@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Debugging · learnmetal</title>
+<meta name="description" content="In Practice: Debugging. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a class="active" href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">In Practice</p><h1 id="debugging">Debugging<a class="headerlink" href="#debugging" title="Permanent link">#</a></h1>
+<p>Graphics bugs are different from ordinary bugs. There is no stack trace for a black screen, and you cannot print from a fragment function. The good news is that Metal's tooling is among the best of any graphics API, and all of it is built into Xcode. Learning these tools early will save you days.</p>
+<h2 id="layer-1-api-validation">Layer 1: API validation<a class="headerlink" href="#layer-1-api-validation" title="Permanent link">#</a></h2>
+<p><strong>Metal API Validation</strong> checks every call you make: mismatched pixel formats, missing buffers, wrong load actions, encoders left open. When something is wrong, the app stops at the offending call with a message that usually names the exact property:</p>
+<div class="codehilite"><pre><span></span><code>-[MTLDebugRenderCommandEncoder setRenderPipelineState:]: failed assertion
+`Set Render Pipeline State Validation
+For color attachment 0, the render pipeline's pixelFormat (MTLPixelFormatBGRA8Unorm)
+does not match the framebuffer's pixelFormat (MTLPixelFormatRGBA16Float).'
+</code></pre></div>
+
+<p>It is enabled by default when you run from Xcode (<strong>Edit Scheme → Run → Diagnostics</strong>). Never turn it off during development. It is disabled automatically in release builds, so it costs your users nothing.</p>
+<h2 id="layer-2-shader-validation">Layer 2: shader validation<a class="headerlink" href="#layer-2-shader-validation" title="Permanent link">#</a></h2>
+<p>In the same scheme panel, <strong>Shader Validation</strong> instruments your shaders to catch what API validation cannot see: reading past the end of a buffer, sampling a texture that was never bound, accessing an array out of bounds. Bad accesses are reported in the console with the function name and line. It slows rendering down, so enable it when a shader behaves strangely.</p>
+<h2 id="label-everything">Label everything<a class="headerlink" href="#label-everything" title="Permanent link">#</a></h2>
+<p>Every Metal object has a <code>label</code> property. Labels appear in validation messages, in the debugger and in Instruments. A message about "Scene HDR Color" is a lot more useful than one about <code>&lt;AGXG14GFamilyTexture: 0x12f80a400&gt;</code>.</p>
+<div class="codehilite"><pre><span></span><code><span class="n">sceneColor</span><span class="p">.</span><span class="n">label</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">"Scene HDR Color"</span>
+<span class="n">pipelineDescriptor</span><span class="p">.</span><span class="n">label</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">"PBR Opaque Pipeline"</span>
+<span class="n">commandBuffer</span><span class="p">.</span><span class="n">label</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">"Frame"</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">label</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">"Shadow Pass"</span>
+<span class="n">vertexBuffer</span><span class="p">.</span><span class="n">label</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">"Cube Vertices"</span>
+</code></pre></div>
+
+<p>Inside an encoder, group related commands so they show up as a collapsible tree in the debugger:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">encoder</span><span class="p">.</span><span class="n">pushDebugGroup</span><span class="p">(</span><span class="s">"Draw Opaque Models"</span><span class="p">)</span>
+<span class="k">for</span><span class="w"> </span><span class="n">model</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">models</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">pushDebugGroup</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">name</span><span class="p">)</span>
+<span class="w">    </span><span class="n">model</span><span class="p">.</span><span class="n">draw</span><span class="p">(</span><span class="n">with</span><span class="p">:</span><span class="w"> </span><span class="n">encoder</span><span class="p">)</span>
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">popDebugGroup</span><span class="p">()</span>
+<span class="p">}</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">popDebugGroup</span><span class="p">()</span>
+
+<span class="n">encoder</span><span class="p">.</span><span class="n">insertDebugSignpost</span><span class="p">(</span><span class="s">"Before skybox"</span><span class="p">)</span>
+</code></pre></div>
+
+<h2 id="the-gpu-frame-debugger">The GPU frame debugger<a class="headerlink" href="#the-gpu-frame-debugger" title="Permanent link">#</a></h2>
+<p>While your app runs, click the <strong>camera</strong> icon (Capture GPU Workload) in Xcode's debug bar. Xcode freezes one frame and lets you take it apart:</p>
+<ul>
+<li><strong>The navigator</strong> lists every command buffer, pass and draw call, organized by your debug groups. Step through draws and watch the frame being built up one call at a time.</li>
+<li><strong>Attachments</strong> shows the color, depth and stencil textures as they are after the selected draw. The current draw's geometry is outlined.</li>
+<li><strong>Bound resources</strong> shows every buffer, texture and sampler bound for the selected draw. You can open a buffer and view its bytes laid out as your struct. This is the fastest way to find a uniform layout mismatch.</li>
+<li><strong>Geometry viewer</strong> shows the mesh after the vertex function, in clip space, with each vertex's outputs. When an object is missing, look here first: you will see at once whether it is behind the camera, clipped, or collapsed to a point.</li>
+<li><strong>Shader debugger</strong>: select a pixel, click <strong>Debug</strong>, and step through the fragment function's execution for that exact pixel, with the value of every variable on every line. The same works for a vertex. It is the closest thing to a breakpoint inside a shader.</li>
+<li><strong>Shader editing</strong>: change shader code in the debugger and reload it to see the effect on the captured frame without rebuilding the app.</li>
+<li><strong>Dependency viewer</strong> draws a graph of all passes and the textures flowing between them, with load and store actions. It makes redundant passes and unnecessary stores obvious.</li>
+<li><strong>Performance and memory</strong>: per-pass and per-draw GPU time, and a list of every resource with its size.</li>
+</ul>
+<p>You can also capture from code, to grab one specific frame:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">captureDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLCaptureDescriptor</span><span class="p">()</span>
+<span class="n">captureDescriptor</span><span class="p">.</span><span class="n">captureObject</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span>
+<span class="k">try</span><span class="w"> </span><span class="bp">MTLCaptureManager</span><span class="p">.</span><span class="n">shared</span><span class="p">().</span><span class="n">startCapture</span><span class="p">(</span><span class="n">with</span><span class="p">:</span><span class="w"> </span><span class="n">captureDescriptor</span><span class="p">)</span>
+<span class="c1">// ...render a frame...</span>
+<span class="bp">MTLCaptureManager</span><span class="p">.</span><span class="n">shared</span><span class="p">().</span><span class="n">stopCapture</span><span class="p">()</span>
+</code></pre></div>
+
+<p>Programmatic capture needs the <code>MetalCaptureEnabled</code> key set to <code>YES</code> in Info.plist.</p>
+<h2 id="the-performance-hud">The performance HUD<a class="headerlink" href="#the-performance-hud" title="Permanent link">#</a></h2>
+<p>Metal can overlay a live graph of frame rate, frame time, GPU time and memory on any Metal app. Enable it in the scheme's options (<strong>Show Graphics HUD</strong>), or with the environment variable <code>MTL_HUD_ENABLED=1</code>. Keep it on while you work so that a sudden slowdown is noticed when it is introduced.</p>
+<h2 id="debugging-by-color">Debugging by color<a class="headerlink" href="#debugging-by-color" title="Permanent link">#</a></h2>
+<p>The oldest technique still works. When a value is in doubt, output it as a color:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">return</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">normal</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.5</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span><span class="w">        </span><span class="c1">// normals</span>
+<span class="k">return</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span><span class="w">                 </span><span class="c1">// texture coordinates</span>
+<span class="k">return</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">float3</span><span class="p">(</span><span class="n">shadow</span><span class="p">),</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span><span class="w">             </span><span class="c1">// a scalar</span>
+<span class="k">return</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">fract</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">worldPosition</span><span class="p">),</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span><span class="w">    </span><span class="c1">// positions, as a repeating pattern</span>
+</code></pre></div>
+
+<p>Remap values outside the 0 to 1 range first, or you only see black and white. Magenta is the traditional "this should never happen" color: <code>return float4(1, 0, 1, 1);</code> inside a branch tells you instantly whether it is taken.</p>
+<figure><img src="../assets/img/in-practice/debugging.webp" alt="Debugging by color: intermediate values written out as the fragment color." width="880" height="499" loading="lazy"><figcaption>Debugging by color: intermediate values written out as the fragment color.</figcaption></figure>
+
+<h2 id="command-buffer-errors">Command buffer errors<a class="headerlink" href="#command-buffer-errors" title="Permanent link">#</a></h2>
+<p>A command buffer can fail on the GPU, for example by running out of memory or timing out. Check in the completion handler:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">commandBuffer</span><span class="p">.</span><span class="n">addCompletedHandler</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">buffer</span><span class="w"> </span><span class="k">in</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">error</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">buffer</span><span class="p">.</span><span class="n">error</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="bp">print</span><span class="p">(</span><span class="s">"Command buffer failed: </span><span class="si">\(</span><span class="n">error</span><span class="si">)</span><span class="s">"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>For more detail, create the buffer with <code>MTLCommandBufferDescriptor</code> and <code>errorOptions = .encoderExecutionStatus</code>. The error then reports which encoder, by label, was executing when the failure happened.</p>
+<h2 id="instruments">Instruments<a class="headerlink" href="#instruments" title="Permanent link">#</a></h2>
+<p>For performance questions that span many frames, such as stutters, CPU-GPU synchronization, and shader compilation hitches, profile with the <strong>Metal System Trace</strong> and <strong>Game Performance</strong> templates in Instruments. They show the CPU encoding, the GPU execution and the display's presentation of each frame on one timeline.</p>
+<h2 id="a-checklist-for-nothing-is-drawn">A checklist for "nothing is drawn"<a class="headerlink" href="#a-checklist-for-nothing-is-drawn" title="Permanent link">#</a></h2>
+<ol>
+<li>Is there a validation message in the console? Read it.</li>
+<li>Capture a frame. Is the draw call there? If not, your code never issued it.</li>
+<li>Open the geometry viewer. Are the vertices inside the clip volume?</li>
+<li>Check the depth attachment and compare function. Is everything failing the depth test?</li>
+<li>Check culling and winding. Try <code>setCullMode(.none)</code>.</li>
+<li>Look at the bound buffers. Are the matrices sensible, or is the layout off?</li>
+<li>Return a solid color from the fragment function. If that appears, the problem is in the shading.</li>
+<li>Is the alpha zero with blending enabled?</li>
+</ol>
+<p>Work from the outside in and the cause is usually found in minutes.</p></article><div class="pager"><a class="prev" href="../pbr/specular-ibl.html"><small>Previous</small>Specular IBL</a><a class="next" href="../in-practice/text-rendering.html"><small>Next</small>Text Rendering</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

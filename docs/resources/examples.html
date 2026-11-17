@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Example Code · learnmetal</title>
+<meta name="description" content="Resources: Example Code. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a class="active" href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">Resources</p><h1 id="example-code">Example Code<a class="headerlink" href="#example-code" title="Permanent link">#</a></h1>
+<p>The repository includes a Swift package with runnable examples for the main chapters. Each one is a small macOS app in a single <code>main.swift</code> plus a <code>Shaders.metal</code> file.</p>
+<p><a class="cta" href="../downloads/learnmetal-examples.zip">Download all examples (.zip)</a></p>
+
+<h2 id="running-an-example">Running an example<a class="headerlink" href="#running-an-example" title="Permanent link">#</a></h2>
+<p>You need macOS 13 or later and Xcode 15 or later. In the unzipped folder:</p>
+<div class="codehilite"><pre><span></span><code>swift<span class="w"> </span>run<span class="w"> </span>HelloTriangle
+swift<span class="w"> </span>run<span class="w"> </span>-c<span class="w"> </span>release<span class="w"> </span>Instancing
+</code></pre></div>
+
+<p>You can also open <code>Package.swift</code> in Xcode, choose an example from the scheme menu and press Run. That gives you API validation, the GPU frame debugger and the performance HUD described in <a href="../in-practice/debugging.html">Debugging</a>.</p>
+<h2 id="the-examples">The examples<a class="headerlink" href="#the-examples" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Target</th>
+<th>Chapters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>HelloView</code></td>
+<td><a href="../getting-started/hello-view.html">Hello View</a></td>
+</tr>
+<tr>
+<td><code>HelloTriangle</code></td>
+<td><a href="../getting-started/hello-triangle.html">Hello Triangle</a></td>
+</tr>
+<tr>
+<td><code>Shaders</code></td>
+<td><a href="../getting-started/shaders.html">Shaders</a></td>
+</tr>
+<tr>
+<td><code>Textures</code></td>
+<td><a href="../getting-started/textures.html">Textures</a></td>
+</tr>
+<tr>
+<td><code>Transformations</code></td>
+<td><a href="../getting-started/transformations.html">Transformations</a></td>
+</tr>
+<tr>
+<td><code>CoordinateSystems</code></td>
+<td><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></td>
+</tr>
+<tr>
+<td><code>Camera</code></td>
+<td><a href="../getting-started/camera.html">Camera</a></td>
+</tr>
+<tr>
+<td><code>BasicLighting</code></td>
+<td><a href="../lighting/colors.html">Colors</a>, <a href="../lighting/basic-lighting.html">Basic Lighting</a>, <a href="../lighting/materials.html">Materials</a></td>
+</tr>
+<tr>
+<td><code>LightingMaps</code></td>
+<td><a href="../lighting/lighting-maps.html">Lighting Maps</a></td>
+</tr>
+<tr>
+<td><code>MultipleLights</code></td>
+<td><a href="../lighting/light-casters.html">Light Casters</a>, <a href="../lighting/multiple-lights.html">Multiple Lights</a></td>
+</tr>
+<tr>
+<td><code>ModelLoading</code></td>
+<td><a href="../model-loading/model-io.html">Model I/O</a>, <a href="../model-loading/mesh.html">Mesh</a>, <a href="../model-loading/model.html">Model</a></td>
+</tr>
+<tr>
+<td><code>RenderTargets</code></td>
+<td><a href="../advanced-metal/render-targets.html">Render Targets</a></td>
+</tr>
+<tr>
+<td><code>Instancing</code></td>
+<td><a href="../advanced-metal/instancing.html">Instancing</a></td>
+</tr>
+<tr>
+<td><code>ShadowMapping</code></td>
+<td><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></td>
+</tr>
+<tr>
+<td><code>HDRBloom</code></td>
+<td><a href="../advanced-lighting/hdr.html">HDR</a>, <a href="../advanced-lighting/bloom.html">Bloom</a></td>
+</tr>
+<tr>
+<td><code>PBR</code></td>
+<td><a href="../pbr/lighting.html">PBR Lighting</a></td>
+</tr>
+<tr>
+<td><code>ComputeParticles</code></td>
+<td><a href="../beyond/compute-shaders.html">Compute Shaders</a></td>
+</tr>
+</tbody>
+</table>
+<p>Chapters that are not in this list have their code inline only.</p>
+<h2 id="how-they-differ-from-the-chapters">How they differ from the chapters<a class="headerlink" href="#how-they-differ-from-the-chapters" title="Permanent link">#</a></h2>
+<ul>
+<li><strong>No Xcode project.</strong> The chapters build a SwiftUI app. The examples use a small library, <code>LearnMetalKit</code>, that opens a plain AppKit window, so each example is one file.</li>
+<li><strong>Shaders are compiled at launch</strong> from the <code>Shaders.metal</code> text with <code>makeLibrary(source:)</code>. That lets <code>swift run</code> work without Xcode's Metal build step. Shader errors are printed to the console.</li>
+<li><strong>Textures are generated in code</strong>, so there is nothing else to download.</li>
+<li><strong>Examples 01 to 03 write the frame loop by hand.</strong> Later ones inherit it from a <code>BaseRenderer</code> class to stay short.</li>
+</ul>
+<h2 id="about-the-figures">About the figures<a class="headerlink" href="#about-the-figures" title="Permanent link">#</a></h2>
+<p>The images in the chapters are illustrations. They are drawn by a small software renderer in the repository's <code>tools/</code> folder, which implements the same math as each chapter's shaders with numpy. They are not screenshots of the Metal examples, so expect small differences in textures and framing when you run the code.</p></article><div class="pager"><a class="prev" href="../beyond/ray-tracing.html"><small>Previous</small>Ray Tracing</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

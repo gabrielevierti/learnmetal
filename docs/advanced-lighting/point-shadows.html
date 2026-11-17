@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Point Shadows · learnmetal</title>
+<meta name="description" content="Advanced Lighting: Point Shadows. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a class="active" href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">Advanced Lighting</p><h1 id="point-shadows">Point Shadows<a class="headerlink" href="#point-shadows" title="Permanent link">#</a></h1>
+<p>A directional shadow map covers one direction. A point light shines in all directions, so one flat map cannot hold its shadows. The answer is a <strong>cube</strong> shadow map: six depth maps arranged around the light, sampled with the direction from the light to the fragment.</p>
+<h2 id="the-plan">The plan<a class="headerlink" href="#the-plan" title="Permanent link">#</a></h2>
+<ol>
+<li>Render the scene six times from the light's position, once per cube face, storing each fragment's <strong>distance to the light</strong>.</li>
+<li>In the main pass, sample the cube with the vector from the light to the fragment and compare the stored distance with the actual one.</li>
+</ol>
+<p>Storing linear distance instead of projected depth makes the comparison trivial and the bias easy to choose.</p>
+<h2 id="the-cube-depth-texture">The cube depth texture<a class="headerlink" href="#the-cube-depth-texture" title="Permanent link">#</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">size</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">1024</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">descriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLTextureDescriptor</span><span class="p">.</span><span class="n">textureCubeDescriptor</span><span class="p">(</span><span class="n">pixelFormat</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">depth32Float</span><span class="p">,</span>
+<span class="w">                                                            </span><span class="n">size</span><span class="p">:</span><span class="w"> </span><span class="n">size</span><span class="p">,</span>
+<span class="w">                                                            </span><span class="n">mipmapped</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">usage</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[.</span><span class="n">renderTarget</span><span class="p">,</span><span class="w"> </span><span class="p">.</span><span class="n">shaderRead</span><span class="p">]</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">storageMode</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="kd">private</span>
+<span class="n">shadowCube</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeTexture</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">descriptor</span><span class="p">)</span><span class="o">!</span>
+</code></pre></div>
+
+<h2 id="six-views">Six views<a class="headerlink" href="#six-views" title="Permanent link">#</a></h2>
+<p>Use the left-handed helpers and the face table from the <a href="../advanced-metal/cubemaps.html">Cubemaps</a> chapter. Each face has a 90 degree field of view and an aspect ratio of 1, so the six frustums fit together exactly:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">farPlane</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">25</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">projection</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">float4x4</span><span class="p">(</span><span class="n">perspectiveLHFov</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">pi</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">aspect</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">near</span><span class="p">:</span><span class="w"> </span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="n">far</span><span class="p">:</span><span class="w"> </span><span class="n">farPlane</span><span class="p">)</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nv">faces</span><span class="p">:</span><span class="w"> </span><span class="p">[(</span><span class="n">direction</span><span class="p">:</span><span class="w"> </span><span class="n">Float3</span><span class="p">,</span><span class="w"> </span><span class="n">up</span><span class="p">:</span><span class="w"> </span><span class="n">Float3</span><span class="p">)]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">([</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">]),</span>
+<span class="w">    </span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">]),</span>
+<span class="w">    </span><span class="p">([</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span>
+<span class="w">    </span><span class="p">([</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">]),</span>
+<span class="w">    </span><span class="p">([</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">]),</span>
+<span class="w">    </span><span class="p">([</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">]),</span>
+<span class="p">]</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nv">faceMatrices</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">faces</span><span class="p">.</span><span class="bp">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">face</span><span class="w"> </span><span class="k">in</span>
+<span class="w">    </span><span class="n">projection</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">float4x4</span><span class="p">(</span><span class="n">lookAtLH</span><span class="p">:</span><span class="w"> </span><span class="n">lightPosition</span><span class="p">,</span>
+<span class="w">                          </span><span class="n">center</span><span class="p">:</span><span class="w"> </span><span class="n">lightPosition</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">face</span><span class="p">.</span><span class="n">direction</span><span class="p">,</span>
+<span class="w">                          </span><span class="n">up</span><span class="p">:</span><span class="w"> </span><span class="n">face</span><span class="p">.</span><span class="n">up</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Render one pass per face, selecting the face through the attachment's <code>slice</code>:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">for</span><span class="w"> </span><span class="n">face</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mf">0.</span><span class="p">.&lt;</span><span class="mi">6</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">pass</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLRenderPassDescriptor</span><span class="p">()</span>
+<span class="w">    </span><span class="n">pass</span><span class="p">.</span><span class="n">depthAttachment</span><span class="p">.</span><span class="n">texture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">shadowCube</span>
+<span class="w">    </span><span class="n">pass</span><span class="p">.</span><span class="n">depthAttachment</span><span class="p">.</span><span class="n">slice</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">face</span>
+<span class="w">    </span><span class="n">pass</span><span class="p">.</span><span class="n">depthAttachment</span><span class="p">.</span><span class="n">loadAction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">clear</span>
+<span class="w">    </span><span class="n">pass</span><span class="p">.</span><span class="n">depthAttachment</span><span class="p">.</span><span class="n">clearDepth</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mf">1.0</span>
+<span class="w">    </span><span class="n">pass</span><span class="p">.</span><span class="n">depthAttachment</span><span class="p">.</span><span class="n">storeAction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">store</span>
+
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">encoder</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">commandBuffer</span><span class="p">.</span><span class="n">makeRenderCommandEncoder</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">pass</span><span class="p">)</span><span class="o">!</span>
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">setRenderPipelineState</span><span class="p">(</span><span class="n">pointShadowPipelineState</span><span class="p">)</span>
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">setDepthStencilState</span><span class="p">(</span><span class="n">depthState</span><span class="p">)</span>
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">setFrontFacing</span><span class="p">(.</span><span class="n">clockwise</span><span class="p">)</span><span class="w">      </span><span class="c1">// the left-handed view mirrors the scene</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">uniforms</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">PointShadowUniforms</span><span class="p">(</span><span class="n">viewProjection</span><span class="p">:</span><span class="w"> </span><span class="n">faceMatrices</span><span class="p">[</span><span class="n">face</span><span class="p">],</span>
+<span class="w">                                       </span><span class="n">lightPosition</span><span class="p">:</span><span class="w"> </span><span class="n">lightPosition</span><span class="p">,</span>
+<span class="w">                                       </span><span class="n">farPlane</span><span class="p">:</span><span class="w"> </span><span class="n">farPlane</span><span class="p">)</span>
+<span class="w">    </span><span class="n">drawScene</span><span class="p">(</span><span class="n">encoder</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="n">uniforms</span><span class="p">)</span>
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">endEncoding</span><span class="p">()</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Six passes can be merged into one with layered rendering, as described in <a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a>. Start with the loop; it is easier to debug.</p>
+<h2 id="writing-distance-as-depth">Writing distance as depth<a class="headerlink" href="#writing-distance-as-depth" title="Permanent link">#</a></h2>
+<p>The fragment function overrides the depth value with the linear distance to the light, scaled into the 0 to 1 range:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">PointShadowOut</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="p">[[</span><span class="na">position</span><span class="p">]];</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">worldPosition</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">DepthOut</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">depth</span><span class="w"> </span><span class="p">[[</span><span class="na">depth</span><span class="p">(</span><span class="n">any</span><span class="p">)]];</span>
+<span class="p">};</span>
+
+<span class="n">vertex</span><span class="w"> </span><span class="n">PointShadowOut</span><span class="w"> </span><span class="n">vertex_pointShadow</span><span class="p">(</span><span class="n">VertexIn</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
+<span class="w">                                         </span><span class="n">constant</span><span class="w"> </span><span class="n">PointShadowUniforms</span><span class="w"> </span><span class="o">&amp;</span><span class="n">uniforms</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">1</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">PointShadowOut</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">world</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">model</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">viewProjection</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">world</span><span class="p">;</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">worldPosition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">world</span><span class="p">.</span><span class="n">xyz</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">fragment</span><span class="w"> </span><span class="n">DepthOut</span><span class="w"> </span><span class="n">fragment_pointShadow</span><span class="p">(</span><span class="n">PointShadowOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
+<span class="w">                                       </span><span class="n">constant</span><span class="w"> </span><span class="n">PointShadowUniforms</span><span class="w"> </span><span class="o">&amp;</span><span class="n">uniforms</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">1</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">DepthOut</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">depth</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">length</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">worldPosition</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">lightPosition</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">farPlane</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>[[depth(any)]]</code> lets a fragment function replace the depth computed by the rasterizer. The pipeline has a fragment function this time, but still no color attachment.</p>
+<h2 id="sampling-the-cube">Sampling the cube<a class="headerlink" href="#sampling-the-cube" title="Permanent link">#</a></h2>
+<p>In the main pass:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="nf">calcPointShadow</span><span class="p">(</span><span class="n">float3</span><span class="w"> </span><span class="n">worldPosition</span><span class="p">,</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="n">lightPosition</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">farPlane</span><span class="p">,</span>
+<span class="w">                             </span><span class="n">depthcube</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">shadowCube</span><span class="p">,</span><span class="w"> </span><span class="n">sampler</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">lightToFragment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">worldPosition</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">lightPosition</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">currentDepth</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">length</span><span class="p">(</span><span class="n">lightToFragment</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">farPlane</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">closestDepth</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">shadowCube</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">lightToFragment</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">bias</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.05</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">farPlane</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">currentDepth</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">bias</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">closestDepth</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mf">0.0</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>The direction does not need to be normalized. The cube picks the face and texel by itself. With a comparison sampler you can write it as <code>shadowCube.sample_compare(s, lightToFragment, currentDepth - bias)</code> and get hardware filtering as a bonus.</p>
+<h2 id="soft-edges">Soft edges<a class="headerlink" href="#soft-edges" title="Permanent link">#</a></h2>
+<p>For a 2D map we averaged neighboring texels. For a cube, offset the sample <strong>direction</strong> instead. Twenty well-spread offsets give a good result:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">const</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="n">offsets</span><span class="p">[</span><span class="mi">20</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mi">-1</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mi">-1</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mi">-1</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mi">-1</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mi">-1</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">},</span>
+<span class="p">};</span>
+
+<span class="kt">float</span><span class="w"> </span><span class="n">lit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
+<span class="kt">float</span><span class="w"> </span><span class="n">radius</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.02</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">length</span><span class="p">(</span><span class="n">lightToFragment</span><span class="p">);</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">20</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">closest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">shadowCube</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">lightToFragment</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">offsets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">radius</span><span class="p">);</span>
+<span class="w">    </span><span class="n">lit</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">currentDepth</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">bias</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">closest</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mf">0.0</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="n">lit</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="mf">20.0</span><span class="p">;</span>
+</code></pre></div>
+
+<p>Scaling the radius with distance makes shadows sharper near the caster and softer farther away, which is how real shadows behave.</p>
+<figure><img src="../assets/img/advanced-lighting/point-shadows.webp" alt="A point light in the middle of a room casts shadows in every direction." width="880" height="495" loading="lazy"><figcaption>A point light in the middle of a room casts shadows in every direction.</figcaption></figure>
+
+<h2 id="cost">Cost<a class="headerlink" href="#cost" title="Permanent link">#</a></h2>
+<p>Point shadows render the scene six extra times per light. Keep the number of shadow-casting point lights small, cull objects per face, and update the map only when the light or the objects near it move.</p>
+<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<ul>
+<li>Visualize the stored distance by returning <code>float4(float3(closestDepth), 1)</code>.</li>
+<li>Convert the six passes into a single layered pass.</li>
+</ul></article><div class="pager"><a class="prev" href="../advanced-lighting/shadow-mapping.html"><small>Previous</small>Shadow Mapping</a><a class="next" href="../advanced-lighting/normal-mapping.html"><small>Next</small>Normal Mapping</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Colors · learnmetal</title>
+<meta name="description" content="Lighting: Colors. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a class="active" href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">Lighting</p><h1 id="colors">Colors<a class="headerlink" href="#colors" title="Permanent link">#</a></h1>
+<div class="example-box"><strong>Example code</strong> <code>examples/Sources/08-BasicLighting</code>, run with <code>swift run BasicLighting</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
+
+<p>Lighting is the art of computing what color a surface should appear. Before any real lighting math, we need a model of color and a scene to light.</p>
+<h2 id="color-as-numbers">Color as numbers<a class="headerlink" href="#color-as-numbers" title="Permanent link">#</a></h2>
+<p>A color is three numbers: how much red, green and blue. In shaders each channel is a float where 0 is none and 1 is full intensity.</p>
+<div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">coral</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float3</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.31</span><span class="p">);</span>
+</code></pre></div>
+
+<p>The color we see on an object is the part of the incoming light that the object <strong>reflects</strong>. A coral-colored object lit by white light reflects all of the red, half of the green and about a third of the blue, and absorbs the rest. In code, reflection is a component-wise multiplication:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">lightColor</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">float3</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<span class="n">float3</span><span class="w"> </span><span class="n">objectColor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float3</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.31</span><span class="p">);</span>
+<span class="n">float3</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lightColor</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">objectColor</span><span class="p">;</span><span class="w">   </span><span class="c1">// (1.0, 0.5, 0.31)</span>
+</code></pre></div>
+
+<p>With a green light the same object looks very different:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">lightColor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float3</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span>
+<span class="n">float3</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lightColor</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">objectColor</span><span class="p">;</span><span class="w">   </span><span class="c1">// (0.0, 0.5, 0.0)</span>
+</code></pre></div>
+
+<p>There is no red or blue light to reflect, so only a dark green remains. That single multiplication is the core of every lighting model in this series.</p>
+<h2 id="a-scene-to-light">A scene to light<a class="headerlink" href="#a-scene-to-light" title="Permanent link">#</a></h2>
+<p>We need two things: an object, and something that shows where the light is. Both are cubes, drawn with two different pipeline states.</p>
+<p>The object's fragment function multiplies the two colors:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">FragmentUniforms</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">objectColor</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">lightColor</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_main</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
+<span class="w">                              </span><span class="n">constant</span><span class="w"> </span><span class="n">FragmentUniforms</span><span class="w"> </span><span class="o">&amp;</span><span class="n">uniforms</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">1</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">uniforms</span><span class="p">.</span><span class="n">lightColor</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">objectColor</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">FragmentUniforms</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">objectColor</span><span class="p">:</span><span class="w"> </span><span class="n">Float3</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">lightColor</span><span class="p">:</span><span class="w"> </span><span class="n">Float3</span>
+<span class="p">}</span>
+
+<span class="kd">var</span><span class="w"> </span><span class="nv">fragmentUniforms</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">FragmentUniforms</span><span class="p">(</span><span class="n">objectColor</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.31</span><span class="p">],</span>
+<span class="w">                                        </span><span class="n">lightColor</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">])</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setFragmentBytes</span><span class="p">(&amp;</span><span class="n">fragmentUniforms</span><span class="p">,</span>
+<span class="w">                         </span><span class="n">length</span><span class="p">:</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="n">FragmentUniforms</span><span class="p">&gt;.</span><span class="bp">stride</span><span class="p">,</span>
+<span class="w">                         </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div>
+
+<p>The lamp cube should not be affected by lighting at all, so it gets its own trivial fragment function:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_light</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="mf">1.0</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Create a second pipeline state that uses the same vertex function and <code>fragment_light</code>:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">pipelineDescriptor</span><span class="p">.</span><span class="n">fragmentFunction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">library</span><span class="p">.</span><span class="n">makeFunction</span><span class="p">(</span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="s">"fragment_light"</span><span class="p">)</span>
+<span class="n">lightPipelineState</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeRenderPipelineState</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">pipelineDescriptor</span><span class="p">)</span>
+</code></pre></div>
+
+<p>A descriptor is only a recipe. You can change one property and create another state from it.</p>
+<h2 id="drawing-both">Drawing both<a class="headerlink" href="#drawing-both" title="Permanent link">#</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">lightPosition</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Float3</span><span class="p">(</span><span class="mf">1.2</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="p">)</span>
+
+<span class="c1">// The object</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setRenderPipelineState</span><span class="p">(</span><span class="n">pipelineState</span><span class="p">)</span>
+<span class="n">uniforms</span><span class="p">.</span><span class="n">model</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">identity</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setVertexBytes</span><span class="p">(&amp;</span><span class="n">uniforms</span><span class="p">,</span><span class="w"> </span><span class="n">length</span><span class="p">:</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="n">Uniforms</span><span class="p">&gt;.</span><span class="bp">stride</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setFragmentBytes</span><span class="p">(&amp;</span><span class="n">fragmentUniforms</span><span class="p">,</span><span class="w"> </span><span class="n">length</span><span class="p">:</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="n">FragmentUniforms</span><span class="p">&gt;.</span><span class="bp">stride</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">drawPrimitives</span><span class="p">(</span><span class="n">type</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">triangle</span><span class="p">,</span><span class="w"> </span><span class="n">vertexStart</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">vertexCount</span><span class="p">:</span><span class="w"> </span><span class="mi">36</span><span class="p">)</span>
+
+<span class="c1">// The lamp</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setRenderPipelineState</span><span class="p">(</span><span class="n">lightPipelineState</span><span class="p">)</span>
+<span class="n">uniforms</span><span class="p">.</span><span class="n">model</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">float4x4</span><span class="p">(</span><span class="n">translation</span><span class="p">:</span><span class="w"> </span><span class="n">lightPosition</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">float4x4</span><span class="p">(</span><span class="n">scale</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">0.2</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2</span><span class="p">])</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setVertexBytes</span><span class="p">(&amp;</span><span class="n">uniforms</span><span class="p">,</span><span class="w"> </span><span class="n">length</span><span class="p">:</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="n">Uniforms</span><span class="p">&gt;.</span><span class="bp">stride</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">drawPrimitives</span><span class="p">(</span><span class="n">type</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">triangle</span><span class="p">,</span><span class="w"> </span><span class="n">vertexStart</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">vertexCount</span><span class="p">:</span><span class="w"> </span><span class="mi">36</span><span class="p">)</span>
+</code></pre></div>
+
+<p>Set the view's clear color to something dark such as (0.1, 0.1, 0.1) so the lamp stands out. You now have a flat coral cube and a small white cube. The coral one has no shading yet, so its faces are indistinguishable. The next chapter fixes that.</p>
+<figure><img src="../assets/img/lighting/colors.webp" alt="A coral object and a white lamp cube. Without shading the faces are indistinguishable." width="880" height="495" loading="lazy"><figcaption>A coral object and a white lamp cube. Without shading the faces are indistinguishable.</figcaption></figure>
+
+<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<ul>
+<li>Change the light color and predict the object's color before running.</li>
+<li>Animate the light color with <code>sin(time)</code> on each channel at different speeds.</li>
+</ul></article><div class="pager"><a class="prev" href="../getting-started/review.html"><small>Previous</small>Review</a><a class="next" href="../lighting/basic-lighting.html"><small>Next</small>Basic Lighting</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

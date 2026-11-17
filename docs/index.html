@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>learnmetal · Learn Metal graphics programming</title>
+<meta name="description" content="Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="getting-started/introduction.html">Introduction</a></li>
+<li><a href="getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="getting-started/hello-view.html">Hello View</a></li>
+<li><a href="getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="getting-started/shaders.html">Shaders</a></li>
+<li><a href="getting-started/textures.html">Textures</a></li>
+<li><a href="getting-started/transformations.html">Transformations</a></li>
+<li><a href="getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="getting-started/camera.html">Camera</a></li>
+<li><a href="getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="lighting/colors.html">Colors</a></li>
+<li><a href="lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="lighting/materials.html">Materials</a></li>
+<li><a href="lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="lighting/light-casters.html">Light Casters</a></li>
+<li><a href="lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="model-loading/model-io.html">Model I/O</a></li>
+<li><a href="model-loading/mesh.html">Mesh</a></li>
+<li><a href="model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="advanced-metal/blending.html">Blending</a></li>
+<li><a href="advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="pbr/theory.html">Theory</a></li>
+<li><a href="pbr/lighting.html">Lighting</a></li>
+<li><a href="pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="in-practice/debugging.html">Debugging</a></li>
+<li><a href="in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="beyond/tessellation.html">Tessellation</a></li>
+<li><a href="beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<div class="hero"><h1>learn<span>metal</span></h1><p>Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.</p><a class="cta" href="getting-started/introduction.html">Start learning</a></div><article><h2 id="what-is-this">What is this?<a class="headerlink" href="#what-is-this" title="Permanent link">#</a></h2>
+<p>learnmetal is a free tutorial series that teaches real-time 3D graphics from the ground up using <strong>Metal</strong>, the graphics API on every Mac, iPhone, iPad, Apple TV and Vision Pro. You start with an empty window and finish with shadows, HDR, deferred shading and physically based rendering.</p>
+<p>Every chapter introduces one idea, explains why it works, and shows the Swift and Metal Shading Language code that implements it. Each chapter builds on the code from the one before, so by the end you have a small renderer you understand line by line.</p>
+<h2 id="code-and-figures">Code and figures<a class="headerlink" href="#code-and-figures" title="Permanent link">#</a></h2>
+<p>Runnable Swift examples for the main chapters are in the repository's <code>examples/</code> folder and can be <a href="downloads/learnmetal-examples.zip">downloaded as a zip</a>. See <a href="resources/examples.html">Example Code</a> for how to run them.</p>
+<p>The figures are illustrations drawn by a small software renderer that implements each chapter's shading math. They are not screenshots of the Metal examples.</p>
+<h2 id="who-is-it-for">Who is it for?<a class="headerlink" href="#who-is-it-for" title="Permanent link">#</a></h2>
+<ul>
+<li>Programmers who know some Swift and want to learn graphics programming.</li>
+<li>People coming from OpenGL, Vulkan or Direct3D who want to see how the same ideas look in Metal. Look for the <strong>Coming from OpenGL</strong> boxes.</li>
+</ul>
+<p>You need a Mac with Xcode. High school level vectors and matrices help, but the math is explained as it comes up.</p>
+<h2 id="chapters">Chapters<a class="headerlink" href="#chapters" title="Permanent link">#</a></h2></article><div class="cards"><section class="card"><h3>Getting Started</h3><ol><li><a href="getting-started/introduction.html">Introduction</a></li><li><a href="getting-started/project-setup.html">Project Setup</a></li><li><a href="getting-started/hello-view.html">Hello View</a></li><li><a href="getting-started/hello-triangle.html">Hello Triangle</a></li><li><a href="getting-started/shaders.html">Shaders</a></li><li><a href="getting-started/textures.html">Textures</a></li><li><a href="getting-started/transformations.html">Transformations</a></li><li><a href="getting-started/coordinate-systems.html">Coordinate Systems</a></li><li><a href="getting-started/camera.html">Camera</a></li><li><a href="getting-started/review.html">Review</a></li></ol></section><section class="card"><h3>Lighting</h3><ol><li><a href="lighting/colors.html">Colors</a></li><li><a href="lighting/basic-lighting.html">Basic Lighting</a></li><li><a href="lighting/materials.html">Materials</a></li><li><a href="lighting/lighting-maps.html">Lighting Maps</a></li><li><a href="lighting/light-casters.html">Light Casters</a></li><li><a href="lighting/multiple-lights.html">Multiple Lights</a></li><li><a href="lighting/review.html">Review</a></li></ol></section><section class="card"><h3>Model Loading</h3><ol><li><a href="model-loading/model-io.html">Model I/O</a></li><li><a href="model-loading/mesh.html">Mesh</a></li><li><a href="model-loading/model.html">Model</a></li></ol></section><section class="card"><h3>Advanced Metal</h3><ol><li><a href="advanced-metal/depth-testing.html">Depth Testing</a></li><li><a href="advanced-metal/stencil-testing.html">Stencil Testing</a></li><li><a href="advanced-metal/blending.html">Blending</a></li><li><a href="advanced-metal/face-culling.html">Face Culling</a></li><li><a href="advanced-metal/render-targets.html">Render Targets</a></li><li><a href="advanced-metal/cubemaps.html">Cubemaps</a></li><li><a href="advanced-metal/advanced-data.html">Advanced Data</a></li><li><a href="advanced-metal/advanced-msl.html">Advanced MSL</a></li><li><a href="advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li><li><a href="advanced-metal/instancing.html">Instancing</a></li><li><a href="advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li></ol></section><section class="card"><h3>Advanced Lighting</h3><ol><li><a href="advanced-lighting/blinn-phong.html">Blinn-Phong</a></li><li><a href="advanced-lighting/gamma-correction.html">Gamma Correction</a></li><li><a href="advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li><li><a href="advanced-lighting/point-shadows.html">Point Shadows</a></li><li><a href="advanced-lighting/normal-mapping.html">Normal Mapping</a></li><li><a href="advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li><li><a href="advanced-lighting/hdr.html">HDR</a></li><li><a href="advanced-lighting/bloom.html">Bloom</a></li><li><a href="advanced-lighting/deferred-shading.html">Deferred Shading</a></li><li><a href="advanced-lighting/ssao.html">SSAO</a></li></ol></section><section class="card"><h3>PBR</h3><ol><li><a href="pbr/theory.html">Theory</a></li><li><a href="pbr/lighting.html">Lighting</a></li><li><a href="pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li><li><a href="pbr/specular-ibl.html">Specular IBL</a></li></ol></section><section class="card"><h3>In Practice</h3><ol><li><a href="in-practice/debugging.html">Debugging</a></li><li><a href="in-practice/text-rendering.html">Text Rendering</a></li><li><a href="in-practice/2d-game.html">A 2D Game</a></li></ol></section><section class="card"><h3>Beyond</h3><ol><li><a href="beyond/compute-shaders.html">Compute Shaders</a></li><li><a href="beyond/tessellation.html">Tessellation</a></li><li><a href="beyond/ray-tracing.html">Ray Tracing</a></li></ol></section><section class="card"><h3>Resources</h3><ol><li><a href="resources/examples.html">Example Code</a></li></ol></section></div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Advanced MSL · learnmetal</title>
+<meta name="description" content="Advanced Metal: Advanced MSL. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a class="active" href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">Advanced Metal</p><h1 id="advanced-msl">Advanced MSL<a class="headerlink" href="#advanced-msl" title="Permanent link">#</a></h1>
+<p>This chapter collects features of the Metal Shading Language that do not get a chapter of their own but are worth knowing. Nothing here is required reading; skim it now and return when you need a piece.</p>
+<h2 id="built-in-inputs-and-outputs">Built-in inputs and outputs<a class="headerlink" href="#built-in-inputs-and-outputs" title="Permanent link">#</a></h2>
+<p>Attributes in double brackets connect variables to values the pipeline provides.</p>
+<p><strong>Vertex function inputs</strong></p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>[[vertex_id]]</code></td>
+<td><code>uint</code></td>
+<td>Index of the vertex being processed.</td>
+</tr>
+<tr>
+<td><code>[[instance_id]]</code></td>
+<td><code>uint</code></td>
+<td>Index of the instance. See <a href="instancing.html">Instancing</a>.</td>
+</tr>
+<tr>
+<td><code>[[base_vertex]]</code>, <code>[[base_instance]]</code></td>
+<td><code>uint</code></td>
+<td>Offsets given in the draw call.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Vertex function outputs</strong></p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>[[position]]</code></td>
+<td><code>float4</code></td>
+<td>Clip-space position. Required.</td>
+</tr>
+<tr>
+<td><code>[[point_size]]</code></td>
+<td><code>float</code></td>
+<td>Size in pixels when drawing <code>.point</code> primitives.</td>
+</tr>
+<tr>
+<td><code>[[clip_distance]]</code></td>
+<td><code>float</code> or array</td>
+<td>Custom clip planes.</td>
+</tr>
+<tr>
+<td><code>[[render_target_array_index]]</code></td>
+<td><code>uint</code></td>
+<td>Layer or cube face to render into.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Fragment function inputs</strong></p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>[[position]]</code></td>
+<td><code>float4</code></td>
+<td>Pixel coordinates (x, y), depth (z), and 1/w.</td>
+</tr>
+<tr>
+<td><code>[[front_facing]]</code></td>
+<td><code>bool</code></td>
+<td>Whether the triangle faces the camera.</td>
+</tr>
+<tr>
+<td><code>[[point_coord]]</code></td>
+<td><code>float2</code></td>
+<td>Position inside a point primitive, 0 to 1.</td>
+</tr>
+<tr>
+<td><code>[[sample_id]]</code>, <code>[[sample_mask]]</code></td>
+<td><code>uint</code></td>
+<td>Multisampling details.</td>
+</tr>
+<tr>
+<td><code>[[color(n)]]</code></td>
+<td><code>float4</code></td>
+<td>Current value of color attachment n (Apple GPUs).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Fragment function outputs</strong></p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>[[color(n)]]</code></td>
+<td><code>float4</code> etc.</td>
+<td>Value for color attachment n.</td>
+</tr>
+<tr>
+<td><code>[[depth(any)]]</code></td>
+<td><code>float</code></td>
+<td>Override the fragment's depth. Also <code>greater</code> and <code>less</code>.</td>
+</tr>
+<tr>
+<td><code>[[sample_mask]]</code></td>
+<td><code>uint</code></td>
+<td>Which samples to write.</td>
+</tr>
+</tbody>
+</table>
+<p>A fragment function with several outputs returns a struct:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">FragmentOut</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">color</span><span class="w">  </span><span class="p">[[</span><span class="na">color</span><span class="p">(</span><span class="mi">0</span><span class="p">)]];</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">bright</span><span class="w"> </span><span class="p">[[</span><span class="na">color</span><span class="p">(</span><span class="mi">1</span><span class="p">)]];</span>
+<span class="p">};</span>
+</code></pre></div>
+
+<h2 id="interpolation-control">Interpolation control<a class="headerlink" href="#interpolation-control" title="Permanent link">#</a></h2>
+<p>Members of the vertex output are interpolated with perspective correction by default. You can change that per member:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">VertexOut</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="p">[[</span><span class="na">position</span><span class="p">]];</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">normal</span><span class="p">;</span><span class="w">                       </span><span class="c1">// perspective-correct, the default</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">flatColor</span><span class="w"> </span><span class="p">[[</span><span class="na">flat</span><span class="p">]];</span><span class="w">           </span><span class="c1">// no interpolation: value of the first vertex</span>
+<span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">screenUV</span><span class="w"> </span><span class="p">[[</span><span class="na">center_no_perspective</span><span class="p">]];</span><span class="w">   </span><span class="c1">// linear in screen space</span>
+<span class="p">};</span>
+</code></pre></div>
+
+<p><code>[[flat]]</code> is required for integer members, such as a material index passed to the fragment function.</p>
+<figure><img src="../assets/img/advanced-metal/advanced-msl.webp" alt="A [[flat]] member takes the value of the first vertex for the whole triangle." width="880" height="246" loading="lazy"><figcaption>A [[flat]] member takes the value of the first vertex for the whole triangle.</figcaption></figure>
+
+<h2 id="address-spaces">Address spaces<a class="headerlink" href="#address-spaces" title="Permanent link">#</a></h2>
+<p>Every pointer or reference parameter must say where its memory lives:</p>
+<ul>
+<li><code>constant</code>: read-only buffer data. Use it for uniforms.</li>
+<li><code>device</code>: read-write buffer data. Use it for large arrays and anything a compute function writes.</li>
+</ul>
+<div class="codehilite"><pre><span></span><code><span class="n">vertex</span><span class="w"> </span><span class="n">VertexOut</span><span class="w"> </span><span class="n">vertex_main</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">device</span><span class="w"> </span><span class="n">Vertex</span><span class="w"> </span><span class="o">*</span><span class="n">vertices</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
+<span class="w">                             </span><span class="n">constant</span><span class="w"> </span><span class="n">Uniforms</span><span class="w"> </span><span class="o">&amp;</span><span class="n">uniforms</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
+<span class="w">                             </span><span class="n">uint</span><span class="w"> </span><span class="n">vertexID</span><span class="w"> </span><span class="p">[[</span><span class="na">vertex_id</span><span class="p">]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Vertex</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vertices</span><span class="p">[</span><span class="n">vertexID</span><span class="p">];</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>This example also shows that a vertex descriptor is optional. A vertex function can fetch its own data from a buffer by index, which is sometimes called <strong>vertex pulling</strong>. The struct layout must then match the buffer bytes exactly, using <code>packed_float3</code> where the data is tightly packed.</p>
+<h2 id="function-constants">Function constants<a class="headerlink" href="#function-constants" title="Permanent link">#</a></h2>
+<p>A value marked as a <strong>function constant</strong> is fixed when the function is specialized, before the pipeline state is created. The compiler can then remove dead branches entirely:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">constant</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">useNormalMap</span><span class="w"> </span><span class="p">[[</span><span class="na">function_constant</span><span class="p">(</span><span class="mi">0</span><span class="p">)]];</span>
+<span class="n">constant</span><span class="w"> </span><span class="kt">int</span><span class="w">  </span><span class="n">lightCount</span><span class="w">   </span><span class="p">[[</span><span class="na">function_constant</span><span class="p">(</span><span class="mi">1</span><span class="p">)]];</span>
+
+<span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_main</span><span class="p">(...)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">normal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">normal</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">useNormalMap</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// compiled out completely when false</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">constants</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLFunctionConstantValues</span><span class="p">()</span>
+<span class="kd">var</span><span class="w"> </span><span class="nv">useNormalMap</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">constants</span><span class="p">.</span><span class="n">setConstantValue</span><span class="p">(&amp;</span><span class="n">useNormalMap</span><span class="p">,</span><span class="w"> </span><span class="n">type</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">bool</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="kd">var</span><span class="w"> </span><span class="nv">lightCount</span><span class="p">:</span><span class="w"> </span><span class="nb">Int32</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">4</span>
+<span class="n">constants</span><span class="p">.</span><span class="n">setConstantValue</span><span class="p">(&amp;</span><span class="n">lightCount</span><span class="p">,</span><span class="w"> </span><span class="n">type</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">int</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nv">function</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="w"> </span><span class="n">library</span><span class="p">.</span><span class="n">makeFunction</span><span class="p">(</span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="s">"fragment_main"</span><span class="p">,</span><span class="w"> </span><span class="n">constantValues</span><span class="p">:</span><span class="w"> </span><span class="n">constants</span><span class="p">)</span>
+</code></pre></div>
+
+<p>This is Metal's answer to <code>#ifdef</code> shader variants: one source function, many specialized pipeline states.</p>
+<h2 id="argument-buffers">Argument buffers<a class="headerlink" href="#argument-buffers" title="Permanent link">#</a></h2>
+<p>Binding ten textures and three buffers one call at a time is slow when you have thousands of draws. An <strong>argument buffer</strong> is a struct of resources stored in a buffer and bound with a single call:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">MaterialArguments</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">baseColor</span><span class="p">;</span>
+<span class="w">    </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">normalMap</span><span class="p">;</span>
+<span class="w">    </span><span class="n">sampler</span><span class="w"> </span><span class="n">mapSampler</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">roughness</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_main</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
+<span class="w">                              </span><span class="n">constant</span><span class="w"> </span><span class="n">MaterialArguments</span><span class="w"> </span><span class="o">&amp;</span><span class="n">material</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">2</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">material</span><span class="p">.</span><span class="n">baseColor</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">material</span><span class="p">.</span><span class="n">mapSampler</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">);</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>On the Swift side an <code>MTLArgumentEncoder</code>, created from the function with <code>makeArgumentEncoder(bufferIndex:)</code>, writes the resources into the buffer. Newer OS versions allow writing resource IDs into the buffer directly. You must also tell the encoder which resources the buffer references, with <code>useResource(_:usage:stages:)</code>, so Metal can track them. Argument buffers can contain arrays of textures, which is the foundation of "bindless" rendering and of ray tracing, where any ray may hit any material.</p>
+<h2 id="samplers-defined-in-the-shader">Samplers defined in the shader<a class="headerlink" href="#samplers-defined-in-the-shader" title="Permanent link">#</a></h2>
+<p>A sampler does not have to come from Swift. It can be declared as a constant:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">constexpr</span><span class="w"> </span><span class="n">sampler</span><span class="w"> </span><span class="nf">linearSampler</span><span class="p">(</span><span class="n">filter</span><span class="o">::</span><span class="n">linear</span><span class="p">,</span><span class="w"> </span><span class="n">mip_filter</span><span class="o">::</span><span class="n">linear</span><span class="p">,</span><span class="w"> </span><span class="n">address</span><span class="o">::</span><span class="n">repeat</span><span class="p">);</span>
+
+<span class="n">float4</span><span class="w"> </span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">colorTexture</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">linearSampler</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">);</span>
+</code></pre></div>
+
+<p>It is convenient for post-processing shaders where the settings never change.</p>
+<h2 id="texture-functions">Texture functions<a class="headerlink" href="#texture-functions" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Call</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tex.sample(s, uv)</code></td>
+<td>Filtered read.</td>
+</tr>
+<tr>
+<td><code>tex.sample(s, uv, level(2))</code></td>
+<td>Read a specific mip level.</td>
+</tr>
+<tr>
+<td><code>tex.sample(s, uv, bias(1))</code></td>
+<td>Offset the automatic mip level.</td>
+</tr>
+<tr>
+<td><code>tex.sample(s, uv, gradient2d(dx, dy))</code></td>
+<td>Supply your own derivatives.</td>
+</tr>
+<tr>
+<td><code>tex.read(uint2(x, y), lod)</code></td>
+<td>Exact texel, no sampler.</td>
+</tr>
+<tr>
+<td><code>tex.gather(s, uv)</code></td>
+<td>The four neighboring texels of one channel.</td>
+</tr>
+<tr>
+<td><code>tex.get_width()</code>, <code>tex.get_height()</code>, <code>tex.get_num_mip_levels()</code></td>
+<td>Queries.</td>
+</tr>
+<tr>
+<td><code>depthTex.sample_compare(s, uv, ref)</code></td>
+<td>Depth comparison with filtering, for shadows.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="precision-half">Precision: half<a class="headerlink" href="#precision-half" title="Permanent link">#</a></h2>
+<p><code>half</code> is a 16-bit float. On mobile GPUs half-precision math is faster and uses less power, and it is precise enough for colors and normalized directions. Use <code>float</code> for positions, texture coordinates on large textures, and depth. Literals take an <code>h</code> suffix: <code>half3(0.5h)</code>.</p>
+<h2 id="derivatives">Derivatives<a class="headerlink" href="#derivatives" title="Permanent link">#</a></h2>
+<p><code>dfdx(v)</code> and <code>dfdy(v)</code> return how fast a value changes between neighboring pixels, and <code>fwidth(v)</code> is the sum of their absolute values. They are the tools for anti-aliased procedural patterns and for computing a flat face normal without vertex normals:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">faceNormal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">cross</span><span class="p">(</span><span class="n">dfdx</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">worldPosition</span><span class="p">),</span><span class="w"> </span><span class="n">dfdy</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">worldPosition</span><span class="p">)));</span>
+</code></pre></div>
+
+<p>Depending on your handedness and winding the result may need to be negated.</p></article><div class="pager"><a class="prev" href="../advanced-metal/advanced-data.html"><small>Previous</small>Advanced Data</a><a class="next" href="../advanced-metal/no-geometry-shaders.html"><small>Next</small>Life Without Geometry Shaders</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

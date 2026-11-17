@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Introduction · learnmetal</title>
+<meta name="description" content="Getting Started: Introduction. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a class="active" href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">Getting Started</p><h1 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">#</a></h1>
+<p>Before drawing anything, it helps to know what Metal is, what it is not, and how its pieces fit together. This chapter is all concepts and no code. The next one opens Xcode.</p>
+<h2 id="what-metal-is">What Metal is<a class="headerlink" href="#what-metal-is" title="Permanent link">#</a></h2>
+<p>Metal is Apple's low-level API for talking to the GPU. It covers two jobs:</p>
+<ul>
+<li><strong>Rendering</strong>: turning triangles into pixels, which is what most of this site is about.</li>
+<li><strong>Compute</strong>: running general-purpose parallel code on the GPU, which we reach in the <a href="../beyond/compute-shaders.html">Beyond</a> section.</li>
+</ul>
+<p>It runs on macOS, iOS, iPadOS, tvOS and visionOS, and it is the only first-class graphics API on those platforms. OpenGL and OpenCL have been deprecated there since 2018. SceneKit, RealityKit, SpriteKit, Core Animation, and game engines like Unity and Unreal all sit on top of Metal when running on Apple hardware.</p>
+<p>Metal is <em>low-level</em> in the sense that it exposes how a GPU really works: you allocate buffers, describe pipelines, and record commands yourself. It is also noticeably friendlier than Vulkan or Direct3D 12. There is far less boilerplate, sensible defaults exist, and the debugging tools in Xcode are excellent.</p>
+<h2 id="the-objects-you-will-meet">The objects you will meet<a class="headerlink" href="#the-objects-you-will-meet" title="Permanent link">#</a></h2>
+<p>Almost everything in Metal is created from one object, the <strong>device</strong>, and nearly every type name starts with <code>MTL</code>. The cast is small:</p>
+<table>
+<thead>
+<tr>
+<th>Object</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MTLDevice</code></td>
+<td>The GPU. Factory for everything else.</td>
+</tr>
+<tr>
+<td><code>MTLCommandQueue</code></td>
+<td>An ordered line of work waiting for the GPU.</td>
+</tr>
+<tr>
+<td><code>MTLCommandBuffer</code></td>
+<td>One batch of work, usually one frame.</td>
+</tr>
+<tr>
+<td><code>MTLRenderCommandEncoder</code></td>
+<td>Writes draw commands for one render pass into a command buffer.</td>
+</tr>
+<tr>
+<td><code>MTLRenderPassDescriptor</code></td>
+<td>Says which textures a pass draws into and how they start and end.</td>
+</tr>
+<tr>
+<td><code>MTLRenderPipelineState</code></td>
+<td>A compiled vertex + fragment shader pair plus fixed configuration.</td>
+</tr>
+<tr>
+<td><code>MTLBuffer</code></td>
+<td>A block of memory the GPU can read: vertices, indices, uniforms.</td>
+</tr>
+<tr>
+<td><code>MTLTexture</code></td>
+<td>An image the GPU can read from or draw into.</td>
+</tr>
+<tr>
+<td><code>MTLSamplerState</code></td>
+<td>How a texture is filtered and wrapped when read.</td>
+</tr>
+<tr>
+<td><code>MTLDepthStencilState</code></td>
+<td>How depth and stencil tests behave.</td>
+</tr>
+<tr>
+<td><code>MTLLibrary</code> / <code>MTLFunction</code></td>
+<td>Compiled shader code and one function inside it.</td>
+</tr>
+</tbody>
+</table>
+<p>A frame always has the same shape:</p>
+<ol>
+<li>Ask the command queue for a command buffer.</li>
+<li>Create a render command encoder for a render pass.</li>
+<li>Set state (pipeline, buffers, textures) and issue draw calls.</li>
+<li>End encoding, ask to present the result on screen, and commit the command buffer.</li>
+</ol>
+<p>Nothing reaches the GPU until you commit. Encoding is just writing a to-do list.</p>
+<figure><img src="../assets/img/getting-started/introduction.webp" alt="Everything is created from the device, and nothing reaches the GPU until the command buffer is committed." width="880" height="300" loading="lazy"><figcaption>Everything is created from the device, and nothing reaches the GPU until the command buffer is committed.</figcaption></figure>
+
+<h2 id="state-objects-instead-of-a-state-machine">State objects instead of a state machine<a class="headerlink" href="#state-objects-instead-of-a-state-machine" title="Permanent link">#</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Coming from OpenGL</p>
+<p>OpenGL is one big global state machine: you bind things to a context and flip switches with <code>glEnable</code>. Metal has no global state at all. Expensive configuration is baked ahead of time into immutable objects (pipeline states, depth-stencil states, sampler states), and cheap per-draw state is set on an encoder that only lives for one pass. When an encoder ends, its state is gone.</p>
+</div>
+<p>This design is the main reason Metal is fast and predictable. Compiling shaders and validating configuration happen once when you create a state object, not unpredictably in the middle of a frame.</p>
+<h2 id="shaders">Shaders<a class="headerlink" href="#shaders" title="Permanent link">#</a></h2>
+<p>Shaders are small programs that run on the GPU. In Metal they are written in the <strong>Metal Shading Language</strong> (MSL), which is C++14 with some features removed and vector, matrix and texture types added. If you have written GLSL or HLSL, you can read MSL immediately.</p>
+<p>Xcode compiles every <code>.metal</code> file in your project at build time into a single <code>default.metallib</code>, so shader syntax errors show up as ordinary build errors.</p>
+<h2 id="apple-gpus">Apple GPUs<a class="headerlink" href="#apple-gpus" title="Permanent link">#</a></h2>
+<p>Every current Apple device uses Apple silicon, whose GPUs are <strong>tile-based deferred renderers</strong> with <strong>unified memory</strong> shared by the CPU and GPU. You do not need to understand either yet, but they explain a few Metal features you will meet later: load and store actions, memoryless textures, and shared storage mode. Older Intel Macs with AMD or Intel GPUs also run Metal, with a few differences that are pointed out where they matter.</p>
+<h2 id="versions">Versions<a class="headerlink" href="#versions" title="Permanent link">#</a></h2>
+<p>The Metal API has grown through numbered generations. Everything in this series uses the long-established core API (<code>MTLCommandQueue</code>, <code>MTLRenderCommandEncoder</code>, and friends), which runs on all Metal-capable devices and is what almost all existing code, samples and answers online use. Apple has also introduced a newer set of interfaces under the name Metal 4, with types prefixed <code>MTL4</code>, aimed at engines that need explicit control. The concepts carry over directly, so learn the core API first.</p>
+<h2 id="how-to-read-this-series">How to read this series<a class="headerlink" href="#how-to-read-this-series" title="Permanent link">#</a></h2>
+<p>Go in order. Every chapter assumes the code from the previous one. Type the code yourself instead of pasting it. Change numbers and break things on purpose, then read what Xcode tells you. The official <a href="https://developer.apple.com/documentation/metal">Metal documentation</a> and the <a href="https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf">Metal Shading Language Specification</a> are the references to keep open in another tab.</p></article><div class="pager"><span></span><a class="next" href="../getting-started/project-setup.html"><small>Next</small>Project Setup</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

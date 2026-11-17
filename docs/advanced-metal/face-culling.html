@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Face Culling · learnmetal</title>
+<meta name="description" content="Advanced Metal: Face Culling. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a class="active" href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">Advanced Metal</p><h1 id="face-culling">Face Culling<a class="headerlink" href="#face-culling" title="Permanent link">#</a></h1>
+<p>Look at a closed object such as a cube from any angle, and you can see at most half of its faces. The faces pointing away from you are always hidden by the ones in front. <strong>Face culling</strong> tells the GPU to skip those triangles before rasterizing them, which saves roughly half of the fragment work for closed meshes.</p>
+<h2 id="winding-order">Winding order<a class="headerlink" href="#winding-order" title="Permanent link">#</a></h2>
+<p>How does the GPU know which side of a triangle is the front? By the order in which its three vertices appear on screen: clockwise or counter-clockwise. That order is the triangle's <strong>winding</strong>. When you turn a triangle around, its winding as seen from the camera flips.</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">vertices</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="nb">Float</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w">   </span><span class="c1">// 1</span>
+<span class="w">     </span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w">   </span><span class="c1">// 2</span>
+<span class="w">     </span><span class="mf">0.0</span><span class="p">,</span><span class="w">  </span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w">   </span><span class="c1">// 3   -&gt; counter-clockwise when seen from +z</span>
+<span class="p">]</span>
+</code></pre></div>
+
+<p>Models are exported with a consistent winding, so one setting works for a whole mesh.</p>
+<figure><img src="../assets/img/advanced-metal/face-culling.webp" alt="The same triangle seen from the front and from behind." width="880" height="280" loading="lazy"><figcaption>The same triangle seen from the front and from behind.</figcaption></figure>
+
+<h2 id="enabling-culling">Enabling culling<a class="headerlink" href="#enabling-culling" title="Permanent link">#</a></h2>
+<p>Culling is render encoder state. It is not part of the pipeline state:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">encoder</span><span class="p">.</span><span class="n">setFrontFacing</span><span class="p">(.</span><span class="n">counterClockwise</span><span class="p">)</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setCullMode</span><span class="p">(.</span><span class="n">back</span><span class="p">)</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th><code>MTLCullMode</code></th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.none</code></td>
+<td>Draw both sides. The default.</td>
+</tr>
+<tr>
+<td><code>.back</code></td>
+<td>Skip triangles facing away.</td>
+</tr>
+<tr>
+<td><code>.front</code></td>
+<td>Skip triangles facing the camera.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Metal's default front face is clockwise</p>
+<p><code>MTLWinding.clockwise</code> is the default front-facing winding in Metal, the opposite of OpenGL. Our cube, and most model files, use counter-clockwise fronts, so always call <code>setFrontFacing(.counterClockwise)</code> together with <code>setCullMode</code>. If a model appears inside out, with only its far walls visible, this is the cause.</p>
+</div>
+<p>Encoder state resets with every new encoder, so set both at the start of each pass.</p>
+<h2 id="when-not-to-cull">When not to cull<a class="headerlink" href="#when-not-to-cull" title="Permanent link">#</a></h2>
+<ul>
+<li><strong>Flat, two-sided geometry</strong>: grass quads, leaves, cloth, windows. Disable culling for those draws with <code>setCullMode(.none)</code>.</li>
+<li><strong>Transparent closed objects</strong>: you may want the inside faces visible through the outside ones. Draw the back faces first (<code>.front</code> culling), then the front faces.</li>
+<li><strong>Mirrored transforms</strong>: a model matrix with a negative scale on one axis flips the winding of everything it draws. Flip the front-face setting for those objects.</li>
+</ul>
+<h2 id="culling-front-faces">Culling front faces<a class="headerlink" href="#culling-front-faces" title="Permanent link">#</a></h2>
+<p>Culling the <em>front</em> faces is occasionally useful on purpose. Rendering only back faces into a shadow map reduces a self-shadowing artifact, as you will see in <a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a>, and a skybox cube seen from the inside can be drawn with front culling or simply with culling off.</p>
+<h2 id="which-side-am-i-on">Which side am I on?<a class="headerlink" href="#which-side-am-i-on" title="Permanent link">#</a></h2>
+<p>A fragment function can ask whether it belongs to a front-facing triangle, using a built-in input:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_main</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
+<span class="w">                              </span><span class="kt">bool</span><span class="w"> </span><span class="n">isFrontFace</span><span class="w"> </span><span class="p">[[</span><span class="na">front_facing</span><span class="p">]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">normal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">normal</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">isFrontFace</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">normal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="n">normal</span><span class="p">;</span><span class="w">   </span><span class="c1">// light the back side correctly</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>This is how two-sided materials are lit correctly with culling turned off.</p>
+<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<ul>
+<li>Enable back-face culling and fly inside a cube.</li>
+<li>Reverse the winding of one cube face in the vertex data and observe which face disappears.</li>
+<li>Color front faces green and back faces red using <code>[[front_facing]]</code> with culling off.</li>
+</ul></article><div class="pager"><a class="prev" href="../advanced-metal/blending.html"><small>Previous</small>Blending</a><a class="next" href="../advanced-metal/render-targets.html"><small>Next</small>Render Targets</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

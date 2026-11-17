@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Review · learnmetal</title>
+<meta name="description" content="Getting Started: Review. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a class="active" href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">Getting Started</p><h1 id="review">Review<a class="headerlink" href="#review" title="Permanent link">#</a></h1>
+<p>That was the hard part. You can open a view, push vertices through a pipeline, texture them, move them with matrices, and fly a camera through the result. Everything from here on builds on these pieces.</p>
+<h2 id="the-frame-one-more-time">The frame, one more time<a class="headerlink" href="#the-frame-one-more-time" title="Permanent link">#</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">draw</span><span class="p">(</span><span class="k">in</span><span class="w"> </span><span class="n">view</span><span class="p">:</span><span class="w"> </span><span class="bp">MTKView</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">guard</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">passDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">view</span><span class="p">.</span><span class="n">currentRenderPassDescriptor</span><span class="p">,</span>
+<span class="w">          </span><span class="kd">let</span><span class="w"> </span><span class="nv">drawable</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">view</span><span class="p">.</span><span class="n">currentDrawable</span><span class="p">,</span>
+<span class="w">          </span><span class="kd">let</span><span class="w"> </span><span class="nv">commandBuffer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">commandQueue</span><span class="p">.</span><span class="n">makeCommandBuffer</span><span class="p">(),</span>
+<span class="w">          </span><span class="kd">let</span><span class="w"> </span><span class="nv">encoder</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">commandBuffer</span><span class="p">.</span><span class="n">makeRenderCommandEncoder</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">passDescriptor</span><span class="p">)</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">setRenderPipelineState</span><span class="p">(</span><span class="n">pipelineState</span><span class="p">)</span>
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">setDepthStencilState</span><span class="p">(</span><span class="n">depthState</span><span class="p">)</span>
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">setVertexBuffer</span><span class="p">(</span><span class="n">vertexBuffer</span><span class="p">,</span><span class="w"> </span><span class="n">offset</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">setVertexBytes</span><span class="p">(&amp;</span><span class="n">uniforms</span><span class="p">,</span><span class="w"> </span><span class="n">length</span><span class="p">:</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="n">Uniforms</span><span class="p">&gt;.</span><span class="bp">stride</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">setFragmentTexture</span><span class="p">(</span><span class="n">texture</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">setFragmentSamplerState</span><span class="p">(</span><span class="n">samplerState</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">drawPrimitives</span><span class="p">(</span><span class="n">type</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">triangle</span><span class="p">,</span><span class="w"> </span><span class="n">vertexStart</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">vertexCount</span><span class="p">:</span><span class="w"> </span><span class="mi">36</span><span class="p">)</span>
+
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">endEncoding</span><span class="p">()</span>
+<span class="w">    </span><span class="n">commandBuffer</span><span class="p">.</span><span class="n">present</span><span class="p">(</span><span class="n">drawable</span><span class="p">)</span>
+<span class="w">    </span><span class="n">commandBuffer</span><span class="p">.</span><span class="n">commit</span><span class="p">()</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>If you can explain every line of this function, you are ready for lighting.</p>
+<figure><img src="../assets/img/getting-started/review.webp" alt="The journey of a vertex." width="880" height="170" loading="lazy"><figcaption>The journey of a vertex.</figcaption></figure>
+
+<h2 id="glossary">Glossary<a class="headerlink" href="#glossary" title="Permanent link">#</a></h2>
+<ul>
+<li><strong>Device</strong> (<code>MTLDevice</code>): the GPU, and the factory for all other Metal objects.</li>
+<li><strong>Command queue / command buffer</strong>: the queue orders work; a buffer holds the encoded commands of one frame.</li>
+<li><strong>Render pass</strong>: a sequence of draws into one set of attachment textures, described by an <code>MTLRenderPassDescriptor</code> with load and store actions.</li>
+<li><strong>Render command encoder</strong>: records state changes and draw calls for one pass.</li>
+<li><strong>Drawable</strong>: the texture that will be presented on screen this frame.</li>
+<li><strong>Vertex function</strong>: runs per vertex, outputs a clip-space position.</li>
+<li><strong>Fragment function</strong>: runs per covered pixel, outputs a color.</li>
+<li><strong>Render pipeline state</strong>: compiled shaders plus vertex layout and attachment formats. Expensive to create, cheap to use.</li>
+<li><strong>Vertex descriptor</strong>: maps bytes in vertex buffers to shader attributes.</li>
+<li><strong>Buffer</strong> (<code>MTLBuffer</code>): raw memory visible to the GPU.</li>
+<li><strong>Uniforms</strong>: per-draw constants passed to shaders in a buffer.</li>
+<li><strong>Texture / sampler state</strong>: image data, and the rules for reading it.</li>
+<li><strong>Mipmaps</strong>: pre-shrunk copies of a texture for distant surfaces.</li>
+<li><strong>Model / view / projection matrices</strong>: local to world, world to camera, camera to clip space.</li>
+<li><strong>NDC</strong>: x and y from -1 to 1, z from 0 to 1 in Metal.</li>
+<li><strong>Depth buffer</strong>: per-pixel record of the nearest surface, used to hide what is behind.</li>
+<li><strong>Delta time</strong>: seconds since the previous frame.</li>
+</ul>
+<h2 id="conventions-used-from-here-on">Conventions used from here on<a class="headerlink" href="#conventions-used-from-here-on" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Thing</th>
+<th>Convention</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>World</td>
+<td>Right-handed, +y up, camera looks down -z</td>
+</tr>
+<tr>
+<td>Angles</td>
+<td>Radians in matrices, degrees in the camera class</td>
+</tr>
+<tr>
+<td>Vertex buffer slot 0</td>
+<td>Vertex data</td>
+</tr>
+<tr>
+<td>Vertex buffer slot 1</td>
+<td>Per-draw uniforms</td>
+</tr>
+<tr>
+<td>Fragment buffer slot 1</td>
+<td>Fragment uniforms (lights, materials)</td>
+</tr>
+<tr>
+<td>Triangle winding</td>
+<td>Counter-clockwise is the front</td>
+</tr>
+</tbody>
+</table>
+<h2 id="common-first-mistakes">Common first mistakes<a class="headerlink" href="#common-first-mistakes" title="Permanent link">#</a></h2>
+<ul>
+<li><strong>Black or empty view</strong>: <code>view.device</code> not set, or the delegate was deallocated because nothing holds the renderer.</li>
+<li><strong>Pipeline creation fails</strong>: pixel formats in the pipeline descriptor do not match the view, or a function name is misspelled.</li>
+<li><strong>Garbage uniforms</strong>: Swift and MSL struct layouts differ, or <code>.size</code> was used where <code>.stride</code> was needed.</li>
+<li><strong>Upside-down textures</strong>: OpenGL-style texture coordinates.</li>
+<li><strong>Geometry vanishing close to the camera</strong>: an OpenGL projection matrix with a -1 to 1 depth range.</li>
+<li><strong>Nothing drawn and no error</strong>: the model is behind the camera, outside the near and far planes, or the depth compare function rejects everything.</li>
+</ul>
+<p>Read validation messages carefully. Metal's are precise and nearly always name the exact property that is wrong.</p></article><div class="pager"><a class="prev" href="../getting-started/camera.html"><small>Previous</small>Camera</a><a class="next" href="../lighting/colors.html"><small>Next</small>Colors</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

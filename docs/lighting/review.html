@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Review · learnmetal</title>
+<meta name="description" content="Lighting: Review. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a class="active" href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">Lighting</p><h1 id="review">Review<a class="headerlink" href="#review" title="Permanent link">#</a></h1>
+<p>You can now light a scene. The model is simple, and it is the foundation that every later technique refines.</p>
+<h2 id="glossary">Glossary<a class="headerlink" href="#glossary" title="Permanent link">#</a></h2>
+<ul>
+<li><strong>Color vector</strong>: red, green and blue intensities. Reflection is a component-wise multiplication of light color and surface color.</li>
+<li><strong>Phong lighting model</strong>: ambient + diffuse + specular.</li>
+<li><strong>Ambient</strong>: a constant term that fakes indirect light.</li>
+<li><strong>Diffuse</strong>: brightness from the angle between the normal and the direction to the light: <code>max(dot(N, L), 0)</code>.</li>
+<li><strong>Specular</strong>: a highlight from the angle between the reflected light and the direction to the viewer, raised to the shininess exponent.</li>
+<li><strong>Normal</strong>: a unit vector perpendicular to the surface.</li>
+<li><strong>Normal matrix</strong>: the inverse transpose of the model matrix's upper-left 3×3, used to transform normals correctly.</li>
+<li><strong>Material</strong>: the set of values describing how a surface reacts to light.</li>
+<li><strong>Diffuse map / specular map</strong>: textures that supply the material's color and shininess per pixel.</li>
+<li><strong>Directional light</strong>: parallel rays with a direction and no position.</li>
+<li><strong>Point light</strong>: a position, shining in all directions, with attenuation over distance.</li>
+<li><strong>Attenuation</strong>: the fall-off of light with distance.</li>
+<li><strong>Spotlight</strong>: a point light limited to a cone, with a soft edge between an inner and outer cutoff.</li>
+</ul>
+<figure><img src="../assets/img/lighting/review.webp" alt="review" width="880" height="270" loading="lazy"></figure>
+
+<h2 id="what-changed-in-the-renderer">What changed in the renderer<a class="headerlink" href="#what-changed-in-the-renderer" title="Permanent link">#</a></h2>
+<ul>
+<li><code>VertexOut</code> carries the world-space position and normal to the fragment function.</li>
+<li>Vertex uniforms gained a normal matrix.</li>
+<li>A second uniform struct, bound to fragment buffer slot 1, holds lights, the camera position and material values.</li>
+<li>Lights that come in variable numbers live in their own buffer and are indexed through a pointer.</li>
+<li>Two pipeline states share one vertex function: a lit one for objects and an unlit one for lamps.</li>
+</ul>
+<h2 id="where-the-model-falls-short">Where the model falls short<a class="headerlink" href="#where-the-model-falls-short" title="Permanent link">#</a></h2>
+<p>Phong lighting is an artistic approximation. Its weaknesses point straight at later chapters:</p>
+<ul>
+<li>Highlights break down at grazing angles. See <a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a>.</li>
+<li>The colors are computed in the wrong color space. See <a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a>.</li>
+<li>Nothing casts a shadow. See <a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a>.</li>
+<li>Flat surfaces look flat. See <a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a>.</li>
+<li>Materials do not conserve energy and need hand tuning per scene. See <a href="../pbr/theory.html">PBR</a>.</li>
+</ul>
+<p>Before any of that, cubes are getting boring. The next section loads real models.</p></article><div class="pager"><a class="prev" href="../lighting/multiple-lights.html"><small>Previous</small>Multiple Lights</a><a class="next" href="../model-loading/model-io.html"><small>Next</small>Model I/O</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

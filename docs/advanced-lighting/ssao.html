@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SSAO · learnmetal</title>
+<meta name="description" content="Advanced Lighting: SSAO. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a class="active" href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">Advanced Lighting</p><h1 id="ssao">SSAO<a class="headerlink" href="#ssao" title="Permanent link">#</a></h1>
+<p>Our ambient term is a constant, so corners, creases and the gaps between objects are as bright as open surfaces. In reality these places receive less indirect light, because nearby geometry blocks part of it. The effect is called <strong>ambient occlusion</strong>, and adding it gives a scene depth and contact that flat ambient light lacks.</p>
+<p>Computing true occlusion requires tracing rays against the scene. <strong>Screen-space ambient occlusion</strong> (SSAO) approximates it using only what is already on screen: the depth buffer.</p>
+<h2 id="how-it-works">How it works<a class="headerlink" href="#how-it-works" title="Permanent link">#</a></h2>
+<p>For each pixel, take a number of sample points in a small <strong>hemisphere</strong> above the surface, oriented along the normal. For each sample, check the G-buffer: is there geometry in front of the sample point? The fraction of samples that are blocked is the pixel's occlusion.</p>
+<p>SSAO fits naturally after a G-buffer pass. It needs positions and normals in <strong>view space</strong>, so either store them that way or transform them on read. Working in view space makes depth comparisons a matter of comparing z.</p>
+<h2 id="the-sample-kernel">The sample kernel<a class="headerlink" href="#the-sample-kernel" title="Permanent link">#</a></h2>
+<p>Generate 64 random points inside a unit hemisphere pointing along +z, in tangent space. Scale them so that more samples fall close to the origin, since nearby occluders matter most:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="nv">kernel</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">(</span><span class="mf">0.</span><span class="p">.&lt;</span><span class="mi">64</span><span class="p">).</span><span class="bp">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">sample</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Float3</span><span class="p">(.</span><span class="n">random</span><span class="p">(</span><span class="k">in</span><span class="p">:</span><span class="w"> </span><span class="o">-</span><span class="mf">1.</span><span class="p">..</span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">random</span><span class="p">(</span><span class="k">in</span><span class="p">:</span><span class="w"> </span><span class="o">-</span><span class="mf">1.</span><span class="p">..</span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">random</span><span class="p">(</span><span class="k">in</span><span class="p">:</span><span class="w"> </span><span class="mf">0.</span><span class="p">..</span><span class="mi">1</span><span class="p">))</span>
+<span class="w">    </span><span class="n">sample</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">.</span><span class="n">random</span><span class="p">(</span><span class="k">in</span><span class="p">:</span><span class="w"> </span><span class="mf">0.</span><span class="p">..</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">t</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">Float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">64</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">scale</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mf">0.1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.9</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">t</span><span class="w">        </span><span class="c1">// cluster near the center</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;(</span><span class="n">sample</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">scale</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Store the kernel in a buffer for the shader.</p>
+<h2 id="random-rotation">Random rotation<a class="headerlink" href="#random-rotation" title="Permanent link">#</a></h2>
+<p>64 samples per pixel is already a lot, and still not enough to avoid visible banding. Rotating the kernel differently at each pixel turns the banding into fine noise, which a blur then removes. A tiny 4 × 4 texture of random vectors, tiled across the screen, supplies the rotations:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">noise</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">(</span><span class="mf">0.</span><span class="p">.&lt;</span><span class="mi">16</span><span class="p">).</span><span class="bp">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kc">_</span><span class="w"> </span><span class="k">in</span>
+<span class="w">    </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;(.</span><span class="n">random</span><span class="p">(</span><span class="k">in</span><span class="p">:</span><span class="w"> </span><span class="o">-</span><span class="mf">1.</span><span class="p">..</span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">random</span><span class="p">(</span><span class="k">in</span><span class="p">:</span><span class="w"> </span><span class="o">-</span><span class="mf">1.</span><span class="p">..</span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nv">descriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLTextureDescriptor</span><span class="p">.</span><span class="n">texture2DDescriptor</span><span class="p">(</span>
+<span class="w">    </span><span class="n">pixelFormat</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">rgba32Float</span><span class="p">,</span><span class="w"> </span><span class="n">width</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="n">mipmapped</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
+<span class="n">noiseTexture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeTexture</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">descriptor</span><span class="p">)</span><span class="o">!</span>
+<span class="n">noiseTexture</span><span class="p">.</span><span class="n">replace</span><span class="p">(</span><span class="n">region</span><span class="p">:</span><span class="w"> </span><span class="n">MTLRegionMake2D</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">),</span><span class="w"> </span><span class="n">mipmapLevel</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">                     </span><span class="n">withBytes</span><span class="p">:</span><span class="w"> </span><span class="n">noise</span><span class="p">,</span><span class="w"> </span><span class="n">bytesPerRow</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;</span><span class="o">&gt;</span><span class="p">.</span><span class="bp">stride</span><span class="p">)</span>
+</code></pre></div>
+
+<h2 id="the-ssao-shader">The SSAO shader<a class="headerlink" href="#the-ssao-shader" title="Permanent link">#</a></h2>
+<p>The output is a single-channel texture (<code>.r8Unorm</code>) holding the occlusion factor.</p>
+<div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">SSAOUniforms</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float4x4</span><span class="w"> </span><span class="n">projection</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">radius</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">bias</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="n">fragment</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">fragment_ssao</span><span class="p">(</span><span class="n">ScreenOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
+<span class="w">                             </span><span class="n">constant</span><span class="w"> </span><span class="n">SSAOUniforms</span><span class="w"> </span><span class="o">&amp;</span><span class="n">uniforms</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
+<span class="w">                             </span><span class="n">constant</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="o">*</span><span class="n">kernel</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
+<span class="w">                             </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">positionTexture</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
+<span class="w">                             </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">normalTexture</span><span class="w">   </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
+<span class="w">                             </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">noiseTexture</span><span class="w">    </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">2</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="n">sampler</span><span class="w"> </span><span class="nf">clampSampler</span><span class="p">(</span><span class="n">filter</span><span class="o">::</span><span class="n">nearest</span><span class="p">,</span><span class="w"> </span><span class="n">address</span><span class="o">::</span><span class="n">clamp_to_edge</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">uint2</span><span class="w"> </span><span class="n">pixel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uint2</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">xy</span><span class="p">);</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">positionTexture</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="n">pixel</span><span class="p">).</span><span class="n">xyz</span><span class="p">;</span><span class="w">       </span><span class="c1">// view space</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">normal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">normalTexture</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="n">pixel</span><span class="p">).</span><span class="n">xyz</span><span class="p">);</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">random</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">noiseTexture</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="n">pixel</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">4</span><span class="p">).</span><span class="n">xyz</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// A TBN basis that orients the hemisphere along the normal, rotated randomly.</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">tangent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">random</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">normal</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">dot</span><span class="p">(</span><span class="n">random</span><span class="p">,</span><span class="w"> </span><span class="n">normal</span><span class="p">));</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">bitangent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cross</span><span class="p">(</span><span class="n">normal</span><span class="p">,</span><span class="w"> </span><span class="n">tangent</span><span class="p">);</span>
+<span class="w">    </span><span class="n">float3x3</span><span class="w"> </span><span class="n">TBN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float3x3</span><span class="p">(</span><span class="n">tangent</span><span class="p">,</span><span class="w"> </span><span class="n">bitangent</span><span class="p">,</span><span class="w"> </span><span class="n">normal</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">occlusion</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">64</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">float3</span><span class="w"> </span><span class="n">samplePosition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">TBN</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">kernel</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">xyz</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">radius</span><span class="p">;</span>
+
+<span class="w">        </span><span class="c1">// Project the sample to find its pixel.</span>
+<span class="w">        </span><span class="n">float4</span><span class="w"> </span><span class="n">clip</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">projection</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">samplePosition</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<span class="w">        </span><span class="n">float2</span><span class="w"> </span><span class="n">uv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">clip</span><span class="p">.</span><span class="n">xy</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">clip</span><span class="p">.</span><span class="n">w</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">float2</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.5</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.5</span><span class="p">;</span>
+
+<span class="w">        </span><span class="kt">float</span><span class="w"> </span><span class="n">sceneZ</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">positionTexture</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">clampSampler</span><span class="p">,</span><span class="w"> </span><span class="n">uv</span><span class="p">).</span><span class="n">z</span><span class="p">;</span>
+
+<span class="w">        </span><span class="c1">// Ignore occluders far outside the sampling radius.</span>
+<span class="w">        </span><span class="kt">float</span><span class="w"> </span><span class="n">rangeCheck</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">smoothstep</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">radius</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">abs</span><span class="p">(</span><span class="n">position</span><span class="p">.</span><span class="n">z</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">sceneZ</span><span class="p">));</span>
+<span class="w">        </span><span class="n">occlusion</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="p">(</span><span class="n">sceneZ</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">samplePosition</span><span class="p">.</span><span class="n">z</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">bias</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">rangeCheck</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">occlusion</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">64.0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Points worth noting:</p>
+<ul>
+<li>In our right-handed view space the camera looks down -z, so a <strong>larger</strong> z is closer to the camera. A sample is occluded when the scene's surface at that pixel is closer than the sample.</li>
+<li>The <code>bias</code>, around 0.025, prevents a flat surface from occluding itself.</li>
+<li>The <strong>range check</strong> stops a distant background object from darkening the edge of something in front of it.</li>
+<li>Reading <code>pixel % 4</code> tiles the noise texture across the screen without a sampler.</li>
+<li>The projection to texture coordinates flips y, as it did for shadow maps.</li>
+</ul>
+<p>A radius of about 0.5 world units is a good starting point.</p>
+<h2 id="blur">Blur<a class="headerlink" href="#blur" title="Permanent link">#</a></h2>
+<p>The raw result has a visible 4 × 4 noise pattern. A box blur of the same size removes it exactly:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">fragment_ssaoBlur</span><span class="p">(</span><span class="n">ScreenOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
+<span class="w">                                 </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">ssao</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">int2</span><span class="w"> </span><span class="n">pixel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">int2</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">xy</span><span class="p">);</span>
+<span class="w">    </span><span class="n">int2</span><span class="w"> </span><span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">int2</span><span class="p">(</span><span class="n">ssao</span><span class="p">.</span><span class="n">get_width</span><span class="p">(),</span><span class="w"> </span><span class="n">ssao</span><span class="p">.</span><span class="n">get_height</span><span class="p">());</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">-2</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">-2</span><span class="p">;</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="n">y</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">int2</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">clamp</span><span class="p">(</span><span class="n">pixel</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">int2</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">),</span><span class="w"> </span><span class="n">int2</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="n">size</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">            </span><span class="n">result</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">ssao</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="n">uint2</span><span class="p">(</span><span class="n">p</span><span class="p">)).</span><span class="n">r</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">16.0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h2 id="applying-it">Applying it<a class="headerlink" href="#applying-it" title="Permanent link">#</a></h2>
+<p>Ambient occlusion affects <strong>ambient light only</strong>. In the deferred lighting pass:</p>
+<div class="codehilite"><pre><span></span><code><span class="kt">float</span><span class="w"> </span><span class="n">ao</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ssaoTexture</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="n">pixel</span><span class="p">).</span><span class="n">r</span><span class="p">;</span>
+<span class="n">float3</span><span class="w"> </span><span class="n">ambient</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">albedo</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.3</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">ao</span><span class="p">;</span>
+</code></pre></div>
+
+<p>Multiplying the whole lit result by the occlusion is a common mistake. It darkens directly lit surfaces, which looks dirty.</p>
+<figure><img src="../assets/img/advanced-lighting/ssao.webp" alt="The occlusion buffer, and ambient light without and with it." width="880" height="218" loading="lazy"><figcaption>The occlusion buffer, and ambient light without and with it.</figcaption></figure>
+
+<h2 id="tuning-and-cost">Tuning and cost<a class="headerlink" href="#tuning-and-cost" title="Permanent link">#</a></h2>
+<ul>
+<li>Render SSAO at <strong>half resolution</strong>. It is low-frequency information, and the blur hides the difference.</li>
+<li>16 to 32 samples are often enough with a good blur.</li>
+<li>Raising the result to a power (<code>pow(ao, 2.0)</code>) increases contrast.</li>
+</ul>
+<p>SSAO only knows about visible surfaces, so occlusion can appear or vanish as objects enter and leave the screen. Refinements such as HBAO and GTAO improve accuracy, and <a href="../beyond/ray-tracing.html">ray tracing</a> computes real ambient occlusion on hardware that supports it.</p>
+<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<ul>
+<li>Output the raw and blurred occlusion to the screen.</li>
+<li>Vary the radius and the sample count and find the cheapest setting that still looks good.</li>
+</ul></article><div class="pager"><a class="prev" href="../advanced-lighting/deferred-shading.html"><small>Previous</small>Deferred Shading</a><a class="next" href="../pbr/theory.html"><small>Next</small>Theory</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

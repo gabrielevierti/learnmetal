@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Model I/O · learnmetal</title>
+<meta name="description" content="Model Loading: Model I/O. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a class="active" href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">Model Loading</p><h1 id="model-io">Model I/O<a class="headerlink" href="#model-io" title="Permanent link">#</a></h1>
+<div class="example-box"><strong>Example code</strong> <code>examples/Sources/11-ModelLoading</code>, run with <code>swift run ModelLoading</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
+
+<p>Nobody types the vertices of a character by hand. Artists build models in tools such as Blender and export them to files, and our job is to turn those files into vertex buffers, index buffers and textures.</p>
+<p>On Apple platforms you do not need a third-party library for this. The system framework <strong>Model I/O</strong> reads common 3D formats, and <strong>MetalKit</strong> converts the result into Metal objects.</p>
+<h2 id="formats">Formats<a class="headerlink" href="#formats" title="Permanent link">#</a></h2>
+<p>Model I/O imports, among others:</p>
+<table>
+<thead>
+<tr>
+<th>Format</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>USD, USDZ, USDA, USDC</td>
+<td>Pixar's Universal Scene Description, Apple's preferred format. Supports materials, hierarchy and animation.</td>
+</tr>
+<tr>
+<td>OBJ (+ MTL)</td>
+<td>Simple and everywhere. Geometry and basic materials only.</td>
+</tr>
+<tr>
+<td>PLY, STL</td>
+<td>Geometry only, common for scans and 3D printing.</td>
+</tr>
+<tr>
+<td>Alembic (ABC)</td>
+<td>Baked animation caches.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">What about glTF and FBX?</p>
+<p>Model I/O does not read glTF or FBX. Convert them to USDZ with Apple's Reality Converter or with Blender, or use an open-source loader. For learning, OBJ and USDZ are plenty.</p>
+</div>
+<h2 id="how-a-model-is-structured">How a model is structured<a class="headerlink" href="#how-a-model-is-structured" title="Permanent link">#</a></h2>
+<p>Model I/O represents a file as a tree:</p>
+<ul>
+<li><strong><code>MDLAsset</code></strong>: the whole file. A container of objects.</li>
+<li><strong><code>MDLObject</code></strong>: a node with a transform and children.</li>
+<li><strong><code>MDLMesh</code></strong>: a node that has geometry. It owns vertex buffers and a vertex descriptor.</li>
+<li><strong><code>MDLSubmesh</code></strong>: a part of a mesh drawn with one material. It owns an index buffer.</li>
+<li><strong><code>MDLMaterial</code></strong>: named properties such as base color, roughness and normal, each a value or a texture.</li>
+</ul>
+<p>One mesh shares its vertices among several submeshes. A car body might be one mesh with a submesh for paint, one for glass and one for chrome.</p>
+<figure><img src="../assets/img/model-loading/model-io.webp" alt="model io" width="880" height="355" loading="lazy"></figure>
+
+<h2 id="asking-for-the-layout-you-want">Asking for the layout you want<a class="headerlink" href="#asking-for-the-layout-you-want" title="Permanent link">#</a></h2>
+<p>Files store vertex data in whatever layout the exporter chose. Model I/O can rearrange it into the layout our shaders expect. Start from the Metal vertex descriptor, convert it, and name the attributes so Model I/O knows which data goes where:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">import</span><span class="w"> </span><span class="nc">MetalKit</span>
+<span class="kd">import</span><span class="w"> </span><span class="nc">ModelIO</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nv">vertexDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLVertexDescriptor</span><span class="p">()</span>
+<span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">format</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">float3</span><span class="w">   </span><span class="c1">// position</span>
+<span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">offset</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">format</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">float3</span><span class="w">   </span><span class="c1">// normal</span>
+<span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">offset</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">12</span>
+<span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">2</span><span class="p">].</span><span class="n">format</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">float2</span><span class="w">   </span><span class="c1">// uv</span>
+<span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">2</span><span class="p">].</span><span class="n">offset</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">24</span>
+<span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">layouts</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="bp">stride</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">32</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nv">mdlDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MTKModelIOVertexDescriptorFromMetal</span><span class="p">(</span><span class="n">vertexDescriptor</span><span class="p">)</span>
+<span class="p">(</span><span class="n">mdlDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="p">!</span><span class="w"> </span><span class="bp">MDLVertexAttribute</span><span class="p">).</span><span class="n">name</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MDLVertexAttributePosition</span>
+<span class="p">(</span><span class="n">mdlDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="p">!</span><span class="w"> </span><span class="bp">MDLVertexAttribute</span><span class="p">).</span><span class="n">name</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MDLVertexAttributeNormal</span>
+<span class="p">(</span><span class="n">mdlDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="p">!</span><span class="w"> </span><span class="bp">MDLVertexAttribute</span><span class="p">).</span><span class="n">name</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MDLVertexAttributeTextureCoordinate</span>
+</code></pre></div>
+
+<p>Since Model I/O writes the buffer for us, we are free to pack it tightly: <code>.float3</code> occupies 12 bytes in a vertex buffer, so a vertex is 32 bytes. This is the same vertex layout as our cube in spirit, only without Swift's padding. The shader's <code>VertexIn</code> does not change at all; <code>[[attribute(n)]]</code> hides the layout.</p>
+<h2 id="loading-the-asset">Loading the asset<a class="headerlink" href="#loading-the-asset" title="Permanent link">#</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">allocator</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTKMeshBufferAllocator</span><span class="p">(</span><span class="n">device</span><span class="p">:</span><span class="w"> </span><span class="n">device</span><span class="p">)</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">url</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Bundle</span><span class="p">.</span><span class="n">main</span><span class="p">.</span><span class="n">url</span><span class="p">(</span><span class="n">forResource</span><span class="p">:</span><span class="w"> </span><span class="s">"backpack"</span><span class="p">,</span><span class="w"> </span><span class="n">withExtension</span><span class="p">:</span><span class="w"> </span><span class="s">"usdz"</span><span class="p">)</span><span class="o">!</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">asset</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MDLAsset</span><span class="p">(</span><span class="n">url</span><span class="p">:</span><span class="w"> </span><span class="n">url</span><span class="p">,</span>
+<span class="w">                     </span><span class="n">vertexDescriptor</span><span class="p">:</span><span class="w"> </span><span class="n">mdlDescriptor</span><span class="p">,</span>
+<span class="w">                     </span><span class="n">bufferAllocator</span><span class="p">:</span><span class="w"> </span><span class="n">allocator</span><span class="p">)</span>
+</code></pre></div>
+
+<p>The <strong>buffer allocator</strong> is the key detail. With an <code>MTKMeshBufferAllocator</code>, Model I/O loads vertex and index data straight into <code>MTLBuffer</code>s, with no intermediate copy.</p>
+<p>Two optional steps are often useful right after loading:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">asset</span><span class="p">.</span><span class="n">loadTextures</span><span class="p">()</span><span class="w">   </span><span class="c1">// resolve texture references in materials</span>
+
+<span class="k">for</span><span class="w"> </span><span class="k">case</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">mesh</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="bp">MDLMesh</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">asset</span><span class="p">.</span><span class="n">childObjects</span><span class="p">(</span><span class="n">of</span><span class="p">:</span><span class="w"> </span><span class="bp">MDLMesh</span><span class="p">.</span><span class="kc">self</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Generate normals if the file has none.</span>
+<span class="w">    </span><span class="n">mesh</span><span class="p">.</span><span class="n">addNormals</span><span class="p">(</span><span class="n">withAttributeNamed</span><span class="p">:</span><span class="w"> </span><span class="n">MDLVertexAttributeNormal</span><span class="p">,</span><span class="w"> </span><span class="n">creaseThreshold</span><span class="p">:</span><span class="w"> </span><span class="mf">0.5</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h2 id="from-model-io-to-metal">From Model I/O to Metal<a class="headerlink" href="#from-model-io-to-metal" title="Permanent link">#</a></h2>
+<p>MetalKit turns every <code>MDLMesh</code> in the asset into an <code>MTKMesh</code>:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">mdlMeshes</span><span class="p">,</span><span class="w"> </span><span class="n">mtkMeshes</span><span class="p">)</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="w"> </span><span class="bp">MTKMesh</span><span class="p">.</span><span class="n">newMeshes</span><span class="p">(</span><span class="n">asset</span><span class="p">:</span><span class="w"> </span><span class="n">asset</span><span class="p">,</span><span class="w"> </span><span class="n">device</span><span class="p">:</span><span class="w"> </span><span class="n">device</span><span class="p">)</span>
+</code></pre></div>
+
+<p>You get two parallel arrays. The <code>MTKMesh</code> objects hold the Metal buffers for drawing. The <code>MDLMesh</code> objects still hold what Metal does not care about: materials and transforms. The next two chapters wrap these into types of our own.</p>
+<h2 id="built-in-shapes">Built-in shapes<a class="headerlink" href="#built-in-shapes" title="Permanent link">#</a></h2>
+<p>Model I/O can also generate geometry, which is handy for tests:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">sphere</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MDLMesh</span><span class="p">(</span><span class="n">sphereWithExtent</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">],</span>
+<span class="w">                     </span><span class="n">segments</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">48</span><span class="p">,</span><span class="w"> </span><span class="mi">48</span><span class="p">],</span>
+<span class="w">                     </span><span class="n">inwardNormals</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">                     </span><span class="n">geometryType</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">triangles</span><span class="p">,</span>
+<span class="w">                     </span><span class="n">allocator</span><span class="p">:</span><span class="w"> </span><span class="n">allocator</span><span class="p">)</span>
+<span class="n">sphere</span><span class="p">.</span><span class="n">vertexDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">mdlDescriptor</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">sphereMesh</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="w"> </span><span class="bp">MTKMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">:</span><span class="w"> </span><span class="n">sphere</span><span class="p">,</span><span class="w"> </span><span class="n">device</span><span class="p">:</span><span class="w"> </span><span class="n">device</span><span class="p">)</span>
+</code></pre></div>
+
+<p>There are similar initializers for boxes, planes, cylinders, capsules, cones and icosahedra.</p>
+<div class="admonition warning">
+<p class="admonition-title">Texture coordinates again</p>
+<p>Many files follow the OpenGL convention with v pointing up. If a model's textures look scrambled or mirrored, flip v when loading: <code>mesh.flipTextureCoordinates(inAttributeNamed: MDLVertexAttributeTextureCoordinate)</code>.</p>
+</div></article><div class="pager"><a class="prev" href="../lighting/review.html"><small>Previous</small>Review</a><a class="next" href="../model-loading/mesh.html"><small>Next</small>Mesh</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

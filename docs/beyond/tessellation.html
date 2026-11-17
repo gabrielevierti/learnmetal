@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tessellation · learnmetal</title>
+<meta name="description" content="Beyond: Tessellation. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a class="active" href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">Beyond</p><h1 id="tessellation">Tessellation<a class="headerlink" href="#tessellation" title="Permanent link">#</a></h1>
+<p>Detailed surfaces need many triangles, but only where the viewer can see the detail. A mountain a kilometer away does not need the triangle density of the ground under your feet. <strong>Tessellation</strong> lets the GPU subdivide coarse geometry on the fly, as finely as you ask, so a mesh can be stored and animated at low resolution and rendered at high resolution.</p>
+<h2 id="patches">Patches<a class="headerlink" href="#patches" title="Permanent link">#</a></h2>
+<p>With tessellation, you no longer submit triangles. You submit <strong>patches</strong>: triangles or quads defined by <strong>control points</strong>. For each patch you provide <strong>tessellation factors</strong> that say how finely to subdivide it. The GPU's tessellator generates the new vertices, and a special vertex function computes the final position of each.</p>
+<p>Metal's design differs from other APIs. There are no separate hull and domain shader stages. Instead:</p>
+<ol>
+<li>A <strong>compute kernel</strong>, or the CPU, writes tessellation factors into a buffer.</li>
+<li>The tessellator subdivides each patch according to its factors.</li>
+<li>A <strong>post-tessellation vertex function</strong> runs once for every generated vertex.</li>
+</ol>
+<h2 id="tessellation-factors">Tessellation factors<a class="headerlink" href="#tessellation-factors" title="Permanent link">#</a></h2>
+<p>A quad patch has four <strong>edge factors</strong> and two <strong>inside factors</strong>. A triangle patch has three and one. A factor of 1 means no subdivision; 16 means the edge is split into 16 segments. Edge factors are separate from inside factors so that two neighboring patches can agree on their shared edge and leave no cracks, even when their interiors are subdivided differently.</p>
+<p>A kernel that sets the same factor for every patch:</p>
+<div class="codehilite"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;metal_stdlib&gt;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">metal</span><span class="p">;</span>
+
+<span class="n">kernel</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">compute_factors</span><span class="p">(</span><span class="n">device</span><span class="w"> </span><span class="n">MTLQuadTessellationFactorsHalf</span><span class="w"> </span><span class="o">*</span><span class="n">factors</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
+<span class="w">                            </span><span class="n">constant</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="o">&amp;</span><span class="n">level</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
+<span class="w">                            </span><span class="n">uint</span><span class="w"> </span><span class="n">patchID</span><span class="w"> </span><span class="p">[[</span><span class="na">thread_position_in_grid</span><span class="p">]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">factors</span><span class="p">[</span><span class="n">patchID</span><span class="p">].</span><span class="n">edgeTessellationFactor</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">level</span><span class="p">;</span>
+<span class="w">    </span><span class="n">factors</span><span class="p">[</span><span class="n">patchID</span><span class="p">].</span><span class="n">edgeTessellationFactor</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">level</span><span class="p">;</span>
+<span class="w">    </span><span class="n">factors</span><span class="p">[</span><span class="n">patchID</span><span class="p">].</span><span class="n">edgeTessellationFactor</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">level</span><span class="p">;</span>
+<span class="w">    </span><span class="n">factors</span><span class="p">[</span><span class="n">patchID</span><span class="p">].</span><span class="n">edgeTessellationFactor</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">level</span><span class="p">;</span>
+<span class="w">    </span><span class="n">factors</span><span class="p">[</span><span class="n">patchID</span><span class="p">].</span><span class="n">insideTessellationFactor</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">level</span><span class="p">;</span>
+<span class="w">    </span><span class="n">factors</span><span class="p">[</span><span class="n">patchID</span><span class="p">].</span><span class="n">insideTessellationFactor</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">level</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>MTLQuadTessellationFactorsHalf</code> is a built-in struct of six half floats, 12 bytes per patch:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">factorBuffer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeBuffer</span><span class="p">(</span><span class="n">length</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">patchCount</span><span class="p">,</span><span class="w"> </span><span class="n">options</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">storageModePrivate</span><span class="p">)</span><span class="o">!</span>
+</code></pre></div>
+
+<p>In a real renderer, the kernel computes each edge's factor from its distance to the camera or its length on screen. That is <strong>adaptive tessellation</strong>. Compute a factor per <em>edge</em> from that edge's own midpoint, so both patches sharing the edge get the same value.</p>
+<h2 id="the-pipeline">The pipeline<a class="headerlink" href="#the-pipeline" title="Permanent link">#</a></h2>
+<p>Control points go in an ordinary vertex buffer. The vertex descriptor says that the data advances per control point:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">vertexDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLVertexDescriptor</span><span class="p">()</span>
+<span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">format</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">float3</span>
+<span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">offset</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">bufferIndex</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">layouts</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="bp">stride</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">12</span>
+<span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">layouts</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">stepFunction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">perPatchControlPoint</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nv">descriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLRenderPipelineDescriptor</span><span class="p">()</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">vertexDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">vertexDescriptor</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">vertexFunction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">library</span><span class="p">.</span><span class="n">makeFunction</span><span class="p">(</span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="s">"vertex_terrain"</span><span class="p">)</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">fragmentFunction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">library</span><span class="p">.</span><span class="n">makeFunction</span><span class="p">(</span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="s">"fragment_terrain"</span><span class="p">)</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">pixelFormat</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">view</span><span class="p">.</span><span class="n">colorPixelFormat</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">depthAttachmentPixelFormat</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">depth32Float</span>
+
+<span class="n">descriptor</span><span class="p">.</span><span class="n">tessellationFactorFormat</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">half</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">tessellationFactorStepFunction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">perPatch</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">tessellationPartitionMode</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">fractionalEven</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">tessellationOutputWindingOrder</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">counterClockwise</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">maxTessellationFactor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">16</span>
+</code></pre></div>
+
+<p>The <strong>partition mode</strong> controls how edges are split. <code>.integer</code> and <code>.pow2</code> snap to whole numbers, which causes visible popping as factors change. The fractional modes add new vertices gradually, so detail grows smoothly as the camera approaches. The maximum factor is 16 on older iOS devices and 64 on Macs and recent Apple GPUs.</p>
+<h2 id="the-post-tessellation-vertex-function">The post-tessellation vertex function<a class="headerlink" href="#the-post-tessellation-vertex-function" title="Permanent link">#</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">ControlPoint</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="p">[[</span><span class="na">attribute</span><span class="p">(</span><span class="mi">0</span><span class="p">)]];</span>
+<span class="p">};</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">PatchIn</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">patch_control_point</span><span class="o">&lt;</span><span class="n">ControlPoint</span><span class="o">&gt;</span><span class="w"> </span><span class="n">controlPoints</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">TerrainOut</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="p">[[</span><span class="na">position</span><span class="p">]];</span>
+<span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">uv</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">height</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="p">[[</span><span class="na">patch</span><span class="p">(</span><span class="n">quad</span><span class="p">,</span><span class="err"> </span><span class="mi">4</span><span class="p">)]]</span>
+<span class="n">vertex</span><span class="w"> </span><span class="n">TerrainOut</span><span class="w"> </span><span class="n">vertex_terrain</span><span class="p">(</span><span class="n">PatchIn</span><span class="w"> </span><span class="n">patch</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
+<span class="w">                                 </span><span class="n">float2</span><span class="w"> </span><span class="n">patchCoord</span><span class="w"> </span><span class="p">[[</span><span class="na">position_in_patch</span><span class="p">]],</span>
+<span class="w">                                 </span><span class="n">constant</span><span class="w"> </span><span class="n">Uniforms</span><span class="w"> </span><span class="o">&amp;</span><span class="n">uniforms</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
+<span class="w">                                 </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">heightMap</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
+<span class="w">                                 </span><span class="n">sampler</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="p">[[</span><span class="na">sampler</span><span class="p">(</span><span class="mi">0</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Bilinear interpolation of the four corners.</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">top</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mix</span><span class="p">(</span><span class="n">patch</span><span class="p">.</span><span class="n">controlPoints</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="n">patch</span><span class="p">.</span><span class="n">controlPoints</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="n">patchCoord</span><span class="p">.</span><span class="n">x</span><span class="p">);</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">bottom</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mix</span><span class="p">(</span><span class="n">patch</span><span class="p">.</span><span class="n">controlPoints</span><span class="p">[</span><span class="mi">3</span><span class="p">].</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="n">patch</span><span class="p">.</span><span class="n">controlPoints</span><span class="p">[</span><span class="mi">2</span><span class="p">].</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="n">patchCoord</span><span class="p">.</span><span class="n">x</span><span class="p">);</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mix</span><span class="p">(</span><span class="n">top</span><span class="p">,</span><span class="w"> </span><span class="n">bottom</span><span class="p">,</span><span class="w"> </span><span class="n">patchCoord</span><span class="p">.</span><span class="n">y</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Displace along y using a height map.</span>
+<span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">uv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">position</span><span class="p">.</span><span class="n">xz</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">terrainSize</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.5</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">height</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">heightMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">uv</span><span class="p">,</span><span class="w"> </span><span class="n">level</span><span class="p">(</span><span class="mi">0</span><span class="p">)).</span><span class="n">r</span><span class="p">;</span>
+<span class="w">    </span><span class="n">position</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">height</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">heightScale</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">TerrainOut</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">projection</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">view</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">model</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">uv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uv</span><span class="p">;</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">height</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">height</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<ul>
+<li><code>[[patch(quad, 4)]]</code> declares a quad patch with four control points.</li>
+<li><code>[[position_in_patch]]</code> is where the generated vertex lies within the patch: a <code>float2</code> from 0 to 1 for quads, and a <code>float3</code> of barycentric weights for triangles.</li>
+<li>Vertex functions cannot compute mip levels automatically, so texture samples name the level.</li>
+</ul>
+<p>The function decides what the patch <em>means</em>. Here it is a flat quad displaced by a height map. Interpret sixteen control points as a bicubic Bézier patch and you get smooth curved surfaces from a coarse cage.</p>
+<h2 id="drawing">Drawing<a class="headerlink" href="#drawing" title="Permanent link">#</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="c1">// 1. Compute pass: fill the factor buffer.</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">compute</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">commandBuffer</span><span class="p">.</span><span class="n">makeComputeCommandEncoder</span><span class="p">()</span><span class="o">!</span>
+<span class="n">compute</span><span class="p">.</span><span class="n">setComputePipelineState</span><span class="p">(</span><span class="n">factorPipeline</span><span class="p">)</span>
+<span class="n">compute</span><span class="p">.</span><span class="n">setBuffer</span><span class="p">(</span><span class="n">factorBuffer</span><span class="p">,</span><span class="w"> </span><span class="n">offset</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="n">compute</span><span class="p">.</span><span class="n">setBytes</span><span class="p">(&amp;</span><span class="n">level</span><span class="p">,</span><span class="w"> </span><span class="n">length</span><span class="p">:</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;.</span><span class="bp">stride</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+<span class="n">compute</span><span class="p">.</span><span class="n">dispatchThreads</span><span class="p">(</span><span class="n">MTLSize</span><span class="p">(</span><span class="n">width</span><span class="p">:</span><span class="w"> </span><span class="n">patchCount</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">depth</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span>
+<span class="w">                        </span><span class="n">threadsPerThreadgroup</span><span class="p">:</span><span class="w"> </span><span class="n">MTLSize</span><span class="p">(</span><span class="n">width</span><span class="p">:</span><span class="w"> </span><span class="n">factorPipeline</span><span class="p">.</span><span class="n">threadExecutionWidth</span><span class="p">,</span>
+<span class="w">                                                       </span><span class="n">height</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">depth</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">))</span>
+<span class="n">compute</span><span class="p">.</span><span class="n">endEncoding</span><span class="p">()</span>
+
+<span class="c1">// 2. Render pass: draw the patches.</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setRenderPipelineState</span><span class="p">(</span><span class="n">terrainPipeline</span><span class="p">)</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setVertexBuffer</span><span class="p">(</span><span class="n">controlPointBuffer</span><span class="p">,</span><span class="w"> </span><span class="n">offset</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setTessellationFactorBuffer</span><span class="p">(</span><span class="n">factorBuffer</span><span class="p">,</span><span class="w"> </span><span class="n">offset</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">instanceStride</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setVertexTexture</span><span class="p">(</span><span class="n">heightMap</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setVertexSamplerState</span><span class="p">(</span><span class="n">samplerState</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setTriangleFillMode</span><span class="p">(.</span><span class="n">lines</span><span class="p">)</span><span class="w">      </span><span class="c1">// to see the subdivision</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">drawPatches</span><span class="p">(</span><span class="n">numberOfPatchControlPoints</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
+<span class="w">                    </span><span class="n">patchStart</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">                    </span><span class="n">patchCount</span><span class="p">:</span><span class="w"> </span><span class="n">patchCount</span><span class="p">,</span>
+<span class="w">                    </span><span class="n">patchIndexBuffer</span><span class="p">:</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span>
+<span class="w">                    </span><span class="n">patchIndexBufferOffset</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">                    </span><span class="n">instanceCount</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">                    </span><span class="n">baseInstance</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+</code></pre></div>
+
+<p>Textures and samplers for the vertex stage have their own binding calls, <code>setVertexTexture</code> and <code>setVertexSamplerState</code>.</p>
+<figure><img src="../assets/img/beyond/tessellation.webp" alt="The same 4 x 4 grid of quad patches at increasing tessellation factors, displaced by a height function." width="880" height="218" loading="lazy"><figcaption>The same 4 x 4 grid of quad patches at increasing tessellation factors, displaced by a height function.</figcaption></figure>
+
+<h2 id="normals-for-displaced-surfaces">Normals for displaced surfaces<a class="headerlink" href="#normals-for-displaced-surfaces" title="Permanent link">#</a></h2>
+<p>Displacement changes the surface, so the original normals are wrong. For a height map, compute the normal from neighboring heights, in the vertex function or per fragment:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">float2</span><span class="w"> </span><span class="n">texel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">float2</span><span class="p">(</span><span class="n">heightMap</span><span class="p">.</span><span class="n">get_width</span><span class="p">(),</span><span class="w"> </span><span class="n">heightMap</span><span class="p">.</span><span class="n">get_height</span><span class="p">());</span>
+<span class="kt">float</span><span class="w"> </span><span class="n">left</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">heightMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">uv</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">float2</span><span class="p">(</span><span class="n">texel</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)).</span><span class="n">r</span><span class="p">;</span>
+<span class="kt">float</span><span class="w"> </span><span class="n">right</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">heightMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">uv</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">float2</span><span class="p">(</span><span class="n">texel</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)).</span><span class="n">r</span><span class="p">;</span>
+<span class="kt">float</span><span class="w"> </span><span class="n">down</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">heightMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">uv</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">float2</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">texel</span><span class="p">.</span><span class="n">y</span><span class="p">)).</span><span class="n">r</span><span class="p">;</span>
+<span class="kt">float</span><span class="w"> </span><span class="n">up</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="n">heightMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">uv</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">float2</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">texel</span><span class="p">.</span><span class="n">y</span><span class="p">)).</span><span class="n">r</span><span class="p">;</span>
+<span class="n">float3</span><span class="w"> </span><span class="n">normal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">float3</span><span class="p">(</span><span class="n">left</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">right</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">texel</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">terrainSize</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">heightScale</span><span class="p">,</span><span class="w"> </span><span class="n">down</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">up</span><span class="p">));</span>
+</code></pre></div>
+
+<h2 id="uses">Uses<a class="headerlink" href="#uses" title="Permanent link">#</a></h2>
+<ul>
+<li><strong>Terrain</strong> with continuous level of detail.</li>
+<li><strong>Displacement mapping</strong>: real geometric detail with correct silhouettes and shadows, where <a href="../advanced-lighting/parallax-mapping.html">parallax mapping</a> only fakes it.</li>
+<li><strong>Smooth surfaces</strong>: subdivision surfaces and Bézier patches for characters and vehicles.</li>
+</ul>
+<p>On recent hardware, mesh shaders offer another route to the same goals with more control. Tessellation remains the simplest way to get adaptive detail and is supported on every Apple GPU.</p>
+<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<ul>
+<li>Animate the tessellation level and watch the wireframe refine.</li>
+<li>Compute per-edge factors from the camera distance in the kernel.</li>
+<li>Compare <code>.integer</code> and <code>.fractionalEven</code> while moving the camera.</li>
+</ul></article><div class="pager"><a class="prev" href="../beyond/compute-shaders.html"><small>Previous</small>Compute Shaders</a><a class="next" href="../beyond/ray-tracing.html"><small>Next</small>Ray Tracing</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

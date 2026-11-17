@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Render Targets · learnmetal</title>
+<meta name="description" content="Advanced Metal: Render Targets. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a class="active" href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">Advanced Metal</p><h1 id="render-targets">Render Targets<a class="headerlink" href="#render-targets" title="Permanent link">#</a></h1>
+<div class="example-box"><strong>Example code</strong> <code>examples/Sources/12-RenderTargets</code>, run with <code>swift run RenderTargets</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
+
+<p>Every frame so far has been drawn straight into the view's drawable. A render pass can draw into any texture instead, and that texture can then be read by a later pass. Rendering to a texture is the basis of post-processing, shadows, reflections, bloom and deferred shading. Nearly every chapter after this one uses it.</p>
+<div class="admonition note">
+<p class="admonition-title">Coming from OpenGL</p>
+<p>Metal has no framebuffer object. Its role is played by the <code>MTLRenderPassDescriptor</code>: a lightweight description of which textures are the color, depth and stencil attachments for one pass. There is nothing to bind or unbind and no "completeness" check.</p>
+</div>
+<h2 id="creating-the-textures">Creating the textures<a class="headerlink" href="#creating-the-textures" title="Permanent link">#</a></h2>
+<p>A texture you render into needs the <code>.renderTarget</code> usage. To sample it afterward it also needs <code>.shaderRead</code>:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">makeOffscreenTextures</span><span class="p">(</span><span class="n">size</span><span class="p">:</span><span class="w"> </span><span class="n">CGSize</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">width</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">max</span><span class="p">(</span><span class="nb">Int</span><span class="p">(</span><span class="n">size</span><span class="p">.</span><span class="n">width</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="n">height</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">max</span><span class="p">(</span><span class="nb">Int</span><span class="p">(</span><span class="n">size</span><span class="p">.</span><span class="n">height</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">colorDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLTextureDescriptor</span><span class="p">.</span><span class="n">texture2DDescriptor</span><span class="p">(</span>
+<span class="w">        </span><span class="n">pixelFormat</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">bgra8Unorm</span><span class="p">,</span><span class="w"> </span><span class="n">width</span><span class="p">:</span><span class="w"> </span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">:</span><span class="w"> </span><span class="n">height</span><span class="p">,</span><span class="w"> </span><span class="n">mipmapped</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
+<span class="w">    </span><span class="n">colorDescriptor</span><span class="p">.</span><span class="n">usage</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[.</span><span class="n">renderTarget</span><span class="p">,</span><span class="w"> </span><span class="p">.</span><span class="n">shaderRead</span><span class="p">]</span>
+<span class="w">    </span><span class="n">colorDescriptor</span><span class="p">.</span><span class="n">storageMode</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="kd">private</span>
+<span class="w">    </span><span class="n">sceneColor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeTexture</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">colorDescriptor</span><span class="p">)</span><span class="o">!</span>
+
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">depthDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLTextureDescriptor</span><span class="p">.</span><span class="n">texture2DDescriptor</span><span class="p">(</span>
+<span class="w">        </span><span class="n">pixelFormat</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">depth32Float</span><span class="p">,</span><span class="w"> </span><span class="n">width</span><span class="p">:</span><span class="w"> </span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">:</span><span class="w"> </span><span class="n">height</span><span class="p">,</span><span class="w"> </span><span class="n">mipmapped</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
+<span class="w">    </span><span class="n">depthDescriptor</span><span class="p">.</span><span class="n">usage</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">renderTarget</span>
+<span class="w">    </span><span class="n">depthDescriptor</span><span class="p">.</span><span class="n">storageMode</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="kd">private</span>
+<span class="w">    </span><span class="n">sceneDepth</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeTexture</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">depthDescriptor</span><span class="p">)</span><span class="o">!</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>.private</code> storage means only the GPU touches the texture. Call this function from <code>mtkView(_:drawableSizeWillChange:)</code> so the textures follow the window size.</p>
+<h2 id="describing-the-pass">Describing the pass<a class="headerlink" href="#describing-the-pass" title="Permanent link">#</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">scenePass</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLRenderPassDescriptor</span><span class="p">()</span>
+<span class="n">scenePass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">texture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">sceneColor</span>
+<span class="n">scenePass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">loadAction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">clear</span>
+<span class="n">scenePass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">clearColor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MTLClearColor</span><span class="p">(</span><span class="n">red</span><span class="p">:</span><span class="w"> </span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="n">green</span><span class="p">:</span><span class="w"> </span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="n">blue</span><span class="p">:</span><span class="w"> </span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="n">alpha</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+<span class="n">scenePass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">storeAction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">store</span>
+<span class="n">scenePass</span><span class="p">.</span><span class="n">depthAttachment</span><span class="p">.</span><span class="n">texture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">sceneDepth</span>
+<span class="n">scenePass</span><span class="p">.</span><span class="n">depthAttachment</span><span class="p">.</span><span class="n">loadAction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">clear</span>
+<span class="n">scenePass</span><span class="p">.</span><span class="n">depthAttachment</span><span class="p">.</span><span class="n">clearDepth</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mf">1.0</span>
+<span class="n">scenePass</span><span class="p">.</span><span class="n">depthAttachment</span><span class="p">.</span><span class="n">storeAction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">dontCare</span>
+</code></pre></div>
+
+<p>The load and store actions deserve thought:</p>
+<ul>
+<li>The color result is needed later, so it is <strong>stored</strong>.</li>
+<li>The depth buffer is only needed <em>during</em> the pass, so <code>.dontCare</code> lets the GPU throw it away.</li>
+</ul>
+<p>On Apple GPUs, a depth texture that is never stored can even be created with <code>storageMode = .memoryless</code>. It then occupies no memory at all, living only in the GPU's tile memory while the pass runs.</p>
+<h2 id="two-passes-in-one-frame">Two passes in one frame<a class="headerlink" href="#two-passes-in-one-frame" title="Permanent link">#</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">draw</span><span class="p">(</span><span class="k">in</span><span class="w"> </span><span class="n">view</span><span class="p">:</span><span class="w"> </span><span class="bp">MTKView</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">guard</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">commandBuffer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">commandQueue</span><span class="p">.</span><span class="n">makeCommandBuffer</span><span class="p">()</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Pass 1: the scene, into our texture.</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">encoder</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">commandBuffer</span><span class="p">.</span><span class="n">makeRenderCommandEncoder</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">scenePass</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">drawScene</span><span class="p">(</span><span class="n">encoder</span><span class="p">)</span>
+<span class="w">        </span><span class="n">encoder</span><span class="p">.</span><span class="n">endEncoding</span><span class="p">()</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Pass 2: a full-screen triangle, into the drawable.</span>
+<span class="w">    </span><span class="k">guard</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">viewPass</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">view</span><span class="p">.</span><span class="n">currentRenderPassDescriptor</span><span class="p">,</span>
+<span class="w">          </span><span class="kd">let</span><span class="w"> </span><span class="nv">drawable</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">view</span><span class="p">.</span><span class="n">currentDrawable</span><span class="p">,</span>
+<span class="w">          </span><span class="kd">let</span><span class="w"> </span><span class="nv">encoder</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">commandBuffer</span><span class="p">.</span><span class="n">makeRenderCommandEncoder</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">viewPass</span><span class="p">)</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">setRenderPipelineState</span><span class="p">(</span><span class="n">postPipelineState</span><span class="p">)</span>
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">setFragmentTexture</span><span class="p">(</span><span class="n">sceneColor</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">setFragmentSamplerState</span><span class="p">(</span><span class="n">samplerState</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">drawPrimitives</span><span class="p">(</span><span class="n">type</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">triangle</span><span class="p">,</span><span class="w"> </span><span class="n">vertexStart</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">vertexCount</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span>
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">endEncoding</span><span class="p">()</span>
+
+<span class="w">    </span><span class="n">commandBuffer</span><span class="p">.</span><span class="n">present</span><span class="p">(</span><span class="n">drawable</span><span class="p">)</span>
+<span class="w">    </span><span class="n">commandBuffer</span><span class="p">.</span><span class="n">commit</span><span class="p">()</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>The pipeline states used in pass 1 must declare the formats of <em>that</em> pass's attachments. The post-processing pass has no depth attachment needs, so its pipeline leaves <code>depthAttachmentPixelFormat</code> unset; if the view still has a depth format, set it to match or set <code>view.depthStencilPixelFormat = .invalid</code>.</p>
+<h2 id="the-full-screen-triangle">The full-screen triangle<a class="headerlink" href="#the-full-screen-triangle" title="Permanent link">#</a></h2>
+<p>To run a fragment function over every pixel we need geometry that covers the screen. A single oversized triangle does it, with no vertex buffer at all. The vertex function builds positions from the built-in vertex index:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">ScreenOut</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="p">[[</span><span class="na">position</span><span class="p">]];</span>
+<span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">uv</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="n">vertex</span><span class="w"> </span><span class="n">ScreenOut</span><span class="w"> </span><span class="n">vertex_fullscreen</span><span class="p">(</span><span class="n">uint</span><span class="w"> </span><span class="n">vertexID</span><span class="w"> </span><span class="p">[[</span><span class="na">vertex_id</span><span class="p">]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">uv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float2</span><span class="p">((</span><span class="n">vertexID</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">vertexID</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span><span class="w">   </span><span class="c1">// (0,0) (2,0) (0,2)</span>
+<span class="w">    </span><span class="n">ScreenOut</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">uv</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">float2</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">-2</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">float2</span><span class="p">(</span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">uv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uv</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_post</span><span class="p">(</span><span class="n">ScreenOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
+<span class="w">                              </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">scene</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
+<span class="w">                              </span><span class="n">sampler</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="p">[[</span><span class="na">sampler</span><span class="p">(</span><span class="mi">0</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">scene</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>The triangle extends past the screen and is clipped to it. The y flip makes uv (0, 0) land on the top-left corner, matching Metal's texture origin, so a texture rendered by one pass is displayed upright by the next without any further fuss. The post pipeline has no vertex descriptor.</p>
+<p>Run it and the scene looks exactly as before. That is the point: it now passes through a texture that we can manipulate.</p>
+<h2 id="post-processing">Post-processing<a class="headerlink" href="#post-processing" title="Permanent link">#</a></h2>
+<p><strong>Inversion and grayscale</strong> change one pixel at a time:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">scene</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">rgb</span><span class="p">;</span>
+<span class="n">float3</span><span class="w"> </span><span class="n">inverted</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">color</span><span class="p">;</span>
+<span class="kt">float</span><span class="w"> </span><span class="n">gray</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dot</span><span class="p">(</span><span class="n">color</span><span class="p">,</span><span class="w"> </span><span class="n">float3</span><span class="p">(</span><span class="mf">0.2126</span><span class="p">,</span><span class="w"> </span><span class="mf">0.7152</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0722</span><span class="p">));</span>
+</code></pre></div>
+
+<p>The weights reflect how sensitive the eye is to each channel.</p>
+<p><strong>Kernel effects</strong> combine each pixel with its neighbors using a small grid of weights, a <strong>convolution kernel</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="nf">applyKernel</span><span class="p">(</span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">tex</span><span class="p">,</span><span class="w"> </span><span class="n">sampler</span><span class="w"> </span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">float2</span><span class="w"> </span><span class="n">uv</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">kernel</span><span class="p">[</span><span class="mi">9</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">texel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">float2</span><span class="p">(</span><span class="n">tex</span><span class="p">.</span><span class="n">get_width</span><span class="p">(),</span><span class="w"> </span><span class="n">tex</span><span class="p">.</span><span class="n">get_height</span><span class="p">());</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float3</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">y</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">float3</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tex</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">uv</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">float2</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">texel</span><span class="p">).</span><span class="n">rgb</span><span class="p">;</span>
+<span class="w">            </span><span class="n">result</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">kernel</span><span class="p">[(</span><span class="n">y</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)];</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">result</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="k">const</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">sharpen</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w">   </span><span class="mi">-1</span><span class="p">,</span><span class="w">  </span><span class="mi">9</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w">   </span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="w"> </span><span class="p">};</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">blur</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">1</span><span class="o">/</span><span class="mf">16.0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="o">/</span><span class="mf">16.0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="o">/</span><span class="mf">16.0</span><span class="p">,</span><span class="w">   </span><span class="mi">2</span><span class="o">/</span><span class="mf">16.0</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="o">/</span><span class="mf">16.0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="o">/</span><span class="mf">16.0</span><span class="p">,</span><span class="w">   </span><span class="mi">1</span><span class="o">/</span><span class="mf">16.0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="o">/</span><span class="mf">16.0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="o">/</span><span class="mf">16.0</span><span class="w"> </span><span class="p">};</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">edges</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">   </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">-8</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">   </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">};</span>
+</code></pre></div>
+
+<p>Use a sampler with <code>.clampToEdge</code> so the kernel does not wrap around at the borders.</p>
+<figure><img src="../assets/img/advanced-metal/render-targets.webp" alt="The scene rendered to a texture, then processed by different fragment functions." width="880" height="499" loading="lazy"><figcaption>The scene rendered to a texture, then processed by different fragment functions.</figcaption></figure>
+
+<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<ul>
+<li>Render the scene at half resolution and stretch it to the screen. Compare <code>.nearest</code> and <code>.linear</code> filtering.</li>
+<li>Build a rear-view mirror: render the scene a second time with the camera turned 180 degrees into a small texture, and show it on a quad at the top of the screen.</li>
+</ul></article><div class="pager"><a class="prev" href="../advanced-metal/face-culling.html"><small>Previous</small>Face Culling</a><a class="next" href="../advanced-metal/cubemaps.html"><small>Next</small>Cubemaps</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

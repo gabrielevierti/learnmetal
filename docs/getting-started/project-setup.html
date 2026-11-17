@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project Setup · learnmetal</title>
+<meta name="description" content="Getting Started: Project Setup. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a class="active" href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">Getting Started</p><h1 id="project-setup">Project Setup<a class="headerlink" href="#project-setup" title="Permanent link">#</a></h1>
+<p>Setting up a Metal project takes minutes. There are no libraries to download, build or link: Metal and its helper framework MetalKit ship with the system.</p>
+<h2 id="what-you-need">What you need<a class="headerlink" href="#what-you-need" title="Permanent link">#</a></h2>
+<ul>
+<li>A Mac running a recent version of macOS.</li>
+<li>Xcode, free from the Mac App Store.</li>
+</ul>
+<p>The examples target macOS because it is the quickest loop: press Run and a window appears. Everything except the few lines that host the view works unchanged on iOS, and the differences are shown below.</p>
+<div class="admonition note">
+<p class="admonition-title">Simulator or device?</p>
+<p>Metal works in the iOS Simulator, but with reduced features and performance. When you target iPhone or iPad, test on a real device.</p>
+</div>
+<h2 id="create-the-project">Create the project<a class="headerlink" href="#create-the-project" title="Permanent link">#</a></h2>
+<ol>
+<li>In Xcode choose <strong>File → New → Project</strong>.</li>
+<li>Pick <strong>macOS → App</strong>.</li>
+<li>Name it <code>LearnMetal</code>, set <strong>Interface</strong> to <strong>SwiftUI</strong> and <strong>Language</strong> to <strong>Swift</strong>.</li>
+</ol>
+<p>Xcode also offers a <strong>Game</strong> template with Metal as the technology. It generates a working spinning cube, which is nice to look at but hides the parts we want to write ourselves, so we start from a plain app.</p>
+<h2 id="metalkit-and-mtkview">MetalKit and MTKView<a class="headerlink" href="#metalkit-and-mtkview" title="Permanent link">#</a></h2>
+<p>To draw with Metal you need a surface that the system can put on screen. The low-level way is a <code>CAMetalLayer</code> plus your own display link. <strong>MetalKit</strong> wraps both in a view called <code>MTKView</code> that:</p>
+<ul>
+<li>owns the layer and hands you a fresh <strong>drawable</strong> (a texture that will be shown on screen) each frame,</li>
+<li>creates depth and multisample textures for you on request,</li>
+<li>calls your code once per display refresh.</li>
+</ul>
+<p>You tell the view what to draw by giving it a <strong>delegate</strong>, an object that implements two methods of <code>MTKViewDelegate</code>. That delegate is our renderer, and it is where nearly all code in this series will live.</p>
+<h2 id="host-the-view-in-swiftui">Host the view in SwiftUI<a class="headerlink" href="#host-the-view-in-swiftui" title="Permanent link">#</a></h2>
+<p><code>MTKView</code> is an AppKit view (UIKit on iOS), so SwiftUI needs a small adapter. Add a new Swift file <code>MetalView.swift</code>:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">import</span><span class="w"> </span><span class="nc">SwiftUI</span>
+<span class="kd">import</span><span class="w"> </span><span class="nc">MetalKit</span>
+
+<span class="kd">struct</span><span class="w"> </span><span class="nc">MetalView</span><span class="p">:</span><span class="w"> </span><span class="n">NSViewRepresentable</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kr">final</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nc">Coordinator</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="nv">renderer</span><span class="p">:</span><span class="w"> </span><span class="n">Renderer</span><span class="p">?</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nf">makeCoordinator</span><span class="p">()</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="n">Coordinator</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">Coordinator</span><span class="p">()</span><span class="w"> </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nf">makeNSView</span><span class="p">(</span><span class="n">context</span><span class="p">:</span><span class="w"> </span><span class="n">Context</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="bp">MTKView</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">view</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTKView</span><span class="p">()</span>
+<span class="w">        </span><span class="n">context</span><span class="p">.</span><span class="n">coordinator</span><span class="p">.</span><span class="n">renderer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Renderer</span><span class="p">(</span><span class="n">view</span><span class="p">:</span><span class="w"> </span><span class="n">view</span><span class="p">)</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">view</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nf">updateNSView</span><span class="p">(</span><span class="kc">_</span><span class="w"> </span><span class="n">view</span><span class="p">:</span><span class="w"> </span><span class="bp">MTKView</span><span class="p">,</span><span class="w"> </span><span class="n">context</span><span class="p">:</span><span class="w"> </span><span class="n">Context</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>The coordinator exists for one reason: <code>MTKView</code> holds its delegate weakly, so something else must keep the renderer alive.</p>
+<p>On iOS the adapter is the same with different names: conform to <code>UIViewRepresentable</code> and implement <code>makeUIView</code> and <code>updateUIView</code>.</p>
+<p>Then show the view in <code>ContentView.swift</code>:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">import</span><span class="w"> </span><span class="nc">SwiftUI</span>
+
+<span class="kd">struct</span><span class="w"> </span><span class="nc">ContentView</span><span class="p">:</span><span class="w"> </span><span class="n">View</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">body</span><span class="p">:</span><span class="w"> </span><span class="n">some</span><span class="w"> </span><span class="n">View</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">MetalView</span><span class="p">()</span>
+<span class="w">            </span><span class="p">.</span><span class="n">frame</span><span class="p">(</span><span class="n">minWidth</span><span class="p">:</span><span class="w"> </span><span class="mi">800</span><span class="p">,</span><span class="w"> </span><span class="n">minHeight</span><span class="p">:</span><span class="w"> </span><span class="mi">600</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>The project will not compile yet because <code>Renderer</code> does not exist. That is the next chapter.</p>
+<figure><img src="../assets/img/getting-started/project-setup.webp" alt="The pieces of the project. The renderer is where almost all code in this series lives." width="880" height="290" loading="lazy"><figcaption>The pieces of the project. The renderer is where almost all code in this series lives.</figcaption></figure>
+
+<h2 id="where-shaders-go">Where shaders go<a class="headerlink" href="#where-shaders-go" title="Permanent link">#</a></h2>
+<p>Shaders live in files with the <code>.metal</code> extension. Create one with <strong>File → New → File → Metal File</strong> and call it <code>Shaders.metal</code>. Xcode gives it this content:</p>
+<div class="codehilite"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;metal_stdlib&gt;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">metal</span><span class="p">;</span>
+</code></pre></div>
+
+<p>Leave it for now. Any <code>.metal</code> file that belongs to the app target is compiled during the build and bundled into the app automatically.</p>
+<h2 id="turn-on-the-safety-nets">Turn on the safety nets<a class="headerlink" href="#turn-on-the-safety-nets" title="Permanent link">#</a></h2>
+<p>Open <strong>Product → Scheme → Edit Scheme → Run → Diagnostics</strong> (in some Xcode versions the Metal options are under <strong>Options</strong>) and make sure <strong>Metal API Validation</strong> is enabled. Validation checks every Metal call and stops with a readable message when you do something illegal, instead of showing a black screen. It is on by default for debug runs, and you should leave it on. <strong>Shader Validation</strong> in the same place catches out-of-bounds reads and similar mistakes inside shaders; turn it on whenever a shader misbehaves.</p>
+<p>The <a href="../in-practice/debugging.html">Debugging</a> chapter covers these tools in depth. You can read it at any time.</p></article><div class="pager"><a class="prev" href="../getting-started/introduction.html"><small>Previous</small>Introduction</a><a class="next" href="../getting-started/hello-view.html"><small>Next</small>Hello View</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

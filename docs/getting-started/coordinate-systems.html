@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Coordinate Systems · learnmetal</title>
+<meta name="description" content="Getting Started: Coordinate Systems. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a class="active" href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">Getting Started</p><h1 id="coordinate-systems">Coordinate Systems<a class="headerlink" href="#coordinate-systems" title="Permanent link">#</a></h1>
+<div class="example-box"><strong>Example code</strong> <code>examples/Sources/06-CoordinateSystems</code>, run with <code>swift run CoordinateSystems</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
+
+<p>A vertex travels through several coordinate systems on its way to the screen. Splitting the journey into steps makes each one simple, and three matrices carry the vertex from one step to the next. At the end of this chapter we have real 3D: a perspective view of textured cubes with correct depth.</p>
+<h2 id="the-spaces">The spaces<a class="headerlink" href="#the-spaces" title="Permanent link">#</a></h2>
+<ol>
+<li><strong>Local space</strong> (object space): coordinates relative to the object's own origin, as stored in the vertex buffer.</li>
+<li><strong>World space</strong>: where the object sits in the scene. The <strong>model matrix</strong> takes local to world.</li>
+<li><strong>View space</strong> (camera space): the world as seen from the camera, with the camera at the origin. The <strong>view matrix</strong> takes world to view.</li>
+<li><strong>Clip space</strong>: the output of the vertex function. The <strong>projection matrix</strong> takes view to clip.</li>
+<li><strong>Normalized device coordinates</strong>: the GPU divides clip-space x, y, z by w (the <strong>perspective divide</strong>).</li>
+<li><strong>Viewport coordinates</strong>: NDC mapped to pixels.</li>
+</ol>
+<p>You write steps 2 to 4 as one line in the shader:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">out</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">projection</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">view</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">model</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+</code></pre></div>
+
+<h2 id="metals-conventions">Metal's conventions<a class="headerlink" href="#metals-conventions" title="Permanent link">#</a></h2>
+<figure>
+<svg viewBox="0 0 640 210" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="13" role="img" aria-label="Normalized device coordinates have y up and range -1 to 1; texture and viewport coordinates have their origin at the top left with y down">
+  <g fill="none" stroke="currentColor" stroke-width="1.5">
+    <rect x="40" y="30" width="200" height="150"/>
+    <rect x="390" y="30" width="200" height="150"/>
+    <path d="M140 105h70M140 105v-55" stroke="#e8590c" stroke-width="2.5"/>
+    <path d="M390 30h70M390 30v55" stroke="#e8590c" stroke-width="2.5"/>
+  </g>
+  <g fill="currentColor">
+    <text x="140" y="20" text-anchor="middle">Normalized device coordinates</text>
+    <text x="490" y="20" text-anchor="middle">Texture and viewport coordinates</text>
+    <text x="215" y="100">+x</text><text x="146" y="48">+y</text>
+    <text x="30" y="195">(-1, -1)</text><text x="210" y="195">(1, -1)</text><text x="215" y="45">(1, 1)</text>
+    <text x="465" y="48">+x</text><text x="396" y="100">+y</text>
+    <text x="372" y="26">(0, 0)</text><text x="560" y="197">(1, 1)</text>
+    <text x="140" y="130" text-anchor="middle">z: 0 near, 1 far</text>
+  </g>
+</svg>
+<figcaption>NDC has y up. Textures and pixels have y down.</figcaption>
+</figure>
+
+<ul>
+<li>NDC x and y run from -1 to 1 with <strong>y up</strong>. NDC <strong>z runs from 0 to 1</strong>.</li>
+<li>Pixel coordinates and texture coordinates start at the <strong>top left</strong> with y down.</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Coming from OpenGL</p>
+<p>OpenGL's NDC z runs from -1 to 1. A projection matrix copied from an OpenGL tutorial puts half of your depth range in front of the near plane, so geometry near the camera disappears. Always use a projection matrix built for a 0 to 1 depth range, like the one below.</p>
+</div>
+<p>Metal does not care whether your world is left-handed or right-handed; that is decided entirely by your matrices. This series uses a <strong>right-handed</strong> world, the same as most tutorials and modeling tools: +x right, +y up, and the camera looks down <strong>-z</strong>.</p>
+<h2 id="perspective-projection">Perspective projection<a class="headerlink" href="#perspective-projection" title="Permanent link">#</a></h2>
+<p>A perspective projection makes distant things smaller. It is defined by a vertical field of view, the aspect ratio of the view, and a near and far plane; together they bound a truncated pyramid called the <strong>frustum</strong>. Add to <code>Math.swift</code>:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">extension</span><span class="w"> </span><span class="nc">float4x4</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">/// Right-handed perspective projection with a 0...1 depth range.</span>
+<span class="w">    </span><span class="kd">init</span><span class="p">(</span><span class="n">perspectiveFov</span><span class="w"> </span><span class="n">fovY</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">,</span><span class="w"> </span><span class="n">aspect</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">,</span><span class="w"> </span><span class="n">near</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">,</span><span class="w"> </span><span class="n">far</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">y</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">tan</span><span class="p">(</span><span class="n">fovY</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.5</span><span class="p">)</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">x</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">aspect</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">z</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">far</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">near</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">far</span><span class="p">)</span>
+<span class="w">        </span><span class="kc">self</span><span class="p">.</span><span class="kd">init</span><span class="p">(</span><span class="n">columns</span><span class="p">:</span><span class="w"> </span><span class="p">(</span>
+<span class="w">            </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">),</span>
+<span class="w">            </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">),</span>
+<span class="w">            </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+<span class="w">            </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">near</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)))</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>The <code>-1</code> copies the negated view-space z into w. After the perspective divide, everything is divided by its distance from the camera, which is exactly what perspective is. Keep the near plane as far out as you can (0.1 is typical). Depth precision is concentrated close to the near plane, and a tiny value such as 0.0001 wastes almost all of it.</p>
+<p>An <strong>orthographic</strong> projection, which has no perspective, appears in the <a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a> chapter.</p>
+<h2 id="model-view-projection">Model, view, projection<a class="headerlink" href="#model-view-projection" title="Permanent link">#</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">Uniforms</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">model</span><span class="p">:</span><span class="w"> </span><span class="n">float4x4</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">view</span><span class="p">:</span><span class="w"> </span><span class="n">float4x4</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">projection</span><span class="p">:</span><span class="w"> </span><span class="n">float4x4</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="nv">aspect</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">1</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nf">mtkView</span><span class="p">(</span><span class="kc">_</span><span class="w"> </span><span class="n">view</span><span class="p">:</span><span class="w"> </span><span class="bp">MTKView</span><span class="p">,</span><span class="w"> </span><span class="n">drawableSizeWillChange</span><span class="w"> </span><span class="n">size</span><span class="p">:</span><span class="w"> </span><span class="n">CGSize</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">aspect</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">Float</span><span class="p">(</span><span class="n">size</span><span class="p">.</span><span class="n">width</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">size</span><span class="p">.</span><span class="n">height</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">model</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">float4x4</span><span class="p">(</span><span class="n">rotation</span><span class="p">:</span><span class="w"> </span><span class="n">time</span><span class="p">,</span><span class="w"> </span><span class="n">axis</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">])</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">viewMatrix</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">float4x4</span><span class="p">(</span><span class="n">translation</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">3</span><span class="p">])</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">projection</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">float4x4</span><span class="p">(</span><span class="n">perspectiveFov</span><span class="p">:</span><span class="w"> </span><span class="mf">45.</span><span class="n">radians</span><span class="p">,</span><span class="w"> </span><span class="n">aspect</span><span class="p">:</span><span class="w"> </span><span class="n">aspect</span><span class="p">,</span><span class="w"> </span><span class="n">near</span><span class="p">:</span><span class="w"> </span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="n">far</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">)</span>
+<span class="kd">var</span><span class="w"> </span><span class="nv">uniforms</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Uniforms</span><span class="p">(</span><span class="n">model</span><span class="p">:</span><span class="w"> </span><span class="n">model</span><span class="p">,</span><span class="w"> </span><span class="n">view</span><span class="p">:</span><span class="w"> </span><span class="n">viewMatrix</span><span class="p">,</span><span class="w"> </span><span class="n">projection</span><span class="p">:</span><span class="w"> </span><span class="n">projection</span><span class="p">)</span>
+</code></pre></div>
+
+<p>The view matrix moves the whole world 3 units away along -z. Moving the world backward and moving the camera forward are the same thing.</p>
+<h2 id="a-cube">A cube<a class="headerlink" href="#a-cube" title="Permanent link">#</a></h2>
+<p>A flat rectangle makes a poor 3D demo. From now on we use a proper vertex struct and generate a cube in code. Each vertex has a position, a <strong>normal</strong> (the direction the surface faces, needed for lighting soon), and a texture coordinate:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">Vertex</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">position</span><span class="p">:</span><span class="w"> </span><span class="n">Float3</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">normal</span><span class="p">:</span><span class="w"> </span><span class="n">Float3</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">uv</span><span class="p">:</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nf">makeCube</span><span class="p">()</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="p">[</span><span class="n">Vertex</span><span class="p">]</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// normal, right and up direction of each face</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">faces</span><span class="p">:</span><span class="w"> </span><span class="p">[(</span><span class="n">Float3</span><span class="p">,</span><span class="w"> </span><span class="n">Float3</span><span class="p">,</span><span class="w"> </span><span class="n">Float3</span><span class="p">)]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">([</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">]),</span><span class="w">   </span><span class="c1">// front</span>
+<span class="w">        </span><span class="p">([</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">]),</span><span class="w">   </span><span class="c1">// back</span>
+<span class="w">        </span><span class="p">([</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">]),</span><span class="w">   </span><span class="c1">// right</span>
+<span class="w">        </span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">]),</span><span class="w">   </span><span class="c1">// left</span>
+<span class="w">        </span><span class="p">([</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span><span class="w">   </span><span class="c1">// top</span>
+<span class="w">        </span><span class="p">([</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">]),</span><span class="w">   </span><span class="c1">// bottom</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">corners</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">]]</span>
+
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">vertices</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="n">Vertex</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[]</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">normal</span><span class="p">,</span><span class="w"> </span><span class="kr">right</span><span class="p">,</span><span class="w"> </span><span class="n">up</span><span class="p">)</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">faces</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">corners</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="nv">position</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">(</span><span class="n">normal</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="kr">right</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">c</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">c</span><span class="p">.</span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.5</span>
+<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="nv">uv</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;(</span><span class="n">c</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.5</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">c</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.5</span><span class="p">)</span>
+<span class="w">            </span><span class="n">vertices</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">Vertex</span><span class="p">(</span><span class="n">position</span><span class="p">:</span><span class="w"> </span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="n">normal</span><span class="p">:</span><span class="w"> </span><span class="n">normal</span><span class="p">,</span><span class="w"> </span><span class="n">uv</span><span class="p">:</span><span class="w"> </span><span class="n">uv</span><span class="p">))</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">vertices</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>That is 36 vertices for a cube one unit wide, wound counter-clockwise when seen from outside. Build the vertex descriptor from the struct itself so offsets can never be wrong:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">format</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">float3</span>
+<span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">offset</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="n">Vertex</span><span class="p">&gt;.</span><span class="n">offset</span><span class="p">(</span><span class="n">of</span><span class="p">:</span><span class="w"> </span><span class="err">\</span><span class="p">.</span><span class="n">position</span><span class="p">)</span><span class="o">!</span>
+<span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">format</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">float3</span>
+<span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">offset</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="n">Vertex</span><span class="p">&gt;.</span><span class="n">offset</span><span class="p">(</span><span class="n">of</span><span class="p">:</span><span class="w"> </span><span class="err">\</span><span class="p">.</span><span class="n">normal</span><span class="p">)</span><span class="o">!</span>
+<span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">2</span><span class="p">].</span><span class="n">format</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">float2</span>
+<span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">2</span><span class="p">].</span><span class="n">offset</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="n">Vertex</span><span class="p">&gt;.</span><span class="n">offset</span><span class="p">(</span><span class="n">of</span><span class="p">:</span><span class="w"> </span><span class="err">\</span><span class="p">.</span><span class="n">uv</span><span class="p">)</span><span class="o">!</span>
+<span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">layouts</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="bp">stride</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="n">Vertex</span><span class="p">&gt;.</span><span class="bp">stride</span>
+</code></pre></div>
+
+<p>All three attributes use <code>bufferIndex</code> 0, the default. Because <code>SIMD3&lt;Float&gt;</code> occupies 16 bytes, the offsets are 0, 16 and 32 and the stride is 48. In the shader:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">VertexIn</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="p">[[</span><span class="na">attribute</span><span class="p">(</span><span class="mi">0</span><span class="p">)]];</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">normal</span><span class="w">   </span><span class="p">[[</span><span class="na">attribute</span><span class="p">(</span><span class="mi">1</span><span class="p">)]];</span>
+<span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">uv</span><span class="w">       </span><span class="p">[[</span><span class="na">attribute</span><span class="p">(</span><span class="mi">2</span><span class="p">)]];</span>
+<span class="p">};</span>
+</code></pre></div>
+
+<p>Draw with <code>vertexCount: 36</code>.</p>
+<h2 id="the-depth-buffer">The depth buffer<a class="headerlink" href="#the-depth-buffer" title="Permanent link">#</a></h2>
+<p>Run it and the cube looks inside out: faces drawn later cover faces drawn earlier, whichever is closer. The fix is a <strong>depth buffer</strong>, a texture that stores the depth of the closest fragment drawn so far at each pixel. A new fragment is kept only if it is closer.</p>
+<p>Three steps enable it.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1">// 1. Ask the view for a depth texture.</span>
+<span class="n">view</span><span class="p">.</span><span class="n">depthStencilPixelFormat</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">depth32Float</span>
+<span class="n">view</span><span class="p">.</span><span class="n">clearDepth</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mf">1.0</span>
+
+<span class="c1">// 2. Tell the pipeline about it.</span>
+<span class="n">pipelineDescriptor</span><span class="p">.</span><span class="n">depthAttachmentPixelFormat</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">depth32Float</span>
+
+<span class="c1">// 3. Create a depth-stencil state...</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">depthDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLDepthStencilDescriptor</span><span class="p">()</span>
+<span class="n">depthDescriptor</span><span class="p">.</span><span class="n">depthCompareFunction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">less</span>
+<span class="n">depthDescriptor</span><span class="p">.</span><span class="n">isDepthWriteEnabled</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">depthState</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeDepthStencilState</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">depthDescriptor</span><span class="p">)</span><span class="o">!</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="c1">// ...and set it when drawing.</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setDepthStencilState</span><span class="p">(</span><span class="n">depthState</span><span class="p">)</span>
+</code></pre></div>
+
+<p>The depth texture is cleared to 1 (the far plane) at the start of each pass, and <code>.less</code> keeps fragments with a smaller depth than what is stored.</p>
+<figure><img src="../assets/img/getting-started/coordinate-systems.webp" alt="Without a depth test, faces drawn later cover faces that are closer to the camera." width="880" height="246" loading="lazy"><figcaption>Without a depth test, faces drawn later cover faces that are closer to the camera.</figcaption></figure>
+
+<h2 id="more-cubes">More cubes<a class="headerlink" href="#more-cubes" title="Permanent link">#</a></h2>
+<p>Drawing the same cube in ten places needs only ten model matrices:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">cubePositions</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="n">Float3</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">[</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w">  </span><span class="mf">0.0</span><span class="p">,</span><span class="w">   </span><span class="mf">0.0</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="mf">2.0</span><span class="p">,</span><span class="w">  </span><span class="mf">5.0</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">15.0</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="o">-</span><span class="mf">1.5</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">2.2</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">2.5</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="o">-</span><span class="mf">3.8</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">12.3</span><span class="p">],</span>
+<span class="w">    </span><span class="p">[</span><span class="w"> </span><span class="mf">2.4</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">0.4</span><span class="p">,</span><span class="w">  </span><span class="o">-</span><span class="mf">3.5</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="o">-</span><span class="mf">1.7</span><span class="p">,</span><span class="w">  </span><span class="mf">3.0</span><span class="p">,</span><span class="w">  </span><span class="o">-</span><span class="mf">7.5</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="mf">1.3</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">2.5</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="mf">1.5</span><span class="p">,</span><span class="w">  </span><span class="mf">2.0</span><span class="p">,</span><span class="w">  </span><span class="o">-</span><span class="mf">2.5</span><span class="p">],</span>
+<span class="w">    </span><span class="p">[</span><span class="w"> </span><span class="mf">1.5</span><span class="p">,</span><span class="w">  </span><span class="mf">0.2</span><span class="p">,</span><span class="w">  </span><span class="o">-</span><span class="mf">1.5</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="o">-</span><span class="mf">1.3</span><span class="p">,</span><span class="w">  </span><span class="mf">1.0</span><span class="p">,</span><span class="w">  </span><span class="o">-</span><span class="mf">1.5</span><span class="p">],</span>
+<span class="p">]</span>
+
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">position</span><span class="p">)</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">cubePositions</span><span class="p">.</span><span class="n">enumerated</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">uniforms</span><span class="p">.</span><span class="n">model</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">float4x4</span><span class="p">(</span><span class="n">translation</span><span class="p">:</span><span class="w"> </span><span class="n">position</span><span class="p">)</span>
+<span class="w">                   </span><span class="o">*</span><span class="w"> </span><span class="n">float4x4</span><span class="p">(</span><span class="n">rotation</span><span class="p">:</span><span class="w"> </span><span class="p">(</span><span class="mi">20</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nb">Float</span><span class="p">(</span><span class="n">i</span><span class="p">)).</span><span class="n">radians</span><span class="p">,</span><span class="w"> </span><span class="n">axis</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mf">0.3</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">])</span>
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">setVertexBytes</span><span class="p">(&amp;</span><span class="n">uniforms</span><span class="p">,</span><span class="w"> </span><span class="n">length</span><span class="p">:</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="n">Uniforms</span><span class="p">&gt;.</span><span class="bp">stride</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">drawPrimitives</span><span class="p">(</span><span class="n">type</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">triangle</span><span class="p">,</span><span class="w"> </span><span class="n">vertexStart</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">vertexCount</span><span class="p">:</span><span class="w"> </span><span class="mi">36</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<figure><img src="../assets/img/getting-started/ten-cubes.webp" alt="Ten cubes from one vertex buffer and ten model matrices." width="880" height="495" loading="lazy"><figcaption>Ten cubes from one vertex buffer and ten model matrices.</figcaption></figure>
+
+<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<ul>
+<li>Change the field of view and the aspect ratio by hand and describe what each does.</li>
+<li>Make every third cube rotate over time.</li>
+<li>Set <code>depthCompareFunction</code> to <code>.always</code> and to <code>.greater</code> and explain what you see.</li>
+</ul></article><div class="pager"><a class="prev" href="../getting-started/transformations.html"><small>Previous</small>Transformations</a><a class="next" href="../getting-started/camera.html"><small>Next</small>Camera</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

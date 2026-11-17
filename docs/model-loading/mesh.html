@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mesh · learnmetal</title>
+<meta name="description" content="Model Loading: Mesh. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a class="active" href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">Model Loading</p><h1 id="mesh">Mesh<a class="headerlink" href="#mesh" title="Permanent link">#</a></h1>
+<div class="example-box"><strong>Example code</strong> <code>examples/Sources/11-ModelLoading</code>, run with <code>swift run ModelLoading</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
+
+<p>MetalKit handed us <code>MTKMesh</code> objects. This chapter looks inside one, draws it, and wraps it together with its materials in a small type of our own.</p>
+<h2 id="inside-an-mtkmesh">Inside an MTKMesh<a class="headerlink" href="#inside-an-mtkmesh" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>vertexBuffers</code></td>
+<td>An array of <code>MTKMeshBuffer</code>, each with a <code>buffer</code> (<code>MTLBuffer</code>) and an <code>offset</code> into it.</td>
+</tr>
+<tr>
+<td><code>vertexDescriptor</code></td>
+<td>The Model I/O vertex descriptor of the data.</td>
+</tr>
+<tr>
+<td><code>submeshes</code></td>
+<td>An array of <code>MTKSubmesh</code>.</td>
+</tr>
+<tr>
+<td><code>vertexCount</code></td>
+<td>Number of vertices.</td>
+</tr>
+</tbody>
+</table>
+<p>and each <code>MTKSubmesh</code> has:</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>indexBuffer</code></td>
+<td>An <code>MTKMeshBuffer</code> with the indices.</td>
+</tr>
+<tr>
+<td><code>indexCount</code>, <code>indexType</code></td>
+<td>How many indices and whether they are 16 or 32 bit.</td>
+</tr>
+<tr>
+<td><code>primitiveType</code></td>
+<td>Usually <code>.triangle</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>The offsets are important. The allocator may place several meshes in one large <code>MTLBuffer</code>, so always pass the offset when binding.</p>
+<figure><img src="../assets/img/model-loading/mesh.webp" alt="The packed vertex layout requested from Model I/O, and the index buffer of a submesh." width="880" height="250" loading="lazy"><figcaption>The packed vertex layout requested from Model I/O, and the index buffer of a submesh.</figcaption></figure>
+
+<h2 id="drawing-a-mesh">Drawing a mesh<a class="headerlink" href="#drawing-a-mesh" title="Permanent link">#</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">draw</span><span class="p">(</span><span class="kc">_</span><span class="w"> </span><span class="n">mesh</span><span class="p">:</span><span class="w"> </span><span class="bp">MTKMesh</span><span class="p">,</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">encoder</span><span class="p">:</span><span class="w"> </span><span class="bp">MTLRenderCommandEncoder</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">index</span><span class="p">,</span><span class="w"> </span><span class="n">vertexBuffer</span><span class="p">)</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">vertexBuffers</span><span class="p">.</span><span class="n">enumerated</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">encoder</span><span class="p">.</span><span class="n">setVertexBuffer</span><span class="p">(</span><span class="n">vertexBuffer</span><span class="p">.</span><span class="n">buffer</span><span class="p">,</span><span class="w"> </span><span class="n">offset</span><span class="p">:</span><span class="w"> </span><span class="n">vertexBuffer</span><span class="p">.</span><span class="n">offset</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="n">index</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">submesh</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">submeshes</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">encoder</span><span class="p">.</span><span class="n">drawIndexedPrimitives</span><span class="p">(</span><span class="n">type</span><span class="p">:</span><span class="w"> </span><span class="n">submesh</span><span class="p">.</span><span class="n">primitiveType</span><span class="p">,</span>
+<span class="w">                                      </span><span class="n">indexCount</span><span class="p">:</span><span class="w"> </span><span class="n">submesh</span><span class="p">.</span><span class="n">indexCount</span><span class="p">,</span>
+<span class="w">                                      </span><span class="n">indexType</span><span class="p">:</span><span class="w"> </span><span class="n">submesh</span><span class="p">.</span><span class="n">indexType</span><span class="p">,</span>
+<span class="w">                                      </span><span class="n">indexBuffer</span><span class="p">:</span><span class="w"> </span><span class="n">submesh</span><span class="p">.</span><span class="n">indexBuffer</span><span class="p">.</span><span class="n">buffer</span><span class="p">,</span>
+<span class="w">                                      </span><span class="n">indexBufferOffset</span><span class="p">:</span><span class="w"> </span><span class="n">submesh</span><span class="p">.</span><span class="n">indexBuffer</span><span class="p">.</span><span class="n">offset</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>With the layout from the previous chapter there is one vertex buffer, bound at slot 0, which leaves slot 1 for uniforms as before.</p>
+<p>The pipeline state needs the matching Metal vertex descriptor. Either reuse the one you built by hand or derive it from the mesh:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">pipelineDescriptor</span><span class="p">.</span><span class="n">vertexDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MTKMetalVertexDescriptorFromModelIO</span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">vertexDescriptor</span><span class="p">)</span>
+</code></pre></div>
+
+<h2 id="materials">Materials<a class="headerlink" href="#materials" title="Permanent link">#</a></h2>
+<p>Each <code>MDLSubmesh</code> has an optional <code>MDLMaterial</code>. A material is a bag of properties looked up by <strong>semantic</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">property</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">mdlSubmesh</span><span class="p">.</span><span class="n">material</span><span class="p">?.</span><span class="n">property</span><span class="p">(</span><span class="n">with</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">baseColor</span><span class="p">)</span>
+</code></pre></div>
+
+<p>A property can be a plain value or a texture, so we handle both. A small material type for the Phong shader from the lighting section:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">MeshMaterial</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">baseColor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Float3</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">baseColorTexture</span><span class="p">:</span><span class="w"> </span><span class="bp">MTLTexture</span><span class="p">?</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">specularTexture</span><span class="p">:</span><span class="w"> </span><span class="bp">MTLTexture</span><span class="p">?</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">shininess</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">32</span>
+<span class="p">}</span>
+
+<span class="kd">extension</span><span class="w"> </span><span class="nc">MeshMaterial</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">init</span><span class="p">(</span><span class="kc">_</span><span class="w"> </span><span class="n">material</span><span class="p">:</span><span class="w"> </span><span class="bp">MDLMaterial</span><span class="p">?,</span><span class="w"> </span><span class="n">loader</span><span class="p">:</span><span class="w"> </span><span class="bp">MTKTextureLoader</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">guard</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">material</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="p">}</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">property</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">material</span><span class="p">.</span><span class="n">property</span><span class="p">(</span><span class="n">with</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">baseColor</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="n">property</span><span class="p">.</span><span class="n">type</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="p">.</span><span class="n">float3</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">baseColor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">property</span><span class="p">.</span><span class="n">float3Value</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="n">baseColorTexture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kc">Self</span><span class="p">.</span><span class="n">texture</span><span class="p">(</span><span class="k">for</span><span class="p">:</span><span class="w"> </span><span class="n">property</span><span class="p">,</span><span class="w"> </span><span class="n">loader</span><span class="p">:</span><span class="w"> </span><span class="n">loader</span><span class="p">,</span><span class="w"> </span><span class="n">sRGB</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">)</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">property</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">material</span><span class="p">.</span><span class="n">property</span><span class="p">(</span><span class="n">with</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">specular</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">specularTexture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kc">Self</span><span class="p">.</span><span class="n">texture</span><span class="p">(</span><span class="k">for</span><span class="p">:</span><span class="w"> </span><span class="n">property</span><span class="p">,</span><span class="w"> </span><span class="n">loader</span><span class="p">:</span><span class="w"> </span><span class="n">loader</span><span class="p">,</span><span class="w"> </span><span class="n">sRGB</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">func</span><span class="w"> </span><span class="nf">texture</span><span class="p">(</span><span class="k">for</span><span class="w"> </span><span class="n">property</span><span class="p">:</span><span class="w"> </span><span class="bp">MDLMaterialProperty</span><span class="p">,</span>
+<span class="w">                                </span><span class="n">loader</span><span class="p">:</span><span class="w"> </span><span class="bp">MTKTextureLoader</span><span class="p">,</span>
+<span class="w">                                </span><span class="n">sRGB</span><span class="p">:</span><span class="w"> </span><span class="nb">Bool</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="bp">MTLTexture</span><span class="p">?</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">options</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="bp">MTKTextureLoader</span><span class="p">.</span><span class="n">Option</span><span class="p">:</span><span class="w"> </span><span class="nb">Any</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="p">.</span><span class="n">generateMipmaps</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">            </span><span class="p">.</span><span class="n">SRGB</span><span class="p">:</span><span class="w"> </span><span class="n">sRGB</span><span class="p">,</span>
+<span class="w">        </span><span class="p">]</span>
+<span class="w">        </span><span class="k">switch</span><span class="w"> </span><span class="n">property</span><span class="p">.</span><span class="n">type</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="p">.</span><span class="n">texture</span><span class="p">:</span>
+<span class="w">            </span><span class="k">guard</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">mdlTexture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">property</span><span class="p">.</span><span class="n">textureSamplerValue</span><span class="p">?.</span><span class="n">texture</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">}</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="k">try</span><span class="p">?</span><span class="w"> </span><span class="n">loader</span><span class="p">.</span><span class="n">newTexture</span><span class="p">(</span><span class="n">texture</span><span class="p">:</span><span class="w"> </span><span class="n">mdlTexture</span><span class="p">,</span><span class="w"> </span><span class="n">options</span><span class="p">:</span><span class="w"> </span><span class="n">options</span><span class="p">)</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="p">.</span><span class="n">URL</span><span class="p">:</span>
+<span class="w">            </span><span class="k">guard</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">url</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">property</span><span class="p">.</span><span class="n">urlValue</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">}</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="k">try</span><span class="p">?</span><span class="w"> </span><span class="n">loader</span><span class="p">.</span><span class="n">newTexture</span><span class="p">(</span><span class="n">URL</span><span class="p">:</span><span class="w"> </span><span class="n">url</span><span class="p">,</span><span class="w"> </span><span class="n">options</span><span class="p">:</span><span class="w"> </span><span class="n">options</span><span class="p">)</span>
+<span class="w">        </span><span class="k">default</span><span class="p">:</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>The texture case covers images embedded in USDZ archives (after <code>asset.loadTextures()</code>), and the URL case covers OBJ files that reference images on disk next to the <code>.mtl</code> file.</p>
+<div class="admonition note">
+<p class="admonition-title">The sRGB flag</p>
+<p>Color textures are stored in sRGB, data textures such as specular or normal maps are not. Until the <a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a> chapter, pass <code>false</code> for everything so the output matches earlier chapters.</p>
+</div>
+<h2 id="a-mesh-type">A Mesh type<a class="headerlink" href="#a-mesh-type" title="Permanent link">#</a></h2>
+<p>Bundle the Metal mesh with one material per submesh:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">Mesh</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">mtkMesh</span><span class="p">:</span><span class="w"> </span><span class="bp">MTKMesh</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">materials</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="n">MeshMaterial</span><span class="p">]</span>
+
+<span class="w">    </span><span class="kd">init</span><span class="p">(</span><span class="n">mdlMesh</span><span class="p">:</span><span class="w"> </span><span class="bp">MDLMesh</span><span class="p">,</span><span class="w"> </span><span class="n">mtkMesh</span><span class="p">:</span><span class="w"> </span><span class="bp">MTKMesh</span><span class="p">,</span><span class="w"> </span><span class="n">loader</span><span class="p">:</span><span class="w"> </span><span class="bp">MTKTextureLoader</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kc">self</span><span class="p">.</span><span class="n">mtkMesh</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">mtkMesh</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">submeshes</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">mdlMesh</span><span class="p">.</span><span class="n">submeshes</span><span class="w"> </span><span class="k">as</span><span class="p">?</span><span class="w"> </span><span class="p">[</span><span class="bp">MDLSubmesh</span><span class="p">]</span><span class="w"> </span><span class="p">??</span><span class="w"> </span><span class="p">[]</span>
+<span class="w">        </span><span class="kc">self</span><span class="p">.</span><span class="n">materials</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">submeshes</span><span class="p">.</span><span class="bp">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">MeshMaterial</span><span class="p">(</span><span class="nv">$0</span><span class="p">.</span><span class="n">material</span><span class="p">,</span><span class="w"> </span><span class="n">loader</span><span class="p">:</span><span class="w"> </span><span class="n">loader</span><span class="p">)</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nf">draw</span><span class="p">(</span><span class="n">with</span><span class="w"> </span><span class="n">encoder</span><span class="p">:</span><span class="w"> </span><span class="bp">MTLRenderCommandEncoder</span><span class="p">,</span><span class="w"> </span><span class="n">fallback</span><span class="p">:</span><span class="w"> </span><span class="bp">MTLTexture</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">index</span><span class="p">,</span><span class="w"> </span><span class="n">vertexBuffer</span><span class="p">)</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">mtkMesh</span><span class="p">.</span><span class="n">vertexBuffers</span><span class="p">.</span><span class="n">enumerated</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">encoder</span><span class="p">.</span><span class="n">setVertexBuffer</span><span class="p">(</span><span class="n">vertexBuffer</span><span class="p">.</span><span class="n">buffer</span><span class="p">,</span><span class="w"> </span><span class="n">offset</span><span class="p">:</span><span class="w"> </span><span class="n">vertexBuffer</span><span class="p">.</span><span class="n">offset</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="n">index</span><span class="p">)</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">submesh</span><span class="p">,</span><span class="w"> </span><span class="n">material</span><span class="p">)</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">zip</span><span class="p">(</span><span class="n">mtkMesh</span><span class="p">.</span><span class="n">submeshes</span><span class="p">,</span><span class="w"> </span><span class="n">materials</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">encoder</span><span class="p">.</span><span class="n">setFragmentTexture</span><span class="p">(</span><span class="n">material</span><span class="p">.</span><span class="n">baseColorTexture</span><span class="w"> </span><span class="p">??</span><span class="w"> </span><span class="n">fallback</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">            </span><span class="n">encoder</span><span class="p">.</span><span class="n">setFragmentTexture</span><span class="p">(</span><span class="n">material</span><span class="p">.</span><span class="n">specularTexture</span><span class="w"> </span><span class="p">??</span><span class="w"> </span><span class="n">fallback</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+<span class="w">            </span><span class="n">encoder</span><span class="p">.</span><span class="n">drawIndexedPrimitives</span><span class="p">(</span><span class="n">type</span><span class="p">:</span><span class="w"> </span><span class="n">submesh</span><span class="p">.</span><span class="n">primitiveType</span><span class="p">,</span>
+<span class="w">                                          </span><span class="n">indexCount</span><span class="p">:</span><span class="w"> </span><span class="n">submesh</span><span class="p">.</span><span class="n">indexCount</span><span class="p">,</span>
+<span class="w">                                          </span><span class="n">indexType</span><span class="p">:</span><span class="w"> </span><span class="n">submesh</span><span class="p">.</span><span class="n">indexType</span><span class="p">,</span>
+<span class="w">                                          </span><span class="n">indexBuffer</span><span class="p">:</span><span class="w"> </span><span class="n">submesh</span><span class="p">.</span><span class="n">indexBuffer</span><span class="p">.</span><span class="n">buffer</span><span class="p">,</span>
+<span class="w">                                          </span><span class="n">indexBufferOffset</span><span class="p">:</span><span class="w"> </span><span class="n">submesh</span><span class="p">.</span><span class="n">indexBuffer</span><span class="p">.</span><span class="n">offset</span><span class="p">)</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h2 id="a-fallback-texture">A fallback texture<a class="headerlink" href="#a-fallback-texture" title="Permanent link">#</a></h2>
+<p>A shader that samples a texture must have one bound. For materials without a texture, bind a 1×1 white texture, which multiplies to nothing:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">makeSolidTexture</span><span class="p">(</span><span class="n">device</span><span class="p">:</span><span class="w"> </span><span class="bp">MTLDevice</span><span class="p">,</span><span class="w"> </span><span class="n">color</span><span class="p">:</span><span class="w"> </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">UInt8</span><span class="p">&gt;)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="bp">MTLTexture</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">descriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLTextureDescriptor</span><span class="p">.</span><span class="n">texture2DDescriptor</span><span class="p">(</span><span class="n">pixelFormat</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">rgba8Unorm</span><span class="p">,</span>
+<span class="w">                                                              </span><span class="n">width</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">                                                              </span><span class="n">mipmapped</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">texture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeTexture</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">descriptor</span><span class="p">)</span><span class="o">!</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">pixel</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">color</span>
+<span class="w">    </span><span class="n">texture</span><span class="p">.</span><span class="n">replace</span><span class="p">(</span><span class="n">region</span><span class="p">:</span><span class="w"> </span><span class="n">MTLRegionMake2D</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span>
+<span class="w">                    </span><span class="n">mipmapLevel</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">                    </span><span class="n">withBytes</span><span class="p">:</span><span class="w"> </span><span class="p">&amp;</span><span class="n">pixel</span><span class="p">,</span>
+<span class="w">                    </span><span class="n">bytesPerRow</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">)</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">texture</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>This is also your first hand-made texture: a descriptor, <code>makeTexture</code>, and <code>replace</code> to upload bytes.</p></article><div class="pager"><a class="prev" href="../model-loading/model-io.html"><small>Previous</small>Model I/O</a><a class="next" href="../model-loading/model.html"><small>Next</small>Model</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

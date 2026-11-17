@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A 2D Game · learnmetal</title>
+<meta name="description" content="In Practice: A 2D Game. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a class="active" href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">In Practice</p><h1 id="a-2d-game">A 2D Game<a class="headerlink" href="#a-2d-game" title="Permanent link">#</a></h1>
+<p>Everything so far has been technique. This chapter puts a handful of those techniques to work in something playable: a small brick-breaking game. A paddle, a ball, a wall of bricks. It is deliberately tiny, so that the whole structure fits in one chapter and you can see how a renderer and game logic meet.</p>
+<h2 id="what-we-need">What we need<a class="headerlink" href="#what-we-need" title="Permanent link">#</a></h2>
+<ul>
+<li>A <strong>sprite renderer</strong> that draws many colored, textured rectangles in one draw call.</li>
+<li>An <strong>orthographic camera</strong> in pixel-like units.</li>
+<li>A <strong>game loop</strong> with delta time and input.</li>
+<li><strong>Collision detection</strong> between a circle and rectangles.</li>
+</ul>
+<h2 id="the-sprite-renderer">The sprite renderer<a class="headerlink" href="#the-sprite-renderer" title="Permanent link">#</a></h2>
+<p>A sprite is a quad with a position, size, color and texture region. We use <a href="../advanced-metal/instancing.html">instancing</a>: one unit quad generated in the vertex function, and one instance per sprite.</p>
+<div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">SpriteInstance</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">position</span><span class="p">;</span><span class="w">     </span><span class="c1">// top-left corner, in game units</span>
+<span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">size</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">color</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">uvRect</span><span class="p">;</span><span class="w">       </span><span class="c1">// xy = origin, zw = size, within the texture</span>
+<span class="p">};</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">SpriteOut</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="p">[[</span><span class="na">position</span><span class="p">]];</span>
+<span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">uv</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">color</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="n">vertex</span><span class="w"> </span><span class="n">SpriteOut</span><span class="w"> </span><span class="n">vertex_sprite</span><span class="p">(</span><span class="n">uint</span><span class="w"> </span><span class="n">vertexID</span><span class="w"> </span><span class="p">[[</span><span class="na">vertex_id</span><span class="p">]],</span>
+<span class="w">                               </span><span class="n">uint</span><span class="w"> </span><span class="n">instanceID</span><span class="w"> </span><span class="p">[[</span><span class="na">instance_id</span><span class="p">]],</span>
+<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">device</span><span class="w"> </span><span class="n">SpriteInstance</span><span class="w"> </span><span class="o">*</span><span class="n">sprites</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
+<span class="w">                               </span><span class="n">constant</span><span class="w"> </span><span class="n">float4x4</span><span class="w"> </span><span class="o">&amp;</span><span class="n">projection</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">1</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">float2</span><span class="w"> </span><span class="n">corners</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">}</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="n">SpriteInstance</span><span class="w"> </span><span class="n">sprite</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sprites</span><span class="p">[</span><span class="n">instanceID</span><span class="p">];</span>
+<span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">corner</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">corners</span><span class="p">[</span><span class="n">vertexID</span><span class="p">];</span>
+
+<span class="w">    </span><span class="n">SpriteOut</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">projection</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">sprite</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">corner</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">sprite</span><span class="p">.</span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">uv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sprite</span><span class="p">.</span><span class="n">uvRect</span><span class="p">.</span><span class="n">xy</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">corner</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">sprite</span><span class="p">.</span><span class="n">uvRect</span><span class="p">.</span><span class="n">zw</span><span class="p">;</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sprite</span><span class="p">.</span><span class="n">color</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_sprite</span><span class="p">(</span><span class="n">SpriteOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
+<span class="w">                                </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">atlas</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
+<span class="w">                                </span><span class="n">sampler</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="p">[[</span><span class="na">sampler</span><span class="p">(</span><span class="mi">0</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">atlas</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">color</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>On the Swift side the renderer collects sprites during the frame and draws them all at once:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">SpriteInstance</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">position</span><span class="p">:</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">size</span><span class="p">:</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">color</span><span class="p">:</span><span class="w"> </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">uvRect</span><span class="p">:</span><span class="w"> </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="kr">final</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nc">SpriteBatch</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">var</span><span class="w"> </span><span class="nv">sprites</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="n">SpriteInstance</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[]</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">buffer</span><span class="p">:</span><span class="w"> </span><span class="bp">MTLBuffer</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">capacity</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">4096</span>
+
+<span class="w">    </span><span class="kd">init</span><span class="p">(</span><span class="n">device</span><span class="p">:</span><span class="w"> </span><span class="bp">MTLDevice</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">buffer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeBuffer</span><span class="p">(</span><span class="n">length</span><span class="p">:</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="n">SpriteInstance</span><span class="p">&gt;.</span><span class="bp">stride</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">capacity</span><span class="p">,</span>
+<span class="w">                                   </span><span class="n">options</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">storageModeShared</span><span class="p">)</span><span class="o">!</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="kc">_</span><span class="w"> </span><span class="n">sprite</span><span class="p">:</span><span class="w"> </span><span class="n">SpriteInstance</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">sprites</span><span class="p">.</span><span class="bp">count</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">capacity</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">sprites</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">sprite</span><span class="p">)</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nf">flush</span><span class="p">(</span><span class="n">encoder</span><span class="p">:</span><span class="w"> </span><span class="bp">MTLRenderCommandEncoder</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">guard</span><span class="w"> </span><span class="o">!</span><span class="n">sprites</span><span class="p">.</span><span class="bp">isEmpty</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="p">}</span>
+<span class="w">        </span><span class="n">buffer</span><span class="p">.</span><span class="n">contents</span><span class="p">().</span><span class="n">copyMemory</span><span class="p">(</span><span class="n">from</span><span class="p">:</span><span class="w"> </span><span class="n">sprites</span><span class="p">,</span>
+<span class="w">                                     </span><span class="n">byteCount</span><span class="p">:</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="n">SpriteInstance</span><span class="p">&gt;.</span><span class="bp">stride</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">sprites</span><span class="p">.</span><span class="bp">count</span><span class="p">)</span>
+<span class="w">        </span><span class="n">encoder</span><span class="p">.</span><span class="n">setVertexBuffer</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span><span class="w"> </span><span class="n">offset</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">        </span><span class="n">encoder</span><span class="p">.</span><span class="n">drawPrimitives</span><span class="p">(</span><span class="n">type</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">triangleStrip</span><span class="p">,</span><span class="w"> </span><span class="n">vertexStart</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">vertexCount</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
+<span class="w">                               </span><span class="n">instanceCount</span><span class="p">:</span><span class="w"> </span><span class="n">sprites</span><span class="p">.</span><span class="bp">count</span><span class="p">)</span>
+<span class="w">        </span><span class="n">sprites</span><span class="p">.</span><span class="bp">removeAll</span><span class="p">(</span><span class="n">keepingCapacity</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Use a pipeline with alpha blending. Put all the game's images in one texture, an <strong>atlas</strong>, and select regions with <code>uvRect</code>, so that the whole game is a single draw call. For solid-colored rectangles, bind a 1 × 1 white texture.</p>
+<h2 id="the-playing-field">The playing field<a class="headerlink" href="#the-playing-field" title="Permanent link">#</a></h2>
+<p>Give the game a fixed logical size, independent of the window, with the origin at the top left and y pointing down, which is convenient for 2D:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">fieldSize</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;(</span><span class="mi">800</span><span class="p">,</span><span class="w"> </span><span class="mi">600</span><span class="p">)</span>
+<span class="kd">var</span><span class="w"> </span><span class="nv">projection</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">float4x4</span><span class="p">(</span><span class="n">orthographicLeft</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="kr">right</span><span class="p">:</span><span class="w"> </span><span class="n">fieldSize</span><span class="p">.</span><span class="n">x</span><span class="p">,</span>
+<span class="w">                          </span><span class="n">bottom</span><span class="p">:</span><span class="w"> </span><span class="n">fieldSize</span><span class="p">.</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">top</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">                          </span><span class="n">near</span><span class="p">:</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">far</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div>
+
+<p>Swapping <code>bottom</code> and <code>top</code> flips the y axis.</p>
+<h2 id="game-objects">Game objects<a class="headerlink" href="#game-objects" title="Permanent link">#</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">Brick</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">position</span><span class="p">:</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">size</span><span class="p">:</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">color</span><span class="p">:</span><span class="w"> </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">isAlive</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="p">}</span>
+
+<span class="kd">struct</span><span class="w"> </span><span class="nc">Ball</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">position</span><span class="p">:</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;</span><span class="w">       </span><span class="c1">// center</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">velocity</span><span class="p">:</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">radius</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">10</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">isStuck</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kc">true</span><span class="w">                </span><span class="c1">// resting on the paddle until launched</span>
+<span class="p">}</span>
+
+<span class="kr">final</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nc">Game</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">paddlePosition</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;(</span><span class="mi">350</span><span class="p">,</span><span class="w"> </span><span class="mi">570</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">paddleSize</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;(</span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">paddleSpeed</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">500</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">ball</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Ball</span><span class="p">(</span><span class="n">position</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">400</span><span class="p">,</span><span class="w"> </span><span class="mi">560</span><span class="p">],</span><span class="w"> </span><span class="n">velocity</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">120</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">350</span><span class="p">])</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">bricks</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="n">Brick</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[]</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">lives</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">3</span>
+
+<span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nf">loadLevel</span><span class="p">(</span><span class="n">rows</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">,</span><span class="w"> </span><span class="n">columns</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">size</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;(</span><span class="mi">800</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">Float</span><span class="p">(</span><span class="n">columns</span><span class="p">),</span><span class="w"> </span><span class="mi">24</span><span class="p">)</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">palette</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[[</span><span class="mf">0.9</span><span class="p">,</span><span class="w"> </span><span class="mf">0.3</span><span class="p">,</span><span class="w"> </span><span class="mf">0.3</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mf">0.9</span><span class="p">,</span><span class="w"> </span><span class="mf">0.6</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">],</span>
+<span class="w">                                       </span><span class="p">[</span><span class="mf">0.3</span><span class="p">,</span><span class="w"> </span><span class="mf">0.8</span><span class="p">,</span><span class="w"> </span><span class="mf">0.4</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mf">0.3</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.9</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">]]</span>
+<span class="w">        </span><span class="n">bricks</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">(</span><span class="mf">0.</span><span class="p">.&lt;</span><span class="n">rows</span><span class="p">).</span><span class="n">flatMap</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">row</span><span class="w"> </span><span class="k">in</span>
+<span class="w">            </span><span class="p">(</span><span class="mf">0.</span><span class="p">.&lt;</span><span class="n">columns</span><span class="p">).</span><span class="bp">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">column</span><span class="w"> </span><span class="k">in</span>
+<span class="w">                </span><span class="n">Brick</span><span class="p">(</span><span class="n">position</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="nb">Float</span><span class="p">(</span><span class="n">column</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">size</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mi">60</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nb">Float</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">size</span><span class="p">.</span><span class="n">y</span><span class="p">],</span>
+<span class="w">                      </span><span class="n">size</span><span class="p">:</span><span class="w"> </span><span class="n">size</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">                      </span><span class="n">color</span><span class="p">:</span><span class="w"> </span><span class="n">palette</span><span class="p">[</span><span class="n">row</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">palette</span><span class="p">.</span><span class="bp">count</span><span class="p">])</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>A level is just data. Loading levels from a text file where each digit is a brick type is an easy extension.</p>
+<h2 id="update">Update<a class="headerlink" href="#update" title="Permanent link">#</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="kd">extension</span><span class="w"> </span><span class="nc">Game</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="n">deltaTime</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">,</span><span class="w"> </span><span class="n">input</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">,</span><span class="w"> </span><span class="n">launch</span><span class="p">:</span><span class="w"> </span><span class="nb">Bool</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Paddle: input is -1, 0 or 1.</span>
+<span class="w">        </span><span class="n">paddlePosition</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">input</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">paddleSpeed</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">deltaTime</span>
+<span class="w">        </span><span class="n">paddlePosition</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">min</span><span class="p">(</span><span class="bp">max</span><span class="p">(</span><span class="n">paddlePosition</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="mi">800</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">paddleSize</span><span class="p">.</span><span class="n">x</span><span class="p">)</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">isStuck</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">ball</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="n">paddlePosition</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">paddleSize</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">paddlePosition</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">radius</span><span class="p">]</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="n">launch</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">isStuck</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">}</span>
+<span class="w">            </span><span class="k">return</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="n">ball</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">velocity</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">deltaTime</span>
+
+<span class="w">        </span><span class="c1">// Walls</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">radius</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">800</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">radius</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">ball</span><span class="p">.</span><span class="n">velocity</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="o">-</span><span class="n">ball</span><span class="p">.</span><span class="n">velocity</span><span class="p">.</span><span class="n">x</span>
+<span class="w">            </span><span class="n">ball</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">min</span><span class="p">(</span><span class="bp">max</span><span class="p">(</span><span class="n">ball</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">radius</span><span class="p">),</span><span class="w"> </span><span class="mi">800</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">radius</span><span class="p">)</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">radius</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">ball</span><span class="p">.</span><span class="n">velocity</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">abs</span><span class="p">(</span><span class="n">ball</span><span class="p">.</span><span class="n">velocity</span><span class="p">.</span><span class="n">y</span><span class="p">)</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="c1">// Bricks</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">bricks</span><span class="p">.</span><span class="bp">indices</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">bricks</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">isAlive</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">normal</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">collide</span><span class="p">(</span><span class="n">ball</span><span class="p">,</span><span class="w"> </span><span class="n">rectPosition</span><span class="p">:</span><span class="w"> </span><span class="n">bricks</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="n">rectSize</span><span class="p">:</span><span class="w"> </span><span class="n">bricks</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">size</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">bricks</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">isAlive</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">                </span><span class="n">ball</span><span class="p">.</span><span class="n">velocity</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">reflect</span><span class="p">(</span><span class="n">ball</span><span class="p">.</span><span class="n">velocity</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">:</span><span class="w"> </span><span class="n">normal</span><span class="p">)</span>
+<span class="w">                </span><span class="k">break</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="c1">// Paddle: the bounce angle depends on where the ball hits.</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">velocity</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">           </span><span class="n">collide</span><span class="p">(</span><span class="n">ball</span><span class="p">,</span><span class="w"> </span><span class="n">rectPosition</span><span class="p">:</span><span class="w"> </span><span class="n">paddlePosition</span><span class="p">,</span><span class="w"> </span><span class="n">rectSize</span><span class="p">:</span><span class="w"> </span><span class="n">paddleSize</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="nv">center</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">paddlePosition</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">paddleSize</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span>
+<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="nv">offset</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">(</span><span class="n">ball</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">center</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">paddleSize</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w">      </span><span class="c1">// -1...1</span>
+<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="nv">speed</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">length</span><span class="p">(</span><span class="n">ball</span><span class="p">.</span><span class="n">velocity</span><span class="p">)</span>
+<span class="w">            </span><span class="n">ball</span><span class="p">.</span><span class="n">velocity</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;(</span><span class="n">offset</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">1.2</span><span class="p">))</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">speed</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="c1">// Lost the ball</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">600</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">radius</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">lives</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">            </span><span class="n">ball</span><span class="p">.</span><span class="n">isStuck</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">            </span><span class="n">ball</span><span class="p">.</span><span class="n">velocity</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="mi">120</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">350</span><span class="p">]</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Steering the ball by where it meets the paddle is what makes the game controllable. A purely physical reflection would feel lifeless.</p>
+<h2 id="circle-against-rectangle">Circle against rectangle<a class="headerlink" href="#circle-against-rectangle" title="Permanent link">#</a></h2>
+<p>Find the point of the rectangle closest to the circle's center by clamping. If that point is within one radius, they overlap. The direction from the closest point to the center tells us which side was hit:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">collide</span><span class="p">(</span><span class="kc">_</span><span class="w"> </span><span class="n">ball</span><span class="p">:</span><span class="w"> </span><span class="n">Ball</span><span class="p">,</span><span class="w"> </span><span class="n">rectPosition</span><span class="p">:</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;,</span><span class="w"> </span><span class="n">rectSize</span><span class="p">:</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;?</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">closest</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">simd_clamp</span><span class="p">(</span><span class="n">ball</span><span class="p">.</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="n">rectPosition</span><span class="p">,</span><span class="w"> </span><span class="n">rectPosition</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">rectSize</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">difference</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">closest</span>
+<span class="w">    </span><span class="k">guard</span><span class="w"> </span><span class="n">length_squared</span><span class="p">(</span><span class="n">difference</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">radius</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">radius</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Pick the dominant axis as the collision normal.</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="bp">abs</span><span class="p">(</span><span class="n">difference</span><span class="p">.</span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="bp">abs</span><span class="p">(</span><span class="n">difference</span><span class="p">.</span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="p">[</span><span class="n">difference</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">?</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">difference</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">?</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>At high speeds a ball can pass through a thin brick between two frames. Running the update in several small sub-steps per frame is the simplest protection.</p>
+<h2 id="render">Render<a class="headerlink" href="#render" title="Permanent link">#</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="n">game</span><span class="p">:</span><span class="w"> </span><span class="n">Game</span><span class="p">,</span><span class="w"> </span><span class="n">batch</span><span class="p">:</span><span class="w"> </span><span class="n">SpriteBatch</span><span class="p">,</span><span class="w"> </span><span class="n">encoder</span><span class="p">:</span><span class="w"> </span><span class="bp">MTLRenderCommandEncoder</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">brick</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">game</span><span class="p">.</span><span class="n">bricks</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">brick</span><span class="p">.</span><span class="n">isAlive</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">batch</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">SpriteInstance</span><span class="p">(</span><span class="n">position</span><span class="p">:</span><span class="w"> </span><span class="n">brick</span><span class="p">.</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">:</span><span class="w"> </span><span class="n">brick</span><span class="p">.</span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="n">color</span><span class="p">:</span><span class="w"> </span><span class="n">brick</span><span class="p">.</span><span class="n">color</span><span class="p">))</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">batch</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">SpriteInstance</span><span class="p">(</span><span class="n">position</span><span class="p">:</span><span class="w"> </span><span class="n">game</span><span class="p">.</span><span class="n">paddlePosition</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">:</span><span class="w"> </span><span class="n">game</span><span class="p">.</span><span class="n">paddleSize</span><span class="p">,</span>
+<span class="w">                             </span><span class="n">color</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">0.9</span><span class="p">,</span><span class="w"> </span><span class="mf">0.9</span><span class="p">,</span><span class="w"> </span><span class="mf">0.9</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">]))</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">r</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">game</span><span class="p">.</span><span class="n">ball</span><span class="p">.</span><span class="n">radius</span>
+<span class="w">    </span><span class="n">batch</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">SpriteInstance</span><span class="p">(</span><span class="n">position</span><span class="p">:</span><span class="w"> </span><span class="n">game</span><span class="p">.</span><span class="n">ball</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">r</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">r</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">r</span><span class="p">],</span>
+<span class="w">                             </span><span class="n">color</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">uvRect</span><span class="p">:</span><span class="w"> </span><span class="n">ballUVRect</span><span class="p">))</span>
+
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">setRenderPipelineState</span><span class="p">(</span><span class="n">spritePipelineState</span><span class="p">)</span>
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">setVertexBytes</span><span class="p">(&amp;</span><span class="n">projection</span><span class="p">,</span><span class="w"> </span><span class="n">length</span><span class="p">:</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="n">float4x4</span><span class="p">&gt;.</span><span class="bp">stride</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">setFragmentTexture</span><span class="p">(</span><span class="n">atlasTexture</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">setFragmentSamplerState</span><span class="p">(</span><span class="n">samplerState</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="n">batch</span><span class="p">.</span><span class="n">flush</span><span class="p">(</span><span class="n">encoder</span><span class="p">:</span><span class="w"> </span><span class="n">encoder</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>The renderer knows nothing about the rules, and the game knows nothing about Metal. Keeping that separation is the most valuable habit in this chapter.</p>
+<figure><img src="../assets/img/in-practice/2d-game.webp" alt="The whole game is one instanced draw call of colored rectangles." width="880" height="660" loading="lazy"><figcaption>The whole game is one instanced draw call of colored rectangles.</figcaption></figure>
+
+<h2 id="making-it-feel-good">Making it feel good<a class="headerlink" href="#making-it-feel-good" title="Permanent link">#</a></h2>
+<p>The game works. What makes it fun is polish, and each item below reuses a technique from this series:</p>
+<ul>
+<li><strong>Particles</strong>: an additive-blended trail behind the ball, drawn with the same sprite batch.</li>
+<li><strong>Screen shake and flashes</strong>: render the game to a texture and distort it in a <a href="../advanced-metal/render-targets.html">post-processing pass</a> for a few frames after a hit.</li>
+<li><strong>Glow</strong>: <a href="../advanced-lighting/bloom.html">bloom</a> on bright bricks.</li>
+<li><strong>Score and lives</strong>: the atlas text from <a href="text-rendering.html">Text Rendering</a>.</li>
+<li><strong>Power-ups</strong>: sprites that fall from destroyed bricks and change the paddle size or ball speed when caught.</li>
+<li><strong>Sound</strong>: <code>AVAudioEngine</code> or <code>AVAudioPlayer</code> for hit effects.</li>
+</ul>
+<h2 id="where-to-go-from-here">Where to go from here<a class="headerlink" href="#where-to-go-from-here" title="Permanent link">#</a></h2>
+<p>Add a state machine for menu, playing, won and lost. Add levels. Then try a different game with the same sprite batch: the renderer you wrote here is enough for a great many 2D games.</p></article><div class="pager"><a class="prev" href="../in-practice/text-rendering.html"><small>Previous</small>Text Rendering</a><a class="next" href="../beyond/compute-shaders.html"><small>Next</small>Compute Shaders</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deferred Shading · learnmetal</title>
+<meta name="description" content="Advanced Lighting: Deferred Shading. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a class="active" href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">Advanced Lighting</p><h1 id="deferred-shading">Deferred Shading<a class="headerlink" href="#deferred-shading" title="Permanent link">#</a></h1>
+<p>Until now we have used <strong>forward rendering</strong>: every object is drawn and lit in one go, and every fragment loops over every light. Two things make that wasteful. Fragments that are later covered by something closer were lit for nothing, and the cost grows as objects × lights.</p>
+<p><strong>Deferred shading</strong> splits rendering into two phases:</p>
+<ol>
+<li><strong>Geometry pass</strong>: draw the scene once and store the <em>inputs</em> of lighting, such as position, normal and albedo, in a set of textures called the <strong>G-buffer</strong>.</li>
+<li><strong>Lighting pass</strong>: for each pixel on screen, read the G-buffer and compute lighting once.</li>
+</ol>
+<p>Lighting cost becomes pixels × lights and no longer depends on scene complexity. Hundreds of lights become practical.</p>
+<h2 id="the-g-buffer">The G-buffer<a class="headerlink" href="#the-g-buffer" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Attachment</th>
+<th>Format</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td><code>.rgba8Unorm_srgb</code></td>
+<td>Albedo in rgb, specular strength in a</td>
+</tr>
+<tr>
+<td>1</td>
+<td><code>.rgba16Float</code></td>
+<td>World-space normal</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>.rgba16Float</code></td>
+<td>World-space position</td>
+</tr>
+<tr>
+<td>depth</td>
+<td><code>.depth32Float</code></td>
+<td>Depth</td>
+</tr>
+</tbody>
+</table>
+<p>Create each as a texture with <code>[.renderTarget, .shaderRead]</code> usage and attach all three to one render pass. The geometry pass fragment function fills them:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">GBufferOut</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">albedoSpecular</span><span class="w"> </span><span class="p">[[</span><span class="na">color</span><span class="p">(</span><span class="mi">0</span><span class="p">)]];</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">normal</span><span class="w">         </span><span class="p">[[</span><span class="na">color</span><span class="p">(</span><span class="mi">1</span><span class="p">)]];</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">position</span><span class="w">       </span><span class="p">[[</span><span class="na">color</span><span class="p">(</span><span class="mi">2</span><span class="p">)]];</span>
+<span class="p">};</span>
+
+<span class="n">fragment</span><span class="w"> </span><span class="n">GBufferOut</span><span class="w"> </span><span class="n">fragment_gbuffer</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
+<span class="w">                                     </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">diffuseMap</span><span class="w">  </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
+<span class="w">                                     </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">specularMap</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
+<span class="w">                                     </span><span class="n">sampler</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="p">[[</span><span class="na">sampler</span><span class="p">(</span><span class="mi">0</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">GBufferOut</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">albedoSpecular</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">diffuseMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">rgb</span><span class="p">,</span>
+<span class="w">                                </span><span class="n">specularMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">r</span><span class="p">);</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">normal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">normalize</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">normal</span><span class="p">),</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">worldPosition</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>No lighting happens here. The pass is cheap, and the depth test guarantees that only the nearest surface ends up in each pixel.</p>
+<p>Storing position costs a lot of memory. Production renderers reconstruct it from the depth buffer and the inverse view-projection matrix, and pack normals into two channels. Start with the simple layout and optimize later.</p>
+<h2 id="the-lighting-pass">The lighting pass<a class="headerlink" href="#the-lighting-pass" title="Permanent link">#</a></h2>
+<p>A full-screen triangle reads the G-buffer and lights every pixel:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_lighting</span><span class="p">(</span><span class="n">ScreenOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
+<span class="w">                                  </span><span class="n">constant</span><span class="w"> </span><span class="n">LightingUniforms</span><span class="w"> </span><span class="o">&amp;</span><span class="n">uniforms</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
+<span class="w">                                  </span><span class="n">constant</span><span class="w"> </span><span class="n">PointLight</span><span class="w"> </span><span class="o">*</span><span class="n">lights</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">2</span><span class="p">)]],</span>
+<span class="w">                                  </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">albedoTexture</span><span class="w">   </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
+<span class="w">                                  </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">normalTexture</span><span class="w">   </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
+<span class="w">                                  </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">positionTexture</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">2</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">uint2</span><span class="w"> </span><span class="n">pixel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uint2</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">xy</span><span class="p">);</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">albedoSpecular</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">albedoTexture</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="n">pixel</span><span class="p">);</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">normal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalTexture</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="n">pixel</span><span class="p">).</span><span class="n">xyz</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">positionTexture</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="n">pixel</span><span class="p">).</span><span class="n">xyz</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">viewDir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">uniforms</span><span class="p">.</span><span class="n">viewPosition</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">position</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">albedoSpecular</span><span class="p">.</span><span class="n">rgb</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.05</span><span class="p">;</span><span class="w">   </span><span class="c1">// ambient</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">uint</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">lightCount</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">float3</span><span class="w"> </span><span class="n">toLight</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lights</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">position</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">position</span><span class="p">;</span>
+<span class="w">        </span><span class="kt">float</span><span class="w"> </span><span class="n">distance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">length</span><span class="p">(</span><span class="n">toLight</span><span class="p">);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">distance</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">lights</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">radius</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">continue</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+
+<span class="w">        </span><span class="n">float3</span><span class="w"> </span><span class="n">lightDir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">toLight</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">distance</span><span class="p">;</span>
+<span class="w">        </span><span class="n">float3</span><span class="w"> </span><span class="n">halfway</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">lightDir</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">viewDir</span><span class="p">);</span>
+<span class="w">        </span><span class="kt">float</span><span class="w"> </span><span class="n">attenuation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="mf">1.0</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">distance</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">distance</span><span class="p">);</span>
+
+<span class="w">        </span><span class="kt">float</span><span class="w"> </span><span class="n">diff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">max</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">normal</span><span class="p">,</span><span class="w"> </span><span class="n">lightDir</span><span class="p">),</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span>
+<span class="w">        </span><span class="kt">float</span><span class="w"> </span><span class="n">spec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pow</span><span class="p">(</span><span class="n">max</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">normal</span><span class="p">,</span><span class="w"> </span><span class="n">halfway</span><span class="p">),</span><span class="w"> </span><span class="mf">0.0</span><span class="p">),</span><span class="w"> </span><span class="mf">32.0</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">albedoSpecular</span><span class="p">.</span><span class="n">a</span><span class="p">;</span>
+<span class="w">        </span><span class="n">color</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="p">(</span><span class="n">diff</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">albedoSpecular</span><span class="p">.</span><span class="n">rgb</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">spec</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">lights</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">color</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">attenuation</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">color</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>read</code> fetches the exact texel for this pixel with no sampler. The <code>radius</code> check skips lights too far away to matter.</p>
+<figure><img src="../assets/img/advanced-lighting/deferred-shading.webp" alt="The G-buffer and the result of the lighting pass." width="880" height="499" loading="lazy"><figcaption>The G-buffer and the result of the lighting pass.</figcaption></figure>
+
+<h2 id="light-volumes">Light volumes<a class="headerlink" href="#light-volumes" title="Permanent link">#</a></h2>
+<p>Looping over all lights for every pixel still wastes work, since most lights reach only a small part of the screen. The refinement is to draw a <strong>sphere</strong> for each light, sized to its radius, using instancing. Each sphere's fragment function lights only the pixels it covers and adds its result with additive blending (<code>.one</code>, <code>.one</code>). Cull front faces and disable depth writes, so the light still works when the camera is inside the sphere. With volumes, a thousand small lights cost little more than their combined screen area.</p>
+<p>Compute the radius from the attenuation: the distance at which the light's contribution falls below a small threshold such as 5/256.</p>
+<h2 id="mixing-in-forward-rendering">Mixing in forward rendering<a class="headerlink" href="#mixing-in-forward-rendering" title="Permanent link">#</a></h2>
+<p>Deferred shading cannot handle transparency, since each pixel stores one surface. The usual structure is:</p>
+<ol>
+<li>Geometry pass, then the lighting pass.</li>
+<li>A forward pass on top for transparent objects, lamps and the skybox.</li>
+</ol>
+<p>The forward pass must use the <strong>same depth buffer</strong> as the geometry pass, so that forward-rendered objects are hidden correctly behind deferred ones. Attach the G-buffer's depth texture to the forward pass with <code>loadAction = .load</code>.</p>
+<h2 id="single-pass-deferred-on-apple-gpus">Single-pass deferred on Apple GPUs<a class="headerlink" href="#single-pass-deferred-on-apple-gpus" title="Permanent link">#</a></h2>
+<p>The classic approach stores the whole G-buffer in memory and reads it back in a second pass. On a tile-based GPU that is expensive: every tile has to be written out and loaded again. Apple GPUs offer something better.</p>
+<p>A fragment function on Apple silicon can <strong>read the current contents of the color attachments</strong> it is drawing to. This is called <strong>programmable blending</strong> or framebuffer fetch. The entire deferred pipeline then fits in <strong>one render pass</strong>:</p>
+<ul>
+<li>Attachment 0 is the final lit color (the drawable or an HDR texture).</li>
+<li>Attachments 1 to 3 are the G-buffer, created with <code>storageMode = .memoryless</code>, <code>loadAction = .clear</code> and <code>storeAction = .dontCare</code>.</li>
+<li>First draw the geometry, writing attachments 1 to 3.</li>
+<li>Then, <strong>in the same encoder</strong>, draw the light volumes with a fragment function that takes the G-buffer as input:</li>
+</ul>
+<div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">LightingIn</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">albedoSpecular</span><span class="w"> </span><span class="p">[[</span><span class="na">color</span><span class="p">(</span><span class="mi">1</span><span class="p">)]];</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">normal</span><span class="w">         </span><span class="p">[[</span><span class="na">color</span><span class="p">(</span><span class="mi">2</span><span class="p">)]];</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">position</span><span class="w">       </span><span class="p">[[</span><span class="na">color</span><span class="p">(</span><span class="mi">3</span><span class="p">)]];</span>
+<span class="p">};</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">LightingOut</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">color</span><span class="w"> </span><span class="p">[[</span><span class="na">color</span><span class="p">(</span><span class="mi">0</span><span class="p">)]];</span>
+<span class="p">};</span>
+
+<span class="n">fragment</span><span class="w"> </span><span class="n">LightingOut</span><span class="w"> </span><span class="n">fragment_light</span><span class="p">(</span><span class="n">LightVolumeOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
+<span class="w">                                    </span><span class="n">LightingIn</span><span class="w"> </span><span class="n">gbuffer</span><span class="p">,</span>
+<span class="w">                                    </span><span class="n">constant</span><span class="w"> </span><span class="n">LightingUniforms</span><span class="w"> </span><span class="o">&amp;</span><span class="n">uniforms</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">1</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">normal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gbuffer</span><span class="p">.</span><span class="n">normal</span><span class="p">.</span><span class="n">xyz</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gbuffer</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">xyz</span><span class="p">;</span>
+<span class="w">    </span><span class="c1">// ...the same lighting as before</span>
+<span class="w">    </span><span class="n">LightingOut</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">color</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>The G-buffer never leaves the GPU's tile memory. It consumes no system memory and no bandwidth, which makes deferred shading practical even on phones. On Intel Macs the feature is unavailable, so portable renderers keep the two-pass path as a fallback; check <code>device.supportsFamily(.apple1)</code>. Apple's "Rendering a Scene with Deferred Lighting" sample code shows both paths side by side.</p>
+<p>Apple GPUs also support <strong>tile shaders</strong>, compute-like functions that run once per tile in the middle of a render pass. They are used to build per-tile light lists for <strong>tiled forward</strong> rendering, an alternative that keeps the benefits of forward shading, including MSAA and transparency, with many lights.</p>
+<h2 id="trade-offs">Trade-offs<a class="headerlink" href="#trade-offs" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Forward</th>
+<th>Deferred</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Many lights</td>
+<td>Costly</td>
+<td>Cheap</td>
+</tr>
+<tr>
+<td>Transparency</td>
+<td>Works</td>
+<td>Needs a forward pass</td>
+</tr>
+<tr>
+<td>MSAA</td>
+<td>Works</td>
+<td>Difficult</td>
+</tr>
+<tr>
+<td>Material variety</td>
+<td>Any shader per object</td>
+<td>Limited by the G-buffer layout</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>Low</td>
+<td>High, unless memoryless</td>
+</tr>
+</tbody>
+</table>
+<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<ul>
+<li>Display each G-buffer texture on screen to verify its contents.</li>
+<li>Scatter 200 small colored lights and compare the frame time with the forward renderer.</li>
+<li>Reconstruct position from depth and remove the position attachment.</li>
+</ul></article><div class="pager"><a class="prev" href="../advanced-lighting/bloom.html"><small>Previous</small>Bloom</a><a class="next" href="../advanced-lighting/ssao.html"><small>Next</small>SSAO</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

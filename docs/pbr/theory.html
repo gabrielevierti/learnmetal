@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Theory · learnmetal</title>
+<meta name="description" content="PBR: Theory. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a class="active" href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">PBR</p><h1 id="theory">Theory<a class="headerlink" href="#theory" title="Permanent link">#</a></h1>
+<p><strong>Physically based rendering</strong> (PBR) is a family of techniques that model light in a way that is closer to physics than Phong or Blinn-Phong. The pay-off is practical:</p>
+<ul>
+<li>Materials look right under <strong>any</strong> lighting, without per-scene tweaking.</li>
+<li>Artists author materials with a few intuitive parameters that mean the same thing in every engine.</li>
+</ul>
+<p>A lighting model is usually called physically based when it meets three conditions: it is built on a <strong>microfacet</strong> model of surfaces, it <strong>conserves energy</strong>, and it uses a physically based <strong>BRDF</strong>. This chapter explains each, and the next one turns them into shader code.</p>
+<h2 id="microfacets">Microfacets<a class="headerlink" href="#microfacets" title="Permanent link">#</a></h2>
+<p>At a microscopic scale no surface is smooth. It is made of tiny perfect mirrors called <strong>microfacets</strong>, each pointing in its own direction. On a rough surface their orientations vary wildly, and incoming light scatters widely, producing broad, dim highlights. On a smooth surface they are nearly aligned, and reflections are sharp and bright.</p>
+<p>We cannot model individual microfacets, so we describe them statistically with one number, the <strong>roughness</strong>, from 0 (mirror) to 1 (completely rough). What matters to a highlight is the fraction of microfacets whose normal matches the <strong>halfway vector</strong> between the light and the viewer, the same vector we met in <a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a>.</p>
+<h2 id="energy-conservation">Energy conservation<a class="headerlink" href="#energy-conservation" title="Permanent link">#</a></h2>
+<p>Outgoing light can never exceed incoming light, apart from surfaces that emit light themselves. When light hits a surface it splits into two parts:</p>
+<ul>
+<li>The <strong>reflected</strong> part bounces off the surface directly. This is <strong>specular</strong> light.</li>
+<li>The <strong>refracted</strong> part enters the material, scatters inside, and is partly absorbed. What comes back out, colored by the material, is <strong>diffuse</strong> light.</li>
+</ul>
+<p>The two are mutually exclusive: light that was reflected cannot also be refracted. So if a fraction <code>kS</code> is reflected, at most <code>1 - kS</code> is left for diffuse.</p>
+<p><strong>Metals</strong> behave differently from non-metals (<strong>dielectrics</strong>). A metal absorbs all refracted light, so it has no diffuse color at all, only tinted specular reflection. This is the basis of the <strong>metalness</strong> parameter.</p>
+<h2 id="the-reflectance-equation">The reflectance equation<a class="headerlink" href="#the-reflectance-equation" title="Permanent link">#</a></h2>
+<p>PBR is built on this equation:</p>
+<div class="codehilite"><pre><span></span><code>Lo(p, wo) = ∫Ω  fr(p, wi, wo) · Li(p, wi) · (n · wi)  dwi
+</code></pre></div>
+
+<p>It reads more gently than it looks. The light <code>Lo</code> leaving point <code>p</code> toward the viewer <code>wo</code> is the sum, over every incoming direction <code>wi</code> in the hemisphere <code>Ω</code> above the surface, of:</p>
+<ul>
+<li><code>Li</code>, the <strong>radiance</strong> arriving from that direction, which is the strength and color of the light,</li>
+<li><code>n · wi</code>, the familiar cosine factor that weakens light arriving at a shallow angle,</li>
+<li><code>fr</code>, the <strong>BRDF</strong>, which says how much of the light from <code>wi</code> is reflected toward <code>wo</code> for this material.</li>
+</ul>
+<p>For a handful of point lights the integral collapses into a simple sum over the lights, which is what the next chapter does. For light arriving from the whole environment we have to actually solve it, and that is the subject of the IBL chapters.</p>
+<h2 id="the-cook-torrance-brdf">The Cook-Torrance BRDF<a class="headerlink" href="#the-cook-torrance-brdf" title="Permanent link">#</a></h2>
+<p>The BRDF used by practically every real-time renderer has a diffuse and a specular part:</p>
+<div class="codehilite"><pre><span></span><code>fr = kD · f_lambert + f_cook-torrance
+</code></pre></div>
+
+<p>The diffuse part is the <strong>Lambertian</strong> term, a constant: <code>albedo / π</code>.</p>
+<p>The specular part is</p>
+<div class="codehilite"><pre><span></span><code>                   D · F · G
+f_cook-torrance = ─────────────────
+                  4 (wo · n)(wi · n)
+</code></pre></div>
+
+<p>with three functions, each approximating one aspect of microfacet behavior.</p>
+<h3 id="d-normal-distribution-function">D: normal distribution function<a class="headerlink" href="#d-normal-distribution-function" title="Permanent link">#</a></h3>
+<p>How many microfacets are aligned with the halfway vector <code>h</code>? The <strong>Trowbridge-Reitz GGX</strong> distribution, with <code>α = roughness²</code>:</p>
+<div class="codehilite"><pre><span></span><code>              α²
+D = ─────────────────────────
+    π ((n · h)² (α² − 1) + 1)²
+</code></pre></div>
+
+<p>Low roughness concentrates the result into a small, intense spot. High roughness spreads it out.</p>
+<h3 id="g-geometry-function">G: geometry function<a class="headerlink" href="#g-geometry-function" title="Permanent link">#</a></h3>
+<p>Microfacets shadow and mask one another, especially on rough surfaces at grazing angles. The <strong>Schlick-GGX</strong> approximation for one direction is</p>
+<div class="codehilite"><pre><span></span><code>              n · v
+G1(v) = ─────────────────
+        (n · v)(1 − k) + k
+</code></pre></div>
+
+<p>where <code>k = (roughness + 1)² / 8</code> for direct lighting and <code>k = roughness² / 2</code> for image-based lighting. <strong>Smith's method</strong> combines the view and light directions: <code>G = G1(view) · G1(light)</code>.</p>
+<h3 id="f-fresnel-equation">F: Fresnel equation<a class="headerlink" href="#f-fresnel-equation" title="Permanent link">#</a></h3>
+<p>Every surface becomes more reflective at grazing angles. Look straight down at a lake and you see the bottom; look across it and you see the sky. The <strong>Fresnel-Schlick</strong> approximation:</p>
+<div class="codehilite"><pre><span></span><code>F = F0 + (1 − F0)(1 − (h · v))⁵
+</code></pre></div>
+
+<p><code>F0</code> is the <strong>base reflectivity</strong>, the reflectance when looking straight at the surface. Dielectrics have a low, colorless F0 around 0.04. Metals have a high, colored one:</p>
+<table>
+<thead>
+<tr>
+<th>Material</th>
+<th>F0 (linear RGB)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Water</td>
+<td>0.02, 0.02, 0.02</td>
+</tr>
+<tr>
+<td>Plastic, glass</td>
+<td>0.04, 0.04, 0.04</td>
+</tr>
+<tr>
+<td>Iron</td>
+<td>0.56, 0.57, 0.58</td>
+</tr>
+<tr>
+<td>Copper</td>
+<td>0.95, 0.64, 0.54</td>
+</tr>
+<tr>
+<td>Gold</td>
+<td>1.00, 0.71, 0.29</td>
+</tr>
+<tr>
+<td>Aluminium</td>
+<td>0.91, 0.92, 0.92</td>
+</tr>
+</tbody>
+</table>
+<p>In the metalness workflow, F0 is computed by blending between 0.04 and the albedo color using the metalness value.</p>
+<p>The Fresnel term F <em>is</em> the reflected fraction <code>kS</code>. So <code>kD = (1 − F)(1 − metalness)</code>.</p>
+<figure><img src="../assets/img/pbr/theory.webp" alt="One light on five dielectric spheres. Roughness alone changes the highlight from a sharp point to a broad sheen." width="880" height="260" loading="lazy"><figcaption>One light on five dielectric spheres. Roughness alone changes the highlight from a sharp point to a broad sheen.</figcaption></figure>
+
+<h2 id="material-parameters">Material parameters<a class="headerlink" href="#material-parameters" title="Permanent link">#</a></h2>
+<p>A PBR material in the common <strong>metallic-roughness</strong> workflow consists of:</p>
+<table>
+<thead>
+<tr>
+<th>Map</th>
+<th>Color space</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Albedo</strong></td>
+<td>sRGB</td>
+<td>Base color, with no lighting or shadows baked in. For metals, the F0 color.</td>
+</tr>
+<tr>
+<td><strong>Normal</strong></td>
+<td>linear</td>
+<td>Tangent-space normal, as in normal mapping.</td>
+</tr>
+<tr>
+<td><strong>Metallic</strong></td>
+<td>linear</td>
+<td>0 for dielectrics, 1 for metals. Rarely in between.</td>
+</tr>
+<tr>
+<td><strong>Roughness</strong></td>
+<td>linear</td>
+<td>Microfacet roughness.</td>
+</tr>
+<tr>
+<td><strong>Ambient occlusion</strong></td>
+<td>linear</td>
+<td>Pre-baked occlusion of crevices.</td>
+</tr>
+</tbody>
+</table>
+<p>This is the material model used by USD's preview surface and by glTF, so the assets Model I/O loads map directly onto it (<code>.baseColor</code>, <code>.metallic</code>, <code>.roughness</code>, <code>.tangentSpaceNormal</code>, <code>.ambientOcclusion</code>).</p>
+<p>Because PBR depends on correct light intensities, it requires the linear workflow and HDR pipeline from the previous section. Check that both are in place before continuing.</p></article><div class="pager"><a class="prev" href="../advanced-lighting/ssao.html"><small>Previous</small>SSAO</a><a class="next" href="../pbr/lighting.html"><small>Next</small>Lighting</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

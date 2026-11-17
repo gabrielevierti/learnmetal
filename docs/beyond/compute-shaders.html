@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compute Shaders · learnmetal</title>
+<meta name="description" content="Beyond: Compute Shaders. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a class="active" href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">Beyond</p><h1 id="compute-shaders">Compute Shaders<a class="headerlink" href="#compute-shaders" title="Permanent link">#</a></h1>
+<div class="example-box"><strong>Example code</strong> <code>examples/Sources/17-ComputeParticles</code>, run with <code>swift run ComputeParticles</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
+
+<p>A GPU is a massively parallel computer that happens to be good at drawing triangles. <strong>Compute functions</strong>, called kernels in Metal, let you use that power for anything: image processing, physics, particle systems, simulations, culling, machine learning. They run outside the render pipeline, with no vertices or fragments, only data in and data out.</p>
+<p>In Metal, compute is not an add-on. It uses the same device, command buffers, buffers, textures and shading language as rendering, so results flow between the two with no copying.</p>
+<h2 id="a-first-kernel-image-processing">A first kernel: image processing<a class="headerlink" href="#a-first-kernel-image-processing" title="Permanent link">#</a></h2>
+<p>A kernel is a function marked <code>kernel</code> that returns <code>void</code>. It is executed once for every point in a grid that you define. For an image, the grid is the pixels:</p>
+<div class="codehilite"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;metal_stdlib&gt;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">metal</span><span class="p">;</span>
+
+<span class="n">kernel</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">grayscale</span><span class="p">(</span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="p">,</span><span class="w"> </span><span class="n">access</span><span class="o">::</span><span class="n">read</span><span class="o">&gt;</span><span class="w">  </span><span class="n">input</span><span class="w">  </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
+<span class="w">                      </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="p">,</span><span class="w"> </span><span class="n">access</span><span class="o">::</span><span class="n">write</span><span class="o">&gt;</span><span class="w"> </span><span class="n">output</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
+<span class="w">                      </span><span class="n">uint2</span><span class="w"> </span><span class="n">gid</span><span class="w"> </span><span class="p">[[</span><span class="na">thread_position_in_grid</span><span class="p">]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">input</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="n">gid</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">gray</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dot</span><span class="p">(</span><span class="n">color</span><span class="p">.</span><span class="n">rgb</span><span class="p">,</span><span class="w"> </span><span class="n">float3</span><span class="p">(</span><span class="mf">0.2126</span><span class="p">,</span><span class="w"> </span><span class="mf">0.7152</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0722</span><span class="p">));</span>
+<span class="w">    </span><span class="n">output</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">float4</span><span class="p">(</span><span class="n">float3</span><span class="p">(</span><span class="n">gray</span><span class="p">),</span><span class="w"> </span><span class="n">color</span><span class="p">.</span><span class="n">a</span><span class="p">),</span><span class="w"> </span><span class="n">gid</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<ul>
+<li>Textures declare how they are accessed: <code>access::read</code>, <code>access::write</code> or <code>access::read_write</code>. A texture that a kernel writes to must be created with <code>.shaderWrite</code> usage.</li>
+<li><code>[[thread_position_in_grid]]</code> is the coordinate of this invocation, here the pixel.</li>
+<li>There is no sampler: <code>read</code> and <code>write</code> address exact texels. You can still pass a sampler and call <code>sample</code> with normalized coordinates when you want filtering.</li>
+</ul>
+<h2 id="running-it">Running it<a class="headerlink" href="#running-it" title="Permanent link">#</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">function</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">library</span><span class="p">.</span><span class="n">makeFunction</span><span class="p">(</span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="s">"grayscale"</span><span class="p">)</span><span class="o">!</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">computePipeline</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeComputePipelineState</span><span class="p">(</span><span class="n">function</span><span class="p">:</span><span class="w"> </span><span class="n">function</span><span class="p">)</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">encoder</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">commandBuffer</span><span class="p">.</span><span class="n">makeComputeCommandEncoder</span><span class="p">()</span><span class="o">!</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setComputePipelineState</span><span class="p">(</span><span class="n">computePipeline</span><span class="p">)</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setTexture</span><span class="p">(</span><span class="n">inputTexture</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setTexture</span><span class="p">(</span><span class="n">outputTexture</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nv">width</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">computePipeline</span><span class="p">.</span><span class="n">threadExecutionWidth</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">height</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">computePipeline</span><span class="p">.</span><span class="n">maxTotalThreadsPerThreadgroup</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">width</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">dispatchThreads</span><span class="p">(</span><span class="n">MTLSize</span><span class="p">(</span><span class="n">width</span><span class="p">:</span><span class="w"> </span><span class="n">inputTexture</span><span class="p">.</span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">:</span><span class="w"> </span><span class="n">inputTexture</span><span class="p">.</span><span class="n">height</span><span class="p">,</span><span class="w"> </span><span class="n">depth</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span>
+<span class="w">                        </span><span class="n">threadsPerThreadgroup</span><span class="p">:</span><span class="w"> </span><span class="n">MTLSize</span><span class="p">(</span><span class="n">width</span><span class="p">:</span><span class="w"> </span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">:</span><span class="w"> </span><span class="n">height</span><span class="p">,</span><span class="w"> </span><span class="n">depth</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">))</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">endEncoding</span><span class="p">()</span>
+</code></pre></div>
+
+<p>A compute encoder lives in a command buffer next to render encoders. A typical frame might run a compute pass to update particles, then a render pass that draws them, in one command buffer.</p>
+<figure><img src="../assets/img/beyond/compute-shaders.webp" alt="A kernel reads one texture and writes another, one thread per pixel." width="880" height="246" loading="lazy"><figcaption>A kernel reads one texture and writes another, one thread per pixel.</figcaption></figure>
+
+<h2 id="threads-and-threadgroups">Threads and threadgroups<a class="headerlink" href="#threads-and-threadgroups" title="Permanent link">#</a></h2>
+<p>The GPU executes the grid in batches called <strong>threadgroups</strong>. Threads in one group run together and can share a small amount of fast memory.</p>
+<p><code>dispatchThreads</code> takes the total grid size and a threadgroup size, and Metal handles grids that are not an exact multiple of the group size. It requires non-uniform threadgroup support, which every Apple silicon device has. The older <code>dispatchThreadgroups</code> takes a number of <em>groups</em> instead, so the grid is rounded up and the kernel must check for out-of-range coordinates itself:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">gid</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">output</span><span class="p">.</span><span class="n">get_width</span><span class="p">()</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">gid</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">output</span><span class="p">.</span><span class="n">get_height</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+
+<p>The sizes used above, <code>threadExecutionWidth</code> wide and as tall as the maximum allows, are a good default for 2D work.</p>
+<h2 id="a-particle-system">A particle system<a class="headerlink" href="#a-particle-system" title="Permanent link">#</a></h2>
+<p>Buffers work in kernels just as textures do. Here every particle is moved by one thread:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">Particle</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">position</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">velocity</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">life</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">SimulationUniforms</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">deltaTime</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">gravity</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="n">kernel</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">update_particles</span><span class="p">(</span><span class="n">device</span><span class="w"> </span><span class="n">Particle</span><span class="w"> </span><span class="o">*</span><span class="n">particles</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
+<span class="w">                             </span><span class="n">constant</span><span class="w"> </span><span class="n">SimulationUniforms</span><span class="w"> </span><span class="o">&amp;</span><span class="n">uniforms</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
+<span class="w">                             </span><span class="n">uint</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="p">[[</span><span class="na">thread_position_in_grid</span><span class="p">]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Particle</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">particles</span><span class="p">[</span><span class="n">id</span><span class="p">];</span>
+
+<span class="w">    </span><span class="n">p</span><span class="p">.</span><span class="n">velocity</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">gravity</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">deltaTime</span><span class="p">;</span>
+<span class="w">    </span><span class="n">p</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">velocity</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">deltaTime</span><span class="p">;</span>
+<span class="w">    </span><span class="n">p</span><span class="p">.</span><span class="n">life</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">deltaTime</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">                 </span><span class="c1">// bounce on the ground</span>
+<span class="w">        </span><span class="n">p</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">p</span><span class="p">.</span><span class="n">velocity</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">*=</span><span class="w"> </span><span class="mf">-0.6</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">particles</span><span class="p">[</span><span class="n">id</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>The buffer is in the <code>device</code> address space because the kernel writes to it. The grid is one-dimensional:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">encoder</span><span class="p">.</span><span class="n">setBuffer</span><span class="p">(</span><span class="n">particleBuffer</span><span class="p">,</span><span class="w"> </span><span class="n">offset</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setBytes</span><span class="p">(&amp;</span><span class="n">simulationUniforms</span><span class="p">,</span><span class="w"> </span><span class="n">length</span><span class="p">:</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="n">SimulationUniforms</span><span class="p">&gt;.</span><span class="bp">stride</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">dispatchThreads</span><span class="p">(</span><span class="n">MTLSize</span><span class="p">(</span><span class="n">width</span><span class="p">:</span><span class="w"> </span><span class="n">particleCount</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">depth</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span>
+<span class="w">                        </span><span class="n">threadsPerThreadgroup</span><span class="p">:</span><span class="w"> </span><span class="n">MTLSize</span><span class="p">(</span><span class="n">width</span><span class="p">:</span><span class="w"> </span><span class="n">computePipeline</span><span class="p">.</span><span class="n">threadExecutionWidth</span><span class="p">,</span>
+<span class="w">                                                       </span><span class="n">height</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">depth</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">))</span>
+</code></pre></div>
+
+<p>Then bind the same buffer to an instanced billboard vertex function like the one in <a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a>, with its <code>Particle</code> struct changed to match this one, and draw. The particle data never leaves the GPU, and a million particles animate comfortably.</p>
+<div class="admonition warning">
+<p class="admonition-title">Data races</p>
+<p>Threads run in parallel in no guaranteed order. Each thread must write only to its own element. If a thread reads data that another thread writes, as in a blur that reads neighbors, use separate input and output resources and swap them after each step. For shared counters, MSL provides atomic types such as <code>atomic_uint</code>.</p>
+</div>
+<h2 id="where-compute-is-used-in-a-renderer">Where compute is used in a renderer<a class="headerlink" href="#where-compute-is-used-in-a-renderer" title="Permanent link">#</a></h2>
+<ul>
+<li><strong>Post-processing</strong>: blur, bloom, tone mapping, depth of field. A kernel avoids the full-screen triangle and can read and write any pixel.</li>
+<li><strong>Culling</strong>: test object bounds against the view frustum and write a list of visible instances or an indirect command buffer.</li>
+<li><strong>Light assignment</strong>: build per-tile or per-cluster light lists for forward rendering with many lights.</li>
+<li><strong>Precomputation</strong>: the irradiance and prefiltered maps of the <a href="../pbr/diffuse-irradiance.html">IBL chapters</a> can be generated by kernels writing directly to cube faces.</li>
+<li><strong>Simulation</strong>: cloth, fluids, flocking.</li>
+<li><strong>Mesh generation</strong>: terrain, marching cubes, skinning.</li>
+</ul>
+<h2 id="compute-or-fragment">Compute or fragment?<a class="headerlink" href="#compute-or-fragment" title="Permanent link">#</a></h2>
+<p>A full-screen fragment function and a kernel can often do the same job. Fragment functions benefit from the tile-based architecture when they write to render pass attachments, especially memoryless ones. Kernels are more flexible: arbitrary reads and writes, several outputs of different sizes, shared threadgroup memory. On Apple GPUs, prefer a fragment function when the result goes straight into the current render pass, and a kernel otherwise. Measure when it matters.</p>
+<h2 id="ready-made-kernels">Ready-made kernels<a class="headerlink" href="#ready-made-kernels" title="Permanent link">#</a></h2>
+<p><strong>Metal Performance Shaders</strong> (MPS) is a library of tuned kernels: Gaussian blur, convolution, histogram, image scaling, matrix multiplication, and more. For standard image operations, use it before writing your own:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">import</span><span class="w"> </span><span class="nc">MetalPerformanceShaders</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nv">blur</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MPSImageGaussianBlur</span><span class="p">(</span><span class="n">device</span><span class="p">:</span><span class="w"> </span><span class="n">device</span><span class="p">,</span><span class="w"> </span><span class="n">sigma</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">)</span>
+<span class="n">blur</span><span class="p">.</span><span class="n">encode</span><span class="p">(</span><span class="n">commandBuffer</span><span class="p">:</span><span class="w"> </span><span class="n">commandBuffer</span><span class="p">,</span><span class="w"> </span><span class="n">sourceTexture</span><span class="p">:</span><span class="w"> </span><span class="n">source</span><span class="p">,</span><span class="w"> </span><span class="n">destinationTexture</span><span class="p">:</span><span class="w"> </span><span class="n">destination</span><span class="p">)</span>
+</code></pre></div>
+
+<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<ul>
+<li>Write a kernel that inverts an image and display the result.</li>
+<li>Port the box blur from the SSAO chapter to a kernel.</li>
+<li>Add an attractor point to the particle simulation that pulls particles toward the mouse.</li>
+</ul></article><div class="pager"><a class="prev" href="../in-practice/2d-game.html"><small>Previous</small>A 2D Game</a><a class="next" href="../beyond/tessellation.html"><small>Next</small>Tessellation</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shaders · learnmetal</title>
+<meta name="description" content="Getting Started: Shaders. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a class="active" href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">Getting Started</p><h1 id="shaders">Shaders<a class="headerlink" href="#shaders" title="Permanent link">#</a></h1>
+<div class="example-box"><strong>Example code</strong> <code>examples/Sources/03-Shaders</code>, run with <code>swift run Shaders</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
+
+<p>Shaders are where graphics programming happens. This chapter looks at the Metal Shading Language more closely, and shows the two ways data reaches a shader: per-vertex attributes that are interpolated across a triangle, and uniforms that are the same for a whole draw call.</p>
+<h2 id="the-language-in-brief">The language in brief<a class="headerlink" href="#the-language-in-brief" title="Permanent link">#</a></h2>
+<p>MSL is based on C++14. The types you will use all the time:</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>float</code>, <code>int</code>, <code>uint</code>, <code>bool</code></td>
+<td>Scalars. <code>half</code> is a 16-bit float, often faster on mobile GPUs.</td>
+</tr>
+<tr>
+<td><code>float2</code>, <code>float3</code>, <code>float4</code></td>
+<td>Vectors. Also <code>int2</code>, <code>uint3</code>, <code>half4</code>, and so on.</td>
+</tr>
+<tr>
+<td><code>float3x3</code>, <code>float4x4</code></td>
+<td>Matrices, stored column by column.</td>
+</tr>
+<tr>
+<td><code>texture2d&lt;float&gt;</code>, <code>texturecube&lt;float&gt;</code>, <code>depth2d&lt;float&gt;</code></td>
+<td>Textures.</td>
+</tr>
+<tr>
+<td><code>sampler</code></td>
+<td>Filtering and addressing settings for reading a texture.</td>
+</tr>
+</tbody>
+</table>
+<p>Vectors support <strong>swizzling</strong>: <code>v.xyz</code>, <code>v.rg</code>, <code>v.zyx</code>, <code>color.rgb * color.a</code>. The standard library has the functions you expect: <code>dot</code>, <code>cross</code>, <code>normalize</code>, <code>length</code>, <code>reflect</code>, <code>mix</code>, <code>clamp</code>, <code>saturate</code>, <code>pow</code>, <code>smoothstep</code>, <code>max</code>, <code>min</code>.</p>
+<p>Things MSL does not allow: recursion, lambdas, virtual functions, exceptions, <code>new</code>, and the C++ standard library.</p>
+<h2 id="passing-data-between-stages">Passing data between stages<a class="headerlink" href="#passing-data-between-stages" title="Permanent link">#</a></h2>
+<p>Whatever the vertex function returns is interpolated across the triangle and handed to the fragment function. Add a color to the output struct:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">VertexOut</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="p">[[</span><span class="na">position</span><span class="p">]];</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">color</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="n">vertex</span><span class="w"> </span><span class="n">VertexOut</span><span class="w"> </span><span class="n">vertex_main</span><span class="p">(</span><span class="n">VertexIn</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">VertexOut</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_main</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">color</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Each vertex computes a color from its own position, and every fragment in between receives a blend of the three. This interpolation is automatic for every member of the struct.</p>
+<h2 id="more-vertex-attributes">More vertex attributes<a class="headerlink" href="#more-vertex-attributes" title="Permanent link">#</a></h2>
+<p>Colors can also come from the vertex buffer. Interleave them with the positions:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">vertices</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="nb">Float</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="c1">// position         // color</span>
+<span class="w">    </span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w">    </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">     </span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w">    </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">     </span><span class="mf">0.0</span><span class="p">,</span><span class="w">  </span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w">    </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span>
+<span class="p">]</span>
+</code></pre></div>
+
+<p>Describe the second attribute and the larger stride:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">floatSize</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;.</span><span class="bp">stride</span>
+<span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">format</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">float3</span>
+<span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">offset</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">bufferIndex</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">format</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">float3</span>
+<span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">offset</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">floatSize</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">3</span>
+<span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">bufferIndex</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">layouts</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="bp">stride</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">floatSize</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">6</span>
+</code></pre></div>
+
+<p>And receive it in the shader:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">VertexIn</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="p">[[</span><span class="na">attribute</span><span class="p">(</span><span class="mi">0</span><span class="p">)]];</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">color</span><span class="w">    </span><span class="p">[[</span><span class="na">attribute</span><span class="p">(</span><span class="mi">1</span><span class="p">)]];</span>
+<span class="p">};</span>
+
+<span class="n">vertex</span><span class="w"> </span><span class="n">VertexOut</span><span class="w"> </span><span class="n">vertex_main</span><span class="p">(</span><span class="n">VertexIn</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">VertexOut</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">color</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>The result is the classic triangle with a red, a green and a blue corner blending into each other.</p>
+<figure><img src="../assets/img/getting-started/shaders.webp" alt="Each vertex has its own color. Every fragment in between receives a blend of the three." width="880" height="495" loading="lazy"><figcaption>Each vertex has its own color. Every fragment in between receives a blend of the three.</figcaption></figure>
+
+<h2 id="uniforms">Uniforms<a class="headerlink" href="#uniforms" title="Permanent link">#</a></h2>
+<p>A <strong>uniform</strong> is data that stays constant during a draw call: a time value, a transformation matrix, a light position. In Metal a uniform is simply a struct in a buffer that the shader receives by reference.</p>
+<p>Declare the struct in the shader and add it as a parameter:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">Uniforms</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">time</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">tint</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_main</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
+<span class="w">                              </span><span class="n">constant</span><span class="w"> </span><span class="n">Uniforms</span><span class="w"> </span><span class="o">&amp;</span><span class="n">uniforms</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">0</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">pulse</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sin</span><span class="p">(</span><span class="n">uniforms</span><span class="p">.</span><span class="n">time</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.5</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.5</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">color</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">tint</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">pulse</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>constant</code> is the address space for read-only buffer data. <code>[[buffer(0)]]</code> is slot 0 of the <strong>fragment</strong> buffer table. Vertex and fragment functions have separate tables, so vertex buffer 0 and fragment buffer 0 are unrelated.</p>
+<p>Declare a matching struct in Swift:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">Uniforms</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">time</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">tint</span><span class="p">:</span><span class="w"> </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>For small data, the simplest way to send it is <code>setFragmentBytes</code>, which copies the bytes into a temporary buffer managed by Metal:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="nv">uniforms</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Uniforms</span><span class="p">(</span><span class="n">time</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">(</span><span class="n">CACurrentMediaTime</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">startTime</span><span class="p">),</span>
+<span class="w">                        </span><span class="n">tint</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">])</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setFragmentBytes</span><span class="p">(&amp;</span><span class="n">uniforms</span><span class="p">,</span>
+<span class="w">                         </span><span class="n">length</span><span class="p">:</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="n">Uniforms</span><span class="p">&gt;.</span><span class="bp">stride</span><span class="p">,</span>
+<span class="w">                         </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+</code></pre></div>
+
+<p>Store <code>startTime = CACurrentMediaTime()</code> in <code>init</code>; a <code>Float</code> cannot hold the raw value precisely enough. There is a matching <code>setVertexBytes</code> for the vertex stage. For data larger than 4 KB, or data shared by many draws, create an <code>MTLBuffer</code> yourself and bind it with <code>setFragmentBuffer</code>.</p>
+<h2 id="keeping-swift-and-msl-layouts-in-sync">Keeping Swift and MSL layouts in sync<a class="headerlink" href="#keeping-swift-and-msl-layouts-in-sync" title="Permanent link">#</a></h2>
+<p>The Swift struct and the MSL struct must have identical memory layouts. Nothing checks this for you, and a mismatch produces garbage values, not an error. Three rules prevent nearly all problems:</p>
+<ol>
+<li>Use <code>SIMD</code> types in Swift for vectors and <code>simd_float4x4</code> (<code>float4x4</code>) for matrices. <code>SIMD4&lt;Float&gt;</code> matches <code>float4</code>, <code>SIMD2&lt;Float&gt;</code> matches <code>float2</code>.</li>
+<li><code>SIMD3&lt;Float&gt;</code> and MSL <code>float3</code> both occupy <strong>16 bytes</strong>, not 12. They match each other, but they do not match three loose floats. When you need a tightly packed 12-byte vector in a buffer, MSL has <code>packed_float3</code>.</li>
+<li>Always use <code>MemoryLayout&lt;T&gt;.stride</code>, not <code>.size</code>, for buffer lengths.</li>
+</ol>
+<p>In our struct, <code>time</code> is 4 bytes followed by 12 bytes of padding so that <code>tint</code> starts at offset 16, in both languages.</p>
+<div class="admonition note">
+<p class="admonition-title">One definition for both languages</p>
+<p>Larger projects put shared structs in a C header that is included by the <code>.metal</code> file and exposed to Swift through a bridging header. Then there is only one definition and the layouts cannot drift. This series repeats the structs on both sides to keep each chapter readable on its own.</p>
+</div>
+<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<ul>
+<li>Flip the triangle upside down in the vertex function only.</li>
+<li>Add a <code>float2 offset</code> uniform for the vertex stage and move the triangle in a circle over time.</li>
+<li>Output the position as the color (<code>out.color = out.position</code>). Why is the bottom-left corner black?</li>
+</ul></article><div class="pager"><a class="prev" href="../getting-started/hello-triangle.html"><small>Previous</small>Hello Triangle</a><a class="next" href="../getting-started/textures.html"><small>Next</small>Textures</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

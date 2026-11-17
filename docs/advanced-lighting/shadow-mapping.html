@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shadow Mapping · learnmetal</title>
+<meta name="description" content="Advanced Lighting: Shadow Mapping. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a class="active" href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">Advanced Lighting</p><h1 id="shadow-mapping">Shadow Mapping<a class="headerlink" href="#shadow-mapping" title="Permanent link">#</a></h1>
+<div class="example-box"><strong>Example code</strong> <code>examples/Sources/14-ShadowMapping</code>, run with <code>swift run ShadowMapping</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
+
+<p>Shadows anchor objects to the ground and reveal how things are arranged in space. The standard real-time technique is <strong>shadow mapping</strong>, and it is built from parts you already know: a depth buffer and render-to-texture.</p>
+<h2 id="the-idea">The idea<a class="headerlink" href="#the-idea" title="Permanent link">#</a></h2>
+<p>A point is in shadow if something sits between it and the light. Put a camera at the light and render the scene's <strong>depth</strong> into a texture. That texture, the <strong>shadow map</strong>, records for every direction how far the light reaches before hitting something.</p>
+<p>When shading a fragment in the main pass, transform it into the light's view and compare its depth with the shadow map. If the fragment is farther from the light than the stored value, something closer is blocking the light.</p>
+<h2 id="the-shadow-map-texture">The shadow map texture<a class="headerlink" href="#the-shadow-map-texture" title="Permanent link">#</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">shadowSize</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">2048</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">descriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLTextureDescriptor</span><span class="p">.</span><span class="n">texture2DDescriptor</span><span class="p">(</span>
+<span class="w">    </span><span class="n">pixelFormat</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">depth32Float</span><span class="p">,</span><span class="w"> </span><span class="n">width</span><span class="p">:</span><span class="w"> </span><span class="n">shadowSize</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">:</span><span class="w"> </span><span class="n">shadowSize</span><span class="p">,</span><span class="w"> </span><span class="n">mipmapped</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">usage</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[.</span><span class="n">renderTarget</span><span class="p">,</span><span class="w"> </span><span class="p">.</span><span class="n">shaderRead</span><span class="p">]</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">storageMode</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="kd">private</span>
+<span class="n">shadowMap</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeTexture</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">descriptor</span><span class="p">)</span><span class="o">!</span>
+
+<span class="n">shadowPass</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLRenderPassDescriptor</span><span class="p">()</span>
+<span class="n">shadowPass</span><span class="p">.</span><span class="n">depthAttachment</span><span class="p">.</span><span class="n">texture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">shadowMap</span>
+<span class="n">shadowPass</span><span class="p">.</span><span class="n">depthAttachment</span><span class="p">.</span><span class="n">loadAction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">clear</span>
+<span class="n">shadowPass</span><span class="p">.</span><span class="n">depthAttachment</span><span class="p">.</span><span class="n">clearDepth</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mf">1.0</span>
+<span class="n">shadowPass</span><span class="p">.</span><span class="n">depthAttachment</span><span class="p">.</span><span class="n">storeAction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">store</span>
+</code></pre></div>
+
+<p>The pass has <strong>no color attachment</strong> at all. This time the depth must be stored, since reading it is the whole point.</p>
+<h2 id="the-lights-matrices">The light's matrices<a class="headerlink" href="#the-lights-matrices" title="Permanent link">#</a></h2>
+<p>A directional light has parallel rays, so its projection is <strong>orthographic</strong>: a box with no perspective. Add to <code>Math.swift</code>:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">extension</span><span class="w"> </span><span class="nc">float4x4</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">/// Right-handed orthographic projection with a 0...1 depth range.</span>
+<span class="w">    </span><span class="kd">init</span><span class="p">(</span><span class="n">orthographicLeft</span><span class="w"> </span><span class="n">l</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">,</span><span class="w"> </span><span class="kr">right</span><span class="w"> </span><span class="n">r</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">,</span><span class="w"> </span><span class="n">bottom</span><span class="w"> </span><span class="n">b</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">,</span><span class="w"> </span><span class="n">top</span><span class="w"> </span><span class="n">t</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">,</span>
+<span class="w">         </span><span class="n">near</span><span class="w"> </span><span class="n">n</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">,</span><span class="w"> </span><span class="n">far</span><span class="w"> </span><span class="n">f</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kc">self</span><span class="p">.</span><span class="kd">init</span><span class="p">(</span><span class="n">columns</span><span class="p">:</span><span class="w"> </span><span class="p">(</span>
+<span class="w">            </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;(</span><span class="mi">2</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">r</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">l</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span>
+<span class="w">            </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">t</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">b</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span>
+<span class="w">            </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">f</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span>
+<span class="w">            </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;((</span><span class="n">l</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">r</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">l</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">r</span><span class="p">),</span><span class="w"> </span><span class="p">(</span><span class="n">t</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t</span><span class="p">),</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">f</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">)))</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">lightPosition</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Float3</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">lightView</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">float4x4</span><span class="p">(</span><span class="n">lookAt</span><span class="p">:</span><span class="w"> </span><span class="n">lightPosition</span><span class="p">,</span><span class="w"> </span><span class="n">center</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">up</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">])</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">lightProjection</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">float4x4</span><span class="p">(</span><span class="n">orthographicLeft</span><span class="p">:</span><span class="w"> </span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="kr">right</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="n">bottom</span><span class="p">:</span><span class="w"> </span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="n">top</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<span class="w">                               </span><span class="n">near</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">far</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">)</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">lightViewProjection</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">lightProjection</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">lightView</span>
+</code></pre></div>
+
+<p>The box must contain everything that casts or receives shadows in the area you care about. Keep it as tight as you can: the shadow map's resolution is spread over the box.</p>
+<h2 id="the-depth-pass">The depth pass<a class="headerlink" href="#the-depth-pass" title="Permanent link">#</a></h2>
+<p>The pipeline for this pass has a vertex function, no fragment function, and no color format:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">vertex</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">vertex_shadow</span><span class="p">(</span><span class="n">VertexIn</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
+<span class="w">                            </span><span class="n">constant</span><span class="w"> </span><span class="n">ShadowUniforms</span><span class="w"> </span><span class="o">&amp;</span><span class="n">uniforms</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">1</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">lightViewProjection</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">model</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">descriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLRenderPipelineDescriptor</span><span class="p">()</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">vertexFunction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">library</span><span class="p">.</span><span class="n">makeFunction</span><span class="p">(</span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="s">"vertex_shadow"</span><span class="p">)</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">fragmentFunction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kc">nil</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">vertexDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">vertexDescriptor</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">depthAttachmentPixelFormat</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">depth32Float</span>
+<span class="n">shadowPipelineState</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeRenderPipelineState</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">descriptor</span><span class="p">)</span>
+</code></pre></div>
+
+<p>A vertex function may return a bare <code>float4</code>; it is taken as the position. Each frame, render the scene with this pipeline into <code>shadowPass</code> before the main pass, using the same command buffer.</p>
+<h2 id="using-the-shadow-map">Using the shadow map<a class="headerlink" href="#using-the-shadow-map" title="Permanent link">#</a></h2>
+<p>In the main pass, the vertex function also outputs the position in the light's clip space:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">out</span><span class="p">.</span><span class="n">shadowPosition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">lightViewProjection</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">world</span><span class="p">;</span>
+</code></pre></div>
+
+<p>The fragment function converts that to a texture coordinate and a depth to compare:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="nf">calcShadow</span><span class="p">(</span><span class="n">float4</span><span class="w"> </span><span class="n">shadowPosition</span><span class="p">,</span><span class="w"> </span><span class="n">depth2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">shadowMap</span><span class="p">,</span><span class="w"> </span><span class="n">sampler</span><span class="w"> </span><span class="n">shadowSampler</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">proj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">shadowPosition</span><span class="p">.</span><span class="n">xyz</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">shadowPosition</span><span class="p">.</span><span class="n">w</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">uv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">proj</span><span class="p">.</span><span class="n">xy</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">float2</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.5</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.5</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">proj</span><span class="p">.</span><span class="n">z</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">1.0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span><span class="w">    </span><span class="c1">// beyond the light's far plane: lit</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">shadowMap</span><span class="p">.</span><span class="n">sample_compare</span><span class="p">(</span><span class="n">shadowSampler</span><span class="p">,</span><span class="w"> </span><span class="n">uv</span><span class="p">,</span><span class="w"> </span><span class="n">proj</span><span class="p">.</span><span class="n">z</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<ul>
+<li>Dividing by w is unnecessary for an orthographic projection but makes the function work for perspective lights as well.</li>
+<li>NDC x and y run from -1 to 1 with y up, and texture coordinates run from 0 to 1 with y down. Hence the scale of <code>(0.5, -0.5)</code>. Depth is already in the 0 to 1 range and needs no conversion.</li>
+<li>Depth textures have their own shader type, <code>depth2d&lt;float&gt;</code>.</li>
+</ul>
+<p><code>sample_compare</code> compares the reference depth against the texture and returns 1 if the test passes and 0 if not. The test is configured on the sampler:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">shadowSamplerDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLSamplerDescriptor</span><span class="p">()</span>
+<span class="n">shadowSamplerDescriptor</span><span class="p">.</span><span class="n">minFilter</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">linear</span>
+<span class="n">shadowSamplerDescriptor</span><span class="p">.</span><span class="n">magFilter</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">linear</span>
+<span class="n">shadowSamplerDescriptor</span><span class="p">.</span><span class="n">compareFunction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">lessEqual</span>
+<span class="n">shadowSamplerDescriptor</span><span class="p">.</span><span class="n">sAddressMode</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">clampToEdge</span>
+<span class="n">shadowSamplerDescriptor</span><span class="p">.</span><span class="n">tAddressMode</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">clampToEdge</span>
+<span class="n">shadowSampler</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeSamplerState</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">shadowSamplerDescriptor</span><span class="p">)</span><span class="o">!</span>
+</code></pre></div>
+
+<p>With <code>.lessEqual</code>, the result is 1 where the fragment is at or in front of the stored depth, meaning lit. Apply it to the diffuse and specular terms and leave ambient alone:</p>
+<div class="codehilite"><pre><span></span><code><span class="kt">float</span><span class="w"> </span><span class="n">lit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">calcShadow</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">shadowPosition</span><span class="p">,</span><span class="w"> </span><span class="n">shadowMap</span><span class="p">,</span><span class="w"> </span><span class="n">shadowSampler</span><span class="p">);</span>
+<span class="n">float3</span><span class="w"> </span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ambient</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">lit</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">diffuse</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">specular</span><span class="p">);</span>
+</code></pre></div>
+
+<h2 id="shadow-acne">Shadow acne<a class="headerlink" href="#shadow-acne" title="Permanent link">#</a></h2>
+<p>The first result is covered in dark stripes. The shadow map has limited resolution, so many fragments share one texel, and across a slanted surface half of them come out slightly behind the stored depth. This is <strong>shadow acne</strong>.</p>
+<p>The cure is a <strong>depth bias</strong>: push the stored depth a little away from the light. Metal applies it during rasterization of the shadow pass:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">shadowEncoder</span><span class="p">.</span><span class="n">setDepthBias</span><span class="p">(</span><span class="mf">0.015</span><span class="p">,</span><span class="w"> </span><span class="n">slopeScale</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="n">clamp</span><span class="p">:</span><span class="w"> </span><span class="mf">0.02</span><span class="p">)</span>
+</code></pre></div>
+
+<p>The constant part is measured in units that depend on the depth format, so treat these numbers as a starting point. The slope-scaled part automatically increases the bias on surfaces at a steep angle to the light, which need it most. Too much bias detaches the shadow from its caster, an artifact known as <strong>peter panning</strong>. Tune until both disappear. Rendering only back faces into the shadow map (<code>setCullMode(.front)</code>) also helps for closed meshes.</p>
+<h2 id="softer-edges">Softer edges<a class="headerlink" href="#softer-edges" title="Permanent link">#</a></h2>
+<p>Because the comparison sampler uses linear filtering, the GPU compares the four nearest texels and blends the <em>results</em>. That is hardware <strong>percentage-closer filtering</strong> (PCF), and it softens edges for free. Averaging a few more taps softens them further:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">float2</span><span class="w"> </span><span class="n">texel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">float2</span><span class="p">(</span><span class="n">shadowMap</span><span class="p">.</span><span class="n">get_width</span><span class="p">(),</span><span class="w"> </span><span class="n">shadowMap</span><span class="p">.</span><span class="n">get_height</span><span class="p">());</span>
+<span class="kt">float</span><span class="w"> </span><span class="n">lit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">y</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">lit</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">shadowMap</span><span class="p">.</span><span class="n">sample_compare</span><span class="p">(</span><span class="n">shadowSampler</span><span class="p">,</span><span class="w"> </span><span class="n">uv</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">float2</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">texel</span><span class="p">,</span><span class="w"> </span><span class="n">proj</span><span class="p">.</span><span class="n">z</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+<span class="n">lit</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="mf">9.0</span><span class="p">;</span>
+</code></pre></div>
+
+<figure><img src="../assets/img/advanced-lighting/shadow-mapping.webp" alt="Left: the scene&#x27;s depth as seen from the light. Right: the scene shaded with that shadow map." width="880" height="246" loading="lazy"><figcaption>Left: the scene&#x27;s depth as seen from the light. Right: the scene shaded with that shadow map.</figcaption></figure>
+
+<h2 id="outside-the-map">Outside the map<a class="headerlink" href="#outside-the-map" title="Permanent link">#</a></h2>
+<p>Fragments outside the light's box sample beyond the texture. With <code>.clampToEdge</code> they repeat the border texel, which can smear shadows across the scene. Either return "lit" when <code>uv</code> is outside 0 to 1, or use <code>.clampToBorderColor</code> with an opaque white border where it is supported.</p>
+<h2 id="beyond-one-map">Beyond one map<a class="headerlink" href="#beyond-one-map" title="Permanent link">#</a></h2>
+<p>A single map cannot cover a large outdoor scene with enough resolution. <strong>Cascaded shadow maps</strong> split the view frustum into several ranges, each with its own map, stored in the layers of a <code>depth2d_array</code> texture. For spotlights, use a perspective projection for the light and the same code.</p>
+<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<ul>
+<li>Display the shadow map on a full-screen triangle to check what the light sees.</li>
+<li>Set the bias to zero, then to a large value, and identify acne and peter panning.</li>
+<li>Move the light over time and watch the shadows follow.</li>
+</ul></article><div class="pager"><a class="prev" href="../advanced-lighting/gamma-correction.html"><small>Previous</small>Gamma Correction</a><a class="next" href="../advanced-lighting/point-shadows.html"><small>Next</small>Point Shadows</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

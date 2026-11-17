@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Instancing · learnmetal</title>
+<meta name="description" content="Advanced Metal: Instancing. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a class="active" href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">Advanced Metal</p><h1 id="instancing">Instancing<a class="headerlink" href="#instancing" title="Permanent link">#</a></h1>
+<div class="example-box"><strong>Example code</strong> <code>examples/Sources/13-Instancing</code>, run with <code>swift run Instancing</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
+
+<p>A field of grass, a forest, an asteroid belt: thousands of copies of the same mesh, each with a different transform. Issuing one draw call per copy wastes CPU time, because each call has a fixed cost no matter how small the mesh is. <strong>Instancing</strong> draws all copies with a single call.</p>
+<h2 id="instanced-draw-calls">Instanced draw calls<a class="headerlink" href="#instanced-draw-calls" title="Permanent link">#</a></h2>
+<p>Every draw method has a variant with an <code>instanceCount</code>:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">encoder</span><span class="p">.</span><span class="n">drawPrimitives</span><span class="p">(</span><span class="n">type</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">triangle</span><span class="p">,</span>
+<span class="w">                       </span><span class="n">vertexStart</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">                       </span><span class="n">vertexCount</span><span class="p">:</span><span class="w"> </span><span class="mi">36</span><span class="p">,</span>
+<span class="w">                       </span><span class="n">instanceCount</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="p">)</span>
+
+<span class="n">encoder</span><span class="p">.</span><span class="n">drawIndexedPrimitives</span><span class="p">(</span><span class="n">type</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">triangle</span><span class="p">,</span>
+<span class="w">                              </span><span class="n">indexCount</span><span class="p">:</span><span class="w"> </span><span class="n">submesh</span><span class="p">.</span><span class="n">indexCount</span><span class="p">,</span>
+<span class="w">                              </span><span class="n">indexType</span><span class="p">:</span><span class="w"> </span><span class="n">submesh</span><span class="p">.</span><span class="n">indexType</span><span class="p">,</span>
+<span class="w">                              </span><span class="n">indexBuffer</span><span class="p">:</span><span class="w"> </span><span class="n">submesh</span><span class="p">.</span><span class="n">indexBuffer</span><span class="p">.</span><span class="n">buffer</span><span class="p">,</span>
+<span class="w">                              </span><span class="n">indexBufferOffset</span><span class="p">:</span><span class="w"> </span><span class="n">submesh</span><span class="p">.</span><span class="n">indexBuffer</span><span class="p">.</span><span class="n">offset</span><span class="p">,</span>
+<span class="w">                              </span><span class="n">instanceCount</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="p">)</span>
+</code></pre></div>
+
+<p>The GPU runs the vertex function for every vertex of every instance. The only difference between instances is the built-in <code>[[instance_id]]</code>, counting from 0. Everything that makes instances look different is derived from that number.</p>
+<h2 id="per-instance-data-in-a-buffer">Per-instance data in a buffer<a class="headerlink" href="#per-instance-data-in-a-buffer" title="Permanent link">#</a></h2>
+<p>Put one struct per instance into a buffer and index it with the instance ID:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">InstanceData</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float4x4</span><span class="w"> </span><span class="n">model</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">color</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="n">vertex</span><span class="w"> </span><span class="n">VertexOut</span><span class="w"> </span><span class="n">vertex_instanced</span><span class="p">(</span><span class="n">VertexIn</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
+<span class="w">                                  </span><span class="n">uint</span><span class="w"> </span><span class="n">instanceID</span><span class="w"> </span><span class="p">[[</span><span class="na">instance_id</span><span class="p">]],</span>
+<span class="w">                                  </span><span class="n">constant</span><span class="w"> </span><span class="n">Uniforms</span><span class="w"> </span><span class="o">&amp;</span><span class="n">uniforms</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
+<span class="w">                                  </span><span class="k">const</span><span class="w"> </span><span class="n">device</span><span class="w"> </span><span class="n">InstanceData</span><span class="w"> </span><span class="o">*</span><span class="n">instances</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">2</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">InstanceData</span><span class="w"> </span><span class="n">instance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">instances</span><span class="p">[</span><span class="n">instanceID</span><span class="p">];</span>
+
+<span class="w">    </span><span class="n">VertexOut</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">world</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">instance</span><span class="p">.</span><span class="n">model</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">projection</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">view</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">world</span><span class="p">;</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">worldPosition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">world</span><span class="p">.</span><span class="n">xyz</span><span class="p">;</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">normal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">instance</span><span class="p">.</span><span class="n">model</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">normal</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">)).</span><span class="n">xyz</span><span class="p">;</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">uv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">;</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">instance</span><span class="p">.</span><span class="n">color</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Using the model matrix for the normal is only correct for rotations and uniform scales. Store a normal matrix per instance if you need non-uniform scaling.</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">InstanceData</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">model</span><span class="p">:</span><span class="w"> </span><span class="n">float4x4</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">color</span><span class="p">:</span><span class="w"> </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;</span>
+<span class="p">}</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nv">instanceBuffer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeBuffer</span><span class="p">(</span><span class="n">length</span><span class="p">:</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="n">InstanceData</span><span class="p">&gt;.</span><span class="bp">stride</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">instanceCount</span><span class="p">,</span>
+<span class="w">                                       </span><span class="n">options</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">storageModeShared</span><span class="p">)</span><span class="o">!</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nv">instances</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">instanceBuffer</span><span class="p">.</span><span class="n">contents</span><span class="p">().</span><span class="n">bindMemory</span><span class="p">(</span><span class="n">to</span><span class="p">:</span><span class="w"> </span><span class="n">InstanceData</span><span class="p">.</span><span class="kc">self</span><span class="p">,</span><span class="w"> </span><span class="n">capacity</span><span class="p">:</span><span class="w"> </span><span class="n">instanceCount</span><span class="p">)</span>
+<span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mf">0.</span><span class="p">.&lt;</span><span class="n">instanceCount</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">instances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">InstanceData</span><span class="p">(</span><span class="n">model</span><span class="p">:</span><span class="w"> </span><span class="n">transforms</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="w"> </span><span class="n">color</span><span class="p">:</span><span class="w"> </span><span class="n">colors</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="n">encoder</span><span class="p">.</span><span class="n">setVertexBuffer</span><span class="p">(</span><span class="n">instanceBuffer</span><span class="p">,</span><span class="w"> </span><span class="n">offset</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span>
+</code></pre></div>
+
+<div class="admonition note">
+<p class="admonition-title">Coming from OpenGL</p>
+<p>There is no need for instanced vertex attributes with divisors, and no limit on the size of per-instance data. A buffer and an index are enough. If you prefer attributes anyway, a vertex descriptor layout can advance once per instance: <code>layouts[1].stepFunction = .perInstance</code>.</p>
+</div>
+<h2 id="an-asteroid-field">An asteroid field<a class="headerlink" href="#an-asteroid-field" title="Permanent link">#</a></h2>
+<p>Generate a ring of randomly placed, rotated and scaled rocks around a planet:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">makeAsteroidTransforms</span><span class="p">(</span><span class="bp">count</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">,</span><span class="w"> </span><span class="n">radius</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">,</span><span class="w"> </span><span class="n">spread</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="p">[</span><span class="n">float4x4</span><span class="p">]</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="p">(</span><span class="mf">0.</span><span class="p">.&lt;</span><span class="bp">count</span><span class="p">).</span><span class="bp">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">angle</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">Float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">Float</span><span class="p">(</span><span class="bp">count</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">.</span><span class="n">pi</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">offset</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nb">Float</span><span class="p">.</span><span class="n">random</span><span class="p">(</span><span class="k">in</span><span class="p">:</span><span class="w"> </span><span class="o">-</span><span class="n">spread</span><span class="p">...</span><span class="n">spread</span><span class="p">)</span><span class="w"> </span><span class="p">}</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">position</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Float3</span><span class="p">(</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">radius</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">offset</span><span class="p">(),</span>
+<span class="w">                              </span><span class="n">offset</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.4</span><span class="p">,</span>
+<span class="w">                              </span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">radius</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">offset</span><span class="p">())</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">scale</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">Float</span><span class="p">.</span><span class="n">random</span><span class="p">(</span><span class="k">in</span><span class="p">:</span><span class="w"> </span><span class="mf">0.05</span><span class="p">...</span><span class="mf">0.25</span><span class="p">)</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">rotation</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">Float</span><span class="p">.</span><span class="n">random</span><span class="p">(</span><span class="k">in</span><span class="p">:</span><span class="w"> </span><span class="mf">0.</span><span class="p">..(</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">.</span><span class="n">pi</span><span class="p">))</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">float4x4</span><span class="p">(</span><span class="n">translation</span><span class="p">:</span><span class="w"> </span><span class="n">position</span><span class="p">)</span>
+<span class="w">             </span><span class="o">*</span><span class="w"> </span><span class="n">float4x4</span><span class="p">(</span><span class="n">rotation</span><span class="p">:</span><span class="w"> </span><span class="n">rotation</span><span class="p">,</span><span class="w"> </span><span class="n">axis</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">0.4</span><span class="p">,</span><span class="w"> </span><span class="mf">0.6</span><span class="p">,</span><span class="w"> </span><span class="mf">0.8</span><span class="p">])</span>
+<span class="w">             </span><span class="o">*</span><span class="w"> </span><span class="n">float4x4</span><span class="p">(</span><span class="n">scale</span><span class="p">:</span><span class="w"> </span><span class="n">Float3</span><span class="p">(</span><span class="n">repeating</span><span class="p">:</span><span class="w"> </span><span class="n">scale</span><span class="p">))</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Drawn with one call per rock, a few thousand asteroids already cost real CPU time each frame. Drawn instanced, a hundred thousand run smoothly, and the limit becomes how many triangles the GPU can fill.</p>
+<figure><img src="../assets/img/advanced-metal/instancing.webp" alt="Thousands of rocks around a planet in a single draw call." width="880" height="495" loading="lazy"><figcaption>Thousands of rocks around a planet in a single draw call.</figcaption></figure>
+
+<h2 id="animating-instances">Animating instances<a class="headerlink" href="#animating-instances" title="Permanent link">#</a></h2>
+<p>Since the instance buffer is shared memory, updating it is a plain write each frame. Use the ring-buffer scheme from <a href="advanced-data.html">Advanced Data</a> so you do not overwrite data the GPU is still reading. For very large counts, moving the update itself to the GPU with a <a href="../beyond/compute-shaders.html">compute function</a> removes the CPU from the loop entirely.</p>
+<h2 id="culling-and-the-next-step">Culling and the next step<a class="headerlink" href="#culling-and-the-next-step" title="Permanent link">#</a></h2>
+<p>Instancing draws every instance, visible or not. Large worlds cull on the CPU and write only visible instances to the buffer, or let the GPU do it: a compute pass tests each instance against the view frustum and writes the survivors into an <strong>indirect command buffer</strong>, a list of draw calls encoded on the GPU itself (<code>MTLIndirectCommandBuffer</code>). That technique, GPU-driven rendering, is beyond this series, but instancing is its first step.</p>
+<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<ul>
+<li>Draw a 100 × 100 grid of cubes with one call, coloring each by its instance ID.</li>
+<li>Make the asteroid ring rotate by passing a time uniform and rotating in the vertex function, with no CPU buffer updates.</li>
+</ul></article><div class="pager"><a class="prev" href="../advanced-metal/no-geometry-shaders.html"><small>Previous</small>Life Without Geometry Shaders</a><a class="next" href="../advanced-metal/anti-aliasing.html"><small>Next</small>Anti-Aliasing</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

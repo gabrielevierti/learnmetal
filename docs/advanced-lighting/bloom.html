@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bloom · learnmetal</title>
+<meta name="description" content="Advanced Lighting: Bloom. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a class="active" href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">Advanced Lighting</p><h1 id="bloom">Bloom<a class="headerlink" href="#bloom" title="Permanent link">#</a></h1>
+<div class="example-box"><strong>Example code</strong> <code>examples/Sources/15-HDRBloom</code>, run with <code>swift run HDRBloom</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
+
+<p>A monitor cannot show a light as blindingly bright as it would be in reality. What we can do is imitate what bright lights do in a camera or in the eye: their glow bleeds over the surrounding image. This effect is <strong>bloom</strong>, and it is one of the cheapest ways to make a scene feel luminous.</p>
+<p>The recipe has three steps:</p>
+<ol>
+<li>Extract the bright parts of the HDR scene into a separate texture.</li>
+<li>Blur that texture.</li>
+<li>Add the blurred result on top of the scene, then tone map.</li>
+</ol>
+<h2 id="extracting-bright-areas">Extracting bright areas<a class="headerlink" href="#extracting-bright-areas" title="Permanent link">#</a></h2>
+<p>We could run a pass over the scene texture to pick out bright pixels. A neater way is to let the scene's fragment function write to <strong>two color attachments</strong> at once, which is called multiple render targets (MRT):</p>
+<div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">SceneOut</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">color</span><span class="w">  </span><span class="p">[[</span><span class="na">color</span><span class="p">(</span><span class="mi">0</span><span class="p">)]];</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">bright</span><span class="w"> </span><span class="p">[[</span><span class="na">color</span><span class="p">(</span><span class="mi">1</span><span class="p">)]];</span>
+<span class="p">};</span>
+
+<span class="n">fragment</span><span class="w"> </span><span class="n">SceneOut</span><span class="w"> </span><span class="n">fragment_main</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span><span class="w"> </span><span class="p">...)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">lit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="cm">/* lighting as before */</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">SceneOut</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">lit</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">brightness</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dot</span><span class="p">(</span><span class="n">lit</span><span class="p">,</span><span class="w"> </span><span class="n">float3</span><span class="p">(</span><span class="mf">0.2126</span><span class="p">,</span><span class="w"> </span><span class="mf">0.7152</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0722</span><span class="p">));</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">bright</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">brightness</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">lit</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>A threshold of 1.0 only makes sense because the scene is rendered in HDR: only pixels brighter than display white glow. Give the render pass and the pipeline a second attachment:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">scenePass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">texture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">brightTexture</span>
+<span class="n">scenePass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">loadAction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">clear</span>
+<span class="n">scenePass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">storeAction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">store</span>
+
+<span class="n">pipelineDescriptor</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">pixelFormat</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">rgba16Float</span>
+</code></pre></div>
+
+<p>Every pipeline used in that pass must declare both attachments. A fragment function that should not write to one of them, such as the lamp shader, can leave it out of its output struct; with <code>writeMask = []</code> on the attachment you can also disable writes explicitly.</p>
+<h2 id="gaussian-blur">Gaussian blur<a class="headerlink" href="#gaussian-blur" title="Permanent link">#</a></h2>
+<p>A <strong>Gaussian blur</strong> averages each pixel with its neighbors, weighted by a bell curve. A two-dimensional kernel of 9 × 9 would cost 81 samples per pixel. The Gaussian is <strong>separable</strong>: blurring horizontally and then vertically gives the identical result with 9 + 9 samples.</p>
+<div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">BlurUniforms</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">direction</span><span class="p">;</span><span class="w">    </span><span class="c1">// (1, 0) or (0, 1)</span>
+<span class="p">};</span>
+
+<span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_blur</span><span class="p">(</span><span class="n">ScreenOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
+<span class="w">                              </span><span class="n">constant</span><span class="w"> </span><span class="n">BlurUniforms</span><span class="w"> </span><span class="o">&amp;</span><span class="n">uniforms</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
+<span class="w">                              </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">image</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
+<span class="w">                              </span><span class="n">sampler</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="p">[[</span><span class="na">sampler</span><span class="p">(</span><span class="mi">0</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">weights</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mf">0.227027</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1945946</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1216216</span><span class="p">,</span><span class="w"> </span><span class="mf">0.054054</span><span class="p">,</span><span class="w"> </span><span class="mf">0.016216</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">texel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">direction</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">float2</span><span class="p">(</span><span class="n">image</span><span class="p">.</span><span class="n">get_width</span><span class="p">(),</span><span class="w"> </span><span class="n">image</span><span class="p">.</span><span class="n">get_height</span><span class="p">());</span>
+
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">image</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">rgb</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">weights</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">result</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">image</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">texel</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="kt">float</span><span class="p">(</span><span class="n">i</span><span class="p">)).</span><span class="n">rgb</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">weights</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">        </span><span class="n">result</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">image</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">texel</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="kt">float</span><span class="p">(</span><span class="n">i</span><span class="p">)).</span><span class="n">rgb</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">weights</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h2 id="ping-pong">Ping-pong<a class="headerlink" href="#ping-pong" title="Permanent link">#</a></h2>
+<p>A pass cannot read from the texture it is writing to, so the blur alternates between two textures: A to B horizontally, B to A vertically, and again for a stronger blur.</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="nv">source</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">brightTexture</span><span class="p">!</span>
+<span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mf">0.</span><span class="p">.&lt;</span><span class="mi">10</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">horizontal</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">target</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">horizontal</span><span class="w"> </span><span class="p">?</span><span class="w"> </span><span class="n">blurTextureA</span><span class="p">!</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">blurTextureB</span><span class="p">!</span>
+
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">pass</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLRenderPassDescriptor</span><span class="p">()</span>
+<span class="w">    </span><span class="n">pass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">texture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">target</span>
+<span class="w">    </span><span class="n">pass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">loadAction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">dontCare</span>
+<span class="w">    </span><span class="n">pass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">storeAction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">store</span>
+
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">encoder</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">commandBuffer</span><span class="p">.</span><span class="n">makeRenderCommandEncoder</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">pass</span><span class="p">)</span><span class="o">!</span>
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">setRenderPipelineState</span><span class="p">(</span><span class="n">blurPipelineState</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">uniforms</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">BlurUniforms</span><span class="p">(</span><span class="n">direction</span><span class="p">:</span><span class="w"> </span><span class="n">horizontal</span><span class="w"> </span><span class="p">?</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">])</span>
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">setFragmentBytes</span><span class="p">(&amp;</span><span class="n">uniforms</span><span class="p">,</span><span class="w"> </span><span class="n">length</span><span class="p">:</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="n">BlurUniforms</span><span class="p">&gt;.</span><span class="bp">stride</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">setFragmentTexture</span><span class="p">(</span><span class="n">source</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">setFragmentSamplerState</span><span class="p">(</span><span class="n">clampSampler</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">drawPrimitives</span><span class="p">(</span><span class="n">type</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">triangle</span><span class="p">,</span><span class="w"> </span><span class="n">vertexStart</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">vertexCount</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span>
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">endEncoding</span><span class="p">()</span>
+
+<span class="w">    </span><span class="n">source</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">target</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>The load action is <code>.dontCare</code> because the full-screen triangle overwrites every pixel anyway. Skipping the load is free performance on a tile-based GPU.</p>
+<h2 id="combining">Combining<a class="headerlink" href="#combining" title="Permanent link">#</a></h2>
+<p>The final pass adds the blurred glow to the scene and then tone maps:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_composite</span><span class="p">(</span><span class="n">ScreenOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
+<span class="w">                                   </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">scene</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
+<span class="w">                                   </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">bloom</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
+<span class="w">                                   </span><span class="n">sampler</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="p">[[</span><span class="na">sampler</span><span class="p">(</span><span class="mi">0</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">hdr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">scene</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">rgb</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">bloom</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">rgb</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">mapped</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">hdr</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">mapped</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Bloom is added <strong>before</strong> tone mapping, so the glow is compressed together with everything else.</p>
+<figure><img src="../assets/img/advanced-lighting/bloom.webp" alt="Pixels brighter than white bleed into their surroundings." width="880" height="246" loading="lazy"><figcaption>Pixels brighter than white bleed into their surroundings.</figcaption></figure>
+
+<h2 id="doing-it-better">Doing it better<a class="headerlink" href="#doing-it-better" title="Permanent link">#</a></h2>
+<p>Ten full-resolution passes with a small kernel give a tight glow at a high cost. Modern bloom works on a <strong>mip chain</strong> instead:</p>
+<ol>
+<li>Downsample the bright texture repeatedly, halving the size each time, for five or six levels.</li>
+<li>Walk back up, upsampling each level with a small blur and adding it to the next larger one.</li>
+</ol>
+<p>Each level contributes a wider glow, the total cost is around one and a third full-resolution passes, and the result is a broad, smooth halo. This is the approach used in most current engines, and it also removes the need for a hard threshold: blending a small fraction of the blurred chain with the scene looks more natural.</p>
+<p>Two Metal-specific shortcuts are worth knowing:</p>
+<ul>
+<li><strong>Metal Performance Shaders</strong> ships tuned image filters. <code>MPSImageGaussianBlur(device:sigma:)</code> blurs a texture with one call: <code>blur.encode(commandBuffer:sourceTexture:destinationTexture:)</code>.</li>
+<li>A blur can also run as a <a href="../beyond/compute-shaders.html">compute function</a>, which avoids setting up render passes for image processing.</li>
+</ul>
+<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<ul>
+<li>Change the number of blur iterations and watch the glow widen.</li>
+<li>Run the blur at half resolution and compare the quality and the GPU time.</li>
+<li>Implement the downsample and upsample chain.</li>
+</ul></article><div class="pager"><a class="prev" href="../advanced-lighting/hdr.html"><small>Previous</small>HDR</a><a class="next" href="../advanced-lighting/deferred-shading.html"><small>Next</small>Deferred Shading</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

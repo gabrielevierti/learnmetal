@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cubemaps · learnmetal</title>
+<meta name="description" content="Advanced Metal: Cubemaps. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a class="active" href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">Advanced Metal</p><h1 id="cubemaps">Cubemaps<a class="headerlink" href="#cubemaps" title="Permanent link">#</a></h1>
+<p>A <strong>cubemap</strong> is a texture made of six square images arranged as the faces of a cube. It is sampled with a 3D direction instead of a 2D coordinate: imagine standing at the center of the cube and looking along the direction, and you get the color that you see. Cubemaps are used for skies, reflections, and, later, for omnidirectional shadows and image-based lighting.</p>
+<h2 id="creating-a-cubemap">Creating a cubemap<a class="headerlink" href="#creating-a-cubemap" title="Permanent link">#</a></h2>
+<p>The six faces are stored as six <strong>slices</strong> of one texture of type <code>.typeCube</code>, in the order +X, -X, +Y, -Y, +Z, -Z (right, left, top, bottom, front, back).</p>
+<p><strong>From six image files</strong>, the shortest route is through Model I/O:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">names</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="s">"right.jpg"</span><span class="p">,</span><span class="w"> </span><span class="s">"left.jpg"</span><span class="p">,</span><span class="w"> </span><span class="s">"top.jpg"</span><span class="p">,</span><span class="w"> </span><span class="s">"bottom.jpg"</span><span class="p">,</span><span class="w"> </span><span class="s">"front.jpg"</span><span class="p">,</span><span class="w"> </span><span class="s">"back.jpg"</span><span class="p">]</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">mdlTexture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MDLTexture</span><span class="p">(</span><span class="n">cubeWithImagesNamed</span><span class="p">:</span><span class="w"> </span><span class="n">names</span><span class="p">)</span><span class="o">!</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">skybox</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="w"> </span><span class="n">loader</span><span class="p">.</span><span class="n">newTexture</span><span class="p">(</span><span class="n">texture</span><span class="p">:</span><span class="w"> </span><span class="n">mdlTexture</span><span class="p">,</span><span class="w"> </span><span class="n">options</span><span class="p">:</span><span class="w"> </span><span class="p">[.</span><span class="n">SRGB</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">])</span>
+</code></pre></div>
+
+<p><strong>From one image</strong> containing the six faces stacked top to bottom, the texture loader can split it:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">skybox</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="w"> </span><span class="n">loader</span><span class="p">.</span><span class="n">newTexture</span><span class="p">(</span><span class="n">URL</span><span class="p">:</span><span class="w"> </span><span class="n">url</span><span class="p">,</span><span class="w"> </span><span class="n">options</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">.</span><span class="n">cubeLayout</span><span class="p">:</span><span class="w"> </span><span class="bp">MTKTextureLoader</span><span class="p">.</span><span class="n">CubeLayout</span><span class="p">.</span><span class="n">vertical</span><span class="p">,</span>
+<span class="w">    </span><span class="p">.</span><span class="n">SRGB</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="p">])</span>
+</code></pre></div>
+
+<p><strong>By hand</strong>, when you generate or decode the faces yourself:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">descriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLTextureDescriptor</span><span class="p">.</span><span class="n">textureCubeDescriptor</span><span class="p">(</span><span class="n">pixelFormat</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">rgba8Unorm</span><span class="p">,</span>
+<span class="w">                                                            </span><span class="n">size</span><span class="p">:</span><span class="w"> </span><span class="mi">1024</span><span class="p">,</span>
+<span class="w">                                                            </span><span class="n">mipmapped</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">cube</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeTexture</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">descriptor</span><span class="p">)</span><span class="o">!</span>
+<span class="k">for</span><span class="w"> </span><span class="n">face</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mf">0.</span><span class="p">.&lt;</span><span class="mi">6</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">cube</span><span class="p">.</span><span class="n">replace</span><span class="p">(</span><span class="n">region</span><span class="p">:</span><span class="w"> </span><span class="n">MTLRegionMake2D</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1024</span><span class="p">,</span><span class="w"> </span><span class="mi">1024</span><span class="p">),</span>
+<span class="w">                 </span><span class="n">mipmapLevel</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">                 </span><span class="n">slice</span><span class="p">:</span><span class="w"> </span><span class="n">face</span><span class="p">,</span>
+<span class="w">                 </span><span class="n">withBytes</span><span class="p">:</span><span class="w"> </span><span class="n">facePixels</span><span class="p">[</span><span class="n">face</span><span class="p">],</span>
+<span class="w">                 </span><span class="n">bytesPerRow</span><span class="p">:</span><span class="w"> </span><span class="mi">1024</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
+<span class="w">                 </span><span class="n">bytesPerImage</span><span class="p">:</span><span class="w"> </span><span class="mi">1024</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1024</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">4</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h2 id="a-skybox">A skybox<a class="headerlink" href="#a-skybox" title="Permanent link">#</a></h2>
+<p>A skybox is a cube drawn around the camera and textured with a cubemap, giving the illusion of a vast environment. Its texture coordinate is simply the cube's local position, used as a direction.</p>
+<div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">SkyOut</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="p">[[</span><span class="na">position</span><span class="p">]];</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">direction</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="n">vertex</span><span class="w"> </span><span class="n">SkyOut</span><span class="w"> </span><span class="n">vertex_sky</span><span class="p">(</span><span class="n">VertexIn</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
+<span class="w">                         </span><span class="n">constant</span><span class="w"> </span><span class="n">Uniforms</span><span class="w"> </span><span class="o">&amp;</span><span class="n">uniforms</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">1</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">SkyOut</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">clip</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">projection</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">view</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">clip</span><span class="p">.</span><span class="n">xyww</span><span class="p">;</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">direction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">position</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_sky</span><span class="p">(</span><span class="n">SkyOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
+<span class="w">                             </span><span class="n">texturecube</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">sky</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
+<span class="w">                             </span><span class="n">sampler</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="p">[[</span><span class="na">sampler</span><span class="p">(</span><span class="mi">0</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">sky</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">direction</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Two tricks are packed into the vertex function:</p>
+<ul>
+<li>The position is multiplied with <strong>w = 0</strong>, which removes the translation of the view matrix. The sky rotates with the camera but never gets closer.</li>
+<li>The output is <code>clip.xyww</code>. After the perspective divide, z becomes w / w = <strong>1</strong>, the far plane. The sky ends up behind everything.</li>
+</ul>
+<p>Draw the sky <strong>last</strong>, after all opaque objects, with a depth state that uses <code>.lessEqual</code> and does not write depth:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">skyDepth</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLDepthStencilDescriptor</span><span class="p">()</span>
+<span class="n">skyDepth</span><span class="p">.</span><span class="n">depthCompareFunction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">lessEqual</span>
+<span class="n">skyDepth</span><span class="p">.</span><span class="n">isDepthWriteEnabled</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kc">false</span>
+</code></pre></div>
+
+<p>Drawn last, the sky's fragments are rejected wherever something else was drawn, so the sky costs only the pixels where it is visible. <code>.lessEqual</code> is needed because the sky's depth equals the cleared value of 1. The camera is inside the cube, so disable culling for this draw.</p>
+<div class="admonition note">
+<p class="admonition-title">Handedness</p>
+<p>Cubemaps use a left-handed convention, a historical quirk shared by all graphics APIs. If a skybox looks mirrored in your right-handed world, negate the x or z component of the direction in the shader.</p>
+</div>
+<h2 id="reflection">Reflection<a class="headerlink" href="#reflection" title="Permanent link">#</a></h2>
+<p>With the environment in a cubemap, a mirror-like surface is easy: reflect the view direction around the normal and use the result to sample the sky.</p>
+<div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_reflect</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
+<span class="w">                                 </span><span class="n">constant</span><span class="w"> </span><span class="n">FragmentUniforms</span><span class="w"> </span><span class="o">&amp;</span><span class="n">uniforms</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
+<span class="w">                                 </span><span class="n">texturecube</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">sky</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
+<span class="w">                                 </span><span class="n">sampler</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="p">[[</span><span class="na">sampler</span><span class="p">(</span><span class="mi">0</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">incident</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">worldPosition</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">viewPosition</span><span class="p">);</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">reflected</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">reflect</span><span class="p">(</span><span class="n">incident</span><span class="p">,</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">normal</span><span class="p">));</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">sky</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">reflected</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Combine it with a specular map to make only parts of a model reflective.</p>
+<h2 id="refraction">Refraction<a class="headerlink" href="#refraction" title="Permanent link">#</a></h2>
+<p>Light bends when it passes from one medium into another. <code>refract</code> computes the bent direction from the ratio of the two <strong>refractive indices</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Material</th>
+<th>Index</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Air</td>
+<td>1.00</td>
+</tr>
+<tr>
+<td>Water</td>
+<td>1.33</td>
+</tr>
+<tr>
+<td>Glass</td>
+<td>1.52</td>
+</tr>
+<tr>
+<td>Diamond</td>
+<td>2.42</td>
+</tr>
+</tbody>
+</table>
+<div class="codehilite"><pre><span></span><code><span class="kt">float</span><span class="w"> </span><span class="n">ratio</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.00</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1.52</span><span class="p">;</span><span class="w">   </span><span class="c1">// from air into glass</span>
+<span class="n">float3</span><span class="w"> </span><span class="n">refracted</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">refract</span><span class="p">(</span><span class="n">incident</span><span class="p">,</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">normal</span><span class="p">),</span><span class="w"> </span><span class="n">ratio</span><span class="p">);</span>
+<span class="k">return</span><span class="w"> </span><span class="n">sky</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">refracted</span><span class="p">);</span>
+</code></pre></div>
+
+<p>This is a single refraction at the surface. It is physically incomplete, but it looks convincingly glassy.</p>
+<figure><img src="../assets/img/advanced-metal/cubemaps.webp" alt="A skybox, a sphere that reflects it and a block that refracts it." width="880" height="495" loading="lazy"><figcaption>A skybox, a sphere that reflects it and a block that refracts it.</figcaption></figure>
+
+<h2 id="rendering-into-a-cubemap">Rendering into a cubemap<a class="headerlink" href="#rendering-into-a-cubemap" title="Permanent link">#</a></h2>
+<p>A static sky cannot reflect moving objects. For dynamic reflections, render the scene six times from the object's position, once into each face, with a 90 degree field of view and an aspect ratio of 1. Select the face with the attachment's <code>slice</code>:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">pass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">texture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">environmentCube</span>
+<span class="n">pass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">slice</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">face</span>
+</code></pre></div>
+
+<p>Because of the cubemap convention, these six views must be built with a <strong>left-handed</strong> view and projection matrix, and the up vectors are fixed:</p>
+<table>
+<thead>
+<tr>
+<th>Face</th>
+<th>Look direction</th>
+<th>Up</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>+X</td>
+<td>( 1, 0, 0)</td>
+<td>(0, 1, 0)</td>
+</tr>
+<tr>
+<td>-X</td>
+<td>(-1, 0, 0)</td>
+<td>(0, 1, 0)</td>
+</tr>
+<tr>
+<td>+Y</td>
+<td>( 0, 1, 0)</td>
+<td>(0, 0, -1)</td>
+</tr>
+<tr>
+<td>-Y</td>
+<td>( 0, -1, 0)</td>
+<td>(0, 0, 1)</td>
+</tr>
+<tr>
+<td>+Z</td>
+<td>( 0, 0, 1)</td>
+<td>(0, 1, 0)</td>
+</tr>
+<tr>
+<td>-Z</td>
+<td>( 0, 0, -1)</td>
+<td>(0, 1, 0)</td>
+</tr>
+</tbody>
+</table>
+<div class="codehilite"><pre><span></span><code><span class="kd">extension</span><span class="w"> </span><span class="nc">float4x4</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">init</span><span class="p">(</span><span class="n">lookAtLH</span><span class="w"> </span><span class="n">eye</span><span class="p">:</span><span class="w"> </span><span class="n">Float3</span><span class="p">,</span><span class="w"> </span><span class="n">center</span><span class="p">:</span><span class="w"> </span><span class="n">Float3</span><span class="p">,</span><span class="w"> </span><span class="n">up</span><span class="p">:</span><span class="w"> </span><span class="n">Float3</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">z</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">center</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">eye</span><span class="p">)</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">x</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">cross</span><span class="p">(</span><span class="n">up</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">))</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">y</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">cross</span><span class="p">(</span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">)</span>
+<span class="w">        </span><span class="kc">self</span><span class="p">.</span><span class="kd">init</span><span class="p">(</span><span class="n">columns</span><span class="p">:</span><span class="w"> </span><span class="p">(</span>
+<span class="w">            </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;(</span><span class="n">x</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span>
+<span class="w">            </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;(</span><span class="n">x</span><span class="p">.</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">.</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">.</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span>
+<span class="w">            </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;(</span><span class="n">x</span><span class="p">.</span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">.</span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">.</span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span>
+<span class="w">            </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;(</span><span class="o">-</span><span class="n">dot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">eye</span><span class="p">),</span><span class="w"> </span><span class="o">-</span><span class="n">dot</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">eye</span><span class="p">),</span><span class="w"> </span><span class="o">-</span><span class="n">dot</span><span class="p">(</span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="n">eye</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">)))</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">init</span><span class="p">(</span><span class="n">perspectiveLHFov</span><span class="w"> </span><span class="n">fovY</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">,</span><span class="w"> </span><span class="n">aspect</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">,</span><span class="w"> </span><span class="n">near</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">,</span><span class="w"> </span><span class="n">far</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">y</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">tan</span><span class="p">(</span><span class="n">fovY</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.5</span><span class="p">)</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">x</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">aspect</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">z</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">far</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">far</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">near</span><span class="p">)</span>
+<span class="w">        </span><span class="kc">self</span><span class="p">.</span><span class="kd">init</span><span class="p">(</span><span class="n">columns</span><span class="p">:</span><span class="w"> </span><span class="p">(</span>
+<span class="w">            </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span>
+<span class="w">            </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span>
+<span class="w">            </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span>
+<span class="w">            </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">near</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)))</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>A left-handed view mirrors the scene, which reverses triangle winding, so use <code>setFrontFacing(.clockwise)</code> while rendering the faces. We reuse these helpers for <a href="../advanced-lighting/point-shadows.html">Point Shadows</a> and for image-based lighting. Six scene renders per frame are expensive; engines update such probes rarely or one face per frame.</p>
+<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<ul>
+<li>Draw the skybox first instead of last, with depth writes off, and measure the difference in the Xcode GPU report on a heavy scene.</li>
+<li>Blend reflection and refraction by a factor that depends on the viewing angle.</li>
+</ul></article><div class="pager"><a class="prev" href="../advanced-metal/render-targets.html"><small>Previous</small>Render Targets</a><a class="next" href="../advanced-metal/advanced-data.html"><small>Next</small>Advanced Data</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

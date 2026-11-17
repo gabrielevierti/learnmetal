@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Normal Mapping · learnmetal</title>
+<meta name="description" content="Advanced Lighting: Normal Mapping. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a class="active" href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">Advanced Lighting</p><h1 id="normal-mapping">Normal Mapping<a class="headerlink" href="#normal-mapping" title="Permanent link">#</a></h1>
+<p>A brick wall rendered as a flat quad looks flat, however good the texture is. The lighting gives it away, because every fragment has the same normal. <strong>Normal mapping</strong> stores a different normal for every texel, so light reacts to bumps and grooves that are not there in the geometry.</p>
+<h2 id="normal-maps">Normal maps<a class="headerlink" href="#normal-maps" title="Permanent link">#</a></h2>
+<p>A normal is a vector with components from -1 to 1. Stored in an image, each component is remapped to the 0 to 1 range, and the shader undoes it:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">normal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">xyz</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
+</code></pre></div>
+
+<p>Normal maps look bluish because most normals point straight out of the surface, along +z, which is stored as the color (0.5, 0.5, 1.0). Load normal maps as <strong>linear</strong> data, never sRGB.</p>
+<h2 id="tangent-space">Tangent space<a class="headerlink" href="#tangent-space" title="Permanent link">#</a></h2>
+<p>The normals in the map are expressed relative to the surface itself, in <strong>tangent space</strong>, where +z points away from the surface. That is what makes one map usable on a wall facing any direction, or wrapped around a curved model. To light with them, we need a way to rotate them from tangent space into world space.</p>
+<p>That rotation is the <strong>TBN matrix</strong>, built from three perpendicular unit vectors at each vertex:</p>
+<ul>
+<li><strong>N</strong>, the vertex normal,</li>
+<li><strong>T</strong>, the <strong>tangent</strong>, pointing along the surface in the direction of increasing u,</li>
+<li><strong>B</strong>, the <strong>bitangent</strong>, pointing along the surface in the direction of increasing v.</li>
+</ul>
+<h2 id="getting-tangents">Getting tangents<a class="headerlink" href="#getting-tangents" title="Permanent link">#</a></h2>
+<p>Tangents are computed from positions and texture coordinates. Model I/O does it for you. Add a tangent attribute to the vertex descriptor and ask for the basis after loading:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">3</span><span class="p">].</span><span class="n">format</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">float3</span><span class="w">   </span><span class="c1">// tangent</span>
+<span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">3</span><span class="p">].</span><span class="n">offset</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">32</span>
+<span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">layouts</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="bp">stride</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">44</span>
+
+<span class="p">(</span><span class="n">mdlDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="p">!</span><span class="w"> </span><span class="bp">MDLVertexAttribute</span><span class="p">).</span><span class="n">name</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MDLVertexAttributeTangent</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="n">mesh</span><span class="p">.</span><span class="n">addOrthTanBasis</span><span class="p">(</span><span class="n">forTextureCoordinateAttributeNamed</span><span class="p">:</span><span class="w"> </span><span class="n">MDLVertexAttributeTextureCoordinate</span><span class="p">,</span>
+<span class="w">                     </span><span class="n">normalAttributeNamed</span><span class="p">:</span><span class="w"> </span><span class="n">MDLVertexAttributeNormal</span><span class="p">,</span>
+<span class="w">                     </span><span class="n">tangentAttributeNamed</span><span class="p">:</span><span class="w"> </span><span class="n">MDLVertexAttributeTangent</span><span class="p">)</span>
+<span class="n">mesh</span><span class="p">.</span><span class="n">vertexDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">mdlDescriptor</span>
+</code></pre></div>
+
+<p>Assigning the descriptor again makes Model I/O repack the buffers with the new attribute.</p>
+<p>For hand-built geometry, the tangent of a triangle with edges <code>e1</code>, <code>e2</code> and texture coordinate differences <code>(du1, dv1)</code>, <code>(du2, dv2)</code> is:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">f</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">du1</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">dv2</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">du2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">dv1</span><span class="p">)</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">tangent</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">f</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">dv2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">e1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">dv1</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">e2</span><span class="p">))</span>
+</code></pre></div>
+
+<h2 id="the-shader">The shader<a class="headerlink" href="#the-shader" title="Permanent link">#</a></h2>
+<p>The vertex function transforms the normal and the tangent into world space:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">VertexIn</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="p">[[</span><span class="na">attribute</span><span class="p">(</span><span class="mi">0</span><span class="p">)]];</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">normal</span><span class="w">   </span><span class="p">[[</span><span class="na">attribute</span><span class="p">(</span><span class="mi">1</span><span class="p">)]];</span>
+<span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">uv</span><span class="w">       </span><span class="p">[[</span><span class="na">attribute</span><span class="p">(</span><span class="mi">2</span><span class="p">)]];</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">tangent</span><span class="w">  </span><span class="p">[[</span><span class="na">attribute</span><span class="p">(</span><span class="mi">3</span><span class="p">)]];</span>
+<span class="p">};</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">VertexOut</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="p">[[</span><span class="na">position</span><span class="p">]];</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">worldPosition</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">normal</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">tangent</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">uv</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="n">vertex</span><span class="w"> </span><span class="n">VertexOut</span><span class="w"> </span><span class="n">vertex_main</span><span class="p">(</span><span class="n">VertexIn</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
+<span class="w">                             </span><span class="n">constant</span><span class="w"> </span><span class="n">Uniforms</span><span class="w"> </span><span class="o">&amp;</span><span class="n">uniforms</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">1</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">VertexOut</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">world</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">model</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">projection</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">view</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">world</span><span class="p">;</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">worldPosition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">world</span><span class="p">.</span><span class="n">xyz</span><span class="p">;</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">normal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">normalMatrix</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">normal</span><span class="p">;</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">tangent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">normalMatrix</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">tangent</span><span class="p">;</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">uv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>The fragment function rebuilds an exactly perpendicular basis, then rotates the sampled normal with it:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="nf">perturbedNormal</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">normalMap</span><span class="p">,</span><span class="w"> </span><span class="n">sampler</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">normal</span><span class="p">);</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">tangent</span><span class="p">);</span>
+<span class="w">    </span><span class="n">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">T</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">dot</span><span class="p">(</span><span class="n">T</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">N</span><span class="p">);</span><span class="w">     </span><span class="c1">// Gram-Schmidt: make T perpendicular to N</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">B</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cross</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">tangentNormal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">xyz</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float3x3</span><span class="w"> </span><span class="n">TBN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float3x3</span><span class="p">(</span><span class="n">T</span><span class="p">,</span><span class="w"> </span><span class="n">B</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">TBN</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">tangentNormal</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>float3x3(T, B, N)</code> builds a matrix with those vectors as columns, so multiplying takes a tangent-space vector into world space. Use the returned normal in place of <code>normalize(in.normal)</code> everywhere in the lighting code. Nothing else changes.</p>
+<figure><img src="../assets/img/advanced-lighting/normal-mapping.webp" alt="The same flat quad. The normal map makes light react to bricks and mortar." width="880" height="246" loading="lazy"><figcaption>The same flat quad. The normal map makes light react to bricks and mortar.</figcaption></figure>
+
+<h2 id="green-channel-and-handedness">Green channel and handedness<a class="headerlink" href="#green-channel-and-handedness" title="Permanent link">#</a></h2>
+<p>Two things commonly make a normal-mapped surface look "inside out", with bumps lit as dents:</p>
+<ul>
+<li><strong>Normal map convention.</strong> Maps come in two flavors that differ in the sign of the green channel, usually labeled OpenGL (+Y) and DirectX (-Y). Which one is right depends on which way your v coordinate and bitangent run. If bumps look inverted, negate <code>tangentNormal.y</code>.</li>
+<li><strong>Mirrored texture coordinates.</strong> Symmetric models often mirror their UVs, which flips the bitangent on one half. Exporters encode this as a sign in the tangent's fourth component. Model I/O offers <code>addTangentBasis(forTextureCoordinateAttributeNamed:tangentAttributeNamed:bitangentAttributeNamed:)</code> to store an explicit bitangent if you need to support it.</li>
+</ul>
+<p>A quick sanity check for any model: output <code>N * 0.5 + 0.5</code> as the color. Smoothly changing pastel colors mean the basis is healthy.</p>
+<h2 id="two-channel-normal-maps">Two-channel normal maps<a class="headerlink" href="#two-channel-normal-maps" title="Permanent link">#</a></h2>
+<p>Since a unit normal's z can be recomputed from x and y, normal maps are often stored with two channels in a compressed format, for example BC5 on Mac or EAC RG11 and ASTC on Apple GPUs:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">float2</span><span class="w"> </span><span class="n">xy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">rg</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
+<span class="n">float3</span><span class="w"> </span><span class="n">tangentNormal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float3</span><span class="p">(</span><span class="n">xy</span><span class="p">,</span><span class="w"> </span><span class="n">sqrt</span><span class="p">(</span><span class="n">saturate</span><span class="p">(</span><span class="mf">1.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">dot</span><span class="p">(</span><span class="n">xy</span><span class="p">,</span><span class="w"> </span><span class="n">xy</span><span class="p">))));</span>
+</code></pre></div>
+
+<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<ul>
+<li>Rotate a normal-mapped quad over time and confirm the lighting stays consistent with a fixed light.</li>
+<li>Scale the x and y of the tangent normal by a "bump strength" uniform before normalizing.</li>
+</ul></article><div class="pager"><a class="prev" href="../advanced-lighting/point-shadows.html"><small>Previous</small>Point Shadows</a><a class="next" href="../advanced-lighting/parallax-mapping.html"><small>Next</small>Parallax Mapping</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

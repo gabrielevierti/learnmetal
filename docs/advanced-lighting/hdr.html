@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HDR · learnmetal</title>
+<meta name="description" content="Advanced Lighting: HDR. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a class="active" href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">Advanced Lighting</p><h1 id="hdr">HDR<a class="headerlink" href="#hdr" title="Permanent link">#</a></h1>
+<div class="example-box"><strong>Example code</strong> <code>examples/Sources/15-HDRBloom</code>, run with <code>swift run HDRBloom</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
+
+<p>Color values written to an 8-bit texture are clamped to the 0 to 1 range. Put several bright lights in a scene and large areas add up to more than 1, get clamped, and turn into a featureless white patch. All the detail in the bright regions is lost.</p>
+<p><strong>High dynamic range</strong> rendering lets colors exceed 1 while the image is being built, and converts the result to a displayable range at the very end, in a step called <strong>tone mapping</strong>.</p>
+<h2 id="floating-point-render-targets">Floating-point render targets<a class="headerlink" href="#floating-point-render-targets" title="Permanent link">#</a></h2>
+<p>The scene is rendered into a texture with a floating-point format, which stores values far beyond 1 without clamping:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">descriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLTextureDescriptor</span><span class="p">.</span><span class="n">texture2DDescriptor</span><span class="p">(</span>
+<span class="w">    </span><span class="n">pixelFormat</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">rgba16Float</span><span class="p">,</span><span class="w"> </span><span class="n">width</span><span class="p">:</span><span class="w"> </span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">:</span><span class="w"> </span><span class="n">height</span><span class="p">,</span><span class="w"> </span><span class="n">mipmapped</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">usage</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[.</span><span class="n">renderTarget</span><span class="p">,</span><span class="w"> </span><span class="p">.</span><span class="n">shaderRead</span><span class="p">]</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">storageMode</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="kd">private</span>
+<span class="n">hdrColor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeTexture</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">descriptor</span><span class="p">)</span><span class="o">!</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Format</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.rgba16Float</code></td>
+<td>The standard choice. 16-bit half floats per channel.</td>
+</tr>
+<tr>
+<td><code>.rg11b10Float</code></td>
+<td>Half the memory, no alpha, slightly less precision. Good on mobile.</td>
+</tr>
+<tr>
+<td><code>.rgba32Float</code></td>
+<td>Rarely needed for color.</td>
+</tr>
+</tbody>
+</table>
+<p>Set the scene pipelines' color format to match, and render the scene as in <a href="../advanced-metal/render-targets.html">Render Targets</a>. The lighting shaders do not change. They simply stop being clamped.</p>
+<h2 id="tone-mapping">Tone mapping<a class="headerlink" href="#tone-mapping" title="Permanent link">#</a></h2>
+<p>A full-screen pass reads the HDR texture and maps it to the 0 to 1 range for the drawable.</p>
+<p>The simplest operator is <strong>Reinhard</strong>, which divides each color by itself plus one. Bright values are squeezed together toward 1 and dark values are left nearly untouched:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_tonemap</span><span class="p">(</span><span class="n">ScreenOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
+<span class="w">                                 </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">hdrTexture</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
+<span class="w">                                 </span><span class="n">sampler</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="p">[[</span><span class="na">sampler</span><span class="p">(</span><span class="mi">0</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">hdr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hdrTexture</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">rgb</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">mapped</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hdr</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">hdr</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">mapped</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>The drawable should have an sRGB format, as set up in <a href="gamma-correction.html">Gamma Correction</a>, so the result is gamma-encoded automatically. Tone mapping always comes before gamma encoding.</p>
+<h2 id="exposure">Exposure<a class="headerlink" href="#exposure" title="Permanent link">#</a></h2>
+<p>A camera adapts to the brightness of a scene with its exposure. An <strong>exposure</strong> tone mapper gives us the same control:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">mapped</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">hdr</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">exposure</span><span class="p">);</span>
+</code></pre></div>
+
+<p>A low exposure reveals detail in bright areas and crushes the dark ones; a high exposure does the reverse. With it you can render a dim interior and a sunlit exterior with the same physical light values, changing only the exposure. Automatic exposure, or <strong>eye adaptation</strong>, computes the average brightness of the frame, for example from the smallest mip level of the HDR texture, and eases the exposure toward a target over time.</p>
+<h2 id="filmic-curves">Filmic curves<a class="headerlink" href="#filmic-curves" title="Permanent link">#</a></h2>
+<p>Reinhard tends to look washed out. Film-like curves keep more contrast and roll highlights off more gracefully. A popular compact fit to the ACES film curve, by Krzysztof Narkowicz:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="nf">acesFilm</span><span class="p">(</span><span class="n">float3</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">2.51</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.03</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">2.43</span><span class="p">,</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.59</span><span class="p">,</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.14</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">saturate</span><span class="p">((</span><span class="n">x</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">))</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">d</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">e</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="n">float3</span><span class="w"> </span><span class="n">mapped</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">acesFilm</span><span class="p">(</span><span class="n">hdr</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">exposure</span><span class="p">);</span>
+</code></pre></div>
+
+<p>The tone mapper is one of the biggest contributors to the overall look of a renderer. Try several.</p>
+<h2 id="a-test-scene">A test scene<a class="headerlink" href="#a-test-scene" title="Permanent link">#</a></h2>
+<p>Build a long tunnel from a stretched, inward-facing cube with one very bright light at the far end, with a color around (200, 200, 200), and a few dim colored lights along the walls. Without HDR the far end is a white blob. With HDR and exposure control, you can see the texture of the wall right up to the light.</p>
+<figure><img src="../assets/img/advanced-lighting/hdr.webp" alt="The same HDR image clamped and with two tone mapping operators." width="880" height="218" loading="lazy"><figcaption>The same HDR image clamped and with two tone mapping operators.</figcaption></figure>
+
+<h2 id="why-it-matters-beyond-bright-lights">Why it matters beyond bright lights<a class="headerlink" href="#why-it-matters-beyond-bright-lights" title="Permanent link">#</a></h2>
+<ul>
+<li><strong>Bloom</strong> needs to know which pixels are brighter than white. See the <a href="bloom.html">next chapter</a>.</li>
+<li><strong>Physically based rendering</strong> uses real-world light intensities, which span a huge range.</li>
+<li>Post effects such as depth of field and motion blur look far more natural when computed on HDR values.</li>
+</ul>
+<h2 id="displaying-hdr-directly">Displaying HDR directly<a class="headerlink" href="#displaying-hdr-directly" title="Permanent link">#</a></h2>
+<p>Apple displays with <strong>Extended Dynamic Range</strong> (EDR) can show values brighter than standard white. A Metal layer opts in by using a floating-point drawable format (<code>.rgba16Float</code>), an extended linear color space, and <code>wantsExtendedDynamicRangeContent = true</code> on the <code>CAMetalLayer</code>. Values above 1.0 are then shown brighter than the UI's white, up to a headroom that the screen reports and that changes with brightness settings. You still tone map, but into the display's available range instead of 0 to 1. It is a worthwhile upgrade once the rest of the pipeline is in place.</p>
+<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<ul>
+<li>Add keys to raise and lower the exposure.</li>
+<li>Show Reinhard on the left half of the screen and ACES on the right.</li>
+</ul></article><div class="pager"><a class="prev" href="../advanced-lighting/parallax-mapping.html"><small>Previous</small>Parallax Mapping</a><a class="next" href="../advanced-lighting/bloom.html"><small>Next</small>Bloom</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

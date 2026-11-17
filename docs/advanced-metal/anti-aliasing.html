@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anti-Aliasing · learnmetal</title>
+<meta name="description" content="Advanced Metal: Anti-Aliasing. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a class="active" href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">Advanced Metal</p><h1 id="anti-aliasing">Anti-Aliasing<a class="headerlink" href="#anti-aliasing" title="Permanent link">#</a></h1>
+<p>Look closely at the edge of any cube we have rendered and you see a staircase. A pixel is either inside a triangle or outside it, and nothing in between. That stair-step pattern is <strong>aliasing</strong>, and techniques that hide it are called <strong>anti-aliasing</strong>.</p>
+<h2 id="why-edges-alias">Why edges alias<a class="headerlink" href="#why-edges-alias" title="Permanent link">#</a></h2>
+<p>The rasterizer tests one point per pixel, its center, against each triangle. If the center is covered, the fragment function runs and the whole pixel takes the color. A slanted edge therefore advances in whole-pixel steps.</p>
+<p>Rendering at a higher resolution and scaling down (<strong>supersampling</strong>) solves it, but shading four times as many pixels is expensive.</p>
+<h2 id="multisampling">Multisampling<a class="headerlink" href="#multisampling" title="Permanent link">#</a></h2>
+<p><strong>Multisample anti-aliasing</strong> (MSAA) gets most of the benefit at a fraction of the cost. Each pixel has several <strong>sample points</strong>, typically four, at different positions inside it. For every triangle:</p>
+<ul>
+<li>coverage and depth are tested at <strong>every sample</strong>,</li>
+<li>the fragment function still runs only <strong>once per pixel</strong>,</li>
+<li>its result is stored in each sample that the triangle covers.</li>
+</ul>
+<p>At the end, the samples of each pixel are averaged in a step called the <strong>resolve</strong>. A pixel half covered by a triangle ends up as an even mix of the triangle's color and the background.</p>
+<figure><img src="../assets/img/advanced-metal/anti-aliasing.webp" alt="A magnified triangle edge. With four samples per pixel, partially covered pixels get intermediate colors." width="880" height="246" loading="lazy"><figcaption>A magnified triangle edge. With four samples per pixel, partially covered pixels get intermediate colors.</figcaption></figure>
+
+<h2 id="msaa-with-mtkview">MSAA with MTKView<a class="headerlink" href="#msaa-with-mtkview" title="Permanent link">#</a></h2>
+<p><code>MTKView</code> manages the multisample texture and the resolve for you. Two lines are needed:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">view</span><span class="p">.</span><span class="n">sampleCount</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">4</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="n">pipelineDescriptor</span><span class="p">.</span><span class="n">rasterSampleCount</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">4</span>
+</code></pre></div>
+
+<p>Every pipeline state used in the pass must have the same sample count as the attachments. Run it and the edges are smooth.</p>
+<p>A sample count of 4 is supported on all Metal devices. Check others with <code>device.supportsTextureSampleCount(8)</code>.</p>
+<h2 id="msaa-in-your-own-render-passes">MSAA in your own render passes<a class="headerlink" href="#msaa-in-your-own-render-passes" title="Permanent link">#</a></h2>
+<p>For offscreen passes you create the textures yourself. You need two color textures: a multisample texture to render into, and an ordinary texture to receive the resolved image.</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">msaaDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLTextureDescriptor</span><span class="p">.</span><span class="n">texture2DDescriptor</span><span class="p">(</span>
+<span class="w">    </span><span class="n">pixelFormat</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">bgra8Unorm</span><span class="p">,</span><span class="w"> </span><span class="n">width</span><span class="p">:</span><span class="w"> </span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">:</span><span class="w"> </span><span class="n">height</span><span class="p">,</span><span class="w"> </span><span class="n">mipmapped</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
+<span class="n">msaaDescriptor</span><span class="p">.</span><span class="n">textureType</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">type2DMultisample</span>
+<span class="n">msaaDescriptor</span><span class="p">.</span><span class="n">sampleCount</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">4</span>
+<span class="n">msaaDescriptor</span><span class="p">.</span><span class="n">usage</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">renderTarget</span>
+<span class="n">msaaDescriptor</span><span class="p">.</span><span class="n">storageMode</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">memoryless</span><span class="w">     </span><span class="c1">// .private on Intel Macs</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">msaaColor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeTexture</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">msaaDescriptor</span><span class="p">)</span><span class="o">!</span>
+</code></pre></div>
+
+<p>The depth texture must be multisampled in the same way. Then connect them in the render pass descriptor:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">pass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">texture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">msaaColor</span>
+<span class="n">pass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">resolveTexture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">sceneColor</span><span class="w">       </span><span class="c1">// ordinary texture</span>
+<span class="n">pass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">loadAction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">clear</span>
+<span class="n">pass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">storeAction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">multisampleResolve</span>
+<span class="n">pass</span><span class="p">.</span><span class="n">depthAttachment</span><span class="p">.</span><span class="n">texture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">msaaDepth</span>
+<span class="n">pass</span><span class="p">.</span><span class="n">depthAttachment</span><span class="p">.</span><span class="n">storeAction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">dontCare</span>
+</code></pre></div>
+
+<p>The store action <code>.multisampleResolve</code> averages the samples into <code>resolveTexture</code> at the end of the pass and discards the multisample data. Because the samples are never needed afterward, the multisample textures can be <strong>memoryless</strong> on Apple GPUs: 4× MSAA then costs no extra memory at all, only some extra work inside each tile. This is a real advantage of tile-based GPUs and makes MSAA unusually cheap on Apple devices.</p>
+<h2 id="limits-of-msaa">Limits of MSAA<a class="headerlink" href="#limits-of-msaa" title="Permanent link">#</a></h2>
+<p>MSAA smooths <strong>geometry edges</strong> only. The fragment function runs once per pixel, so it does nothing for:</p>
+<ul>
+<li>shimmering inside a surface from high-frequency textures or sharp specular highlights,</li>
+<li>edges created by <code>discard_fragment</code> in alpha-tested textures. For those, enable <code>isAlphaToCoverageEnabled</code> on the pipeline descriptor, which converts the fragment's alpha into a sample coverage mask.</li>
+</ul>
+<p>MSAA also clashes with <a href="../advanced-lighting/deferred-shading.html">deferred shading</a>, where lighting happens after geometry has been flattened into textures.</p>
+<h2 id="reading-individual-samples">Reading individual samples<a class="headerlink" href="#reading-individual-samples" title="Permanent link">#</a></h2>
+<p>A shader can read a multisample texture directly through the <code>texture2d_ms&lt;float&gt;</code> type, one sample at a time:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_customResolve</span><span class="p">(</span><span class="n">ScreenOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
+<span class="w">                                       </span><span class="n">texture2d_ms</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">scene</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">uint2</span><span class="w"> </span><span class="n">pixel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uint2</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">xy</span><span class="p">);</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">uint</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">scene</span><span class="p">.</span><span class="n">get_num_samples</span><span class="p">();</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">sum</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">scene</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="n">pixel</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="kt">float</span><span class="p">(</span><span class="n">scene</span><span class="p">.</span><span class="n">get_num_samples</span><span class="p">());</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>A custom resolve matters for HDR rendering, where tone mapping each sample before averaging gives much cleaner bright edges. The multisample texture then needs <code>.shaderRead</code> usage and cannot be memoryless.</p>
+<h2 id="other-approaches">Other approaches<a class="headerlink" href="#other-approaches" title="Permanent link">#</a></h2>
+<ul>
+<li><strong>FXAA and SMAA</strong> are post-processing filters that find edges in the finished image and blur along them. They are cheap and work with any renderer, at the cost of some sharpness.</li>
+<li><strong>Temporal anti-aliasing</strong> (TAA) shifts the camera by a sub-pixel amount each frame and blends with previous frames. It handles shading aliasing too, but needs motion vectors and care to avoid ghosting.</li>
+<li><strong>MetalFX</strong> is Apple's upscaling framework. You render at a lower resolution, and it reconstructs a sharp, anti-aliased image at full resolution with either a spatial or a temporal method. The temporal upscaler doubles as high-quality anti-aliasing.</li>
+</ul>
+<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<ul>
+<li>Compare sample counts 1, 2 and 4 on a thin, nearly horizontal triangle.</li>
+<li>Draw alpha-tested grass with and without alpha-to-coverage under 4× MSAA.</li>
+</ul></article><div class="pager"><a class="prev" href="../advanced-metal/instancing.html"><small>Previous</small>Instancing</a><a class="next" href="../advanced-lighting/blinn-phong.html"><small>Next</small>Blinn-Phong</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

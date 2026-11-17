@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stencil Testing · learnmetal</title>
+<meta name="description" content="Advanced Metal: Stencil Testing. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a class="active" href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">Advanced Metal</p><h1 id="stencil-testing">Stencil Testing<a class="headerlink" href="#stencil-testing" title="Permanent link">#</a></h1>
+<p>Next to the depth buffer lives the <strong>stencil buffer</strong>: 8 bits per pixel that you can write freely while drawing and test against later. It lets you mark regions of the screen and then restrict drawing to them. Outlines, portals, mirrors and masking UI are classic uses.</p>
+<h2 id="enabling-a-stencil-buffer">Enabling a stencil buffer<a class="headerlink" href="#enabling-a-stencil-buffer" title="Permanent link">#</a></h2>
+<p>Depth and stencil normally share one texture with a combined format:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">view</span><span class="p">.</span><span class="n">depthStencilPixelFormat</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">depth32Float_stencil8</span>
+<span class="n">view</span><span class="p">.</span><span class="n">clearStencil</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span>
+
+<span class="n">pipelineDescriptor</span><span class="p">.</span><span class="n">depthAttachmentPixelFormat</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">depth32Float_stencil8</span>
+<span class="n">pipelineDescriptor</span><span class="p">.</span><span class="n">stencilAttachmentPixelFormat</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">depth32Float_stencil8</span>
+</code></pre></div>
+
+<p>Every pipeline state used in the pass must declare both formats.</p>
+<h2 id="the-stencil-test">The stencil test<a class="headerlink" href="#the-stencil-test" title="Permanent link">#</a></h2>
+<p>For each fragment the GPU compares a <strong>reference value</strong>, which you set on the encoder, with the value in the buffer. The comparison and the reaction are described by an <code>MTLStencilDescriptor</code> inside the depth-stencil descriptor:</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stencilCompareFunction</code></td>
+<td>How reference and stored value are compared.</td>
+</tr>
+<tr>
+<td><code>stencilFailureOperation</code></td>
+<td>What to do with the stored value if the stencil test fails.</td>
+</tr>
+<tr>
+<td><code>depthFailureOperation</code></td>
+<td>If the stencil test passes but the depth test fails.</td>
+</tr>
+<tr>
+<td><code>depthStencilPassOperation</code></td>
+<td>If both pass.</td>
+</tr>
+<tr>
+<td><code>readMask</code>, <code>writeMask</code></td>
+<td>Bit masks applied when comparing and when writing.</td>
+</tr>
+</tbody>
+</table>
+<p>The operations are <code>.keep</code>, <code>.zero</code>, <code>.replace</code> (store the reference value), <code>.incrementClamp</code>, <code>.decrementClamp</code>, <code>.invert</code>, <code>.incrementWrap</code> and <code>.decrementWrap</code>.</p>
+<p>There are separate descriptors for front-facing and back-facing triangles, <code>frontFaceStencil</code> and <code>backFaceStencil</code>.</p>
+<h2 id="object-outlines">Object outlines<a class="headerlink" href="#object-outlines" title="Permanent link">#</a></h2>
+<p>A selection outline is drawn in two steps:</p>
+<ol>
+<li>Draw the object normally and write 1 into the stencil buffer wherever it is visible.</li>
+<li>Draw the object again, slightly enlarged and in a flat color, only where the stencil is <strong>not</strong> 1.</li>
+</ol>
+<p>The enlarged copy is rejected over the object itself, and survives only in a thin border around it.</p>
+<p><strong>State 1: write 1 wherever the object is drawn.</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">writeStencil</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLStencilDescriptor</span><span class="p">()</span>
+<span class="n">writeStencil</span><span class="p">.</span><span class="n">stencilCompareFunction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">always</span>
+<span class="n">writeStencil</span><span class="p">.</span><span class="n">depthStencilPassOperation</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">replace</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nv">writeDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLDepthStencilDescriptor</span><span class="p">()</span>
+<span class="n">writeDescriptor</span><span class="p">.</span><span class="n">depthCompareFunction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">less</span>
+<span class="n">writeDescriptor</span><span class="p">.</span><span class="n">isDepthWriteEnabled</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">writeDescriptor</span><span class="p">.</span><span class="n">frontFaceStencil</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">writeStencil</span>
+<span class="n">writeDescriptor</span><span class="p">.</span><span class="n">backFaceStencil</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">writeStencil</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">writeState</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeDepthStencilState</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">writeDescriptor</span><span class="p">)</span><span class="o">!</span>
+</code></pre></div>
+
+<p><strong>State 2: draw only where the stencil is not 1, ignoring depth.</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">testStencil</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLStencilDescriptor</span><span class="p">()</span>
+<span class="n">testStencil</span><span class="p">.</span><span class="n">stencilCompareFunction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">notEqual</span>
+<span class="n">testStencil</span><span class="p">.</span><span class="n">depthStencilPassOperation</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">keep</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nv">outlineDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLDepthStencilDescriptor</span><span class="p">()</span>
+<span class="n">outlineDescriptor</span><span class="p">.</span><span class="n">depthCompareFunction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">always</span>
+<span class="n">outlineDescriptor</span><span class="p">.</span><span class="n">isDepthWriteEnabled</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kc">false</span>
+<span class="n">outlineDescriptor</span><span class="p">.</span><span class="n">frontFaceStencil</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">testStencil</span>
+<span class="n">outlineDescriptor</span><span class="p">.</span><span class="n">backFaceStencil</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">testStencil</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">outlineState</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeDepthStencilState</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">outlineDescriptor</span><span class="p">)</span><span class="o">!</span>
+</code></pre></div>
+
+<p><strong>Drawing:</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1">// Floor and anything else that should not be outlined: the ordinary depth state.</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setDepthStencilState</span><span class="p">(</span><span class="n">depthState</span><span class="p">)</span>
+<span class="n">drawFloor</span><span class="p">(</span><span class="n">encoder</span><span class="p">)</span>
+
+<span class="c1">// 1. The cubes, marking the stencil buffer.</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setDepthStencilState</span><span class="p">(</span><span class="n">writeState</span><span class="p">)</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setStencilReferenceValue</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setRenderPipelineState</span><span class="p">(</span><span class="n">pipelineState</span><span class="p">)</span>
+<span class="n">drawCubes</span><span class="p">(</span><span class="n">encoder</span><span class="p">,</span><span class="w"> </span><span class="n">scale</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">)</span>
+
+<span class="c1">// 2. The outlines.</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setDepthStencilState</span><span class="p">(</span><span class="n">outlineState</span><span class="p">)</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setRenderPipelineState</span><span class="p">(</span><span class="n">solidColorPipelineState</span><span class="p">)</span>
+<span class="n">drawCubes</span><span class="p">(</span><span class="n">encoder</span><span class="p">,</span><span class="w"> </span><span class="n">scale</span><span class="p">:</span><span class="w"> </span><span class="mf">1.05</span><span class="p">)</span>
+</code></pre></div>
+
+<p>The <code>solidColorPipelineState</code> uses a fragment function that returns a single color. Because the outline state uses <code>.always</code> for depth, the border shows through other objects, which is what you want for a selection highlight.</p>
+<div class="admonition note">
+<p class="admonition-title">Better outlines</p>
+<p>Scaling works for convex shapes centered on their origin. For arbitrary models, move each vertex along its normal in the vertex function instead: <code>position + normal * thickness</code>.</p>
+</div>
+<figure><img src="../assets/img/advanced-metal/stencil-testing.webp" alt="Outlines drawn where the stencil buffer was not marked by the crates." width="880" height="495" loading="lazy"><figcaption>Outlines drawn where the stencil buffer was not marked by the crates.</figcaption></figure>
+
+<h2 id="reading-the-comparison-correctly">Reading the comparison correctly<a class="headerlink" href="#reading-the-comparison-correctly" title="Permanent link">#</a></h2>
+<p>The comparison is written as <em>reference</em> <strong>op</strong> <em>stored</em>. With <code>.less</code> and a reference of 1, a fragment passes where <code>1 &lt; stored</code>. It is easy to read this backwards.</p>
+<h2 id="other-uses">Other uses<a class="headerlink" href="#other-uses" title="Permanent link">#</a></h2>
+<ul>
+<li><strong>Portals and mirrors</strong>: draw the portal shape into the stencil buffer, then draw the world seen through it only where the stencil is set.</li>
+<li><strong>Masking</strong>: clip UI or 2D content to arbitrary shapes.</li>
+<li><strong>Deferred lighting volumes</strong>: mark the pixels a light can reach so the lighting shader runs only there.</li>
+</ul>
+<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<ul>
+<li>Make the outline respect depth, so it is hidden behind closer objects.</li>
+<li>Outline only one of the cubes.</li>
+</ul></article><div class="pager"><a class="prev" href="../advanced-metal/depth-testing.html"><small>Previous</small>Depth Testing</a><a class="next" href="../advanced-metal/blending.html"><small>Next</small>Blending</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

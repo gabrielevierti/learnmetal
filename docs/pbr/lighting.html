@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lighting · learnmetal</title>
+<meta name="description" content="PBR: Lighting. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a class="active" href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">PBR</p><h1 id="lighting">Lighting<a class="headerlink" href="#lighting" title="Permanent link">#</a></h1>
+<div class="example-box"><strong>Example code</strong> <code>examples/Sources/16-PBR</code>, run with <code>swift run PBR</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
+
+<p>With the theory in hand, the PBR fragment shader is short. This chapter implements the Cook-Torrance BRDF for point lights, first with constant material values and then with textures.</p>
+<h2 id="the-brdf-functions">The BRDF functions<a class="headerlink" href="#the-brdf-functions" title="Permanent link">#</a></h2>
+<p>Each formula from the previous chapter becomes a small function:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">constant</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">PI</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">3.14159265359</span><span class="p">;</span>
+
+<span class="k">static</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="nf">distributionGGX</span><span class="p">(</span><span class="n">float3</span><span class="w"> </span><span class="n">N</span><span class="p">,</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="n">H</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">roughness</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">roughness</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">roughness</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">a2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">a</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">NdotH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">max</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="w"> </span><span class="n">H</span><span class="p">),</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">denom</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">NdotH</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">NdotH</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">a2</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">1.0</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">a2</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">PI</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">denom</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">denom</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="nf">geometrySchlickGGX</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">NdotV</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">roughness</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">roughness</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">r</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">r</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">8.0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">NdotV</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">NdotV</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mf">1.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">k</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">k</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="nf">geometrySmith</span><span class="p">(</span><span class="n">float3</span><span class="w"> </span><span class="n">N</span><span class="p">,</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="n">V</span><span class="p">,</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="n">L</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">roughness</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">NdotV</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">max</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="w"> </span><span class="n">V</span><span class="p">),</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">NdotL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">max</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="w"> </span><span class="n">L</span><span class="p">),</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">geometrySchlickGGX</span><span class="p">(</span><span class="n">NdotV</span><span class="p">,</span><span class="w"> </span><span class="n">roughness</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">geometrySchlickGGX</span><span class="p">(</span><span class="n">NdotL</span><span class="p">,</span><span class="w"> </span><span class="n">roughness</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="nf">fresnelSchlick</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">cosTheta</span><span class="p">,</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="n">F0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">F0</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="mf">1.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">F0</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">pow</span><span class="p">(</span><span class="n">saturate</span><span class="p">(</span><span class="mf">1.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">cosTheta</span><span class="p">),</span><span class="w"> </span><span class="mf">5.0</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Squaring the roughness before use (<code>a = roughness²</code>) makes the parameter feel linear to artists. It is a convention adopted by nearly all engines.</p>
+<h2 id="the-fragment-function">The fragment function<a class="headerlink" href="#the-fragment-function" title="Permanent link">#</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">PBRUniforms</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">viewPosition</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">albedo</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">metallic</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">roughness</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">ao</span><span class="p">;</span>
+<span class="w">    </span><span class="n">uint</span><span class="w"> </span><span class="n">lightCount</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">PBRLight</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">position</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">color</span><span class="p">;</span><span class="w">      </span><span class="c1">// radiant intensity, can be far above 1</span>
+<span class="p">};</span>
+
+<span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_pbr</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
+<span class="w">                             </span><span class="n">constant</span><span class="w"> </span><span class="n">PBRUniforms</span><span class="w"> </span><span class="o">&amp;</span><span class="n">uniforms</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
+<span class="w">                             </span><span class="n">constant</span><span class="w"> </span><span class="n">PBRLight</span><span class="w"> </span><span class="o">*</span><span class="n">lights</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">2</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">normal</span><span class="p">);</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">V</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">uniforms</span><span class="p">.</span><span class="n">viewPosition</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">worldPosition</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">albedo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">albedo</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">metallic</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">metallic</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">roughness</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">roughness</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">F0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mix</span><span class="p">(</span><span class="n">float3</span><span class="p">(</span><span class="mf">0.04</span><span class="p">),</span><span class="w"> </span><span class="n">albedo</span><span class="p">,</span><span class="w"> </span><span class="n">metallic</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">Lo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float3</span><span class="p">(</span><span class="mf">0.0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">uint</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">lightCount</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">float3</span><span class="w"> </span><span class="n">toLight</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lights</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">position</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">worldPosition</span><span class="p">;</span>
+<span class="w">        </span><span class="kt">float</span><span class="w"> </span><span class="n">distance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">length</span><span class="p">(</span><span class="n">toLight</span><span class="p">);</span>
+<span class="w">        </span><span class="n">float3</span><span class="w"> </span><span class="n">L</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">toLight</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">distance</span><span class="p">;</span>
+<span class="w">        </span><span class="n">float3</span><span class="w"> </span><span class="n">H</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">V</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">L</span><span class="p">);</span>
+
+<span class="w">        </span><span class="n">float3</span><span class="w"> </span><span class="n">radiance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lights</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">color</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">distance</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">distance</span><span class="p">);</span>
+
+<span class="w">        </span><span class="kt">float</span><span class="w"> </span><span class="n">D</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">distributionGGX</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="w"> </span><span class="n">H</span><span class="p">,</span><span class="w"> </span><span class="n">roughness</span><span class="p">);</span>
+<span class="w">        </span><span class="kt">float</span><span class="w"> </span><span class="n">G</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">geometrySmith</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="w"> </span><span class="n">V</span><span class="p">,</span><span class="w"> </span><span class="n">L</span><span class="p">,</span><span class="w"> </span><span class="n">roughness</span><span class="p">);</span>
+<span class="w">        </span><span class="n">float3</span><span class="w"> </span><span class="n">F</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fresnelSchlick</span><span class="p">(</span><span class="n">max</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">H</span><span class="p">,</span><span class="w"> </span><span class="n">V</span><span class="p">),</span><span class="w"> </span><span class="mf">0.0</span><span class="p">),</span><span class="w"> </span><span class="n">F0</span><span class="p">);</span>
+
+<span class="w">        </span><span class="kt">float</span><span class="w"> </span><span class="n">NdotL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">max</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="w"> </span><span class="n">L</span><span class="p">),</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span>
+<span class="w">        </span><span class="n">float3</span><span class="w"> </span><span class="n">specular</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">D</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">G</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">F</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="mf">4.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">max</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="w"> </span><span class="n">V</span><span class="p">),</span><span class="w"> </span><span class="mf">0.0</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">NdotL</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.0001</span><span class="p">);</span>
+
+<span class="w">        </span><span class="n">float3</span><span class="w"> </span><span class="n">kD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="mf">1.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">F</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mf">1.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">metallic</span><span class="p">);</span>
+
+<span class="w">        </span><span class="n">Lo</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="p">(</span><span class="n">kD</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">albedo</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">PI</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">specular</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">radiance</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">NdotL</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">ambient</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float3</span><span class="p">(</span><span class="mf">0.03</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">albedo</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">ao</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">ambient</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">Lo</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Walking through the loop:</p>
+<ul>
+<li><strong>Radiance</strong> is the light's color attenuated by the inverse square of the distance. A point light delivers all its energy from one direction, so the integral of the reflectance equation reduces to one evaluation per light.</li>
+<li><strong>F0</strong> blends from the dielectric value 0.04 to the albedo as the material becomes metallic.</li>
+<li>The <strong>specular</strong> term is <code>D·G·F</code> over the normalization factor. The small constant avoids a division by zero.</li>
+<li><code>kD</code> removes the reflected fraction and removes diffuse entirely for metals.</li>
+<li>The result is multiplied by <code>NdotL</code>, the cosine factor.</li>
+</ul>
+<p>The output is linear HDR. It goes through the tone mapping pass from the <a href="../advanced-lighting/hdr.html">HDR</a> chapter and the sRGB drawable. Do not gamma correct in this shader.</p>
+<p>The fixed ambient term is a placeholder. Replacing it with real light from the environment is the job of the next two chapters.</p>
+<h2 id="a-grid-of-spheres">A grid of spheres<a class="headerlink" href="#a-grid-of-spheres" title="Permanent link">#</a></h2>
+<p>The standard test: a grid of spheres where metalness increases from bottom to top and roughness from left to right. Model I/O generates the sphere:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">sphere</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MDLMesh</span><span class="p">(</span><span class="n">sphereWithExtent</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">segments</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">64</span><span class="p">,</span><span class="w"> </span><span class="mi">64</span><span class="p">],</span>
+<span class="w">                     </span><span class="n">inwardNormals</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="n">geometryType</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">triangles</span><span class="p">,</span><span class="w"> </span><span class="n">allocator</span><span class="p">:</span><span class="w"> </span><span class="n">allocator</span><span class="p">)</span>
+<span class="n">sphere</span><span class="p">.</span><span class="n">vertexDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">mdlDescriptor</span>
+<span class="n">sphereMesh</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="w"> </span><span class="bp">MTKMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">:</span><span class="w"> </span><span class="n">sphere</span><span class="p">,</span><span class="w"> </span><span class="n">device</span><span class="p">:</span><span class="w"> </span><span class="n">device</span><span class="p">)</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">rows</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="n">columns</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">7</span>
+<span class="k">for</span><span class="w"> </span><span class="n">row</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mf">0.</span><span class="p">.&lt;</span><span class="n">rows</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">pbrUniforms</span><span class="p">.</span><span class="n">metallic</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">Float</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">Float</span><span class="p">(</span><span class="n">rows</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">column</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mf">0.</span><span class="p">.&lt;</span><span class="n">columns</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// A roughness of exactly 0 gives an infinitely small highlight; clamp it.</span>
+<span class="w">        </span><span class="n">pbrUniforms</span><span class="p">.</span><span class="n">roughness</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">max</span><span class="p">(</span><span class="nb">Float</span><span class="p">(</span><span class="n">column</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">Float</span><span class="p">(</span><span class="n">columns</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="mf">0.05</span><span class="p">)</span>
+<span class="w">        </span><span class="n">uniforms</span><span class="p">.</span><span class="n">model</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">float4x4</span><span class="p">(</span><span class="n">translation</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="nb">Float</span><span class="p">(</span><span class="n">column</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">columns</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">2.5</span><span class="p">,</span>
+<span class="w">                                                </span><span class="nb">Float</span><span class="p">(</span><span class="n">row</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">rows</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">2.5</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">])</span>
+<span class="w">        </span><span class="c1">// set uniforms, draw the sphere</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Four lights with a color of (300, 300, 300) placed about 10 units in front of the grid light it well. Such large values are normal with inverse-square falloff.</p>
+<p>Even with a flat ambient term the result is striking: rough dielectrics look like chalk or rubber, smooth ones like plastic, and the metals have colored, tight highlights.</p>
+<figure><img src="../assets/img/pbr/lighting.webp" alt="Metalness increases from bottom to top, roughness from left to right. Direct lighting only." width="880" height="495" loading="lazy"><figcaption>Metalness increases from bottom to top, roughness from left to right. Direct lighting only.</figcaption></figure>
+
+<h2 id="textured-pbr">Textured PBR<a class="headerlink" href="#textured-pbr" title="Permanent link">#</a></h2>
+<p>Replace the constants with texture lookups, and use the normal mapping function from <a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a>:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_pbr</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
+<span class="w">                             </span><span class="n">constant</span><span class="w"> </span><span class="n">PBRUniforms</span><span class="w"> </span><span class="o">&amp;</span><span class="n">uniforms</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
+<span class="w">                             </span><span class="n">constant</span><span class="w"> </span><span class="n">PBRLight</span><span class="w"> </span><span class="o">*</span><span class="n">lights</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">2</span><span class="p">)]],</span>
+<span class="w">                             </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">albedoMap</span><span class="w">    </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
+<span class="w">                             </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">normalMap</span><span class="w">    </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
+<span class="w">                             </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">metallicMap</span><span class="w">  </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">2</span><span class="p">)]],</span>
+<span class="w">                             </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">roughnessMap</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">3</span><span class="p">)]],</span>
+<span class="w">                             </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">aoMap</span><span class="w">        </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">4</span><span class="p">)]],</span>
+<span class="w">                             </span><span class="n">sampler</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="p">[[</span><span class="na">sampler</span><span class="p">(</span><span class="mi">0</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">albedo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">albedoMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">rgb</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">metallic</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">metallicMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">r</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">roughness</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">roughnessMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">r</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">ao</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">aoMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">r</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">perturbedNormal</span><span class="p">(</span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">normalMap</span><span class="p">,</span><span class="w"> </span><span class="n">s</span><span class="p">);</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Load the albedo map as sRGB and all the others as linear data. Many asset packs combine occlusion, roughness and metalness into the red, green and blue channels of a single "ORM" texture, which saves two texture reads.</p>
+<p>With Model I/O, extend the material loader from the <a href="../model-loading/mesh.html">Mesh</a> chapter to read the <code>.metallic</code>, <code>.roughness</code>, <code>.tangentSpaceNormal</code> and <code>.ambientOcclusion</code> semantics, falling back to 1 × 1 textures holding the scalar values when a property has no texture.</p>
+<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<ul>
+<li>Give every sphere the same roughness and vary only the albedo to see how metals tint their highlights.</li>
+<li>Find a free PBR material set, such as rusted iron or worn plastic, and apply it to a sphere.</li>
+</ul></article><div class="pager"><a class="prev" href="../pbr/theory.html"><small>Previous</small>Theory</a><a class="next" href="../pbr/diffuse-irradiance.html"><small>Next</small>Diffuse Irradiance</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

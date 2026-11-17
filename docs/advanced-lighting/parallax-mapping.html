@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parallax Mapping · learnmetal</title>
+<meta name="description" content="Advanced Lighting: Parallax Mapping. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a class="active" href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">Advanced Lighting</p><h1 id="parallax-mapping">Parallax Mapping<a class="headerlink" href="#parallax-mapping" title="Permanent link">#</a></h1>
+<p>Normal mapping changes how a surface is lit, but not what you see where. At a shallow angle a normal-mapped brick wall still looks like a painted board, because the bricks do not hide the mortar behind them. <strong>Parallax mapping</strong> shifts the texture coordinates based on a height map and the viewing angle, so that high parts appear to cover low parts.</p>
+<h2 id="the-idea">The idea<a class="headerlink" href="#the-idea" title="Permanent link">#</a></h2>
+<p>Alongside the color and normal maps we need a <strong>height map</strong>, a grayscale texture describing the surface's relief. It is more convenient to store <strong>depth</strong>, the inverse of height: 0 at the top surface, 1 at the deepest point.</p>
+<p>Picture the viewer looking at a point A on the flat polygon. On the real, bumpy surface, the line of sight would have hit the relief earlier, at some point B, and the viewer should see the texture at B. Parallax mapping estimates how far to slide the texture coordinate from A toward B.</p>
+<p>All of this is done in <strong>tangent space</strong>, where the surface is the xy plane and the texture's u and v run along x and y. So the view direction must be converted into tangent space first.</p>
+<h2 id="view-direction-in-tangent-space">View direction in tangent space<a class="headerlink" href="#view-direction-in-tangent-space" title="Permanent link">#</a></h2>
+<p>The TBN matrix from the previous chapter converts tangent to world. Its transpose does the opposite, since the matrix is orthonormal:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">float3x3</span><span class="w"> </span><span class="n">TBN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float3x3</span><span class="p">(</span><span class="n">T</span><span class="p">,</span><span class="w"> </span><span class="n">B</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="p">);</span>
+<span class="n">float3</span><span class="w"> </span><span class="n">viewDirTangent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">transpose</span><span class="p">(</span><span class="n">TBN</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">uniforms</span><span class="p">.</span><span class="n">viewPosition</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">worldPosition</span><span class="p">));</span>
+</code></pre></div>
+
+<h2 id="simple-parallax-mapping">Simple parallax mapping<a class="headerlink" href="#simple-parallax-mapping" title="Permanent link">#</a></h2>
+<p>Sample the depth at the current coordinate and move along the view direction by that amount:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="n">float2</span><span class="w"> </span><span class="nf">parallaxSimple</span><span class="p">(</span><span class="n">float2</span><span class="w"> </span><span class="n">uv</span><span class="p">,</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="n">viewDir</span><span class="p">,</span>
+<span class="w">                             </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">depthMap</span><span class="p">,</span><span class="w"> </span><span class="n">sampler</span><span class="w"> </span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">scale</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">depth</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">depthMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">uv</span><span class="p">).</span><span class="n">r</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">offset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">viewDir</span><span class="p">.</span><span class="n">xy</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">viewDir</span><span class="p">.</span><span class="n">z</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">depth</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">scale</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">uv</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">offset</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>scale</code> controls the strength; values around 0.05 to 0.1 are typical. The division by <code>viewDir.z</code> makes the shift larger at shallow angles. Then use the shifted coordinate for <strong>every</strong> texture lookup of the fragment: color, normal, specular.</p>
+<div class="codehilite"><pre><span></span><code><span class="n">float2</span><span class="w"> </span><span class="n">uv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">parallaxSimple</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">,</span><span class="w"> </span><span class="n">viewDirTangent</span><span class="p">,</span><span class="w"> </span><span class="n">depthMap</span><span class="p">,</span><span class="w"> </span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1</span><span class="p">);</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">uv</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.0</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">uv</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">uv</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.0</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">uv</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">1.0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">discard_fragment</span><span class="p">();</span>
+<span class="p">}</span>
+<span class="n">float3</span><span class="w"> </span><span class="n">albedo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">diffuseMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">uv</span><span class="p">).</span><span class="n">rgb</span><span class="p">;</span>
+<span class="n">float3</span><span class="w"> </span><span class="n">tangentNormal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">uv</span><span class="p">).</span><span class="n">xyz</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
+</code></pre></div>
+
+<p>The discard trims the edges of a single quad, where shifted coordinates would leave the texture. On tiling surfaces you would leave it out.</p>
+<div class="admonition note">
+<p class="admonition-title">Sign conventions</p>
+<p>Whether the offset is subtracted or added, and whether its y needs negating, depends on the direction of your v axis and bitangent. If the effect seems to bulge inward or slide the wrong way when you move the camera, flip the sign of the y component.</p>
+</div>
+<p>This one-sample version works for gentle relief. On steep height changes or at very low angles the estimate is poor and the surface seems to swim.</p>
+<h2 id="steep-parallax-mapping">Steep parallax mapping<a class="headerlink" href="#steep-parallax-mapping" title="Permanent link">#</a></h2>
+<p>A better estimate comes from marching along the view ray in small steps through a number of depth layers until the ray goes below the surface:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="n">float2</span><span class="w"> </span><span class="nf">parallaxSteep</span><span class="p">(</span><span class="n">float2</span><span class="w"> </span><span class="n">uv</span><span class="p">,</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="n">viewDir</span><span class="p">,</span>
+<span class="w">                            </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">depthMap</span><span class="p">,</span><span class="w"> </span><span class="n">sampler</span><span class="w"> </span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">scale</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">layerCount</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mix</span><span class="p">(</span><span class="mf">32.0</span><span class="p">,</span><span class="w"> </span><span class="mf">8.0</span><span class="p">,</span><span class="w"> </span><span class="n">abs</span><span class="p">(</span><span class="n">viewDir</span><span class="p">.</span><span class="n">z</span><span class="p">));</span><span class="w">   </span><span class="c1">// more layers at shallow angles</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">layerDepth</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">layerCount</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">deltaUV</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">viewDir</span><span class="p">.</span><span class="n">xy</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">viewDir</span><span class="p">.</span><span class="n">z</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">scale</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">layerCount</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">currentUV</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uv</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">currentLayerDepth</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">mapDepth</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">depthMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">currentUV</span><span class="p">,</span><span class="w"> </span><span class="n">level</span><span class="p">(</span><span class="mi">0</span><span class="p">)).</span><span class="n">r</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">currentLayerDepth</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">mapDepth</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">currentUV</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">deltaUV</span><span class="p">;</span>
+<span class="w">        </span><span class="n">mapDepth</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">depthMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">currentUV</span><span class="p">,</span><span class="w"> </span><span class="n">level</span><span class="p">(</span><span class="mi">0</span><span class="p">)).</span><span class="n">r</span><span class="p">;</span>
+<span class="w">        </span><span class="n">currentLayerDepth</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">layerDepth</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">currentUV</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Inside a loop the GPU cannot compute automatic mip levels reliably, so the samples name level 0 explicitly. The result is far more convincing, but the discrete layers show up as visible steps.</p>
+<h2 id="parallax-occlusion-mapping">Parallax occlusion mapping<a class="headerlink" href="#parallax-occlusion-mapping" title="Permanent link">#</a></h2>
+<p>The steps disappear if, instead of taking the first layer below the surface, we interpolate between the last point above the surface and the first one below it:</p>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="c1">// ...after the loop in parallaxSteep</span>
+<span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">previousUV</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">currentUV</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">deltaUV</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">afterDepth</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">mapDepth</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">currentLayerDepth</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">beforeDepth</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">depthMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">previousUV</span><span class="p">,</span><span class="w"> </span><span class="n">level</span><span class="p">(</span><span class="mi">0</span><span class="p">)).</span><span class="n">r</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">currentLayerDepth</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">layerDepth</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">weight</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">afterDepth</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">afterDepth</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">beforeDepth</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">mix</span><span class="p">(</span><span class="n">currentUV</span><span class="p">,</span><span class="w"> </span><span class="n">previousUV</span><span class="p">,</span><span class="w"> </span><span class="n">weight</span><span class="p">);</span>
+</code></pre></div>
+
+<p>This is <strong>parallax occlusion mapping</strong> (POM). The two depths tell us how far each point is from the true surface, and a linear blend lands very close to the real intersection.</p>
+<figure><img src="../assets/img/advanced-lighting/parallax-mapping.webp" alt="At a shallow angle, parallax occlusion mapping makes bricks hide the mortar behind them." width="880" height="246" loading="lazy"><figcaption>At a shallow angle, parallax occlusion mapping makes bricks hide the mortar behind them.</figcaption></figure>
+
+<h2 id="limits">Limits<a class="headerlink" href="#limits" title="Permanent link">#</a></h2>
+<ul>
+<li>It is an illusion inside the polygon. The silhouette stays flat, and the effect breaks at glancing angles.</li>
+<li>It is expensive: dozens of texture reads per fragment. Reduce the layer count with distance.</li>
+<li>The relief casts no shadows on itself unless you march a second ray toward the light.</li>
+</ul>
+<p>When you need real geometry, with real silhouettes and shadows, displace vertices using <a href="../beyond/tessellation.html">tessellation</a>.</p>
+<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<ul>
+<li>Switch between the three variants with a uniform and compare at a low viewing angle.</li>
+<li>Implement self-shadowing by marching from the found point toward the light in tangent space.</li>
+</ul></article><div class="pager"><a class="prev" href="../advanced-lighting/normal-mapping.html"><small>Previous</small>Normal Mapping</a><a class="next" href="../advanced-lighting/hdr.html"><small>Next</small>HDR</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

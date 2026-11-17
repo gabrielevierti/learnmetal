@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hello View · learnmetal</title>
+<meta name="description" content="Getting Started: Hello View. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a class="active" href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">Getting Started</p><h1 id="hello-view">Hello View<a class="headerlink" href="#hello-view" title="Permanent link">#</a></h1>
+<div class="example-box"><strong>Example code</strong> <code>examples/Sources/01-HelloView</code>, run with <code>swift run HelloView</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
+
+<p>Time for the first Metal code: a renderer that clears the window to a color every frame. It draws no geometry, but it contains the complete skeleton of a frame, and every later chapter only adds to it.</p>
+<h2 id="the-renderer">The renderer<a class="headerlink" href="#the-renderer" title="Permanent link">#</a></h2>
+<p>Create <code>Renderer.swift</code>:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">import</span><span class="w"> </span><span class="nc">MetalKit</span>
+
+<span class="kr">final</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nc">Renderer</span><span class="p">:</span><span class="w"> </span><span class="bp">NSObject</span><span class="p">,</span><span class="w"> </span><span class="bp">MTKViewDelegate</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">device</span><span class="p">:</span><span class="w"> </span><span class="bp">MTLDevice</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">commandQueue</span><span class="p">:</span><span class="w"> </span><span class="bp">MTLCommandQueue</span>
+
+<span class="w">    </span><span class="kd">init</span><span class="p">?(</span><span class="n">view</span><span class="p">:</span><span class="w"> </span><span class="bp">MTKView</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">guard</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">device</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MTLCreateSystemDefaultDevice</span><span class="p">(),</span>
+<span class="w">              </span><span class="kd">let</span><span class="w"> </span><span class="nv">commandQueue</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeCommandQueue</span><span class="p">()</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="kc">self</span><span class="p">.</span><span class="n">device</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span>
+<span class="w">        </span><span class="kc">self</span><span class="p">.</span><span class="n">commandQueue</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">commandQueue</span>
+<span class="w">        </span><span class="kc">super</span><span class="p">.</span><span class="kd">init</span><span class="p">()</span>
+
+<span class="w">        </span><span class="n">view</span><span class="p">.</span><span class="n">device</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span>
+<span class="w">        </span><span class="n">view</span><span class="p">.</span><span class="n">colorPixelFormat</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">bgra8Unorm</span>
+<span class="w">        </span><span class="n">view</span><span class="p">.</span><span class="n">clearColor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MTLClearColor</span><span class="p">(</span><span class="n">red</span><span class="p">:</span><span class="w"> </span><span class="mf">0.2</span><span class="p">,</span><span class="w"> </span><span class="n">green</span><span class="p">:</span><span class="w"> </span><span class="mf">0.3</span><span class="p">,</span><span class="w"> </span><span class="n">blue</span><span class="p">:</span><span class="w"> </span><span class="mf">0.3</span><span class="p">,</span><span class="w"> </span><span class="n">alpha</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">)</span>
+<span class="w">        </span><span class="n">view</span><span class="p">.</span><span class="n">delegate</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kc">self</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nf">mtkView</span><span class="p">(</span><span class="kc">_</span><span class="w"> </span><span class="n">view</span><span class="p">:</span><span class="w"> </span><span class="bp">MTKView</span><span class="p">,</span><span class="w"> </span><span class="n">drawableSizeWillChange</span><span class="w"> </span><span class="n">size</span><span class="p">:</span><span class="w"> </span><span class="n">CGSize</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Called when the view is resized. We will need it for the projection matrix later.</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nf">draw</span><span class="p">(</span><span class="k">in</span><span class="w"> </span><span class="n">view</span><span class="p">:</span><span class="w"> </span><span class="bp">MTKView</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">guard</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">passDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">view</span><span class="p">.</span><span class="n">currentRenderPassDescriptor</span><span class="p">,</span>
+<span class="w">              </span><span class="kd">let</span><span class="w"> </span><span class="nv">drawable</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">view</span><span class="p">.</span><span class="n">currentDrawable</span><span class="p">,</span>
+<span class="w">              </span><span class="kd">let</span><span class="w"> </span><span class="nv">commandBuffer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">commandQueue</span><span class="p">.</span><span class="n">makeCommandBuffer</span><span class="p">(),</span>
+<span class="w">              </span><span class="kd">let</span><span class="w"> </span><span class="nv">encoder</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">commandBuffer</span><span class="p">.</span><span class="n">makeRenderCommandEncoder</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">passDescriptor</span><span class="p">)</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="c1">// Draw calls will go here.</span>
+
+<span class="w">        </span><span class="n">encoder</span><span class="p">.</span><span class="n">endEncoding</span><span class="p">()</span>
+<span class="w">        </span><span class="n">commandBuffer</span><span class="p">.</span><span class="n">present</span><span class="p">(</span><span class="n">drawable</span><span class="p">)</span>
+<span class="w">        </span><span class="n">commandBuffer</span><span class="p">.</span><span class="n">commit</span><span class="p">()</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Run it. You should see a window filled with dark teal.</p>
+<figure><img src="../assets/img/getting-started/hello-view.webp" alt="The result: a view cleared to one color, sixty or more times per second." width="880" height="495" loading="lazy"><figcaption>The result: a view cleared to one color, sixty or more times per second.</figcaption></figure>
+
+<h2 id="the-device-and-the-queue">The device and the queue<a class="headerlink" href="#the-device-and-the-queue" title="Permanent link">#</a></h2>
+<p><code>MTLCreateSystemDefaultDevice()</code> returns the GPU the system recommends. On Apple silicon there is only one. Everything else is created from this device.</p>
+<p>The <strong>command queue</strong> is created once and kept for the lifetime of the app. It guarantees that the command buffers you commit are executed in order.</p>
+<h2 id="configuring-the-view">Configuring the view<a class="headerlink" href="#configuring-the-view" title="Permanent link">#</a></h2>
+<ul>
+<li><code>view.device</code> tells the view which GPU its textures live on. Without it nothing is drawn.</li>
+<li><code>colorPixelFormat</code> is the format of the texture shown on screen. <code>.bgra8Unorm</code> means four 8-bit channels stored as blue, green, red, alpha, read by shaders as floats from 0 to 1. This is the view's default; we set it explicitly because we will change it in the <a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a> chapter.</li>
+<li><code>clearColor</code> is the color the drawable is filled with at the start of each frame.</li>
+</ul>
+<h2 id="anatomy-of-a-frame">Anatomy of a frame<a class="headerlink" href="#anatomy-of-a-frame" title="Permanent link">#</a></h2>
+<p><code>draw(in:)</code> is called once per display refresh, typically 60 or 120 times per second. Four things happen in it.</p>
+<p><strong>1. Get a render pass descriptor.</strong> A render pass is a batch of drawing that targets one set of textures, its <strong>attachments</strong>. <code>currentRenderPassDescriptor</code> is a ready-made descriptor whose color attachment is this frame's drawable texture. For each attachment a descriptor also holds:</p>
+<ul>
+<li>a <strong>load action</strong>: what to do with the existing contents when the pass begins (<code>.clear</code>, <code>.load</code>, or <code>.dontCare</code>),</li>
+<li>a <strong>store action</strong>: what to do with the result when it ends (<code>.store</code>, <code>.dontCare</code>, or a multisample resolve).</li>
+</ul>
+<p>The view's descriptor uses <code>.clear</code> with your <code>clearColor</code>, and <code>.store</code>. That is why we get a colored window without drawing anything: clearing is part of beginning the pass.</p>
+<div class="admonition note">
+<p class="admonition-title">Coming from OpenGL</p>
+<p>There is no <code>glClear</code> call. Clearing is a property of the render pass, and choosing load and store actions well matters for performance on tile-based GPUs, since each one can save or cost a full copy of the texture.</p>
+</div>
+<p><strong>2. Create a command buffer and an encoder.</strong> The command buffer stores the encoded commands for this frame. The render command encoder translates your calls (set pipeline, set buffer, draw) into GPU commands for this one pass.</p>
+<p><strong>3. End encoding.</strong> You must call <code>endEncoding()</code> before creating another encoder or committing. Forgetting it is a validation error.</p>
+<p><strong>4. Present and commit.</strong> <code>present(drawable)</code> schedules the drawable to be shown as soon as the GPU finishes this command buffer. <code>commit()</code> hands the buffer to the queue. The call returns immediately; the GPU works asynchronously.</p>
+<h2 id="drawables-are-scarce">Drawables are scarce<a class="headerlink" href="#drawables-are-scarce" title="Permanent link">#</a></h2>
+<p><code>currentDrawable</code> comes from a small pool, usually three textures. If all are in use, the call blocks until one is free, and it can return <code>nil</code>. That is why the method starts with a <code>guard</code> and simply skips the frame when anything is missing. Hold on to a drawable for as short a time as possible and never store it.</p>
+<h2 id="continuous-or-on-demand">Continuous or on demand<a class="headerlink" href="#continuous-or-on-demand" title="Permanent link">#</a></h2>
+<p>By default <code>MTKView</code> redraws continuously at <code>preferredFramesPerSecond</code>. For an editor-style app that only changes on input you can set <code>view.isPaused = true</code> and <code>view.enableSetNeedsDisplay = true</code>, then request frames with <code>setNeedsDisplay</code>. A game or an animation keeps the default.</p>
+<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<ul>
+<li>Change the clear color every frame using <code>CACurrentMediaTime()</code> and <code>sin</code> so the window pulses.</li>
+<li>Print <code>view.drawableSize</code> in <code>mtkView(_:drawableSizeWillChange:)</code> and resize the window. Notice that the size is in pixels, not points: on a Retina display it is twice the window size.</li>
+</ul></article><div class="pager"><a class="prev" href="../getting-started/project-setup.html"><small>Previous</small>Project Setup</a><a class="next" href="../getting-started/hello-triangle.html"><small>Next</small>Hello Triangle</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

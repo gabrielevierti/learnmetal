@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Camera · learnmetal</title>
+<meta name="description" content="Getting Started: Camera. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a class="active" href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">Getting Started</p><h1 id="camera">Camera<a class="headerlink" href="#camera" title="Permanent link">#</a></h1>
+<div class="example-box"><strong>Example code</strong> <code>examples/Sources/07-Camera</code>, run with <code>swift run Camera</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
+
+<p>A fixed view matrix shows a scene from one spot. A camera you can fly through the scene is a view matrix that is rebuilt every frame from a position and a direction, both driven by input.</p>
+<h2 id="the-look-at-matrix">The look-at matrix<a class="headerlink" href="#the-look-at-matrix" title="Permanent link">#</a></h2>
+<p>A camera is defined by where it is, what it looks at, and which way is up. From those three we derive three perpendicular axes and build a matrix that moves the world into the camera's frame. Add to <code>Math.swift</code>:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">extension</span><span class="w"> </span><span class="nc">float4x4</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">/// Right-handed view matrix.</span>
+<span class="w">    </span><span class="kd">init</span><span class="p">(</span><span class="n">lookAt</span><span class="w"> </span><span class="n">eye</span><span class="p">:</span><span class="w"> </span><span class="n">Float3</span><span class="p">,</span><span class="w"> </span><span class="n">center</span><span class="p">:</span><span class="w"> </span><span class="n">Float3</span><span class="p">,</span><span class="w"> </span><span class="n">up</span><span class="p">:</span><span class="w"> </span><span class="n">Float3</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">z</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">eye</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">center</span><span class="p">)</span><span class="w">        </span><span class="c1">// points backward, away from the target</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">x</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">cross</span><span class="p">(</span><span class="n">up</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">))</span><span class="w">        </span><span class="c1">// right</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">y</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">cross</span><span class="p">(</span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w">                    </span><span class="c1">// true up</span>
+<span class="w">        </span><span class="kc">self</span><span class="p">.</span><span class="kd">init</span><span class="p">(</span><span class="n">columns</span><span class="p">:</span><span class="w"> </span><span class="p">(</span>
+<span class="w">            </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;(</span><span class="n">x</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span>
+<span class="w">            </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;(</span><span class="n">x</span><span class="p">.</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">.</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">.</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span>
+<span class="w">            </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;(</span><span class="n">x</span><span class="p">.</span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">.</span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">.</span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span>
+<span class="w">            </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;(</span><span class="o">-</span><span class="n">dot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">eye</span><span class="p">),</span><span class="w"> </span><span class="o">-</span><span class="n">dot</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">eye</span><span class="p">),</span><span class="w"> </span><span class="o">-</span><span class="n">dot</span><span class="p">(</span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="n">eye</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">)))</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>The rotation part lines the world up with the camera's axes, and the last column moves the camera to the origin. Try it by orbiting the scene:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">radius</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">10</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">eye</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Float3</span><span class="p">(</span><span class="n">sin</span><span class="p">(</span><span class="n">time</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">radius</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">cos</span><span class="p">(</span><span class="n">time</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">radius</span><span class="p">)</span>
+<span class="n">uniforms</span><span class="p">.</span><span class="n">view</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">float4x4</span><span class="p">(</span><span class="n">lookAt</span><span class="p">:</span><span class="w"> </span><span class="n">eye</span><span class="p">,</span><span class="w"> </span><span class="n">center</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">up</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">])</span>
+</code></pre></div>
+
+<h2 id="a-fly-camera">A fly camera<a class="headerlink" href="#a-fly-camera" title="Permanent link">#</a></h2>
+<p>For free movement, store a position and two angles. <strong>Yaw</strong> turns left and right, <strong>pitch</strong> looks up and down.</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">import</span><span class="w"> </span><span class="nc">simd</span>
+
+<span class="kr">final</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nc">Camera</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">position</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Float3</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">yaw</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="o">-</span><span class="mi">90</span><span class="w">      </span><span class="c1">// degrees; -90 looks down -z</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">pitch</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">fov</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">45</span>
+
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">speed</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mf">2.5</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">sensitivity</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mf">0.1</span>
+
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">front</span><span class="p">:</span><span class="w"> </span><span class="n">Float3</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">y</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">yaw</span><span class="p">.</span><span class="n">radians</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">pitch</span><span class="p">.</span><span class="n">radians</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">Float3</span><span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">cos</span><span class="p">(</span><span class="n">p</span><span class="p">),</span><span class="w"> </span><span class="n">sin</span><span class="p">(</span><span class="n">p</span><span class="p">),</span><span class="w"> </span><span class="n">sin</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">cos</span><span class="p">(</span><span class="n">p</span><span class="p">)))</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">right</span><span class="p">:</span><span class="w"> </span><span class="n">Float3</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">cross</span><span class="p">(</span><span class="n">front</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]))</span><span class="w"> </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">viewMatrix</span><span class="p">:</span><span class="w"> </span><span class="n">float4x4</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">float4x4</span><span class="p">(</span><span class="n">lookAt</span><span class="p">:</span><span class="w"> </span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="n">center</span><span class="p">:</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">front</span><span class="p">,</span><span class="w"> </span><span class="n">up</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">])</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nf">move</span><span class="p">(</span><span class="n">forward</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">,</span><span class="w"> </span><span class="n">strafe</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">,</span><span class="w"> </span><span class="n">deltaTime</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">position</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">front</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">forward</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">speed</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">deltaTime</span>
+<span class="w">        </span><span class="n">position</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="kr">right</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">strafe</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">speed</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">deltaTime</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nf">rotate</span><span class="p">(</span><span class="n">deltaX</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">,</span><span class="w"> </span><span class="n">deltaY</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">yaw</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">deltaX</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">sensitivity</span>
+<span class="w">        </span><span class="n">pitch</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">deltaY</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">sensitivity</span>
+<span class="w">        </span><span class="n">pitch</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">min</span><span class="p">(</span><span class="bp">max</span><span class="p">(</span><span class="n">pitch</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">89</span><span class="p">),</span><span class="w"> </span><span class="mi">89</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nf">zoom</span><span class="p">(</span><span class="kc">_</span><span class="w"> </span><span class="n">amount</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">fov</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">min</span><span class="p">(</span><span class="bp">max</span><span class="p">(</span><span class="n">fov</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">amount</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="mi">60</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>front</code> turns the two angles into a direction with basic trigonometry. Pitch is clamped just short of 90 degrees because looking straight up makes <code>front</code> parallel to the up vector, and the cross product in <code>lookAt</code> collapses.</p>
+<h2 id="delta-time">Delta time<a class="headerlink" href="#delta-time" title="Permanent link">#</a></h2>
+<p>Frames do not take equal time. Movement must be scaled by the time since the last frame, the <strong>delta time</strong>, or the camera speed would depend on the frame rate:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="nv">lastFrameTime</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">CACurrentMediaTime</span><span class="p">()</span>
+
+<span class="c1">// in draw(in:)</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">now</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">CACurrentMediaTime</span><span class="p">()</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">deltaTime</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">Float</span><span class="p">(</span><span class="n">now</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">lastFrameTime</span><span class="p">)</span>
+<span class="n">lastFrameTime</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">now</span>
+</code></pre></div>
+
+<h2 id="input">Input<a class="headerlink" href="#input" title="Permanent link">#</a></h2>
+<p>AppKit and UIKit deliver input as events, which is awkward for a game loop that wants to ask "is W down right now?". The <strong>GameController</strong> framework lets you poll the keyboard and mouse on both macOS and iPadOS:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">import</span><span class="w"> </span><span class="nc">GameController</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nf">updateCamera</span><span class="p">(</span><span class="n">deltaTime</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">forward</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">strafe</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">keyboard</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">GCKeyboard</span><span class="p">.</span><span class="n">coalesced</span><span class="p">?.</span><span class="n">keyboardInput</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">keyboard</span><span class="p">.</span><span class="n">button</span><span class="p">(</span><span class="n">forKeyCode</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">keyW</span><span class="p">)?.</span><span class="n">isPressed</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">forward</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">keyboard</span><span class="p">.</span><span class="n">button</span><span class="p">(</span><span class="n">forKeyCode</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">keyS</span><span class="p">)?.</span><span class="n">isPressed</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">forward</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">keyboard</span><span class="p">.</span><span class="n">button</span><span class="p">(</span><span class="n">forKeyCode</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">keyD</span><span class="p">)?.</span><span class="n">isPressed</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">strafe</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">keyboard</span><span class="p">.</span><span class="n">button</span><span class="p">(</span><span class="n">forKeyCode</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">keyA</span><span class="p">)?.</span><span class="n">isPressed</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">strafe</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">camera</span><span class="p">.</span><span class="n">move</span><span class="p">(</span><span class="n">forward</span><span class="p">:</span><span class="w"> </span><span class="n">forward</span><span class="p">,</span><span class="w"> </span><span class="n">strafe</span><span class="p">:</span><span class="w"> </span><span class="n">strafe</span><span class="p">,</span><span class="w"> </span><span class="n">deltaTime</span><span class="p">:</span><span class="w"> </span><span class="n">deltaTime</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Mouse movement arrives through a handler that reports deltas. Register it once, for example in the renderer's <code>init</code>:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">NotificationCenter</span><span class="p">.</span><span class="k">default</span><span class="p">.</span><span class="n">addObserver</span><span class="p">(</span><span class="n">forName</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">GCMouseDidConnect</span><span class="p">,</span><span class="w"> </span><span class="n">object</span><span class="p">:</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="n">queue</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">main</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">[</span><span class="kr">weak</span><span class="w"> </span><span class="kc">self</span><span class="p">]</span><span class="w"> </span><span class="n">note</span><span class="w"> </span><span class="k">in</span>
+<span class="w">    </span><span class="k">guard</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">mouse</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">note</span><span class="p">.</span><span class="n">object</span><span class="w"> </span><span class="k">as</span><span class="p">?</span><span class="w"> </span><span class="bp">GCMouse</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="n">mouse</span><span class="p">.</span><span class="n">mouseInput</span><span class="p">?.</span><span class="n">mouseMovedHandler</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kc">_</span><span class="p">,</span><span class="w"> </span><span class="n">deltaX</span><span class="p">,</span><span class="w"> </span><span class="n">deltaY</span><span class="w"> </span><span class="k">in</span>
+<span class="w">        </span><span class="kc">self</span><span class="p">?.</span><span class="n">camera</span><span class="p">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">deltaX</span><span class="p">:</span><span class="w"> </span><span class="n">deltaX</span><span class="p">,</span><span class="w"> </span><span class="n">deltaY</span><span class="p">:</span><span class="w"> </span><span class="n">deltaY</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">mouse</span><span class="p">.</span><span class="n">mouseInput</span><span class="p">?.</span><span class="n">scroll</span><span class="p">.</span><span class="n">valueChangedHandler</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kc">_</span><span class="p">,</span><span class="w"> </span><span class="kc">_</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="k">in</span>
+<span class="w">        </span><span class="kc">self</span><span class="p">?.</span><span class="n">camera</span><span class="p">.</span><span class="n">zoom</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>deltaY</code> is positive when the mouse moves up, so pitch increases and the camera looks up. On macOS the window must be key for keyboard polling to work; click it once after launch. The same framework reads game controllers through <code>GCController</code>, which is the natural choice on iPhone.</p>
+<h2 id="putting-it-together">Putting it together<a class="headerlink" href="#putting-it-together" title="Permanent link">#</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">camera</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Camera</span><span class="p">()</span>
+
+<span class="c1">// in draw(in:)</span>
+<span class="n">updateCamera</span><span class="p">(</span><span class="n">deltaTime</span><span class="p">:</span><span class="w"> </span><span class="n">deltaTime</span><span class="p">)</span>
+<span class="n">uniforms</span><span class="p">.</span><span class="n">view</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">camera</span><span class="p">.</span><span class="n">viewMatrix</span>
+<span class="n">uniforms</span><span class="p">.</span><span class="n">projection</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">float4x4</span><span class="p">(</span><span class="n">perspectiveFov</span><span class="p">:</span><span class="w"> </span><span class="n">camera</span><span class="p">.</span><span class="n">fov</span><span class="p">.</span><span class="n">radians</span><span class="p">,</span>
+<span class="w">                               </span><span class="n">aspect</span><span class="p">:</span><span class="w"> </span><span class="n">aspect</span><span class="p">,</span><span class="w"> </span><span class="n">near</span><span class="p">:</span><span class="w"> </span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="n">far</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">)</span>
+</code></pre></div>
+
+<p>Zoom is nothing more than narrowing the field of view. You can now fly around the ten cubes from the previous chapter.</p>
+<figure><img src="../assets/img/getting-started/camera.webp" alt="The same ten cubes seen from a camera that has moved up and to the right." width="880" height="495" loading="lazy"><figcaption>The same ten cubes seen from a camera that has moved up and to the right.</figcaption></figure>
+
+<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<ul>
+<li>Turn the fly camera into a first-person camera that cannot leave the ground plane (keep <code>position.y</code> fixed).</li>
+<li>Add Q and E to move straight up and down.</li>
+<li>Hold Shift to triple the movement speed.</li>
+</ul></article><div class="pager"><a class="prev" href="../getting-started/coordinate-systems.html"><small>Previous</small>Coordinate Systems</a><a class="next" href="../getting-started/review.html"><small>Next</small>Review</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blinn-Phong · learnmetal</title>
+<meta name="description" content="Advanced Lighting: Blinn-Phong. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = t;
+})();
+</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
+  <a class="brand" href="../index.html">learn<span>metal</span></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a href="../getting-started/introduction.html">Introduction</a></li>
+<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a href="../getting-started/shaders.html">Shaders</a></li>
+<li><a href="../getting-started/textures.html">Textures</a></li>
+<li><a href="../getting-started/transformations.html">Transformations</a></li>
+<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a href="../getting-started/camera.html">Camera</a></li>
+<li><a href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a href="../lighting/colors.html">Colors</a></li>
+<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a href="../lighting/materials.html">Materials</a></li>
+<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a href="../model-loading/mesh.html">Mesh</a></li>
+<li><a href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a href="../advanced-metal/blending.html">Blending</a></li>
+<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a class="active" href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a href="../pbr/theory.html">Theory</a></li>
+<li><a href="../pbr/lighting.html">Lighting</a></li>
+<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a href="../in-practice/debugging.html">Debugging</a></li>
+<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content">
+<article><p class="crumb">Advanced Lighting</p><h1 id="blinn-phong">Blinn-Phong<a class="headerlink" href="#blinn-phong" title="Permanent link">#</a></h1>
+<p>The Phong specular term has a flaw that shows on rough surfaces viewed at a low angle. A small change to the formula, proposed by James Blinn in 1977, fixes it and has been the default ever since.</p>
+<h2 id="the-problem-with-phong">The problem with Phong<a class="headerlink" href="#the-problem-with-phong" title="Permanent link">#</a></h2>
+<p>Phong measures the angle between the <strong>view direction</strong> and the <strong>reflected light direction</strong>. When the viewer and the light are on the same side of a surface and both near the horizon, that angle can exceed 90 degrees. The dot product goes negative and is clamped to zero, so the highlight is cut off abruptly.</p>
+<p>With a high shininess exponent the highlight is tiny and the cut-off region is never reached. With a low exponent, such as a wide, soft highlight on a floor, you get a visible hard edge where the specular light suddenly stops.</p>
+<h2 id="the-halfway-vector">The halfway vector<a class="headerlink" href="#the-halfway-vector" title="Permanent link">#</a></h2>
+<p>Blinn-Phong replaces the reflection vector with the <strong>halfway vector</strong>: the unit vector exactly between the light direction and the view direction.</p>
+<div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">halfwayDir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">lightDir</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">viewDir</span><span class="p">);</span>
+</code></pre></div>
+
+<p>The specular strength is then the angle between the halfway vector and the <strong>normal</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="kt">float</span><span class="w"> </span><span class="n">spec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pow</span><span class="p">(</span><span class="n">max</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">normal</span><span class="p">,</span><span class="w"> </span><span class="n">halfwayDir</span><span class="p">),</span><span class="w"> </span><span class="mf">0.0</span><span class="p">),</span><span class="w"> </span><span class="n">shininess</span><span class="p">);</span>
+</code></pre></div>
+
+<p>When the view direction lines up perfectly with the reflection, the halfway vector lines up with the normal, so both models agree on where the highlight is brightest. The difference is that the angle between the normal and the halfway vector never exceeds 90 degrees as long as the light is above the surface, so the cut-off cannot happen.</p>
+<h2 id="in-the-shader">In the shader<a class="headerlink" href="#in-the-shader" title="Permanent link">#</a></h2>
+<p>Only the specular lines of the lighting functions change:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="nf">calcPointLight</span><span class="p">(</span><span class="n">PointLight</span><span class="w"> </span><span class="n">light</span><span class="p">,</span><span class="w"> </span><span class="n">Surface</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">toLight</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">light</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">position</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">distance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">length</span><span class="p">(</span><span class="n">toLight</span><span class="p">);</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">lightDir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">toLight</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">distance</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">diff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">max</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">normal</span><span class="p">,</span><span class="w"> </span><span class="n">lightDir</span><span class="p">),</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">halfwayDir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">lightDir</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">viewDir</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">spec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pow</span><span class="p">(</span><span class="n">max</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">normal</span><span class="p">,</span><span class="w"> </span><span class="n">halfwayDir</span><span class="p">),</span><span class="w"> </span><span class="mf">0.0</span><span class="p">),</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">shininess</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">attenuation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">distance</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">distance</span><span class="p">);</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h2 id="adjusting-shininess">Adjusting shininess<a class="headerlink" href="#adjusting-shininess" title="Permanent link">#</a></h2>
+<p>The angle to the halfway vector is smaller than the angle Phong uses, roughly half of it. The same exponent therefore gives a larger highlight with Blinn-Phong. To get a similar look, multiply your old shininess values by somewhere between 2 and 4.</p>
+<h2 id="a-test-scene">A test scene<a class="headerlink" href="#a-test-scene" title="Permanent link">#</a></h2>
+<p>Lay a large textured floor under a single point light close to the surface, and add a uniform that switches between the two formulas:</p>
+<div class="codehilite"><pre><span></span><code><span class="kt">float</span><span class="w"> </span><span class="n">spec</span><span class="p">;</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">uniforms</span><span class="p">.</span><span class="n">useBlinn</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">halfwayDir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">lightDir</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">viewDir</span><span class="p">);</span>
+<span class="w">    </span><span class="n">spec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pow</span><span class="p">(</span><span class="n">max</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">normal</span><span class="p">,</span><span class="w"> </span><span class="n">halfwayDir</span><span class="p">),</span><span class="w"> </span><span class="mf">0.0</span><span class="p">),</span><span class="w"> </span><span class="mf">32.0</span><span class="p">);</span>
+<span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">reflectDir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">reflect</span><span class="p">(</span><span class="o">-</span><span class="n">lightDir</span><span class="p">,</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">normal</span><span class="p">);</span>
+<span class="w">    </span><span class="n">spec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pow</span><span class="p">(</span><span class="n">max</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">viewDir</span><span class="p">,</span><span class="w"> </span><span class="n">reflectDir</span><span class="p">),</span><span class="w"> </span><span class="mf">0.0</span><span class="p">),</span><span class="w"> </span><span class="mf">8.0</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>With Phong, the highlight on the floor is chopped off along a curve. With Blinn-Phong it fades out smoothly and stretches toward the horizon, which is how real glossy floors behave.</p>
+<div class="admonition note">
+<p class="admonition-title">Booleans in uniforms</p>
+<p>MSL's <code>bool</code> is one byte, and so is Swift's <code>Bool</code>, but alignment and padding around them are easy to get wrong. Many people use a <code>uint</code> or <code>int</code> flag (<code>UInt32</code> in Swift) in uniform structs to keep layouts obvious.</p>
+</div>
+<p>Blinn-Phong is used for the rest of this section. It is still an empirical model, and the PBR section will replace it, but the halfway vector stays: it is central to physically based specular reflection as well.</p>
+<figure><img src="../assets/img/advanced-lighting/blinn-phong.webp" alt="A light close to a floor. The Phong highlight is cut off behind the light; the Blinn-Phong highlight is not." width="880" height="246" loading="lazy"><figcaption>A light close to a floor. The Phong highlight is cut off behind the light; the Blinn-Phong highlight is not.</figcaption></figure></article><div class="pager"><a class="prev" href="../advanced-metal/anti-aliasing.html"><small>Previous</small>Anti-Aliasing</a><a class="next" href="../advanced-lighting/gamma-correction.html"><small>Next</small>Gamma Correction</a></div>
+</main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>
