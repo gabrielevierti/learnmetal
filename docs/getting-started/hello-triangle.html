@@ -3,32 +3,47 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Hello Triangle · learnmetal</title>
-<meta name="description" content="Getting Started: Hello Triangle. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<title>Hello Triangle | learnmetal</title>
+<meta name="description" content="Getting Started: Hello Triangle. Learn 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering, in Swift or C++.">
+<meta name="author" content="Gabriele Vierti">
+<link rel="icon" href="../assets/favicon.png">
 <script>
 (function () {
-  var t = null;
-  try { t = localStorage.getItem("theme"); } catch (e) {}
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem("theme"); l = localStorage.getItem("lang"); } catch (e) {}
   if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  document.documentElement.dataset.theme = t;
+  d.dataset.theme = t;
+  var q = /[?&]lang=(swift|cpp)/.exec(location.search);      // links can pick a language: page.html?lang=cpp
+  if (q) l = q[1];
+  d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
 <link rel="stylesheet" href="../assets/style.css">
 <link rel="stylesheet" href="../assets/code.css">
 </head>
-<body>
+<body class="">
+<a class="skip" href="#main">Skip to content</a>
 <header class="topbar">
-  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
-  <a class="brand" href="../index.html">learn<span>metal</span></a>
-  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+  <button id="menu-toggle" class="icon-btn" aria-label="Open the chapter list">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a class="brand" href="../index.html"><img src="../assets/logo.png" alt="LearnMetal" width="136" height="32"></a>
+  <div class="lang-switch" role="group" aria-label="Language of the host code">
+    <button type="button" data-set-lang="swift">Swift</button>
+    <button type="button" data-set-lang="cpp">C++</button>
+  </div>
+  <a class="icon-btn" href="https://github.com/gabrielevierti" aria-label="Gabriele Vierti on GitHub"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Switch between light and dark">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"/></svg>
+  </button>
 </header>
 <div class="layout">
-<nav class="sidebar" id="sidebar">
+<nav class="sidebar" id="sidebar" aria-label="Chapters">
 <div class="nav-section"><h4>Getting Started</h4><ul>
 <li><a href="../getting-started/introduction.html">Introduction</a></li>
 <li><a href="../getting-started/project-setup.html">Project Setup</a></li>
 <li><a href="../getting-started/hello-view.html">Hello View</a></li>
-<li><a class="active" href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a class="active" aria-current="page" href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
 <li><a href="../getting-started/shaders.html">Shaders</a></li>
 <li><a href="../getting-started/textures.html">Textures</a></li>
 <li><a href="../getting-started/transformations.html">Transformations</a></li>
@@ -95,9 +110,9 @@
 <li><a href="../resources/examples.html">Example Code</a></li>
 </ul></div>
 </nav>
-<main class="content">
+<main class="content" id="main">
 <article><p class="crumb">Getting Started</p><h1 id="hello-triangle">Hello Triangle<a class="headerlink" href="#hello-triangle" title="Permanent link">#</a></h1>
-<div class="example-box"><strong>Example code</strong> <code>examples/Sources/02-HelloTriangle</code>, run with <code>swift run HelloTriangle</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
+<div class="example-box lang-swift"><strong>Example project</strong> <code>examples/Sources/02-HelloTriangle</code>, run with <code>swift run HelloTriangle</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
 
 <p>In Metal, as in every GPU API, everything you see is made of triangles. Drawing the first one requires three new pieces: vertex data in a buffer, a pair of shaders, and a render pipeline state that ties them together. It is the steepest step in the whole series. Once it works, the rest is variation.</p>
 <h2 id="the-graphics-pipeline">The graphics pipeline<a class="headerlink" href="#the-graphics-pipeline" title="Permanent link">#</a></h2>
@@ -133,14 +148,25 @@
 </ul>
 <h2 id="vertex-data">Vertex data<a class="headerlink" href="#vertex-data" title="Permanent link">#</a></h2>
 <p>Metal expects final positions in <strong>normalized device coordinates</strong> (NDC): x and y run from -1 to 1 across the view, with x to the right and y up, and z runs from 0 to 1 into the screen. Anything outside is clipped away. A triangle in the middle of the view:</p>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">vertices</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="nb">Float</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w">   </span><span class="c1">// bottom left</span>
 <span class="w">     </span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w">   </span><span class="c1">// bottom right</span>
 <span class="w">     </span><span class="mf">0.0</span><span class="p">,</span><span class="w">  </span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w">   </span><span class="c1">// top</span>
 <span class="p">]</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="k">const</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">vertices</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="mf">-0.5f</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.5f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">,</span><span class="w">   </span><span class="c1">// bottom left</span>
+<span class="w">     </span><span class="mf">0.5f</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.5f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">,</span><span class="w">   </span><span class="c1">// bottom right</span>
+<span class="w">     </span><span class="mf">0.0f</span><span class="p">,</span><span class="w">  </span><span class="mf">0.5f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">,</span><span class="w">   </span><span class="c1">// top</span>
+<span class="p">};</span>
+</code></pre></div>
+</div>
 
 <p>The GPU cannot read a Swift array. The data has to be in an <code>MTLBuffer</code>. Add a property and create the buffer in <code>init</code>:</p>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">vertexBuffer</span><span class="p">:</span><span class="w"> </span><span class="bp">MTLBuffer</span>
 
 <span class="c1">// in init, before super.init()</span>
@@ -148,6 +174,14 @@
 <span class="w">                                 </span><span class="n">length</span><span class="p">:</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;.</span><span class="bp">stride</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">vertices</span><span class="p">.</span><span class="bp">count</span><span class="p">,</span>
 <span class="w">                                 </span><span class="n">options</span><span class="p">:</span><span class="w"> </span><span class="p">[])</span><span class="o">!</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">MTL</span><span class="o">::</span><span class="n">Buffer</span><span class="o">*</span><span class="w"> </span><span class="n">vertexBuffer</span><span class="p">;</span><span class="w">      </span><span class="c1">// member of Renderer</span>
+
+<span class="c1">// in the constructor</span>
+<span class="n">vertexBuffer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">device</span><span class="o">-&gt;</span><span class="n">newBuffer</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">vertices</span><span class="p">),</span><span class="w"> </span><span class="n">MTL</span><span class="o">::</span><span class="n">ResourceStorageModeShared</span><span class="p">);</span>
+</code></pre></div>
+</div>
 
 <p>The buffer is just bytes. Metal does not know yet that they are groups of three floats.</p>
 <h2 id="the-shaders">The shaders<a class="headerlink" href="#the-shaders" title="Permanent link">#</a></h2>
@@ -184,16 +218,27 @@
 <p>The fragment function returns an orange color as RGBA floats.</p>
 <h2 id="the-vertex-descriptor">The vertex descriptor<a class="headerlink" href="#the-vertex-descriptor" title="Permanent link">#</a></h2>
 <p>An <code>MTLVertexDescriptor</code> explains the layout of the vertex buffer so that Metal can fill <code>VertexIn</code>:</p>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">vertexDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLVertexDescriptor</span><span class="p">()</span>
 <span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">format</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">float3</span>
 <span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">offset</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span>
 <span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">bufferIndex</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span>
 <span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">layouts</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="bp">stride</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;.</span><span class="bp">stride</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">3</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">MTL</span><span class="o">::</span><span class="n">VertexDescriptor</span><span class="o">*</span><span class="w"> </span><span class="n">vertexDescriptor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MTL</span><span class="o">::</span><span class="n">VertexDescriptor</span><span class="o">::</span><span class="n">alloc</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">();</span>
+<span class="n">vertexDescriptor</span><span class="o">-&gt;</span><span class="n">attributes</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">object</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">setFormat</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">VertexFormatFloat3</span><span class="p">);</span>
+<span class="n">vertexDescriptor</span><span class="o">-&gt;</span><span class="n">attributes</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">object</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">setOffset</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="n">vertexDescriptor</span><span class="o">-&gt;</span><span class="n">attributes</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">object</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">setBufferIndex</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="n">vertexDescriptor</span><span class="o">-&gt;</span><span class="n">layouts</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">object</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">setStride</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">float</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span>
+</code></pre></div>
+</div>
 
 <p>Attribute 0 is three floats, starting at byte 0 of each vertex, read from the buffer bound at index 0. Each vertex is 12 bytes apart.</p>
 <h2 id="the-render-pipeline-state">The render pipeline state<a class="headerlink" href="#the-render-pipeline-state" title="Permanent link">#</a></h2>
 <p>The pipeline state combines the shader functions, the vertex layout, and the pixel format of the texture being drawn into:</p>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">pipelineState</span><span class="p">:</span><span class="w"> </span><span class="bp">MTLRenderPipelineState</span>
 
 <span class="c1">// in init, before super.init()</span>
@@ -211,6 +256,31 @@
 <span class="w">    </span><span class="bp">fatalError</span><span class="p">(</span><span class="s">"Could not create pipeline state: </span><span class="si">\(</span><span class="n">error</span><span class="si">)</span><span class="s">"</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">MTL</span><span class="o">::</span><span class="n">RenderPipelineState</span><span class="o">*</span><span class="w"> </span><span class="n">pipelineState</span><span class="p">;</span><span class="w">      </span><span class="c1">// member of Renderer</span>
+
+<span class="c1">// in the constructor</span>
+<span class="n">MTL</span><span class="o">::</span><span class="n">Library</span><span class="o">*</span><span class="w"> </span><span class="n">library</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">loadLibrary</span><span class="p">(</span><span class="n">device</span><span class="p">,</span><span class="w"> </span><span class="s">"Shaders.metal"</span><span class="p">);</span><span class="w">   </span><span class="c1">// from Project Setup</span>
+
+<span class="n">MTL</span><span class="o">::</span><span class="n">RenderPipelineDescriptor</span><span class="o">*</span><span class="w"> </span><span class="n">pipelineDescriptor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MTL</span><span class="o">::</span><span class="n">RenderPipelineDescriptor</span><span class="o">::</span><span class="n">alloc</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">();</span>
+<span class="n">pipelineDescriptor</span><span class="o">-&gt;</span><span class="n">setVertexFunction</span><span class="p">(</span><span class="n">library</span><span class="o">-&gt;</span><span class="n">newFunction</span><span class="p">(</span><span class="n">MTLSTR</span><span class="p">(</span><span class="s">"vertex_main"</span><span class="p">)));</span>
+<span class="n">pipelineDescriptor</span><span class="o">-&gt;</span><span class="n">setFragmentFunction</span><span class="p">(</span><span class="n">library</span><span class="o">-&gt;</span><span class="n">newFunction</span><span class="p">(</span><span class="n">MTLSTR</span><span class="p">(</span><span class="s">"fragment_main"</span><span class="p">)));</span>
+<span class="n">pipelineDescriptor</span><span class="o">-&gt;</span><span class="n">setVertexDescriptor</span><span class="p">(</span><span class="n">vertexDescriptor</span><span class="p">);</span>
+<span class="n">pipelineDescriptor</span><span class="o">-&gt;</span><span class="n">colorAttachments</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">object</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">setPixelFormat</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">PixelFormatBGRA8Unorm</span><span class="p">);</span>
+
+<span class="n">NS</span><span class="o">::</span><span class="n">Error</span><span class="o">*</span><span class="w"> </span><span class="n">error</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">nullptr</span><span class="p">;</span>
+<span class="n">pipelineState</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">device</span><span class="o">-&gt;</span><span class="n">newRenderPipelineState</span><span class="p">(</span><span class="n">pipelineDescriptor</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">error</span><span class="p">);</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">pipelineState</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cerr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Could not create pipeline state: "</span>
+<span class="w">              </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">error</span><span class="o">-&gt;</span><span class="n">localizedDescription</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">utf8String</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="n">pipelineDescriptor</span><span class="o">-&gt;</span><span class="n">release</span><span class="p">();</span>
+<span class="n">vertexDescriptor</span><span class="o">-&gt;</span><span class="n">release</span><span class="p">();</span>
+<span class="n">library</span><span class="o">-&gt;</span><span class="n">release</span><span class="p">();</span>
+</code></pre></div>
+</div>
 
 <p><code>makeDefaultLibrary()</code> loads the compiled shaders from the app bundle. Creating a pipeline state compiles the shaders for the GPU and is slow, so always do it at load time and never per frame. The pixel format must match the view's <code>colorPixelFormat</code>; a mismatch is the most common first validation error.</p>
 <div class="admonition note">
@@ -219,14 +289,25 @@
 </div>
 <h2 id="draw">Draw<a class="headerlink" href="#draw" title="Permanent link">#</a></h2>
 <p>In <code>draw(in:)</code>, between creating the encoder and ending it:</p>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">encoder</span><span class="p">.</span><span class="n">setRenderPipelineState</span><span class="p">(</span><span class="n">pipelineState</span><span class="p">)</span>
 <span class="n">encoder</span><span class="p">.</span><span class="n">setVertexBuffer</span><span class="p">(</span><span class="n">vertexBuffer</span><span class="p">,</span><span class="w"> </span><span class="n">offset</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
 <span class="n">encoder</span><span class="p">.</span><span class="n">drawPrimitives</span><span class="p">(</span><span class="n">type</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">triangle</span><span class="p">,</span><span class="w"> </span><span class="n">vertexStart</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">vertexCount</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setRenderPipelineState</span><span class="p">(</span><span class="n">pipelineState</span><span class="p">);</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setVertexBuffer</span><span class="p">(</span><span class="n">vertexBuffer</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w">       </span><span class="c1">// buffer, offset, index</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">drawPrimitives</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">PrimitiveTypeTriangle</span><span class="p">,</span><span class="w"> </span><span class="n">NS</span><span class="o">::</span><span class="n">UInteger</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="n">NS</span><span class="o">::</span><span class="n">UInteger</span><span class="p">(</span><span class="mi">3</span><span class="p">));</span>
+</code></pre></div>
+</div>
 
 <p><code>index: 0</code> is the buffer slot that the vertex descriptor's <code>bufferIndex</code> refers to. Run the app and you should see an orange triangle.</p>
+<div class="lm-demo" data-demo="hello-triangle" data-fallback="../assets/img/getting-started/hello-triangle.webp"></div>
+
 <h2 id="indexed-drawing">Indexed drawing<a class="headerlink" href="#indexed-drawing" title="Permanent link">#</a></h2>
 <p>A rectangle is two triangles that share two vertices. Instead of duplicating them, store each vertex once and describe the triangles with indices:</p>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">vertices</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="nb">Float</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span>
 <span class="w">     </span><span class="mf">0.5</span><span class="p">,</span><span class="w">  </span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w">   </span><span class="c1">// top right</span>
 <span class="w">     </span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w">   </span><span class="c1">// bottom right</span>
@@ -242,25 +323,57 @@
 <span class="w">                                </span><span class="n">length</span><span class="p">:</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="nb">UInt16</span><span class="p">&gt;.</span><span class="bp">stride</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="bp">indices</span><span class="p">.</span><span class="bp">count</span><span class="p">,</span>
 <span class="w">                                </span><span class="n">options</span><span class="p">:</span><span class="w"> </span><span class="p">[])</span><span class="o">!</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="k">const</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">vertices</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">     </span><span class="mf">0.5f</span><span class="p">,</span><span class="w">  </span><span class="mf">0.5f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">,</span><span class="w">   </span><span class="c1">// top right</span>
+<span class="w">     </span><span class="mf">0.5f</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.5f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">,</span><span class="w">   </span><span class="c1">// bottom right</span>
+<span class="w">    </span><span class="mf">-0.5f</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.5f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">,</span><span class="w">   </span><span class="c1">// bottom left</span>
+<span class="w">    </span><span class="mf">-0.5f</span><span class="p">,</span><span class="w">  </span><span class="mf">0.5f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">,</span><span class="w">   </span><span class="c1">// top left</span>
+<span class="p">};</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">indices</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="w">    </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="p">};</span>
 
+<span class="n">indexBuffer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">device</span><span class="o">-&gt;</span><span class="n">newBuffer</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">indices</span><span class="p">),</span><span class="w"> </span><span class="n">MTL</span><span class="o">::</span><span class="n">ResourceStorageModeShared</span><span class="p">);</span>
+</code></pre></div>
+</div>
+
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">encoder</span><span class="p">.</span><span class="n">drawIndexedPrimitives</span><span class="p">(</span><span class="n">type</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">triangle</span><span class="p">,</span>
 <span class="w">                              </span><span class="n">indexCount</span><span class="p">:</span><span class="w"> </span><span class="bp">indices</span><span class="p">.</span><span class="bp">count</span><span class="p">,</span>
 <span class="w">                              </span><span class="n">indexType</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">uint16</span><span class="p">,</span>
 <span class="w">                              </span><span class="n">indexBuffer</span><span class="p">:</span><span class="w"> </span><span class="n">indexBuffer</span><span class="p">,</span>
 <span class="w">                              </span><span class="n">indexBufferOffset</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">encoder</span><span class="o">-&gt;</span><span class="n">drawIndexedPrimitives</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">PrimitiveTypeTriangle</span><span class="p">,</span>
+<span class="w">                               </span><span class="mi">6</span><span class="p">,</span><span class="w">                        </span><span class="c1">// index count</span>
+<span class="w">                               </span><span class="n">MTL</span><span class="o">::</span><span class="n">IndexTypeUInt16</span><span class="p">,</span>
+<span class="w">                               </span><span class="n">indexBuffer</span><span class="p">,</span>
+<span class="w">                               </span><span class="mi">0</span><span class="p">);</span><span class="w">                       </span><span class="c1">// index buffer offset</span>
+</code></pre></div>
+</div>
 
 <p>To see the triangles themselves, call <code>encoder.setTriangleFillMode(.lines)</code> before drawing.</p>
-<figure><img src="../assets/img/getting-started/hello-triangle.webp" alt="Left: the first triangle. Right: the indexed rectangle drawn with setTriangleFillMode(.lines), showing its two triangles." width="880" height="246" loading="lazy"><figcaption>Left: the first triangle. Right: the indexed rectangle drawn with setTriangleFillMode(.lines), showing its two triangles.</figcaption></figure>
-
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
 <li>Draw two triangles next to each other by adding three more vertices and changing <code>vertexCount</code>.</li>
 <li>Create a second pipeline state with a fragment function that returns yellow, and draw the second triangle with it.</li>
 <li>Move a vertex outside the -1 to 1 range and watch it get clipped.</li>
-</ul></article><div class="pager"><a class="prev" href="../getting-started/hello-view.html"><small>Previous</small>Hello View</a><a class="next" href="../getting-started/shaders.html"><small>Next</small>Shaders</a></div>
+</ul></article><nav class="pager" aria-label="Previous and next chapter"><a class="prev" href="../getting-started/hello-view.html"><small>Previous</small>Hello View</a><a class="next" href="../getting-started/shaders.html"><small>Next</small>Shaders</a></nav>
+<footer class="site-footer">
+  <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>
+  <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
+</footer>
 </main>
+<aside class="toc" aria-label="On this page"><h4>On this page</h4><ul><li><a href="#the-graphics-pipeline">The graphics pipeline</a></li><li><a href="#vertex-data">Vertex data</a></li><li><a href="#the-shaders">The shaders</a></li><li><a href="#the-vertex-descriptor">The vertex descriptor</a></li><li><a href="#the-render-pipeline-state">The render pipeline state</a></li><li><a href="#draw">Draw</a></li><li><a href="#indexed-drawing">Indexed drawing</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
 </div>
-<script src="../assets/site.js"></script>
+<script defer src="../assets/textures.js"></script>
+<script defer src="../assets/live.js"></script>
+<script defer src="../assets/demos.js"></script>
+<script defer src="../assets/site.js"></script>
 </body>
 </html>

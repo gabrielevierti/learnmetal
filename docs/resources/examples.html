@@ -3,27 +3,42 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Example Code · learnmetal</title>
-<meta name="description" content="Resources: Example Code. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<title>Example Code | learnmetal</title>
+<meta name="description" content="Resources: Example Code. Learn 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering, in Swift or C++.">
+<meta name="author" content="Gabriele Vierti">
+<link rel="icon" href="../assets/favicon.png">
 <script>
 (function () {
-  var t = null;
-  try { t = localStorage.getItem("theme"); } catch (e) {}
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem("theme"); l = localStorage.getItem("lang"); } catch (e) {}
   if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  document.documentElement.dataset.theme = t;
+  d.dataset.theme = t;
+  var q = /[?&]lang=(swift|cpp)/.exec(location.search);      // links can pick a language: page.html?lang=cpp
+  if (q) l = q[1];
+  d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
 <link rel="stylesheet" href="../assets/style.css">
 <link rel="stylesheet" href="../assets/code.css">
 </head>
-<body>
+<body class="">
+<a class="skip" href="#main">Skip to content</a>
 <header class="topbar">
-  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
-  <a class="brand" href="../index.html">learn<span>metal</span></a>
-  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+  <button id="menu-toggle" class="icon-btn" aria-label="Open the chapter list">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a class="brand" href="../index.html"><img src="../assets/logo.png" alt="LearnMetal" width="136" height="32"></a>
+  <div class="lang-switch" role="group" aria-label="Language of the host code">
+    <button type="button" data-set-lang="swift">Swift</button>
+    <button type="button" data-set-lang="cpp">C++</button>
+  </div>
+  <a class="icon-btn" href="https://github.com/gabrielevierti" aria-label="Gabriele Vierti on GitHub"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Switch between light and dark">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"/></svg>
+  </button>
 </header>
 <div class="layout">
-<nav class="sidebar" id="sidebar">
+<nav class="sidebar" id="sidebar" aria-label="Chapters">
 <div class="nav-section"><h4>Getting Started</h4><ul>
 <li><a href="../getting-started/introduction.html">Introduction</a></li>
 <li><a href="../getting-started/project-setup.html">Project Setup</a></li>
@@ -92,11 +107,12 @@
 <li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
 </ul></div>
 <div class="nav-section"><h4>Resources</h4><ul>
-<li><a class="active" href="../resources/examples.html">Example Code</a></li>
+<li><a class="active" aria-current="page" href="../resources/examples.html">Example Code</a></li>
 </ul></div>
 </nav>
-<main class="content">
+<main class="content" id="main">
 <article><p class="crumb">Resources</p><h1 id="example-code">Example Code<a class="headerlink" href="#example-code" title="Permanent link">#</a></h1>
+<p>There are two sets of projects: Swift examples for the main chapters, and a C++ starter for readers using metal-cpp.</p>
 <p>The repository includes a Swift package with runnable examples for the main chapters. Each one is a small macOS app in a single <code>main.swift</code> plus a <code>Shaders.metal</code> file.</p>
 <p><a class="cta" href="../downloads/learnmetal-examples.zip">Download all examples (.zip)</a></p>
 
@@ -194,10 +210,23 @@ swift<span class="w"> </span>run<span class="w"> </span>-c<span class="w"> </spa
 <li><strong>Textures are generated in code</strong>, so there is nothing else to download.</li>
 <li><strong>Examples 01 to 03 write the frame loop by hand.</strong> Later ones inherit it from a <code>BaseRenderer</code> class to stay short.</li>
 </ul>
-<h2 id="about-the-figures">About the figures<a class="headerlink" href="#about-the-figures" title="Permanent link">#</a></h2>
-<p>The images in the chapters are illustrations. They are drawn by a small software renderer in the repository's <code>tools/</code> folder, which implements the same math as each chapter's shaders with numpy. They are not screenshots of the Metal examples, so expect small differences in textures and framing when you run the code.</p></article><div class="pager"><a class="prev" href="../beyond/ray-tracing.html"><small>Previous</small>Ray Tracing</a></div>
+<h2 id="c-starter">C++ starter<a class="headerlink" href="#c-starter" title="Permanent link">#</a></h2>
+<p><a class="cta" href="../downloads/learnmetal-cpp-starter.zip">Download the C++ starter (.zip)</a></p>
+
+<p>The starter is the Hello Triangle chapter in C++: a GLFW window, a <code>CAMetalLayer</code>, and a renderer written with Apple's metal-cpp. It needs <code>brew install glfw cmake</code> and a copy of <a href="https://developer.apple.com/metal/cpp/">metal-cpp</a> unzipped into the folder. Build it with CMake as described in <a href="../getting-started/project-setup.html">Project Setup</a>. It is the base that the C++ code in the chapters builds on.</p>
+<h2 id="about-the-live-demos-and-the-figures">About the live demos and the figures<a class="headerlink" href="#about-the-live-demos-and-the-figures" title="Permanent link">#</a></h2>
+<p>The live demos run in your browser with WebGL. The shader you edit is Metal Shading Language, translated to GLSL on the fly by a small script (<code>assets/live.js</code>). The translator covers the subset of the language the chapters use; it is a teaching aid and not a full Metal implementation, so a few things differ from a real Mac, such as stricter rules about mixing <code>int</code> and <code>float</code>.</p>
+<p>The remaining static images are illustrations. They are drawn by a small software renderer in the repository's <code>tools/</code> folder, which implements the same math as each chapter's shaders with numpy. They are not screenshots of the Metal examples, so expect small differences in textures and framing when you run the code.</p></article><nav class="pager" aria-label="Previous and next chapter"><a class="prev" href="../beyond/ray-tracing.html"><small>Previous</small>Ray Tracing</a></nav>
+<footer class="site-footer">
+  <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>
+  <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
+</footer>
 </main>
+<aside class="toc" aria-label="On this page"><h4>On this page</h4><ul><li><a href="#running-an-example">Running an example</a></li><li><a href="#the-examples">The examples</a></li><li><a href="#how-they-differ-from-the-chapters">How they differ from the chapters</a></li><li><a href="#c-starter">C++ starter</a></li><li><a href="#about-the-live-demos-and-the-figures">About the live demos and the figures</a></li></ul></aside>
 </div>
-<script src="../assets/site.js"></script>
+<script defer src="../assets/textures.js"></script>
+<script defer src="../assets/live.js"></script>
+<script defer src="../assets/demos.js"></script>
+<script defer src="../assets/site.js"></script>
 </body>
 </html>

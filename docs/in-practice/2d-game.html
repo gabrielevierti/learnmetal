@@ -3,27 +3,42 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>A 2D Game · learnmetal</title>
-<meta name="description" content="In Practice: A 2D Game. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<title>A 2D Game | learnmetal</title>
+<meta name="description" content="In Practice: A 2D Game. Learn 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering, in Swift or C++.">
+<meta name="author" content="Gabriele Vierti">
+<link rel="icon" href="../assets/favicon.png">
 <script>
 (function () {
-  var t = null;
-  try { t = localStorage.getItem("theme"); } catch (e) {}
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem("theme"); l = localStorage.getItem("lang"); } catch (e) {}
   if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  document.documentElement.dataset.theme = t;
+  d.dataset.theme = t;
+  var q = /[?&]lang=(swift|cpp)/.exec(location.search);      // links can pick a language: page.html?lang=cpp
+  if (q) l = q[1];
+  d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
 <link rel="stylesheet" href="../assets/style.css">
 <link rel="stylesheet" href="../assets/code.css">
 </head>
-<body>
+<body class="">
+<a class="skip" href="#main">Skip to content</a>
 <header class="topbar">
-  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
-  <a class="brand" href="../index.html">learn<span>metal</span></a>
-  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+  <button id="menu-toggle" class="icon-btn" aria-label="Open the chapter list">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a class="brand" href="../index.html"><img src="../assets/logo.png" alt="LearnMetal" width="136" height="32"></a>
+  <div class="lang-switch" role="group" aria-label="Language of the host code">
+    <button type="button" data-set-lang="swift">Swift</button>
+    <button type="button" data-set-lang="cpp">C++</button>
+  </div>
+  <a class="icon-btn" href="https://github.com/gabrielevierti" aria-label="Gabriele Vierti on GitHub"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Switch between light and dark">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"/></svg>
+  </button>
 </header>
 <div class="layout">
-<nav class="sidebar" id="sidebar">
+<nav class="sidebar" id="sidebar" aria-label="Chapters">
 <div class="nav-section"><h4>Getting Started</h4><ul>
 <li><a href="../getting-started/introduction.html">Introduction</a></li>
 <li><a href="../getting-started/project-setup.html">Project Setup</a></li>
@@ -84,7 +99,7 @@
 <div class="nav-section"><h4>In Practice</h4><ul>
 <li><a href="../in-practice/debugging.html">Debugging</a></li>
 <li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
-<li><a class="active" href="../in-practice/2d-game.html">A 2D Game</a></li>
+<li><a class="active" aria-current="page" href="../in-practice/2d-game.html">A 2D Game</a></li>
 </ul></div>
 <div class="nav-section"><h4>Beyond</h4><ul>
 <li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
@@ -95,7 +110,7 @@
 <li><a href="../resources/examples.html">Example Code</a></li>
 </ul></div>
 </nav>
-<main class="content">
+<main class="content" id="main">
 <article><p class="crumb">In Practice</p><h1 id="a-2d-game">A 2D Game<a class="headerlink" href="#a-2d-game" title="Permanent link">#</a></h1>
 <p>Everything so far has been technique. This chapter puts a handful of those techniques to work in something playable: a small brick-breaking game. A paddle, a ball, a wall of bricks. It is deliberately tiny, so that the whole structure fits in one chapter and you can see how a renderer and game logic meet.</p>
 <h2 id="what-we-need">What we need<a class="headerlink" href="#what-we-need" title="Permanent link">#</a></h2>
@@ -143,6 +158,7 @@
 </code></pre></div>
 
 <p>On the Swift side the renderer collects sprites during the frame and draws them all at once:</p>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">SpriteInstance</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">position</span><span class="p">:</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;</span>
 <span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">size</span><span class="p">:</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;</span>
@@ -175,18 +191,64 @@
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">SpriteInstance</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">simd</span><span class="o">::</span><span class="n">float2</span><span class="w"> </span><span class="n">position</span><span class="p">;</span>
+<span class="w">    </span><span class="n">simd</span><span class="o">::</span><span class="n">float2</span><span class="w"> </span><span class="n">size</span><span class="p">;</span>
+<span class="w">    </span><span class="n">simd</span><span class="o">::</span><span class="n">float4</span><span class="w"> </span><span class="n">color</span><span class="p">;</span>
+<span class="w">    </span><span class="n">simd</span><span class="o">::</span><span class="n">float4</span><span class="w"> </span><span class="n">uvRect</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">};</span>
+<span class="p">};</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">SpriteBatch</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="k">explicit</span><span class="w"> </span><span class="n">SpriteBatch</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">Device</span><span class="o">*</span><span class="w"> </span><span class="n">device</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">buffer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">device</span><span class="o">-&gt;</span><span class="n">newBuffer</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">SpriteInstance</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">capacity</span><span class="p">,</span><span class="w"> </span><span class="n">MTL</span><span class="o">::</span><span class="n">ResourceStorageModeShared</span><span class="p">);</span>
+<span class="w">        </span><span class="n">sprites</span><span class="p">.</span><span class="n">reserve</span><span class="p">(</span><span class="n">capacity</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">add</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">SpriteInstance</span><span class="o">&amp;</span><span class="w"> </span><span class="n">sprite</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">sprites</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">capacity</span><span class="p">)</span><span class="w"> </span><span class="n">sprites</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">sprite</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">flush</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">RenderCommandEncoder</span><span class="o">*</span><span class="w"> </span><span class="n">encoder</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">sprites</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">memcpy</span><span class="p">(</span><span class="n">buffer</span><span class="o">-&gt;</span><span class="n">contents</span><span class="p">(),</span><span class="w"> </span><span class="n">sprites</span><span class="p">.</span><span class="n">data</span><span class="p">(),</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">SpriteInstance</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">sprites</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+<span class="w">        </span><span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setVertexBuffer</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">        </span><span class="n">encoder</span><span class="o">-&gt;</span><span class="n">drawPrimitives</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">PrimitiveTypeTriangleStrip</span><span class="p">,</span><span class="w"> </span><span class="n">NS</span><span class="o">::</span><span class="n">UInteger</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="n">NS</span><span class="o">::</span><span class="n">UInteger</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span>
+<span class="w">                                </span><span class="n">NS</span><span class="o">::</span><span class="n">UInteger</span><span class="p">(</span><span class="n">sprites</span><span class="p">.</span><span class="n">size</span><span class="p">()));</span>
+<span class="w">        </span><span class="n">sprites</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="k">private</span><span class="o">:</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">capacity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4096</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">SpriteInstance</span><span class="o">&gt;</span><span class="w"> </span><span class="n">sprites</span><span class="p">;</span>
+<span class="w">    </span><span class="n">MTL</span><span class="o">::</span><span class="n">Buffer</span><span class="o">*</span><span class="w"> </span><span class="n">buffer</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div>
+</div>
 
 <p>Use a pipeline with alpha blending. Put all the game's images in one texture, an <strong>atlas</strong>, and select regions with <code>uvRect</code>, so that the whole game is a single draw call. For solid-colored rectangles, bind a 1 × 1 white texture.</p>
 <h2 id="the-playing-field">The playing field<a class="headerlink" href="#the-playing-field" title="Permanent link">#</a></h2>
 <p>Give the game a fixed logical size, independent of the window, with the origin at the top left and y pointing down, which is convenient for 2D:</p>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">fieldSize</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;(</span><span class="mi">800</span><span class="p">,</span><span class="w"> </span><span class="mi">600</span><span class="p">)</span>
 <span class="kd">var</span><span class="w"> </span><span class="nv">projection</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">float4x4</span><span class="p">(</span><span class="n">orthographicLeft</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="kr">right</span><span class="p">:</span><span class="w"> </span><span class="n">fieldSize</span><span class="p">.</span><span class="n">x</span><span class="p">,</span>
 <span class="w">                          </span><span class="n">bottom</span><span class="p">:</span><span class="w"> </span><span class="n">fieldSize</span><span class="p">.</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">top</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
 <span class="w">                          </span><span class="n">near</span><span class="p">:</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">far</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="k">const</span><span class="w"> </span><span class="n">simd</span><span class="o">::</span><span class="n">float2</span><span class="w"> </span><span class="n">fieldSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">800</span><span class="p">,</span><span class="w"> </span><span class="mi">600</span><span class="p">};</span>
+<span class="n">simd</span><span class="o">::</span><span class="n">float4x4</span><span class="w"> </span><span class="n">projection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">orthographic</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">fieldSize</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w">      </span><span class="c1">// left, right</span>
+<span class="w">                                         </span><span class="n">fieldSize</span><span class="p">.</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">      </span><span class="c1">// bottom, top: swapped to flip y</span>
+<span class="w">                                         </span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+</code></pre></div>
+</div>
 
 <p>Swapping <code>bottom</code> and <code>top</code> flips the y axis.</p>
 <h2 id="game-objects">Game objects<a class="headerlink" href="#game-objects" title="Permanent link">#</a></h2>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">Brick</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">position</span><span class="p">:</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;</span>
 <span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">size</span><span class="p">:</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;</span>
@@ -223,9 +285,51 @@
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">Brick</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">simd</span><span class="o">::</span><span class="n">float2</span><span class="w"> </span><span class="n">position</span><span class="p">;</span>
+<span class="w">    </span><span class="n">simd</span><span class="o">::</span><span class="n">float2</span><span class="w"> </span><span class="n">size</span><span class="p">;</span>
+<span class="w">    </span><span class="n">simd</span><span class="o">::</span><span class="n">float4</span><span class="w"> </span><span class="n">color</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">isAlive</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">Ball</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">simd</span><span class="o">::</span><span class="n">float2</span><span class="w"> </span><span class="n">position</span><span class="p">;</span><span class="w">        </span><span class="c1">// center</span>
+<span class="w">    </span><span class="n">simd</span><span class="o">::</span><span class="n">float2</span><span class="w"> </span><span class="n">velocity</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">radius</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">isStuck</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w">          </span><span class="c1">// resting on the paddle until launched</span>
+<span class="p">};</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Game</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="n">simd</span><span class="o">::</span><span class="n">float2</span><span class="w"> </span><span class="n">paddlePosition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">350</span><span class="p">,</span><span class="w"> </span><span class="mi">570</span><span class="p">};</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">simd</span><span class="o">::</span><span class="n">float2</span><span class="w"> </span><span class="n">paddleSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">};</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">paddleSpeed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">500</span><span class="p">;</span>
+<span class="w">    </span><span class="n">Ball</span><span class="w"> </span><span class="n">ball</span><span class="p">{{</span><span class="mi">400</span><span class="p">,</span><span class="w"> </span><span class="mi">560</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mi">120</span><span class="p">,</span><span class="w"> </span><span class="mi">-350</span><span class="p">}};</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Brick</span><span class="o">&gt;</span><span class="w"> </span><span class="n">bricks</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">lives</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">loadLevel</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">rows</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">columns</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">const</span><span class="w"> </span><span class="n">simd</span><span class="o">::</span><span class="n">float2</span><span class="w"> </span><span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">800.0f</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">columns</span><span class="p">,</span><span class="w"> </span><span class="mi">24</span><span class="p">};</span>
+<span class="w">        </span><span class="k">const</span><span class="w"> </span><span class="n">simd</span><span class="o">::</span><span class="n">float4</span><span class="w"> </span><span class="n">palette</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{{</span><span class="mf">0.9f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.3f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.3f</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mf">0.9f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.6f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2f</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">},</span>
+<span class="w">                                         </span><span class="p">{</span><span class="mf">0.3f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.8f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.4f</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mf">0.3f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.9f</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">}};</span>
+<span class="w">        </span><span class="n">bricks</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">row</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">row</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">rows</span><span class="p">;</span><span class="w"> </span><span class="n">row</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">column</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">column</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">columns</span><span class="p">;</span><span class="w"> </span><span class="n">column</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">bricks</span><span class="p">.</span><span class="n">push_back</span><span class="p">({{</span><span class="n">column</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">size</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mi">60</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">row</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">size</span><span class="p">.</span><span class="n">y</span><span class="p">},</span><span class="w"> </span><span class="n">size</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">2.0f</span><span class="p">,</span><span class="w"> </span><span class="n">palette</span><span class="p">[</span><span class="n">row</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">4</span><span class="p">]});</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">deltaTime</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">input</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">launch</span><span class="p">);</span>
+<span class="p">};</span>
+</code></pre></div>
+</div>
 
 <p>A level is just data. Loading levels from a text file where each digit is a brick type is an easy extension.</p>
 <h2 id="update">Update<a class="headerlink" href="#update" title="Permanent link">#</a></h2>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">extension</span><span class="w"> </span><span class="nc">Game</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="n">deltaTime</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">,</span><span class="w"> </span><span class="n">input</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">,</span><span class="w"> </span><span class="n">launch</span><span class="p">:</span><span class="w"> </span><span class="nb">Bool</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="c1">// Paddle: input is -1, 0 or 1.</span>
@@ -276,10 +380,64 @@
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">Game::update</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">deltaTime</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">input</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">launch</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Paddle: input is -1, 0 or 1.</span>
+<span class="w">    </span><span class="n">paddlePosition</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">input</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">paddleSpeed</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">deltaTime</span><span class="p">;</span>
+<span class="w">    </span><span class="n">paddlePosition</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">clamp</span><span class="p">(</span><span class="n">paddlePosition</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">,</span><span class="w"> </span><span class="mi">800</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">paddleSize</span><span class="p">.</span><span class="n">x</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ball</span><span class="p">.</span><span class="n">isStuck</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">ball</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">paddlePosition</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">paddleSize</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">paddlePosition</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">radius</span><span class="p">};</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">launch</span><span class="p">)</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">isStuck</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">        </span><span class="k">return</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">ball</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">velocity</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">deltaTime</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Walls</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ball</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">radius</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">800</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">radius</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">ball</span><span class="p">.</span><span class="n">velocity</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="n">ball</span><span class="p">.</span><span class="n">velocity</span><span class="p">.</span><span class="n">x</span><span class="p">;</span>
+<span class="w">        </span><span class="n">ball</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">clamp</span><span class="p">(</span><span class="n">ball</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">radius</span><span class="p">,</span><span class="w"> </span><span class="mi">800</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">radius</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ball</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">radius</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">ball</span><span class="p">.</span><span class="n">velocity</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">abs</span><span class="p">(</span><span class="n">ball</span><span class="p">.</span><span class="n">velocity</span><span class="p">.</span><span class="n">y</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Bricks</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">Brick</span><span class="o">&amp;</span><span class="w"> </span><span class="n">brick</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">bricks</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">brick</span><span class="p">.</span><span class="n">isAlive</span><span class="p">)</span><span class="w"> </span><span class="k">continue</span><span class="p">;</span>
+<span class="w">        </span><span class="n">simd</span><span class="o">::</span><span class="n">float2</span><span class="w"> </span><span class="n">normal</span><span class="p">;</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">collide</span><span class="p">(</span><span class="n">ball</span><span class="p">,</span><span class="w"> </span><span class="n">brick</span><span class="p">.</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="n">brick</span><span class="p">.</span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="n">normal</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">brick</span><span class="p">.</span><span class="n">isAlive</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">            </span><span class="n">ball</span><span class="p">.</span><span class="n">velocity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">simd</span><span class="o">::</span><span class="n">reflect</span><span class="p">(</span><span class="n">ball</span><span class="p">.</span><span class="n">velocity</span><span class="p">,</span><span class="w"> </span><span class="n">normal</span><span class="p">);</span>
+<span class="w">            </span><span class="k">break</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Paddle: the bounce angle depends on where the ball hits.</span>
+<span class="w">    </span><span class="n">simd</span><span class="o">::</span><span class="n">float2</span><span class="w"> </span><span class="n">unused</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ball</span><span class="p">.</span><span class="n">velocity</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">collide</span><span class="p">(</span><span class="n">ball</span><span class="p">,</span><span class="w"> </span><span class="n">paddlePosition</span><span class="p">,</span><span class="w"> </span><span class="n">paddleSize</span><span class="p">,</span><span class="w"> </span><span class="n">unused</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">float</span><span class="w"> </span><span class="n">center</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">paddlePosition</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">paddleSize</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">        </span><span class="kt">float</span><span class="w"> </span><span class="n">offset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">ball</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">center</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">paddleSize</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span><span class="w">      </span><span class="c1">// -1...1</span>
+<span class="w">        </span><span class="kt">float</span><span class="w"> </span><span class="n">speed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">simd</span><span class="o">::</span><span class="n">length</span><span class="p">(</span><span class="n">ball</span><span class="p">.</span><span class="n">velocity</span><span class="p">);</span>
+<span class="w">        </span><span class="n">ball</span><span class="p">.</span><span class="n">velocity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">simd</span><span class="o">::</span><span class="n">normalize</span><span class="p">(</span><span class="n">simd</span><span class="o">::</span><span class="n">float2</span><span class="p">{</span><span class="n">offset</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.2f</span><span class="p">})</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">speed</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Lost the ball</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ball</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">600</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">radius</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">lives</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">        </span><span class="n">ball</span><span class="p">.</span><span class="n">isStuck</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">        </span><span class="n">ball</span><span class="p">.</span><span class="n">velocity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">120</span><span class="p">,</span><span class="w"> </span><span class="mi">-350</span><span class="p">};</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
 
 <p>Steering the ball by where it meets the paddle is what makes the game controllable. A purely physical reflection would feel lifeless.</p>
 <h2 id="circle-against-rectangle">Circle against rectangle<a class="headerlink" href="#circle-against-rectangle" title="Permanent link">#</a></h2>
 <p>Find the point of the rectangle closest to the circle's center by clamping. If that point is within one radius, they overlap. The direction from the closest point to the center tells us which side was hit:</p>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">collide</span><span class="p">(</span><span class="kc">_</span><span class="w"> </span><span class="n">ball</span><span class="p">:</span><span class="w"> </span><span class="n">Ball</span><span class="p">,</span><span class="w"> </span><span class="n">rectPosition</span><span class="p">:</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;,</span><span class="w"> </span><span class="n">rectSize</span><span class="p">:</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;?</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">closest</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">simd_clamp</span><span class="p">(</span><span class="n">ball</span><span class="p">.</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="n">rectPosition</span><span class="p">,</span><span class="w"> </span><span class="n">rectPosition</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">rectSize</span><span class="p">)</span>
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">difference</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">closest</span>
@@ -293,9 +451,28 @@
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="c1">// Returns true on overlap and writes the collision normal.</span>
+<span class="kt">bool</span><span class="w"> </span><span class="nf">collide</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Ball</span><span class="o">&amp;</span><span class="w"> </span><span class="n">ball</span><span class="p">,</span><span class="w"> </span><span class="n">simd</span><span class="o">::</span><span class="n">float2</span><span class="w"> </span><span class="n">rectPosition</span><span class="p">,</span><span class="w"> </span><span class="n">simd</span><span class="o">::</span><span class="n">float2</span><span class="w"> </span><span class="n">rectSize</span><span class="p">,</span><span class="w"> </span><span class="n">simd</span><span class="o">::</span><span class="n">float2</span><span class="o">&amp;</span><span class="w"> </span><span class="n">normal</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">simd</span><span class="o">::</span><span class="n">float2</span><span class="w"> </span><span class="n">closest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">simd</span><span class="o">::</span><span class="n">clamp</span><span class="p">(</span><span class="n">ball</span><span class="p">.</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="n">rectPosition</span><span class="p">,</span><span class="w"> </span><span class="n">rectPosition</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">rectSize</span><span class="p">);</span>
+<span class="w">    </span><span class="n">simd</span><span class="o">::</span><span class="n">float2</span><span class="w"> </span><span class="n">difference</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">closest</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">simd</span><span class="o">::</span><span class="n">length_squared</span><span class="p">(</span><span class="n">difference</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">radius</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">ball</span><span class="p">.</span><span class="n">radius</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Pick the dominant axis as the collision normal.</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">abs</span><span class="p">(</span><span class="n">difference</span><span class="p">.</span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">abs</span><span class="p">(</span><span class="n">difference</span><span class="p">.</span><span class="n">y</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">normal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">difference</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mf">1.0f</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mf">-1.0f</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">};</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">normal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">difference</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mf">1.0f</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mf">-1.0f</span><span class="p">};</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
 
 <p>At high speeds a ball can pass through a thin brick between two frames. Running the update in several small sub-steps per frame is the simplest protection.</p>
 <h2 id="render">Render<a class="headerlink" href="#render" title="Permanent link">#</a></h2>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="n">game</span><span class="p">:</span><span class="w"> </span><span class="n">Game</span><span class="p">,</span><span class="w"> </span><span class="n">batch</span><span class="p">:</span><span class="w"> </span><span class="n">SpriteBatch</span><span class="p">,</span><span class="w"> </span><span class="n">encoder</span><span class="p">:</span><span class="w"> </span><span class="bp">MTLRenderCommandEncoder</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">brick</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">game</span><span class="p">.</span><span class="n">bricks</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">brick</span><span class="p">.</span><span class="n">isAlive</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="n">batch</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">SpriteInstance</span><span class="p">(</span><span class="n">position</span><span class="p">:</span><span class="w"> </span><span class="n">brick</span><span class="p">.</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">:</span><span class="w"> </span><span class="n">brick</span><span class="p">.</span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="n">color</span><span class="p">:</span><span class="w"> </span><span class="n">brick</span><span class="p">.</span><span class="n">color</span><span class="p">))</span>
@@ -313,9 +490,27 @@
 <span class="w">    </span><span class="n">batch</span><span class="p">.</span><span class="n">flush</span><span class="p">(</span><span class="n">encoder</span><span class="p">:</span><span class="w"> </span><span class="n">encoder</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Game</span><span class="o">&amp;</span><span class="w"> </span><span class="n">game</span><span class="p">,</span><span class="w"> </span><span class="n">SpriteBatch</span><span class="o">&amp;</span><span class="w"> </span><span class="n">batch</span><span class="p">,</span><span class="w"> </span><span class="n">MTL</span><span class="o">::</span><span class="n">RenderCommandEncoder</span><span class="o">*</span><span class="w"> </span><span class="n">encoder</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Brick</span><span class="o">&amp;</span><span class="w"> </span><span class="n">brick</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">game</span><span class="p">.</span><span class="n">bricks</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">brick</span><span class="p">.</span><span class="n">isAlive</span><span class="p">)</span><span class="w"> </span><span class="n">batch</span><span class="p">.</span><span class="n">add</span><span class="p">({</span><span class="n">brick</span><span class="p">.</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="n">brick</span><span class="p">.</span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="n">brick</span><span class="p">.</span><span class="n">color</span><span class="p">});</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">batch</span><span class="p">.</span><span class="n">add</span><span class="p">({</span><span class="n">game</span><span class="p">.</span><span class="n">paddlePosition</span><span class="p">,</span><span class="w"> </span><span class="n">game</span><span class="p">.</span><span class="n">paddleSize</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mf">0.9f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.9f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.9f</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">}});</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">game</span><span class="p">.</span><span class="n">ball</span><span class="p">.</span><span class="n">radius</span><span class="p">;</span>
+<span class="w">    </span><span class="n">batch</span><span class="p">.</span><span class="n">add</span><span class="p">({</span><span class="n">game</span><span class="p">.</span><span class="n">ball</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">r</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">r</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">r</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">},</span><span class="w"> </span><span class="n">ballUVRect</span><span class="p">});</span>
+
+<span class="w">    </span><span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setRenderPipelineState</span><span class="p">(</span><span class="n">spritePipelineState</span><span class="p">);</span>
+<span class="w">    </span><span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setVertexBytes</span><span class="p">(</span><span class="o">&amp;</span><span class="n">projection</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">simd</span><span class="o">::</span><span class="n">float4x4</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">    </span><span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setFragmentTexture</span><span class="p">(</span><span class="n">atlasTexture</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setFragmentSamplerState</span><span class="p">(</span><span class="n">samplerState</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="n">batch</span><span class="p">.</span><span class="n">flush</span><span class="p">(</span><span class="n">encoder</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
 
 <p>The renderer knows nothing about the rules, and the game knows nothing about Metal. Keeping that separation is the most valuable habit in this chapter.</p>
-<figure><img src="../assets/img/in-practice/2d-game.webp" alt="The whole game is one instanced draw call of colored rectangles." width="880" height="660" loading="lazy"><figcaption>The whole game is one instanced draw call of colored rectangles.</figcaption></figure>
+<div class="lm-demo" data-demo="breakout" data-fallback="../assets/img/in-practice/2d-game.webp"></div>
 
 <h2 id="making-it-feel-good">Making it feel good<a class="headerlink" href="#making-it-feel-good" title="Permanent link">#</a></h2>
 <p>The game works. What makes it fun is polish, and each item below reuses a technique from this series:</p>
@@ -328,9 +523,17 @@
 <li><strong>Sound</strong>: <code>AVAudioEngine</code> or <code>AVAudioPlayer</code> for hit effects.</li>
 </ul>
 <h2 id="where-to-go-from-here">Where to go from here<a class="headerlink" href="#where-to-go-from-here" title="Permanent link">#</a></h2>
-<p>Add a state machine for menu, playing, won and lost. Add levels. Then try a different game with the same sprite batch: the renderer you wrote here is enough for a great many 2D games.</p></article><div class="pager"><a class="prev" href="../in-practice/text-rendering.html"><small>Previous</small>Text Rendering</a><a class="next" href="../beyond/compute-shaders.html"><small>Next</small>Compute Shaders</a></div>
+<p>Add a state machine for menu, playing, won and lost. Add levels. Then try a different game with the same sprite batch: the renderer you wrote here is enough for a great many 2D games.</p></article><nav class="pager" aria-label="Previous and next chapter"><a class="prev" href="../in-practice/text-rendering.html"><small>Previous</small>Text Rendering</a><a class="next" href="../beyond/compute-shaders.html"><small>Next</small>Compute Shaders</a></nav>
+<footer class="site-footer">
+  <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>
+  <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
+</footer>
 </main>
+<aside class="toc" aria-label="On this page"><h4>On this page</h4><ul><li><a href="#what-we-need">What we need</a></li><li><a href="#the-sprite-renderer">The sprite renderer</a></li><li><a href="#the-playing-field">The playing field</a></li><li><a href="#game-objects">Game objects</a></li><li><a href="#update">Update</a></li><li><a href="#circle-against-rectangle">Circle against rectangle</a></li><li><a href="#render">Render</a></li><li><a href="#making-it-feel-good">Making it feel good</a></li><li><a href="#where-to-go-from-here">Where to go from here</a></li></ul></aside>
 </div>
-<script src="../assets/site.js"></script>
+<script defer src="../assets/textures.js"></script>
+<script defer src="../assets/live.js"></script>
+<script defer src="../assets/demos.js"></script>
+<script defer src="../assets/site.js"></script>
 </body>
 </html>

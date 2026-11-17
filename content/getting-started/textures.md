@@ -53,6 +53,13 @@ texture = try! loader.newTexture(URL: url, options: options)
 
 Images in an asset catalog can be loaded by name with `loader.newTexture(name:scaleFactor:bundle:options:)`.
 
+<!-- cpp -->
+
+!!! note "Loading images in C++"
+    `MTKTextureLoader` belongs to MetalKit, which metal-cpp does not wrap. The C++ version decodes the file with the single-header library [stb_image](https://github.com/nothings/stb) and uploads the pixels with `replaceRegion`. stb_image returns the top row first, which matches Metal's top-left origin. To get the OpenGL orientation, call `stbi_set_flip_vertically_on_load(true)` before loading.
+
+<!-- /cpp -->
+
 ## Samplers
 
 A texture is only pixels. How they are read is decided by a separate object, the **sampler state**:

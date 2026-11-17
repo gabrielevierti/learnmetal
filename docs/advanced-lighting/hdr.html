@@ -3,27 +3,42 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>HDR · learnmetal</title>
-<meta name="description" content="Advanced Lighting: HDR. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<title>HDR | learnmetal</title>
+<meta name="description" content="Advanced Lighting: HDR. Learn 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering, in Swift or C++.">
+<meta name="author" content="Gabriele Vierti">
+<link rel="icon" href="../assets/favicon.png">
 <script>
 (function () {
-  var t = null;
-  try { t = localStorage.getItem("theme"); } catch (e) {}
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem("theme"); l = localStorage.getItem("lang"); } catch (e) {}
   if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  document.documentElement.dataset.theme = t;
+  d.dataset.theme = t;
+  var q = /[?&]lang=(swift|cpp)/.exec(location.search);      // links can pick a language: page.html?lang=cpp
+  if (q) l = q[1];
+  d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
 <link rel="stylesheet" href="../assets/style.css">
 <link rel="stylesheet" href="../assets/code.css">
 </head>
-<body>
+<body class="">
+<a class="skip" href="#main">Skip to content</a>
 <header class="topbar">
-  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
-  <a class="brand" href="../index.html">learn<span>metal</span></a>
-  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+  <button id="menu-toggle" class="icon-btn" aria-label="Open the chapter list">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a class="brand" href="../index.html"><img src="../assets/logo.png" alt="LearnMetal" width="136" height="32"></a>
+  <div class="lang-switch" role="group" aria-label="Language of the host code">
+    <button type="button" data-set-lang="swift">Swift</button>
+    <button type="button" data-set-lang="cpp">C++</button>
+  </div>
+  <a class="icon-btn" href="https://github.com/gabrielevierti" aria-label="Gabriele Vierti on GitHub"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Switch between light and dark">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"/></svg>
+  </button>
 </header>
 <div class="layout">
-<nav class="sidebar" id="sidebar">
+<nav class="sidebar" id="sidebar" aria-label="Chapters">
 <div class="nav-section"><h4>Getting Started</h4><ul>
 <li><a href="../getting-started/introduction.html">Introduction</a></li>
 <li><a href="../getting-started/project-setup.html">Project Setup</a></li>
@@ -70,7 +85,7 @@
 <li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
 <li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
 <li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
-<li><a class="active" href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a class="active" aria-current="page" href="../advanced-lighting/hdr.html">HDR</a></li>
 <li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
 <li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
 <li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
@@ -95,20 +110,30 @@
 <li><a href="../resources/examples.html">Example Code</a></li>
 </ul></div>
 </nav>
-<main class="content">
+<main class="content" id="main">
 <article><p class="crumb">Advanced Lighting</p><h1 id="hdr">HDR<a class="headerlink" href="#hdr" title="Permanent link">#</a></h1>
-<div class="example-box"><strong>Example code</strong> <code>examples/Sources/15-HDRBloom</code>, run with <code>swift run HDRBloom</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
+<div class="example-box lang-swift"><strong>Example project</strong> <code>examples/Sources/15-HDRBloom</code>, run with <code>swift run HDRBloom</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
 
 <p>Color values written to an 8-bit texture are clamped to the 0 to 1 range. Put several bright lights in a scene and large areas add up to more than 1, get clamped, and turn into a featureless white patch. All the detail in the bright regions is lost.</p>
 <p><strong>High dynamic range</strong> rendering lets colors exceed 1 while the image is being built, and converts the result to a displayable range at the very end, in a step called <strong>tone mapping</strong>.</p>
 <h2 id="floating-point-render-targets">Floating-point render targets<a class="headerlink" href="#floating-point-render-targets" title="Permanent link">#</a></h2>
 <p>The scene is rendered into a texture with a floating-point format, which stores values far beyond 1 without clamping:</p>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">descriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLTextureDescriptor</span><span class="p">.</span><span class="n">texture2DDescriptor</span><span class="p">(</span>
 <span class="w">    </span><span class="n">pixelFormat</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">rgba16Float</span><span class="p">,</span><span class="w"> </span><span class="n">width</span><span class="p">:</span><span class="w"> </span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">:</span><span class="w"> </span><span class="n">height</span><span class="p">,</span><span class="w"> </span><span class="n">mipmapped</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
 <span class="n">descriptor</span><span class="p">.</span><span class="n">usage</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[.</span><span class="n">renderTarget</span><span class="p">,</span><span class="w"> </span><span class="p">.</span><span class="n">shaderRead</span><span class="p">]</span>
 <span class="n">descriptor</span><span class="p">.</span><span class="n">storageMode</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="kd">private</span>
 <span class="n">hdrColor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeTexture</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">descriptor</span><span class="p">)</span><span class="o">!</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">MTL</span><span class="o">::</span><span class="n">TextureDescriptor</span><span class="o">*</span><span class="w"> </span><span class="n">descriptor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MTL</span><span class="o">::</span><span class="n">TextureDescriptor</span><span class="o">::</span><span class="n">texture2DDescriptor</span><span class="p">(</span>
+<span class="w">    </span><span class="n">MTL</span><span class="o">::</span><span class="n">PixelFormatRGBA16Float</span><span class="p">,</span><span class="w"> </span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setUsage</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">TextureUsageRenderTarget</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">MTL</span><span class="o">::</span><span class="n">TextureUsageShaderRead</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setStorageMode</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">StorageModePrivate</span><span class="p">);</span>
+<span class="n">hdrColor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">device</span><span class="o">-&gt;</span><span class="n">newTexture</span><span class="p">(</span><span class="n">descriptor</span><span class="p">);</span>
+</code></pre></div>
+</div>
 
 <table>
 <thead>
@@ -165,7 +190,7 @@
 <p>The tone mapper is one of the biggest contributors to the overall look of a renderer. Try several.</p>
 <h2 id="a-test-scene">A test scene<a class="headerlink" href="#a-test-scene" title="Permanent link">#</a></h2>
 <p>Build a long tunnel from a stretched, inward-facing cube with one very bright light at the far end, with a color around (200, 200, 200), and a few dim colored lights along the walls. Without HDR the far end is a white blob. With HDR and exposure control, you can see the texture of the wall right up to the light.</p>
-<figure><img src="../assets/img/advanced-lighting/hdr.webp" alt="The same HDR image clamped and with two tone mapping operators." width="880" height="218" loading="lazy"><figcaption>The same HDR image clamped and with two tone mapping operators.</figcaption></figure>
+<div class="lm-demo" data-demo="hdr" data-fallback="../assets/img/advanced-lighting/hdr.webp"></div>
 
 <h2 id="why-it-matters-beyond-bright-lights">Why it matters beyond bright lights<a class="headerlink" href="#why-it-matters-beyond-bright-lights" title="Permanent link">#</a></h2>
 <ul>
@@ -179,9 +204,17 @@
 <ul>
 <li>Add keys to raise and lower the exposure.</li>
 <li>Show Reinhard on the left half of the screen and ACES on the right.</li>
-</ul></article><div class="pager"><a class="prev" href="../advanced-lighting/parallax-mapping.html"><small>Previous</small>Parallax Mapping</a><a class="next" href="../advanced-lighting/bloom.html"><small>Next</small>Bloom</a></div>
+</ul></article><nav class="pager" aria-label="Previous and next chapter"><a class="prev" href="../advanced-lighting/parallax-mapping.html"><small>Previous</small>Parallax Mapping</a><a class="next" href="../advanced-lighting/bloom.html"><small>Next</small>Bloom</a></nav>
+<footer class="site-footer">
+  <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>
+  <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
+</footer>
 </main>
+<aside class="toc" aria-label="On this page"><h4>On this page</h4><ul><li><a href="#floating-point-render-targets">Floating-point render targets</a></li><li><a href="#tone-mapping">Tone mapping</a></li><li><a href="#exposure">Exposure</a></li><li><a href="#filmic-curves">Filmic curves</a></li><li><a href="#a-test-scene">A test scene</a></li><li><a href="#why-it-matters-beyond-bright-lights">Why it matters beyond bright lights</a></li><li><a href="#displaying-hdr-directly">Displaying HDR directly</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
 </div>
-<script src="../assets/site.js"></script>
+<script defer src="../assets/textures.js"></script>
+<script defer src="../assets/live.js"></script>
+<script defer src="../assets/demos.js"></script>
+<script defer src="../assets/site.js"></script>
 </body>
 </html>

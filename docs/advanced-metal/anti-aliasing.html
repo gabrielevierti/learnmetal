@@ -3,27 +3,42 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Anti-Aliasing · learnmetal</title>
-<meta name="description" content="Advanced Metal: Anti-Aliasing. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<title>Anti-Aliasing | learnmetal</title>
+<meta name="description" content="Advanced Metal: Anti-Aliasing. Learn 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering, in Swift or C++.">
+<meta name="author" content="Gabriele Vierti">
+<link rel="icon" href="../assets/favicon.png">
 <script>
 (function () {
-  var t = null;
-  try { t = localStorage.getItem("theme"); } catch (e) {}
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem("theme"); l = localStorage.getItem("lang"); } catch (e) {}
   if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  document.documentElement.dataset.theme = t;
+  d.dataset.theme = t;
+  var q = /[?&]lang=(swift|cpp)/.exec(location.search);      // links can pick a language: page.html?lang=cpp
+  if (q) l = q[1];
+  d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
 <link rel="stylesheet" href="../assets/style.css">
 <link rel="stylesheet" href="../assets/code.css">
 </head>
-<body>
+<body class="">
+<a class="skip" href="#main">Skip to content</a>
 <header class="topbar">
-  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
-  <a class="brand" href="../index.html">learn<span>metal</span></a>
-  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+  <button id="menu-toggle" class="icon-btn" aria-label="Open the chapter list">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a class="brand" href="../index.html"><img src="../assets/logo.png" alt="LearnMetal" width="136" height="32"></a>
+  <div class="lang-switch" role="group" aria-label="Language of the host code">
+    <button type="button" data-set-lang="swift">Swift</button>
+    <button type="button" data-set-lang="cpp">C++</button>
+  </div>
+  <a class="icon-btn" href="https://github.com/gabrielevierti" aria-label="Gabriele Vierti on GitHub"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Switch between light and dark">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"/></svg>
+  </button>
 </header>
 <div class="layout">
-<nav class="sidebar" id="sidebar">
+<nav class="sidebar" id="sidebar" aria-label="Chapters">
 <div class="nav-section"><h4>Getting Started</h4><ul>
 <li><a href="../getting-started/introduction.html">Introduction</a></li>
 <li><a href="../getting-started/project-setup.html">Project Setup</a></li>
@@ -61,7 +76,7 @@
 <li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
 <li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
 <li><a href="../advanced-metal/instancing.html">Instancing</a></li>
-<li><a class="active" href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+<li><a class="active" aria-current="page" href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
 </ul></div>
 <div class="nav-section"><h4>Advanced Lighting</h4><ul>
 <li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
@@ -95,7 +110,7 @@
 <li><a href="../resources/examples.html">Example Code</a></li>
 </ul></div>
 </nav>
-<main class="content">
+<main class="content" id="main">
 <article><p class="crumb">Advanced Metal</p><h1 id="anti-aliasing">Anti-Aliasing<a class="headerlink" href="#anti-aliasing" title="Permanent link">#</a></h1>
 <p>Look closely at the edge of any cube we have rendered and you see a staircase. A pixel is either inside a triangle or outside it, and nothing in between. That stair-step pattern is <strong>aliasing</strong>, and techniques that hide it are called <strong>anti-aliasing</strong>.</p>
 <h2 id="why-edges-alias">Why edges alias<a class="headerlink" href="#why-edges-alias" title="Permanent link">#</a></h2>
@@ -113,16 +128,31 @@
 
 <h2 id="msaa-with-mtkview">MSAA with MTKView<a class="headerlink" href="#msaa-with-mtkview" title="Permanent link">#</a></h2>
 <p><code>MTKView</code> manages the multisample texture and the resolve for you. Two lines are needed:</p>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">view</span><span class="p">.</span><span class="n">sampleCount</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">4</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="c1">// There is no view to do this for us. Create a 4x multisample color (and depth) texture</span>
+<span class="c1">// the size of the drawable, render into it, and resolve into the drawable's texture.</span>
+<span class="k">const</span><span class="w"> </span><span class="n">NS</span><span class="o">::</span><span class="n">UInteger</span><span class="w"> </span><span class="n">sampleCount</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span>
+</code></pre></div>
+</div>
 
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">pipelineDescriptor</span><span class="p">.</span><span class="n">rasterSampleCount</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">4</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">pipelineDescriptor</span><span class="o">-&gt;</span><span class="n">setRasterSampleCount</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
+</code></pre></div>
+</div>
 
 <p>Every pipeline state used in the pass must have the same sample count as the attachments. Run it and the edges are smooth.</p>
 <p>A sample count of 4 is supported on all Metal devices. Check others with <code>device.supportsTextureSampleCount(8)</code>.</p>
 <h2 id="msaa-in-your-own-render-passes">MSAA in your own render passes<a class="headerlink" href="#msaa-in-your-own-render-passes" title="Permanent link">#</a></h2>
 <p>For offscreen passes you create the textures yourself. You need two color textures: a multisample texture to render into, and an ordinary texture to receive the resolved image.</p>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">msaaDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLTextureDescriptor</span><span class="p">.</span><span class="n">texture2DDescriptor</span><span class="p">(</span>
 <span class="w">    </span><span class="n">pixelFormat</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">bgra8Unorm</span><span class="p">,</span><span class="w"> </span><span class="n">width</span><span class="p">:</span><span class="w"> </span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">:</span><span class="w"> </span><span class="n">height</span><span class="p">,</span><span class="w"> </span><span class="n">mipmapped</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
 <span class="n">msaaDescriptor</span><span class="p">.</span><span class="n">textureType</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">type2DMultisample</span>
@@ -131,8 +161,20 @@
 <span class="n">msaaDescriptor</span><span class="p">.</span><span class="n">storageMode</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">memoryless</span><span class="w">     </span><span class="c1">// .private on Intel Macs</span>
 <span class="kd">let</span><span class="w"> </span><span class="nv">msaaColor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeTexture</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">msaaDescriptor</span><span class="p">)</span><span class="o">!</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">MTL</span><span class="o">::</span><span class="n">TextureDescriptor</span><span class="o">*</span><span class="w"> </span><span class="n">msaaDescriptor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MTL</span><span class="o">::</span><span class="n">TextureDescriptor</span><span class="o">::</span><span class="n">texture2DDescriptor</span><span class="p">(</span>
+<span class="w">    </span><span class="n">MTL</span><span class="o">::</span><span class="n">PixelFormatBGRA8Unorm</span><span class="p">,</span><span class="w"> </span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">);</span>
+<span class="n">msaaDescriptor</span><span class="o">-&gt;</span><span class="n">setTextureType</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">TextureType2DMultisample</span><span class="p">);</span>
+<span class="n">msaaDescriptor</span><span class="o">-&gt;</span><span class="n">setSampleCount</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
+<span class="n">msaaDescriptor</span><span class="o">-&gt;</span><span class="n">setUsage</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">TextureUsageRenderTarget</span><span class="p">);</span>
+<span class="n">msaaDescriptor</span><span class="o">-&gt;</span><span class="n">setStorageMode</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">StorageModeMemoryless</span><span class="p">);</span><span class="w">     </span><span class="c1">// StorageModePrivate on Intel Macs</span>
+<span class="n">MTL</span><span class="o">::</span><span class="n">Texture</span><span class="o">*</span><span class="w"> </span><span class="n">msaaColor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">device</span><span class="o">-&gt;</span><span class="n">newTexture</span><span class="p">(</span><span class="n">msaaDescriptor</span><span class="p">);</span>
+</code></pre></div>
+</div>
 
 <p>The depth texture must be multisampled in the same way. Then connect them in the render pass descriptor:</p>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">pass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">texture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">msaaColor</span>
 <span class="n">pass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">resolveTexture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">sceneColor</span><span class="w">       </span><span class="c1">// ordinary texture</span>
 <span class="n">pass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">loadAction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">clear</span>
@@ -140,6 +182,16 @@
 <span class="n">pass</span><span class="p">.</span><span class="n">depthAttachment</span><span class="p">.</span><span class="n">texture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">msaaDepth</span>
 <span class="n">pass</span><span class="p">.</span><span class="n">depthAttachment</span><span class="p">.</span><span class="n">storeAction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">dontCare</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">pass</span><span class="o">-&gt;</span><span class="n">colorAttachments</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">object</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">setTexture</span><span class="p">(</span><span class="n">msaaColor</span><span class="p">);</span>
+<span class="n">pass</span><span class="o">-&gt;</span><span class="n">colorAttachments</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">object</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">setResolveTexture</span><span class="p">(</span><span class="n">sceneColor</span><span class="p">);</span><span class="w">       </span><span class="c1">// ordinary texture, or the drawable's</span>
+<span class="n">pass</span><span class="o">-&gt;</span><span class="n">colorAttachments</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">object</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">setLoadAction</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">LoadActionClear</span><span class="p">);</span>
+<span class="n">pass</span><span class="o">-&gt;</span><span class="n">colorAttachments</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">object</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">setStoreAction</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">StoreActionMultisampleResolve</span><span class="p">);</span>
+<span class="n">pass</span><span class="o">-&gt;</span><span class="n">depthAttachment</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">setTexture</span><span class="p">(</span><span class="n">msaaDepth</span><span class="p">);</span>
+<span class="n">pass</span><span class="o">-&gt;</span><span class="n">depthAttachment</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">setStoreAction</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">StoreActionDontCare</span><span class="p">);</span>
+</code></pre></div>
+</div>
 
 <p>The store action <code>.multisampleResolve</code> averages the samples into <code>resolveTexture</code> at the end of the pass and discards the multisample data. Because the samples are never needed afterward, the multisample textures can be <strong>memoryless</strong> on Apple GPUs: 4× MSAA then costs no extra memory at all, only some extra work inside each tile. This is a real advantage of tile-based GPUs and makes MSAA unusually cheap on Apple devices.</p>
 <h2 id="limits-of-msaa">Limits of MSAA<a class="headerlink" href="#limits-of-msaa" title="Permanent link">#</a></h2>
@@ -173,9 +225,17 @@
 <ul>
 <li>Compare sample counts 1, 2 and 4 on a thin, nearly horizontal triangle.</li>
 <li>Draw alpha-tested grass with and without alpha-to-coverage under 4× MSAA.</li>
-</ul></article><div class="pager"><a class="prev" href="../advanced-metal/instancing.html"><small>Previous</small>Instancing</a><a class="next" href="../advanced-lighting/blinn-phong.html"><small>Next</small>Blinn-Phong</a></div>
+</ul></article><nav class="pager" aria-label="Previous and next chapter"><a class="prev" href="../advanced-metal/instancing.html"><small>Previous</small>Instancing</a><a class="next" href="../advanced-lighting/blinn-phong.html"><small>Next</small>Blinn-Phong</a></nav>
+<footer class="site-footer">
+  <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>
+  <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
+</footer>
 </main>
+<aside class="toc" aria-label="On this page"><h4>On this page</h4><ul><li><a href="#why-edges-alias">Why edges alias</a></li><li><a href="#multisampling">Multisampling</a></li><li><a href="#msaa-with-mtkview">MSAA with MTKView</a></li><li><a href="#msaa-in-your-own-render-passes">MSAA in your own render passes</a></li><li><a href="#limits-of-msaa">Limits of MSAA</a></li><li><a href="#reading-individual-samples">Reading individual samples</a></li><li><a href="#other-approaches">Other approaches</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
 </div>
-<script src="../assets/site.js"></script>
+<script defer src="../assets/textures.js"></script>
+<script defer src="../assets/live.js"></script>
+<script defer src="../assets/demos.js"></script>
+<script defer src="../assets/site.js"></script>
 </body>
 </html>

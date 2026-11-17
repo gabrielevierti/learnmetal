@@ -358,14 +358,14 @@ def pbr_image(objs, props, albedo, cam, lights, ambient="flat", w=W, h=H, bg=(0.
     return gamma(reinhard(hdr_down(img)))
 
 
-GRID_CAM = Camera((0, 0, 13.5), (0, 0, 0), fov=38)
+GRID_CAM = Camera((0, 0, 33.0), (0, 0, 0), fov=16)       # a long lens keeps the outer spheres round
 GRID_LIGHTS = [dict(type="point", pos=(x, y, 10), color=(300, 300, 300), att="inv2") for x in (-10, 10) for y in (-10, 10)]
 
 
 def pb_theory():
     objs = [Sphere(((i - 2) * 1.3, 0, 0), 0.55) for i in range(5)]
     props = np.array([(0.0, r) for r in (0.1, 0.3, 0.5, 0.7, 0.9)])
-    cam = Camera((0, 0, 5.2), (0, 0, 0), fov=30)
+    cam = Camera((0, 0, 13.25), (0, 0, 0), fov=12)      # a long lens keeps the outer spheres round
     L = [dict(type="point", pos=(-3, 4, 6), color=(160, 160, 160), att="inv2")]
     img = pbr_image(objs, props, v(0.2, 0.35, 0.8), cam, L, h=260)
     im = to_image(img)

@@ -2,6 +2,13 @@
 
 Time for the first Metal code: a renderer that clears the window to a color every frame. It draws no geometry, but it contains the complete skeleton of a frame, and every later chapter only adds to it.
 
+<!-- cpp -->
+
+!!! note "Reading this chapter in C++"
+    There is no `MTKView` or delegate in metal-cpp. Your renderer keeps the `CAMetalLayer` from [Project Setup](project-setup.html), and `main.cpp` calls `renderer.draw()` once per loop. Where the text says `view.currentDrawable`, you call `layer->nextDrawable()`. Where it says `view.currentRenderPassDescriptor`, you fill in an `MTL::RenderPassDescriptor` yourself, which makes the load and store actions explained below visible in your own code.
+
+<!-- /cpp -->
+
 ## The renderer
 
 Create `Renderer.swift`:

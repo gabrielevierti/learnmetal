@@ -3,27 +3,42 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Blending · learnmetal</title>
-<meta name="description" content="Advanced Metal: Blending. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<title>Blending | learnmetal</title>
+<meta name="description" content="Advanced Metal: Blending. Learn 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering, in Swift or C++.">
+<meta name="author" content="Gabriele Vierti">
+<link rel="icon" href="../assets/favicon.png">
 <script>
 (function () {
-  var t = null;
-  try { t = localStorage.getItem("theme"); } catch (e) {}
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem("theme"); l = localStorage.getItem("lang"); } catch (e) {}
   if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  document.documentElement.dataset.theme = t;
+  d.dataset.theme = t;
+  var q = /[?&]lang=(swift|cpp)/.exec(location.search);      // links can pick a language: page.html?lang=cpp
+  if (q) l = q[1];
+  d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
 <link rel="stylesheet" href="../assets/style.css">
 <link rel="stylesheet" href="../assets/code.css">
 </head>
-<body>
+<body class="">
+<a class="skip" href="#main">Skip to content</a>
 <header class="topbar">
-  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
-  <a class="brand" href="../index.html">learn<span>metal</span></a>
-  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+  <button id="menu-toggle" class="icon-btn" aria-label="Open the chapter list">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a class="brand" href="../index.html"><img src="../assets/logo.png" alt="LearnMetal" width="136" height="32"></a>
+  <div class="lang-switch" role="group" aria-label="Language of the host code">
+    <button type="button" data-set-lang="swift">Swift</button>
+    <button type="button" data-set-lang="cpp">C++</button>
+  </div>
+  <a class="icon-btn" href="https://github.com/gabrielevierti" aria-label="Gabriele Vierti on GitHub"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Switch between light and dark">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"/></svg>
+  </button>
 </header>
 <div class="layout">
-<nav class="sidebar" id="sidebar">
+<nav class="sidebar" id="sidebar" aria-label="Chapters">
 <div class="nav-section"><h4>Getting Started</h4><ul>
 <li><a href="../getting-started/introduction.html">Introduction</a></li>
 <li><a href="../getting-started/project-setup.html">Project Setup</a></li>
@@ -53,7 +68,7 @@
 <div class="nav-section"><h4>Advanced Metal</h4><ul>
 <li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
 <li><a href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
-<li><a class="active" href="../advanced-metal/blending.html">Blending</a></li>
+<li><a class="active" aria-current="page" href="../advanced-metal/blending.html">Blending</a></li>
 <li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
 <li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
 <li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
@@ -95,7 +110,7 @@
 <li><a href="../resources/examples.html">Example Code</a></li>
 </ul></div>
 </nav>
-<main class="content">
+<main class="content" id="main">
 <article><p class="crumb">Advanced Metal</p><h1 id="blending">Blending<a class="headerlink" href="#blending" title="Permanent link">#</a></h1>
 <p>Blending is how transparency is done. Instead of replacing the color already in the texture, a new fragment's color is <em>combined</em> with it. The fourth color component, <strong>alpha</strong>, usually controls how: 1 is fully opaque, 0 is fully transparent.</p>
 <h2 id="discarding-fragments">Discarding fragments<a class="headerlink" href="#discarding-fragments" title="Permanent link">#</a></h2>
@@ -119,6 +134,7 @@
 </code></pre></div>
 
 <p>where <strong>source</strong> is the fragment function's output and <strong>destination</strong> is the color already stored. In Metal, blending is part of the <strong>render pipeline state</strong>, configured per color attachment:</p>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">attachment</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">pipelineDescriptor</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">!</span>
 <span class="n">attachment</span><span class="p">.</span><span class="n">isBlendingEnabled</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kc">true</span>
 <span class="n">attachment</span><span class="p">.</span><span class="n">rgbBlendOperation</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">add</span>
@@ -128,6 +144,18 @@
 <span class="n">attachment</span><span class="p">.</span><span class="n">sourceAlphaBlendFactor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">one</span>
 <span class="n">attachment</span><span class="p">.</span><span class="n">destinationAlphaBlendFactor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">oneMinusSourceAlpha</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">MTL</span><span class="o">::</span><span class="n">RenderPipelineColorAttachmentDescriptor</span><span class="o">*</span><span class="w"> </span><span class="n">attachment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pipelineDescriptor</span><span class="o">-&gt;</span><span class="n">colorAttachments</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">object</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="n">attachment</span><span class="o">-&gt;</span><span class="n">setBlendingEnabled</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span>
+<span class="n">attachment</span><span class="o">-&gt;</span><span class="n">setRgbBlendOperation</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">BlendOperationAdd</span><span class="p">);</span>
+<span class="n">attachment</span><span class="o">-&gt;</span><span class="n">setAlphaBlendOperation</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">BlendOperationAdd</span><span class="p">);</span>
+<span class="n">attachment</span><span class="o">-&gt;</span><span class="n">setSourceRGBBlendFactor</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">BlendFactorSourceAlpha</span><span class="p">);</span>
+<span class="n">attachment</span><span class="o">-&gt;</span><span class="n">setDestinationRGBBlendFactor</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">BlendFactorOneMinusSourceAlpha</span><span class="p">);</span>
+<span class="n">attachment</span><span class="o">-&gt;</span><span class="n">setSourceAlphaBlendFactor</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">BlendFactorOne</span><span class="p">);</span>
+<span class="n">attachment</span><span class="o">-&gt;</span><span class="n">setDestinationAlphaBlendFactor</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">BlendFactorOneMinusSourceAlpha</span><span class="p">);</span>
+</code></pre></div>
+</div>
 
 <p>This is classic alpha blending: <code>result = source * alpha + destination * (1 - alpha)</code>. A red window with alpha 0.5 in front of a green wall gives an even mix of both.</p>
 <p>Some other useful setups:</p>
@@ -177,6 +205,7 @@
 <li><strong>Sort</strong> the transparent objects by distance from the camera.</li>
 <li>Draw them <strong>back to front</strong>, with depth testing on and depth writing <strong>off</strong>.</li>
 </ol>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">sortedWindows</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">windowPositions</span><span class="p">.</span><span class="bp">sorted</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">distance_squared</span><span class="p">(</span><span class="n">camera</span><span class="p">.</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="nv">$0</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">distance_squared</span><span class="p">(</span><span class="n">camera</span><span class="p">.</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="nv">$1</span><span class="p">)</span>
 <span class="p">}</span>
@@ -189,6 +218,22 @@
 <span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">drawPrimitives</span><span class="p">(</span><span class="n">type</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">triangle</span><span class="p">,</span><span class="w"> </span><span class="n">vertexStart</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">vertexCount</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">simd</span><span class="o">::</span><span class="n">float3</span><span class="o">&gt;</span><span class="w"> </span><span class="n">sortedWindows</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">windowPositions</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">sort</span><span class="p">(</span><span class="n">sortedWindows</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span><span class="w"> </span><span class="n">sortedWindows</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span><span class="w"> </span><span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="n">simd</span><span class="o">::</span><span class="n">float3</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">simd</span><span class="o">::</span><span class="n">float3</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">simd</span><span class="o">::</span><span class="n">distance_squared</span><span class="p">(</span><span class="n">camera</span><span class="p">.</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">simd</span><span class="o">::</span><span class="n">distance_squared</span><span class="p">(</span><span class="n">camera</span><span class="p">.</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setRenderPipelineState</span><span class="p">(</span><span class="n">blendPipelineState</span><span class="p">);</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setDepthStencilState</span><span class="p">(</span><span class="n">depthTestNoWriteState</span><span class="p">);</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">simd</span><span class="o">::</span><span class="n">float3</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">sortedWindows</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">uniforms</span><span class="p">.</span><span class="n">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">translation</span><span class="p">(</span><span class="n">position</span><span class="p">);</span>
+<span class="w">    </span><span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setVertexBytes</span><span class="p">(</span><span class="o">&amp;</span><span class="n">uniforms</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">Uniforms</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">    </span><span class="n">encoder</span><span class="o">-&gt;</span><span class="n">drawPrimitives</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">PrimitiveTypeTriangle</span><span class="p">,</span><span class="w"> </span><span class="n">NS</span><span class="o">::</span><span class="n">UInteger</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="n">NS</span><span class="o">::</span><span class="n">UInteger</span><span class="p">(</span><span class="mi">6</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
 
 <p>Sorting by object distance is not perfect. Intersecting or very large transparent surfaces can still blend in the wrong order. Techniques that remove the need for sorting are grouped under the name <strong>order-independent transparency</strong>. Apple GPUs make one family of them practical through programmable blending, where a fragment function can read the current color of the pixel it is writing; you will meet that feature in <a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a>.</p>
 <figure><img src="../assets/img/advanced-metal/blending.webp" alt="Semi-transparent windows drawn back to front after the opaque scene." width="880" height="495" loading="lazy"><figcaption>Semi-transparent windows drawn back to front after the opaque scene.</figcaption></figure>
@@ -198,9 +243,17 @@
 <li>Render grass quads with <code>discard_fragment</code>, then with blending but no sorting, and compare the edges.</li>
 <li>Draw the windows front to back to see the artifact that sorting prevents.</li>
 <li>Make an additive particle pipeline and draw a few overlapping quads.</li>
-</ul></article><div class="pager"><a class="prev" href="../advanced-metal/stencil-testing.html"><small>Previous</small>Stencil Testing</a><a class="next" href="../advanced-metal/face-culling.html"><small>Next</small>Face Culling</a></div>
+</ul></article><nav class="pager" aria-label="Previous and next chapter"><a class="prev" href="../advanced-metal/stencil-testing.html"><small>Previous</small>Stencil Testing</a><a class="next" href="../advanced-metal/face-culling.html"><small>Next</small>Face Culling</a></nav>
+<footer class="site-footer">
+  <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>
+  <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
+</footer>
 </main>
+<aside class="toc" aria-label="On this page"><h4>On this page</h4><ul><li><a href="#discarding-fragments">Discarding fragments</a></li><li><a href="#the-blend-equation">The blend equation</a></li><li><a href="#order-matters">Order matters</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
 </div>
-<script src="../assets/site.js"></script>
+<script defer src="../assets/textures.js"></script>
+<script defer src="../assets/live.js"></script>
+<script defer src="../assets/demos.js"></script>
+<script defer src="../assets/site.js"></script>
 </body>
 </html>

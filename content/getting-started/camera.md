@@ -124,6 +124,13 @@ NotificationCenter.default.addObserver(forName: .GCMouseDidConnect, object: nil,
 
 `deltaY` is positive when the mouse moves up, so pitch increases and the camera looks up. On macOS the window must be key for keyboard polling to work; click it once after launch. The same framework reads game controllers through `GCController`, which is the natural choice on iPhone.
 
+<!-- cpp -->
+
+!!! note "Input in C++"
+    The C++ version uses GLFW, which the window already comes from, in place of the GameController framework. `glfwGetKey` polls the keyboard, and cursor and scroll callbacks deliver mouse movement. GLFW reports the cursor position with y growing downward, so the callback subtracts in the other order to make pitch increase when the mouse moves up.
+
+<!-- /cpp -->
+
 ## Putting it together
 
 ```swift

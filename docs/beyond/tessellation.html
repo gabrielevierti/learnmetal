@@ -3,27 +3,42 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tessellation · learnmetal</title>
-<meta name="description" content="Beyond: Tessellation. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<title>Tessellation | learnmetal</title>
+<meta name="description" content="Beyond: Tessellation. Learn 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering, in Swift or C++.">
+<meta name="author" content="Gabriele Vierti">
+<link rel="icon" href="../assets/favicon.png">
 <script>
 (function () {
-  var t = null;
-  try { t = localStorage.getItem("theme"); } catch (e) {}
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem("theme"); l = localStorage.getItem("lang"); } catch (e) {}
   if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  document.documentElement.dataset.theme = t;
+  d.dataset.theme = t;
+  var q = /[?&]lang=(swift|cpp)/.exec(location.search);      // links can pick a language: page.html?lang=cpp
+  if (q) l = q[1];
+  d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
 <link rel="stylesheet" href="../assets/style.css">
 <link rel="stylesheet" href="../assets/code.css">
 </head>
-<body>
+<body class="">
+<a class="skip" href="#main">Skip to content</a>
 <header class="topbar">
-  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
-  <a class="brand" href="../index.html">learn<span>metal</span></a>
-  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+  <button id="menu-toggle" class="icon-btn" aria-label="Open the chapter list">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a class="brand" href="../index.html"><img src="../assets/logo.png" alt="LearnMetal" width="136" height="32"></a>
+  <div class="lang-switch" role="group" aria-label="Language of the host code">
+    <button type="button" data-set-lang="swift">Swift</button>
+    <button type="button" data-set-lang="cpp">C++</button>
+  </div>
+  <a class="icon-btn" href="https://github.com/gabrielevierti" aria-label="Gabriele Vierti on GitHub"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Switch between light and dark">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"/></svg>
+  </button>
 </header>
 <div class="layout">
-<nav class="sidebar" id="sidebar">
+<nav class="sidebar" id="sidebar" aria-label="Chapters">
 <div class="nav-section"><h4>Getting Started</h4><ul>
 <li><a href="../getting-started/introduction.html">Introduction</a></li>
 <li><a href="../getting-started/project-setup.html">Project Setup</a></li>
@@ -88,14 +103,14 @@
 </ul></div>
 <div class="nav-section"><h4>Beyond</h4><ul>
 <li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
-<li><a class="active" href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a class="active" aria-current="page" href="../beyond/tessellation.html">Tessellation</a></li>
 <li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
 </ul></div>
 <div class="nav-section"><h4>Resources</h4><ul>
 <li><a href="../resources/examples.html">Example Code</a></li>
 </ul></div>
 </nav>
-<main class="content">
+<main class="content" id="main">
 <article><p class="crumb">Beyond</p><h1 id="tessellation">Tessellation<a class="headerlink" href="#tessellation" title="Permanent link">#</a></h1>
 <p>Detailed surfaces need many triangles, but only where the viewer can see the detail. A mountain a kilometer away does not need the triangle density of the ground under your feet. <strong>Tessellation</strong> lets the GPU subdivide coarse geometry on the fly, as finely as you ask, so a mesh can be stored and animated at low resolution and rendered at high resolution.</p>
 <h2 id="patches">Patches<a class="headerlink" href="#patches" title="Permanent link">#</a></h2>
@@ -125,12 +140,19 @@
 </code></pre></div>
 
 <p><code>MTLQuadTessellationFactorsHalf</code> is a built-in struct of six half floats, 12 bytes per patch:</p>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">factorBuffer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeBuffer</span><span class="p">(</span><span class="n">length</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">patchCount</span><span class="p">,</span><span class="w"> </span><span class="n">options</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">storageModePrivate</span><span class="p">)</span><span class="o">!</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">MTL</span><span class="o">::</span><span class="n">Buffer</span><span class="o">*</span><span class="w"> </span><span class="n">factorBuffer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">device</span><span class="o">-&gt;</span><span class="n">newBuffer</span><span class="p">(</span><span class="mi">12</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">patchCount</span><span class="p">,</span><span class="w"> </span><span class="n">MTL</span><span class="o">::</span><span class="n">ResourceStorageModePrivate</span><span class="p">);</span>
+</code></pre></div>
+</div>
 
 <p>In a real renderer, the kernel computes each edge's factor from its distance to the camera or its length on screen. That is <strong>adaptive tessellation</strong>. Compute a factor per <em>edge</em> from that edge's own midpoint, so both patches sharing the edge get the same value.</p>
 <h2 id="the-pipeline">The pipeline<a class="headerlink" href="#the-pipeline" title="Permanent link">#</a></h2>
 <p>Control points go in an ordinary vertex buffer. The vertex descriptor says that the data advances per control point:</p>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">vertexDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLVertexDescriptor</span><span class="p">()</span>
 <span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">format</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">float3</span>
 <span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">offset</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span>
@@ -151,6 +173,29 @@
 <span class="n">descriptor</span><span class="p">.</span><span class="n">tessellationOutputWindingOrder</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">counterClockwise</span>
 <span class="n">descriptor</span><span class="p">.</span><span class="n">maxTessellationFactor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">16</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">MTL</span><span class="o">::</span><span class="n">VertexDescriptor</span><span class="o">*</span><span class="w"> </span><span class="n">vertexDescriptor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MTL</span><span class="o">::</span><span class="n">VertexDescriptor</span><span class="o">::</span><span class="n">alloc</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">();</span>
+<span class="n">vertexDescriptor</span><span class="o">-&gt;</span><span class="n">attributes</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">object</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">setFormat</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">VertexFormatFloat3</span><span class="p">);</span>
+<span class="n">vertexDescriptor</span><span class="o">-&gt;</span><span class="n">attributes</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">object</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">setOffset</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="n">vertexDescriptor</span><span class="o">-&gt;</span><span class="n">attributes</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">object</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">setBufferIndex</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="n">vertexDescriptor</span><span class="o">-&gt;</span><span class="n">layouts</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">object</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">setStride</span><span class="p">(</span><span class="mi">12</span><span class="p">);</span>
+<span class="n">vertexDescriptor</span><span class="o">-&gt;</span><span class="n">layouts</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">object</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">setStepFunction</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">VertexStepFunctionPerPatchControlPoint</span><span class="p">);</span>
+
+<span class="n">MTL</span><span class="o">::</span><span class="n">RenderPipelineDescriptor</span><span class="o">*</span><span class="w"> </span><span class="n">descriptor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MTL</span><span class="o">::</span><span class="n">RenderPipelineDescriptor</span><span class="o">::</span><span class="n">alloc</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">();</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setVertexDescriptor</span><span class="p">(</span><span class="n">vertexDescriptor</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setVertexFunction</span><span class="p">(</span><span class="n">library</span><span class="o">-&gt;</span><span class="n">newFunction</span><span class="p">(</span><span class="n">MTLSTR</span><span class="p">(</span><span class="s">"vertex_terrain"</span><span class="p">)));</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setFragmentFunction</span><span class="p">(</span><span class="n">library</span><span class="o">-&gt;</span><span class="n">newFunction</span><span class="p">(</span><span class="n">MTLSTR</span><span class="p">(</span><span class="s">"fragment_terrain"</span><span class="p">)));</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">colorAttachments</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">object</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">setPixelFormat</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">PixelFormatBGRA8Unorm</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setDepthAttachmentPixelFormat</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">PixelFormatDepth32Float</span><span class="p">);</span>
+
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setTessellationFactorFormat</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">TessellationFactorFormatHalf</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setTessellationFactorStepFunction</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">TessellationFactorStepFunctionPerPatch</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setTessellationPartitionMode</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">TessellationPartitionModeFractionalEven</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setTessellationOutputWindingOrder</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">WindingCounterClockwise</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setMaxTessellationFactor</span><span class="p">(</span><span class="mi">16</span><span class="p">);</span>
+</code></pre></div>
+</div>
 
 <p>The <strong>partition mode</strong> controls how edges are split. <code>.integer</code> and <code>.pow2</code> snap to whole numbers, which causes visible popping as factors change. The fractional modes add new vertices gradually, so detail grows smoothly as the camera approaches. The maximum factor is 16 on older iOS devices and 64 on Macs and recent Apple GPUs.</p>
 <h2 id="the-post-tessellation-vertex-function">The post-tessellation vertex function<a class="headerlink" href="#the-post-tessellation-vertex-function" title="Permanent link">#</a></h2>
@@ -199,6 +244,7 @@
 </ul>
 <p>The function decides what the patch <em>means</em>. Here it is a flat quad displaced by a height map. Interpret sixteen control points as a bicubic Bézier patch and you get smooth curved surfaces from a coarse cage.</p>
 <h2 id="drawing">Drawing<a class="headerlink" href="#drawing" title="Permanent link">#</a></h2>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// 1. Compute pass: fill the factor buffer.</span>
 <span class="kd">let</span><span class="w"> </span><span class="nv">compute</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">commandBuffer</span><span class="p">.</span><span class="n">makeComputeCommandEncoder</span><span class="p">()</span><span class="o">!</span>
 <span class="n">compute</span><span class="p">.</span><span class="n">setComputePipelineState</span><span class="p">(</span><span class="n">factorPipeline</span><span class="p">)</span>
@@ -224,9 +270,36 @@
 <span class="w">                    </span><span class="n">instanceCount</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
 <span class="w">                    </span><span class="n">baseInstance</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="c1">// 1. Compute pass: fill the factor buffer.</span>
+<span class="n">MTL</span><span class="o">::</span><span class="n">ComputeCommandEncoder</span><span class="o">*</span><span class="w"> </span><span class="n">compute</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">commandBuffer</span><span class="o">-&gt;</span><span class="n">computeCommandEncoder</span><span class="p">();</span>
+<span class="n">compute</span><span class="o">-&gt;</span><span class="n">setComputePipelineState</span><span class="p">(</span><span class="n">factorPipeline</span><span class="p">);</span>
+<span class="n">compute</span><span class="o">-&gt;</span><span class="n">setBuffer</span><span class="p">(</span><span class="n">factorBuffer</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="n">compute</span><span class="o">-&gt;</span><span class="n">setBytes</span><span class="p">(</span><span class="o">&amp;</span><span class="n">level</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="kt">float</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="n">compute</span><span class="o">-&gt;</span><span class="n">dispatchThreads</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">Size</span><span class="o">::</span><span class="n">Make</span><span class="p">(</span><span class="n">patchCount</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span>
+<span class="w">                         </span><span class="n">MTL</span><span class="o">::</span><span class="n">Size</span><span class="o">::</span><span class="n">Make</span><span class="p">(</span><span class="n">factorPipeline</span><span class="o">-&gt;</span><span class="n">threadExecutionWidth</span><span class="p">(),</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">));</span>
+<span class="n">compute</span><span class="o">-&gt;</span><span class="n">endEncoding</span><span class="p">();</span>
+
+<span class="c1">// 2. Render pass: draw the patches.</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setRenderPipelineState</span><span class="p">(</span><span class="n">terrainPipeline</span><span class="p">);</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setVertexBuffer</span><span class="p">(</span><span class="n">controlPointBuffer</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setTessellationFactorBuffer</span><span class="p">(</span><span class="n">factorBuffer</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w">      </span><span class="c1">// buffer, offset, instance stride</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setVertexTexture</span><span class="p">(</span><span class="n">heightMap</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setVertexSamplerState</span><span class="p">(</span><span class="n">samplerState</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setTriangleFillMode</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">TriangleFillModeLines</span><span class="p">);</span><span class="w">      </span><span class="c1">// to see the subdivision</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">drawPatches</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="w">                </span><span class="c1">// control points per patch</span>
+<span class="w">                     </span><span class="mi">0</span><span class="p">,</span><span class="w">                </span><span class="c1">// patch start</span>
+<span class="w">                     </span><span class="n">patchCount</span><span class="p">,</span>
+<span class="w">                     </span><span class="nb">nullptr</span><span class="p">,</span><span class="w">          </span><span class="c1">// patch index buffer</span>
+<span class="w">                     </span><span class="mi">0</span><span class="p">,</span><span class="w">                </span><span class="c1">// patch index buffer offset</span>
+<span class="w">                     </span><span class="mi">1</span><span class="p">,</span><span class="w">                </span><span class="c1">// instance count</span>
+<span class="w">                     </span><span class="mi">0</span><span class="p">);</span><span class="w">               </span><span class="c1">// base instance</span>
+</code></pre></div>
+</div>
 
 <p>Textures and samplers for the vertex stage have their own binding calls, <code>setVertexTexture</code> and <code>setVertexSamplerState</code>.</p>
-<figure><img src="../assets/img/beyond/tessellation.webp" alt="The same 4 x 4 grid of quad patches at increasing tessellation factors, displaced by a height function." width="880" height="218" loading="lazy"><figcaption>The same 4 x 4 grid of quad patches at increasing tessellation factors, displaced by a height function.</figcaption></figure>
+<div class="lm-demo" data-demo="tessellation" data-fallback="../assets/img/beyond/tessellation.webp"></div>
 
 <h2 id="normals-for-displaced-surfaces">Normals for displaced surfaces<a class="headerlink" href="#normals-for-displaced-surfaces" title="Permanent link">#</a></h2>
 <p>Displacement changes the surface, so the original normals are wrong. For a height map, compute the normal from neighboring heights, in the vertex function or per fragment:</p>
@@ -250,9 +323,17 @@
 <li>Animate the tessellation level and watch the wireframe refine.</li>
 <li>Compute per-edge factors from the camera distance in the kernel.</li>
 <li>Compare <code>.integer</code> and <code>.fractionalEven</code> while moving the camera.</li>
-</ul></article><div class="pager"><a class="prev" href="../beyond/compute-shaders.html"><small>Previous</small>Compute Shaders</a><a class="next" href="../beyond/ray-tracing.html"><small>Next</small>Ray Tracing</a></div>
+</ul></article><nav class="pager" aria-label="Previous and next chapter"><a class="prev" href="../beyond/compute-shaders.html"><small>Previous</small>Compute Shaders</a><a class="next" href="../beyond/ray-tracing.html"><small>Next</small>Ray Tracing</a></nav>
+<footer class="site-footer">
+  <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>
+  <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
+</footer>
 </main>
+<aside class="toc" aria-label="On this page"><h4>On this page</h4><ul><li><a href="#patches">Patches</a></li><li><a href="#tessellation-factors">Tessellation factors</a></li><li><a href="#the-pipeline">The pipeline</a></li><li><a href="#the-post-tessellation-vertex-function">The post-tessellation vertex function</a></li><li><a href="#drawing">Drawing</a></li><li><a href="#normals-for-displaced-surfaces">Normals for displaced surfaces</a></li><li><a href="#uses">Uses</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
 </div>
-<script src="../assets/site.js"></script>
+<script defer src="../assets/textures.js"></script>
+<script defer src="../assets/live.js"></script>
+<script defer src="../assets/demos.js"></script>
+<script defer src="../assets/site.js"></script>
 </body>
 </html>

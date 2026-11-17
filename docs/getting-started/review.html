@@ -3,27 +3,42 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Review · learnmetal</title>
-<meta name="description" content="Getting Started: Review. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<title>Review | learnmetal</title>
+<meta name="description" content="Getting Started: Review. Learn 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering, in Swift or C++.">
+<meta name="author" content="Gabriele Vierti">
+<link rel="icon" href="../assets/favicon.png">
 <script>
 (function () {
-  var t = null;
-  try { t = localStorage.getItem("theme"); } catch (e) {}
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem("theme"); l = localStorage.getItem("lang"); } catch (e) {}
   if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  document.documentElement.dataset.theme = t;
+  d.dataset.theme = t;
+  var q = /[?&]lang=(swift|cpp)/.exec(location.search);      // links can pick a language: page.html?lang=cpp
+  if (q) l = q[1];
+  d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
 <link rel="stylesheet" href="../assets/style.css">
 <link rel="stylesheet" href="../assets/code.css">
 </head>
-<body>
+<body class="">
+<a class="skip" href="#main">Skip to content</a>
 <header class="topbar">
-  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
-  <a class="brand" href="../index.html">learn<span>metal</span></a>
-  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+  <button id="menu-toggle" class="icon-btn" aria-label="Open the chapter list">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a class="brand" href="../index.html"><img src="../assets/logo.png" alt="LearnMetal" width="136" height="32"></a>
+  <div class="lang-switch" role="group" aria-label="Language of the host code">
+    <button type="button" data-set-lang="swift">Swift</button>
+    <button type="button" data-set-lang="cpp">C++</button>
+  </div>
+  <a class="icon-btn" href="https://github.com/gabrielevierti" aria-label="Gabriele Vierti on GitHub"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Switch between light and dark">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"/></svg>
+  </button>
 </header>
 <div class="layout">
-<nav class="sidebar" id="sidebar">
+<nav class="sidebar" id="sidebar" aria-label="Chapters">
 <div class="nav-section"><h4>Getting Started</h4><ul>
 <li><a href="../getting-started/introduction.html">Introduction</a></li>
 <li><a href="../getting-started/project-setup.html">Project Setup</a></li>
@@ -34,7 +49,7 @@
 <li><a href="../getting-started/transformations.html">Transformations</a></li>
 <li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
 <li><a href="../getting-started/camera.html">Camera</a></li>
-<li><a class="active" href="../getting-started/review.html">Review</a></li>
+<li><a class="active" aria-current="page" href="../getting-started/review.html">Review</a></li>
 </ul></div>
 <div class="nav-section"><h4>Lighting</h4><ul>
 <li><a href="../lighting/colors.html">Colors</a></li>
@@ -95,10 +110,11 @@
 <li><a href="../resources/examples.html">Example Code</a></li>
 </ul></div>
 </nav>
-<main class="content">
+<main class="content" id="main">
 <article><p class="crumb">Getting Started</p><h1 id="review">Review<a class="headerlink" href="#review" title="Permanent link">#</a></h1>
 <p>That was the hard part. You can open a view, push vertices through a pipeline, texture them, move them with matrices, and fly a camera through the result. Everything from here on builds on these pieces.</p>
 <h2 id="the-frame-one-more-time">The frame, one more time<a class="headerlink" href="#the-frame-one-more-time" title="Permanent link">#</a></h2>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">draw</span><span class="p">(</span><span class="k">in</span><span class="w"> </span><span class="n">view</span><span class="p">:</span><span class="w"> </span><span class="bp">MTKView</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">guard</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">passDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">view</span><span class="p">.</span><span class="n">currentRenderPassDescriptor</span><span class="p">,</span>
 <span class="w">          </span><span class="kd">let</span><span class="w"> </span><span class="nv">drawable</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">view</span><span class="p">.</span><span class="n">currentDrawable</span><span class="p">,</span>
@@ -118,6 +134,33 @@
 <span class="w">    </span><span class="n">commandBuffer</span><span class="p">.</span><span class="n">commit</span><span class="p">()</span>
 <span class="p">}</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">Renderer::draw</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">NS</span><span class="o">::</span><span class="n">AutoreleasePool</span><span class="o">*</span><span class="w"> </span><span class="n">pool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">NS</span><span class="o">::</span><span class="n">AutoreleasePool</span><span class="o">::</span><span class="n">alloc</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">();</span>
+<span class="w">    </span><span class="n">CA</span><span class="o">::</span><span class="n">MetalDrawable</span><span class="o">*</span><span class="w"> </span><span class="n">drawable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">layer</span><span class="o">-&gt;</span><span class="n">nextDrawable</span><span class="p">();</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">drawable</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">MTL</span><span class="o">::</span><span class="n">RenderPassDescriptor</span><span class="o">*</span><span class="w"> </span><span class="n">passDescriptor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">makePassDescriptor</span><span class="p">(</span><span class="n">drawable</span><span class="o">-&gt;</span><span class="n">texture</span><span class="p">());</span>
+<span class="w">        </span><span class="n">MTL</span><span class="o">::</span><span class="n">CommandBuffer</span><span class="o">*</span><span class="w"> </span><span class="n">commandBuffer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">commandQueue</span><span class="o">-&gt;</span><span class="n">commandBuffer</span><span class="p">();</span>
+<span class="w">        </span><span class="n">MTL</span><span class="o">::</span><span class="n">RenderCommandEncoder</span><span class="o">*</span><span class="w"> </span><span class="n">encoder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">commandBuffer</span><span class="o">-&gt;</span><span class="n">renderCommandEncoder</span><span class="p">(</span><span class="n">passDescriptor</span><span class="p">);</span>
+
+<span class="w">        </span><span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setRenderPipelineState</span><span class="p">(</span><span class="n">pipelineState</span><span class="p">);</span>
+<span class="w">        </span><span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setDepthStencilState</span><span class="p">(</span><span class="n">depthState</span><span class="p">);</span>
+<span class="w">        </span><span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setVertexBuffer</span><span class="p">(</span><span class="n">vertexBuffer</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">        </span><span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setVertexBytes</span><span class="p">(</span><span class="o">&amp;</span><span class="n">uniforms</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">Uniforms</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">        </span><span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setFragmentTexture</span><span class="p">(</span><span class="n">texture</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">        </span><span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setFragmentSamplerState</span><span class="p">(</span><span class="n">samplerState</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">        </span><span class="n">encoder</span><span class="o">-&gt;</span><span class="n">drawPrimitives</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">PrimitiveTypeTriangle</span><span class="p">,</span><span class="w"> </span><span class="n">NS</span><span class="o">::</span><span class="n">UInteger</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="n">NS</span><span class="o">::</span><span class="n">UInteger</span><span class="p">(</span><span class="mi">36</span><span class="p">));</span>
+
+<span class="w">        </span><span class="n">encoder</span><span class="o">-&gt;</span><span class="n">endEncoding</span><span class="p">();</span>
+<span class="w">        </span><span class="n">commandBuffer</span><span class="o">-&gt;</span><span class="n">presentDrawable</span><span class="p">(</span><span class="n">drawable</span><span class="p">);</span>
+<span class="w">        </span><span class="n">commandBuffer</span><span class="o">-&gt;</span><span class="n">commit</span><span class="p">();</span>
+<span class="w">        </span><span class="n">passDescriptor</span><span class="o">-&gt;</span><span class="n">release</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">pool</span><span class="o">-&gt;</span><span class="n">release</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
 
 <p>If you can explain every line of this function, you are ready for lighting.</p>
 <figure><img src="../assets/img/getting-started/review.webp" alt="The journey of a vertex." width="880" height="170" loading="lazy"><figcaption>The journey of a vertex.</figcaption></figure>
@@ -186,9 +229,17 @@
 <li><strong>Geometry vanishing close to the camera</strong>: an OpenGL projection matrix with a -1 to 1 depth range.</li>
 <li><strong>Nothing drawn and no error</strong>: the model is behind the camera, outside the near and far planes, or the depth compare function rejects everything.</li>
 </ul>
-<p>Read validation messages carefully. Metal's are precise and nearly always name the exact property that is wrong.</p></article><div class="pager"><a class="prev" href="../getting-started/camera.html"><small>Previous</small>Camera</a><a class="next" href="../lighting/colors.html"><small>Next</small>Colors</a></div>
+<p>Read validation messages carefully. Metal's are precise and nearly always name the exact property that is wrong.</p></article><nav class="pager" aria-label="Previous and next chapter"><a class="prev" href="../getting-started/camera.html"><small>Previous</small>Camera</a><a class="next" href="../lighting/colors.html"><small>Next</small>Colors</a></nav>
+<footer class="site-footer">
+  <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>
+  <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
+</footer>
 </main>
+<aside class="toc" aria-label="On this page"><h4>On this page</h4><ul><li><a href="#the-frame-one-more-time">The frame, one more time</a></li><li><a href="#glossary">Glossary</a></li><li><a href="#conventions-used-from-here-on">Conventions used from here on</a></li><li><a href="#common-first-mistakes">Common first mistakes</a></li></ul></aside>
 </div>
-<script src="../assets/site.js"></script>
+<script defer src="../assets/textures.js"></script>
+<script defer src="../assets/live.js"></script>
+<script defer src="../assets/demos.js"></script>
+<script defer src="../assets/site.js"></script>
 </body>
 </html>

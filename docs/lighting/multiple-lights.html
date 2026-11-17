@@ -3,27 +3,42 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Multiple Lights · learnmetal</title>
-<meta name="description" content="Lighting: Multiple Lights. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<title>Multiple Lights | learnmetal</title>
+<meta name="description" content="Lighting: Multiple Lights. Learn 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering, in Swift or C++.">
+<meta name="author" content="Gabriele Vierti">
+<link rel="icon" href="../assets/favicon.png">
 <script>
 (function () {
-  var t = null;
-  try { t = localStorage.getItem("theme"); } catch (e) {}
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem("theme"); l = localStorage.getItem("lang"); } catch (e) {}
   if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  document.documentElement.dataset.theme = t;
+  d.dataset.theme = t;
+  var q = /[?&]lang=(swift|cpp)/.exec(location.search);      // links can pick a language: page.html?lang=cpp
+  if (q) l = q[1];
+  d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
 <link rel="stylesheet" href="../assets/style.css">
 <link rel="stylesheet" href="../assets/code.css">
 </head>
-<body>
+<body class="">
+<a class="skip" href="#main">Skip to content</a>
 <header class="topbar">
-  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
-  <a class="brand" href="../index.html">learn<span>metal</span></a>
-  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+  <button id="menu-toggle" class="icon-btn" aria-label="Open the chapter list">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a class="brand" href="../index.html"><img src="../assets/logo.png" alt="LearnMetal" width="136" height="32"></a>
+  <div class="lang-switch" role="group" aria-label="Language of the host code">
+    <button type="button" data-set-lang="swift">Swift</button>
+    <button type="button" data-set-lang="cpp">C++</button>
+  </div>
+  <a class="icon-btn" href="https://github.com/gabrielevierti" aria-label="Gabriele Vierti on GitHub"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Switch between light and dark">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"/></svg>
+  </button>
 </header>
 <div class="layout">
-<nav class="sidebar" id="sidebar">
+<nav class="sidebar" id="sidebar" aria-label="Chapters">
 <div class="nav-section"><h4>Getting Started</h4><ul>
 <li><a href="../getting-started/introduction.html">Introduction</a></li>
 <li><a href="../getting-started/project-setup.html">Project Setup</a></li>
@@ -42,7 +57,7 @@
 <li><a href="../lighting/materials.html">Materials</a></li>
 <li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
 <li><a href="../lighting/light-casters.html">Light Casters</a></li>
-<li><a class="active" href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a class="active" aria-current="page" href="../lighting/multiple-lights.html">Multiple Lights</a></li>
 <li><a href="../lighting/review.html">Review</a></li>
 </ul></div>
 <div class="nav-section"><h4>Model Loading</h4><ul>
@@ -95,9 +110,9 @@
 <li><a href="../resources/examples.html">Example Code</a></li>
 </ul></div>
 </nav>
-<main class="content">
+<main class="content" id="main">
 <article><p class="crumb">Lighting</p><h1 id="multiple-lights">Multiple Lights<a class="headerlink" href="#multiple-lights" title="Permanent link">#</a></h1>
-<div class="example-box"><strong>Example code</strong> <code>examples/Sources/10-MultipleLights</code>, run with <code>swift run MultipleLights</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
+<div class="example-box lang-swift"><strong>Example project</strong> <code>examples/Sources/10-MultipleLights</code>, run with <code>swift run MultipleLights</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
 
 <p>A scene rarely has one light. This chapter combines everything from the lighting section: one directional light, four point lights and a flashlight, all in a single fragment function. The trick is organization: one function per light type, and their results added together.</p>
 <h2 id="shader-functions">Shader functions<a class="headerlink" href="#shader-functions" title="Permanent link">#</a></h2>
@@ -178,6 +193,7 @@
 
 <h2 id="the-swift-side">The Swift side<a class="headerlink" href="#the-swift-side" title="Permanent link">#</a></h2>
 <p>Swift has no fixed-size C arrays in structs, but a <strong>tuple</strong> of identical elements has the same memory layout:</p>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">FragmentUniforms</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">directionalLight</span><span class="p">:</span><span class="w"> </span><span class="n">DirectionalLight</span>
 <span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">pointLights</span><span class="p">:</span><span class="w"> </span><span class="p">(</span><span class="n">PointLight</span><span class="p">,</span><span class="w"> </span><span class="n">PointLight</span><span class="p">,</span><span class="w"> </span><span class="n">PointLight</span><span class="p">,</span><span class="w"> </span><span class="n">PointLight</span><span class="p">)</span>
@@ -186,6 +202,18 @@
 <span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">shininess</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span>
 <span class="p">}</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="c1">// C++ has real fixed-size arrays, so the layout matches the shader directly.</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">FragmentUniforms</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">DirectionalLight</span><span class="w"> </span><span class="n">directionalLight</span><span class="p">;</span>
+<span class="w">    </span><span class="n">PointLight</span><span class="w"> </span><span class="n">pointLights</span><span class="p">[</span><span class="mi">4</span><span class="p">];</span>
+<span class="w">    </span><span class="n">SpotLight</span><span class="w"> </span><span class="n">spotLight</span><span class="p">;</span>
+<span class="w">    </span><span class="n">simd</span><span class="o">::</span><span class="n">float3</span><span class="w"> </span><span class="n">viewPosition</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">shininess</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div>
+</div>
 
 <p>That gets clumsy for larger counts. The scalable alternative is to put the lights in their own <code>MTLBuffer</code> and pass a pointer plus a count:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_main</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
@@ -197,15 +225,26 @@
 <span class="w">    </span><span class="p">}</span>
 </code></pre></div>
 
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">lightBuffer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeBuffer</span><span class="p">(</span><span class="n">bytes</span><span class="p">:</span><span class="w"> </span><span class="n">pointLights</span><span class="p">,</span>
 <span class="w">                                    </span><span class="n">length</span><span class="p">:</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="n">PointLight</span><span class="p">&gt;.</span><span class="bp">stride</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">pointLights</span><span class="p">.</span><span class="bp">count</span><span class="p">,</span>
 <span class="w">                                    </span><span class="n">options</span><span class="p">:</span><span class="w"> </span><span class="p">[])</span><span class="o">!</span>
 <span class="n">encoder</span><span class="p">.</span><span class="n">setFragmentBuffer</span><span class="p">(</span><span class="n">lightBuffer</span><span class="p">,</span><span class="w"> </span><span class="n">offset</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="c1">// pointLights is a std::vector&lt;PointLight&gt;</span>
+<span class="n">MTL</span><span class="o">::</span><span class="n">Buffer</span><span class="o">*</span><span class="w"> </span><span class="n">lightBuffer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">device</span><span class="o">-&gt;</span><span class="n">newBuffer</span><span class="p">(</span><span class="n">pointLights</span><span class="p">.</span><span class="n">data</span><span class="p">(),</span>
+<span class="w">                                             </span><span class="k">sizeof</span><span class="p">(</span><span class="n">PointLight</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">pointLights</span><span class="p">.</span><span class="n">size</span><span class="p">(),</span>
+<span class="w">                                             </span><span class="n">MTL</span><span class="o">::</span><span class="n">ResourceStorageModeShared</span><span class="p">);</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setFragmentBuffer</span><span class="p">(</span><span class="n">lightBuffer</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span><span class="w">      </span><span class="c1">// buffer, offset, index</span>
+</code></pre></div>
+</div>
 
 <p>A buffer bound to a shader is just memory, and a pointer parameter lets the shader index it as an array of any length. This is far more flexible than uniform arrays in older APIs, and it is the form we use from now on.</p>
 <h2 id="setting-the-scene">Setting the scene<a class="headerlink" href="#setting-the-scene" title="Permanent link">#</a></h2>
 <p>Four point lights at different positions, each drawn as a small lamp cube with the unlit pipeline from the <a href="colors.html">Colors</a> chapter:</p>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">pointLightPositions</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="n">Float3</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">[</span><span class="w"> </span><span class="mf">0.7</span><span class="p">,</span><span class="w">  </span><span class="mf">0.2</span><span class="p">,</span><span class="w">   </span><span class="mf">2.0</span><span class="p">],</span>
 <span class="w">    </span><span class="p">[</span><span class="w"> </span><span class="mf">2.3</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">3.3</span><span class="p">,</span><span class="w">  </span><span class="o">-</span><span class="mf">4.0</span><span class="p">],</span>
@@ -213,8 +252,18 @@
 <span class="w">    </span><span class="p">[</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w">  </span><span class="mf">0.0</span><span class="p">,</span><span class="w">  </span><span class="o">-</span><span class="mf">3.0</span><span class="p">],</span>
 <span class="p">]</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="k">const</span><span class="w"> </span><span class="n">simd</span><span class="o">::</span><span class="n">float3</span><span class="w"> </span><span class="n">pointLightPositions</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="mf">0.7f</span><span class="p">,</span><span class="w">  </span><span class="mf">0.2f</span><span class="p">,</span><span class="w">   </span><span class="mf">2.0f</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="mf">2.3f</span><span class="p">,</span><span class="w"> </span><span class="mf">-3.3f</span><span class="p">,</span><span class="w">  </span><span class="mf">-4.0f</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="mf">-4.0f</span><span class="p">,</span><span class="w">  </span><span class="mf">2.0f</span><span class="p">,</span><span class="w"> </span><span class="mf">-12.0f</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">,</span><span class="w">  </span><span class="mf">0.0f</span><span class="p">,</span><span class="w">  </span><span class="mf">-3.0f</span><span class="p">},</span>
+<span class="p">};</span>
+</code></pre></div>
+</div>
 
-<figure><img src="../assets/img/lighting/multiple-lights.webp" alt="One directional light and four colored point lights, each drawn as a small lamp cube." width="880" height="495" loading="lazy"><figcaption>One directional light and four colored point lights, each drawn as a small lamp cube.</figcaption></figure>
+<div class="lm-demo" data-demo="multiple-lights" data-fallback="../assets/img/lighting/multiple-lights.webp"></div>
 
 <h2 id="the-cost-of-many-lights">The cost of many lights<a class="headerlink" href="#the-cost-of-many-lights" title="Permanent link">#</a></h2>
 <p>Every fragment evaluates every light, so the cost is fragments × lights. A handful is fine. Hundreds are not, and solving that is the purpose of <a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a> later on.</p>
@@ -222,9 +271,17 @@
 <ul>
 <li>Recreate different atmospheres only by changing light colors and the clear color: a desert at noon, a dim factory, a horror corridor lit by the flashlight alone.</li>
 <li>Move the lights over time by rewriting the buffer contents each frame through <code>lightBuffer.contents()</code>.</li>
-</ul></article><div class="pager"><a class="prev" href="../lighting/light-casters.html"><small>Previous</small>Light Casters</a><a class="next" href="../lighting/review.html"><small>Next</small>Review</a></div>
+</ul></article><nav class="pager" aria-label="Previous and next chapter"><a class="prev" href="../lighting/light-casters.html"><small>Previous</small>Light Casters</a><a class="next" href="../lighting/review.html"><small>Next</small>Review</a></nav>
+<footer class="site-footer">
+  <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>
+  <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
+</footer>
 </main>
+<aside class="toc" aria-label="On this page"><h4>On this page</h4><ul><li><a href="#shader-functions">Shader functions</a></li><li><a href="#arrays-in-uniforms">Arrays in uniforms</a></li><li><a href="#the-swift-side">The Swift side</a></li><li><a href="#setting-the-scene">Setting the scene</a></li><li><a href="#the-cost-of-many-lights">The cost of many lights</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
 </div>
-<script src="../assets/site.js"></script>
+<script defer src="../assets/textures.js"></script>
+<script defer src="../assets/live.js"></script>
+<script defer src="../assets/demos.js"></script>
+<script defer src="../assets/site.js"></script>
 </body>
 </html>

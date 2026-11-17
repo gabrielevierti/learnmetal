@@ -2,6 +2,13 @@
 
 A file usually contains several meshes arranged in a hierarchy, each with its own transform. A `Model` type collects them so that loading and drawing a whole file is one line each.
 
+<!-- cpp -->
+
+!!! note "Model loading in C++"
+    Model I/O and MetalKit's mesh types are not part of metal-cpp. The C++ version of this section loads Wavefront OBJ files with the single-header library [tinyobjloader](https://github.com/tinyobjloader/tinyobjloader) and builds the Metal buffers by hand. The ideas are the same: a model is meshes, a mesh has one vertex buffer and one index buffer per material, and a material is values plus textures. To load USD from C++, call Model I/O from a small Objective-C++ file, as the window code in [Project Setup](../getting-started/project-setup.html) does for AppKit, or convert the model to OBJ or glTF.
+
+<!-- /cpp -->
+
 ## The Model class
 
 ```swift

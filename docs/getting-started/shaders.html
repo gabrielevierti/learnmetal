@@ -3,33 +3,48 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Shaders · learnmetal</title>
-<meta name="description" content="Getting Started: Shaders. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<title>Shaders | learnmetal</title>
+<meta name="description" content="Getting Started: Shaders. Learn 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering, in Swift or C++.">
+<meta name="author" content="Gabriele Vierti">
+<link rel="icon" href="../assets/favicon.png">
 <script>
 (function () {
-  var t = null;
-  try { t = localStorage.getItem("theme"); } catch (e) {}
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem("theme"); l = localStorage.getItem("lang"); } catch (e) {}
   if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  document.documentElement.dataset.theme = t;
+  d.dataset.theme = t;
+  var q = /[?&]lang=(swift|cpp)/.exec(location.search);      // links can pick a language: page.html?lang=cpp
+  if (q) l = q[1];
+  d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
 <link rel="stylesheet" href="../assets/style.css">
 <link rel="stylesheet" href="../assets/code.css">
 </head>
-<body>
+<body class="">
+<a class="skip" href="#main">Skip to content</a>
 <header class="topbar">
-  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
-  <a class="brand" href="../index.html">learn<span>metal</span></a>
-  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+  <button id="menu-toggle" class="icon-btn" aria-label="Open the chapter list">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a class="brand" href="../index.html"><img src="../assets/logo.png" alt="LearnMetal" width="136" height="32"></a>
+  <div class="lang-switch" role="group" aria-label="Language of the host code">
+    <button type="button" data-set-lang="swift">Swift</button>
+    <button type="button" data-set-lang="cpp">C++</button>
+  </div>
+  <a class="icon-btn" href="https://github.com/gabrielevierti" aria-label="Gabriele Vierti on GitHub"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Switch between light and dark">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"/></svg>
+  </button>
 </header>
 <div class="layout">
-<nav class="sidebar" id="sidebar">
+<nav class="sidebar" id="sidebar" aria-label="Chapters">
 <div class="nav-section"><h4>Getting Started</h4><ul>
 <li><a href="../getting-started/introduction.html">Introduction</a></li>
 <li><a href="../getting-started/project-setup.html">Project Setup</a></li>
 <li><a href="../getting-started/hello-view.html">Hello View</a></li>
 <li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
-<li><a class="active" href="../getting-started/shaders.html">Shaders</a></li>
+<li><a class="active" aria-current="page" href="../getting-started/shaders.html">Shaders</a></li>
 <li><a href="../getting-started/textures.html">Textures</a></li>
 <li><a href="../getting-started/transformations.html">Transformations</a></li>
 <li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
@@ -95,9 +110,9 @@
 <li><a href="../resources/examples.html">Example Code</a></li>
 </ul></div>
 </nav>
-<main class="content">
+<main class="content" id="main">
 <article><p class="crumb">Getting Started</p><h1 id="shaders">Shaders<a class="headerlink" href="#shaders" title="Permanent link">#</a></h1>
-<div class="example-box"><strong>Example code</strong> <code>examples/Sources/03-Shaders</code>, run with <code>swift run Shaders</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
+<div class="example-box lang-swift"><strong>Example project</strong> <code>examples/Sources/03-Shaders</code>, run with <code>swift run Shaders</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
 
 <p>Shaders are where graphics programming happens. This chapter looks at the Metal Shading Language more closely, and shows the two ways data reaches a shader: per-vertex attributes that are interpolated across a triangle, and uniforms that are the same for a whole draw call.</p>
 <h2 id="the-language-in-brief">The language in brief<a class="headerlink" href="#the-language-in-brief" title="Permanent link">#</a></h2>
@@ -156,6 +171,7 @@
 <p>Each vertex computes a color from its own position, and every fragment in between receives a blend of the three. This interpolation is automatic for every member of the struct.</p>
 <h2 id="more-vertex-attributes">More vertex attributes<a class="headerlink" href="#more-vertex-attributes" title="Permanent link">#</a></h2>
 <p>Colors can also come from the vertex buffer. Interleave them with the positions:</p>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">vertices</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="nb">Float</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="c1">// position         // color</span>
 <span class="w">    </span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w">    </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span>
@@ -163,8 +179,19 @@
 <span class="w">     </span><span class="mf">0.0</span><span class="p">,</span><span class="w">  </span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w">    </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span>
 <span class="p">]</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="k">const</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">vertices</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// position            // color</span>
+<span class="w">    </span><span class="mf">-0.5f</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.5f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">,</span><span class="w">    </span><span class="mf">1.0f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">,</span>
+<span class="w">     </span><span class="mf">0.5f</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.5f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">,</span><span class="w">    </span><span class="mf">0.0f</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">,</span>
+<span class="w">     </span><span class="mf">0.0f</span><span class="p">,</span><span class="w">  </span><span class="mf">0.5f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">,</span><span class="w">    </span><span class="mf">0.0f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0f</span><span class="p">,</span>
+<span class="p">};</span>
+</code></pre></div>
+</div>
 
 <p>Describe the second attribute and the larger stride:</p>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">floatSize</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;.</span><span class="bp">stride</span>
 <span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">format</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">float3</span>
 <span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">offset</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span>
@@ -174,6 +201,18 @@
 <span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">bufferIndex</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span>
 <span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">layouts</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="bp">stride</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">floatSize</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">6</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">floatSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="kt">float</span><span class="p">);</span>
+<span class="n">vertexDescriptor</span><span class="o">-&gt;</span><span class="n">attributes</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">object</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">setFormat</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">VertexFormatFloat3</span><span class="p">);</span>
+<span class="n">vertexDescriptor</span><span class="o">-&gt;</span><span class="n">attributes</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">object</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">setOffset</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="n">vertexDescriptor</span><span class="o">-&gt;</span><span class="n">attributes</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">object</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">setBufferIndex</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="n">vertexDescriptor</span><span class="o">-&gt;</span><span class="n">attributes</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">object</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">setFormat</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">VertexFormatFloat3</span><span class="p">);</span>
+<span class="n">vertexDescriptor</span><span class="o">-&gt;</span><span class="n">attributes</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">object</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">setOffset</span><span class="p">(</span><span class="n">floatSize</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span>
+<span class="n">vertexDescriptor</span><span class="o">-&gt;</span><span class="n">attributes</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">object</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">setBufferIndex</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="n">vertexDescriptor</span><span class="o">-&gt;</span><span class="n">layouts</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">object</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">setStride</span><span class="p">(</span><span class="n">floatSize</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">6</span><span class="p">);</span>
+</code></pre></div>
+</div>
 
 <p>And receive it in the shader:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">VertexIn</span><span class="w"> </span><span class="p">{</span>
@@ -190,7 +229,7 @@
 </code></pre></div>
 
 <p>The result is the classic triangle with a red, a green and a blue corner blending into each other.</p>
-<figure><img src="../assets/img/getting-started/shaders.webp" alt="Each vertex has its own color. Every fragment in between receives a blend of the three." width="880" height="495" loading="lazy"><figcaption>Each vertex has its own color. Every fragment in between receives a blend of the three.</figcaption></figure>
+<div class="lm-demo" data-demo="shaders" data-fallback="../assets/img/getting-started/shaders.webp"></div>
 
 <h2 id="uniforms">Uniforms<a class="headerlink" href="#uniforms" title="Permanent link">#</a></h2>
 <p>A <strong>uniform</strong> is data that stays constant during a draw call: a time value, a transformation matrix, a light position. In Metal a uniform is simply a struct in a buffer that the shader receives by reference.</p>
@@ -209,19 +248,37 @@
 
 <p><code>constant</code> is the address space for read-only buffer data. <code>[[buffer(0)]]</code> is slot 0 of the <strong>fragment</strong> buffer table. Vertex and fragment functions have separate tables, so vertex buffer 0 and fragment buffer 0 are unrelated.</p>
 <p>Declare a matching struct in Swift:</p>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">Uniforms</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">time</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span>
 <span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">tint</span><span class="p">:</span><span class="w"> </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;</span>
 <span class="p">}</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;simd/simd.h&gt;</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">Uniforms</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">time</span><span class="p">;</span>
+<span class="w">    </span><span class="n">simd</span><span class="o">::</span><span class="n">float4</span><span class="w"> </span><span class="n">tint</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div>
+</div>
 
 <p>For small data, the simplest way to send it is <code>setFragmentBytes</code>, which copies the bytes into a temporary buffer managed by Metal:</p>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="nv">uniforms</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Uniforms</span><span class="p">(</span><span class="n">time</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">(</span><span class="n">CACurrentMediaTime</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">startTime</span><span class="p">),</span>
 <span class="w">                        </span><span class="n">tint</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">])</span>
 <span class="n">encoder</span><span class="p">.</span><span class="n">setFragmentBytes</span><span class="p">(&amp;</span><span class="n">uniforms</span><span class="p">,</span>
 <span class="w">                         </span><span class="n">length</span><span class="p">:</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="n">Uniforms</span><span class="p">&gt;.</span><span class="bp">stride</span><span class="p">,</span>
 <span class="w">                         </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">Uniforms</span><span class="w"> </span><span class="n">uniforms</span><span class="p">{</span><span class="w"> </span><span class="kt">float</span><span class="p">(</span><span class="n">glfwGetTime</span><span class="p">()),</span><span class="w"> </span><span class="n">simd</span><span class="o">::</span><span class="n">float4</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">}</span><span class="w"> </span><span class="p">};</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setFragmentBytes</span><span class="p">(</span><span class="o">&amp;</span><span class="n">uniforms</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">Uniforms</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w">    </span><span class="c1">// bytes, length, index</span>
+</code></pre></div>
+</div>
 
 <p>Store <code>startTime = CACurrentMediaTime()</code> in <code>init</code>; a <code>Float</code> cannot hold the raw value precisely enough. There is a matching <code>setVertexBytes</code> for the vertex stage. For data larger than 4 KB, or data shared by many draws, create an <code>MTLBuffer</code> yourself and bind it with <code>setFragmentBuffer</code>.</p>
 <h2 id="keeping-swift-and-msl-layouts-in-sync">Keeping Swift and MSL layouts in sync<a class="headerlink" href="#keeping-swift-and-msl-layouts-in-sync" title="Permanent link">#</a></h2>
@@ -241,9 +298,17 @@
 <li>Flip the triangle upside down in the vertex function only.</li>
 <li>Add a <code>float2 offset</code> uniform for the vertex stage and move the triangle in a circle over time.</li>
 <li>Output the position as the color (<code>out.color = out.position</code>). Why is the bottom-left corner black?</li>
-</ul></article><div class="pager"><a class="prev" href="../getting-started/hello-triangle.html"><small>Previous</small>Hello Triangle</a><a class="next" href="../getting-started/textures.html"><small>Next</small>Textures</a></div>
+</ul></article><nav class="pager" aria-label="Previous and next chapter"><a class="prev" href="../getting-started/hello-triangle.html"><small>Previous</small>Hello Triangle</a><a class="next" href="../getting-started/textures.html"><small>Next</small>Textures</a></nav>
+<footer class="site-footer">
+  <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>
+  <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
+</footer>
 </main>
+<aside class="toc" aria-label="On this page"><h4>On this page</h4><ul><li><a href="#the-language-in-brief">The language in brief</a></li><li><a href="#passing-data-between-stages">Passing data between stages</a></li><li><a href="#more-vertex-attributes">More vertex attributes</a></li><li><a href="#uniforms">Uniforms</a></li><li><a href="#keeping-swift-and-msl-layouts-in-sync">Keeping Swift and MSL layouts in sync</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
 </div>
-<script src="../assets/site.js"></script>
+<script defer src="../assets/textures.js"></script>
+<script defer src="../assets/live.js"></script>
+<script defer src="../assets/demos.js"></script>
+<script defer src="../assets/site.js"></script>
 </body>
 </html>

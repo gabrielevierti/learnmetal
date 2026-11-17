@@ -3,27 +3,42 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lighting Maps · learnmetal</title>
-<meta name="description" content="Lighting: Lighting Maps. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<title>Lighting Maps | learnmetal</title>
+<meta name="description" content="Lighting: Lighting Maps. Learn 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering, in Swift or C++.">
+<meta name="author" content="Gabriele Vierti">
+<link rel="icon" href="../assets/favicon.png">
 <script>
 (function () {
-  var t = null;
-  try { t = localStorage.getItem("theme"); } catch (e) {}
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem("theme"); l = localStorage.getItem("lang"); } catch (e) {}
   if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  document.documentElement.dataset.theme = t;
+  d.dataset.theme = t;
+  var q = /[?&]lang=(swift|cpp)/.exec(location.search);      // links can pick a language: page.html?lang=cpp
+  if (q) l = q[1];
+  d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
 <link rel="stylesheet" href="../assets/style.css">
 <link rel="stylesheet" href="../assets/code.css">
 </head>
-<body>
+<body class="">
+<a class="skip" href="#main">Skip to content</a>
 <header class="topbar">
-  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
-  <a class="brand" href="../index.html">learn<span>metal</span></a>
-  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+  <button id="menu-toggle" class="icon-btn" aria-label="Open the chapter list">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a class="brand" href="../index.html"><img src="../assets/logo.png" alt="LearnMetal" width="136" height="32"></a>
+  <div class="lang-switch" role="group" aria-label="Language of the host code">
+    <button type="button" data-set-lang="swift">Swift</button>
+    <button type="button" data-set-lang="cpp">C++</button>
+  </div>
+  <a class="icon-btn" href="https://github.com/gabrielevierti" aria-label="Gabriele Vierti on GitHub"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Switch between light and dark">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"/></svg>
+  </button>
 </header>
 <div class="layout">
-<nav class="sidebar" id="sidebar">
+<nav class="sidebar" id="sidebar" aria-label="Chapters">
 <div class="nav-section"><h4>Getting Started</h4><ul>
 <li><a href="../getting-started/introduction.html">Introduction</a></li>
 <li><a href="../getting-started/project-setup.html">Project Setup</a></li>
@@ -40,7 +55,7 @@
 <li><a href="../lighting/colors.html">Colors</a></li>
 <li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
 <li><a href="../lighting/materials.html">Materials</a></li>
-<li><a class="active" href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a class="active" aria-current="page" href="../lighting/lighting-maps.html">Lighting Maps</a></li>
 <li><a href="../lighting/light-casters.html">Light Casters</a></li>
 <li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
 <li><a href="../lighting/review.html">Review</a></li>
@@ -95,9 +110,9 @@
 <li><a href="../resources/examples.html">Example Code</a></li>
 </ul></div>
 </nav>
-<main class="content">
+<main class="content" id="main">
 <article><p class="crumb">Lighting</p><h1 id="lighting-maps">Lighting Maps<a class="headerlink" href="#lighting-maps" title="Permanent link">#</a></h1>
-<div class="example-box"><strong>Example code</strong> <code>examples/Sources/09-LightingMaps</code>, run with <code>swift run LightingMaps</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
+<div class="example-box lang-swift"><strong>Example project</strong> <code>examples/Sources/09-LightingMaps</code>, run with <code>swift run LightingMaps</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
 
 <p>A material with one color per object is still too coarse. A wooden crate with a steel frame is two materials on one surface: the wood is dull, the steel is shiny. The answer is to store material properties in textures, so they can vary per pixel. Such textures are called <strong>lighting maps</strong>.</p>
 <h2 id="diffuse-maps">Diffuse maps<a class="headerlink" href="#diffuse-maps" title="Permanent link">#</a></h2>
@@ -136,17 +151,32 @@
 <h2 id="specular-maps">Specular maps<a class="headerlink" href="#specular-maps" title="Permanent link">#</a></h2>
 <p>The <strong>specular map</strong> is a second image, usually grayscale, that says how strongly each point reflects highlights. For the crate it is black over the wood and bright over the steel frame, with scratches and wear painted in. Black means no highlight; white means full.</p>
 <p>Load both images and bind them to the two texture slots:</p>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">diffuseMap</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="p">!</span><span class="w"> </span><span class="n">loader</span><span class="p">.</span><span class="n">newTexture</span><span class="p">(</span><span class="n">URL</span><span class="p">:</span><span class="w"> </span><span class="n">url</span><span class="p">(</span><span class="k">for</span><span class="p">:</span><span class="w"> </span><span class="s">"container2"</span><span class="p">,</span><span class="w"> </span><span class="s">"png"</span><span class="p">),</span><span class="w"> </span><span class="n">options</span><span class="p">:</span><span class="w"> </span><span class="n">options</span><span class="p">)</span>
 <span class="n">specularMap</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="p">!</span><span class="w"> </span><span class="n">loader</span><span class="p">.</span><span class="n">newTexture</span><span class="p">(</span><span class="n">URL</span><span class="p">:</span><span class="w"> </span><span class="n">url</span><span class="p">(</span><span class="k">for</span><span class="p">:</span><span class="w"> </span><span class="s">"container2_specular"</span><span class="p">,</span><span class="w"> </span><span class="s">"png"</span><span class="p">),</span><span class="w"> </span><span class="n">options</span><span class="p">:</span><span class="w"> </span><span class="n">options</span><span class="p">)</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">diffuseMap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">loadTexture</span><span class="p">(</span><span class="n">device</span><span class="p">,</span><span class="w"> </span><span class="n">commandQueue</span><span class="p">,</span><span class="w"> </span><span class="s">"container2.png"</span><span class="p">);</span>
+<span class="n">specularMap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">loadTexture</span><span class="p">(</span><span class="n">device</span><span class="p">,</span><span class="w"> </span><span class="n">commandQueue</span><span class="p">,</span><span class="w"> </span><span class="s">"container2_specular.png"</span><span class="p">);</span>
+</code></pre></div>
+</div>
 
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">encoder</span><span class="p">.</span><span class="n">setFragmentTexture</span><span class="p">(</span><span class="n">diffuseMap</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
 <span class="n">encoder</span><span class="p">.</span><span class="n">setFragmentTexture</span><span class="p">(</span><span class="n">specularMap</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
 <span class="n">encoder</span><span class="p">.</span><span class="n">setFragmentSamplerState</span><span class="p">(</span><span class="n">samplerState</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setFragmentTexture</span><span class="p">(</span><span class="n">diffuseMap</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setFragmentTexture</span><span class="p">(</span><span class="n">specularMap</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setFragmentSamplerState</span><span class="p">(</span><span class="n">samplerState</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+</code></pre></div>
+</div>
 
 <p>Now only the metal border of the crate shines, and the highlight breaks up over its scratches.</p>
-<figure><img src="../assets/img/lighting/lighting-maps.webp" alt="With a specular map only the steel frame shines, and the highlight breaks up over its scratches." width="880" height="246" loading="lazy"><figcaption>With a specular map only the steel frame shines, and the highlight breaks up over its scratches.</figcaption></figure>
+<div class="lm-demo" data-demo="lighting-maps" data-fallback="../assets/img/lighting/lighting-maps.webp"></div>
 
 <h2 id="one-sampler-many-textures">One sampler, many textures<a class="headerlink" href="#one-sampler-many-textures" title="Permanent link">#</a></h2>
 <p>Both maps are read through the same sampler. A sampler describes <em>how</em> to read, and that is nearly always the same for all maps of a material, so a single sampler state is typical.</p>
@@ -161,9 +191,17 @@
 <li>Invert the specular map in the shader so the wood shines and the steel does not.</li>
 <li>Use a colored specular map and see how it tints the highlights.</li>
 <li>Add an <strong>emission map</strong>: a third texture whose color is added to the result regardless of lighting, making parts of the object appear to glow.</li>
-</ul></article><div class="pager"><a class="prev" href="../lighting/materials.html"><small>Previous</small>Materials</a><a class="next" href="../lighting/light-casters.html"><small>Next</small>Light Casters</a></div>
+</ul></article><nav class="pager" aria-label="Previous and next chapter"><a class="prev" href="../lighting/materials.html"><small>Previous</small>Materials</a><a class="next" href="../lighting/light-casters.html"><small>Next</small>Light Casters</a></nav>
+<footer class="site-footer">
+  <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>
+  <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
+</footer>
 </main>
+<aside class="toc" aria-label="On this page"><h4>On this page</h4><ul><li><a href="#diffuse-maps">Diffuse maps</a></li><li><a href="#specular-maps">Specular maps</a></li><li><a href="#one-sampler-many-textures">One sampler, many textures</a></li><li><a href="#single-channel-textures">Single-channel textures</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
 </div>
-<script src="../assets/site.js"></script>
+<script defer src="../assets/textures.js"></script>
+<script defer src="../assets/live.js"></script>
+<script defer src="../assets/demos.js"></script>
+<script defer src="../assets/site.js"></script>
 </body>
 </html>

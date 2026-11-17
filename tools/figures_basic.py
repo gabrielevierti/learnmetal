@@ -30,7 +30,8 @@ def lamp(pos, color=(1, 1, 1), s=0.14):
 
 
 def ndc(w, h, ss=3):
-    xs = (np.arange(w * ss) + 0.5) / (w * ss) * 2 - 1
+    # x is scaled by the aspect ratio so squares stay square (a centered square viewport).
+    xs = ((np.arange(w * ss) + 0.5) / (w * ss) * 2 - 1) * (w / h)
     ys = 1 - (np.arange(h * ss) + 0.5) / (h * ss) * 2
     return np.meshgrid(xs, ys)
 
@@ -94,7 +95,7 @@ def gs_hello_triangle():
     a = tri2d([(-0.5, -0.5), (0.5, -0.5), (0, 0.5)], orange, PW, PH)
     im = to_image(np.broadcast_to(TEAL, (PH * 3, PW * 3, 3)))
     d = ImageDraw.Draw(im)
-    P = lambda x, y: ((x * 0.5 + 0.5) * PW * 3, (0.5 - y * 0.5) * PH * 3)
+    P = lambda x, y: ((x * 0.5 * PH / PW + 0.5) * PW * 3, (0.5 - y * 0.5) * PH * 3)
     q = [P(0.5, 0.5), P(0.5, -0.5), P(-0.5, -0.5), P(-0.5, 0.5)]
     for i, j in [(0, 1), (1, 3), (3, 0), (1, 2), (2, 3)]:
         d.line([q[i], q[j]], fill=(255, 128, 51), width=5)
@@ -126,7 +127,7 @@ def gs_address_modes():
                 c = np.where(out[..., None], 0.0, c)
             return c
         return f
-    sq = np.array([[1.9 * PH / PW, 0, 0], [0, 1.9, 0], [0, 0, 1]])
+    sq = np.array([[1.9, 0, 0], [0, 1.9, 0], [0, 0, 1]])
     names = [("repeat", ".repeat"), ("mirror", ".mirrorRepeat"), ("edge", ".clampToEdge"), ("zero", ".clampToZero")]
     return panels([quad2d(sq, w=PW, h=PH, uvfn=mode(k)) for k, _ in names], [n for _, n in names], cols=2)
 
@@ -293,7 +294,7 @@ def ml_model():
             Box(T(1.8, -0.1, 0) @ R(-20, (0, 1, 0)) @ S(0.7, 1.3, 0.7), color=(0.35, 0.55, 0.85), spec=0.7, shin=48),
             Plane(-0.75, 6, tex=PLANKS, uvscale=0.25, spec=0.15)]
     L = [dict(type="point", pos=(2, 3, 3), color=(1, 1, 1), att=None)]
-    return render(objs, Camera((0, 1.4, 5), (0, 0, 0)), L, ambient=0.15, shadows=True, bg=(0.12, 0.13, 0.16))
+    return render(objs, Camera((0, 2.2, 7.8), (0, 0, 0), fov=29), L, ambient=0.15, shadows=True, bg=(0.12, 0.13, 0.16))
 
 
 # ------------------------------------------------------------ advanced metal

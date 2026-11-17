@@ -3,27 +3,42 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Shadow Mapping · learnmetal</title>
-<meta name="description" content="Advanced Lighting: Shadow Mapping. Learn modern 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering.">
+<title>Shadow Mapping | learnmetal</title>
+<meta name="description" content="Advanced Lighting: Shadow Mapping. Learn 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering, in Swift or C++.">
+<meta name="author" content="Gabriele Vierti">
+<link rel="icon" href="../assets/favicon.png">
 <script>
 (function () {
-  var t = null;
-  try { t = localStorage.getItem("theme"); } catch (e) {}
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem("theme"); l = localStorage.getItem("lang"); } catch (e) {}
   if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  document.documentElement.dataset.theme = t;
+  d.dataset.theme = t;
+  var q = /[?&]lang=(swift|cpp)/.exec(location.search);      // links can pick a language: page.html?lang=cpp
+  if (q) l = q[1];
+  d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
 <link rel="stylesheet" href="../assets/style.css">
 <link rel="stylesheet" href="../assets/code.css">
 </head>
-<body>
+<body class="">
+<a class="skip" href="#main">Skip to content</a>
 <header class="topbar">
-  <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">&#9776;</button>
-  <a class="brand" href="../index.html">learn<span>metal</span></a>
-  <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">&#9680;</button>
+  <button id="menu-toggle" class="icon-btn" aria-label="Open the chapter list">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a class="brand" href="../index.html"><img src="../assets/logo.png" alt="LearnMetal" width="136" height="32"></a>
+  <div class="lang-switch" role="group" aria-label="Language of the host code">
+    <button type="button" data-set-lang="swift">Swift</button>
+    <button type="button" data-set-lang="cpp">C++</button>
+  </div>
+  <a class="icon-btn" href="https://github.com/gabrielevierti" aria-label="Gabriele Vierti on GitHub"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Switch between light and dark">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"/></svg>
+  </button>
 </header>
 <div class="layout">
-<nav class="sidebar" id="sidebar">
+<nav class="sidebar" id="sidebar" aria-label="Chapters">
 <div class="nav-section"><h4>Getting Started</h4><ul>
 <li><a href="../getting-started/introduction.html">Introduction</a></li>
 <li><a href="../getting-started/project-setup.html">Project Setup</a></li>
@@ -66,7 +81,7 @@
 <div class="nav-section"><h4>Advanced Lighting</h4><ul>
 <li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
 <li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
-<li><a class="active" href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a class="active" aria-current="page" href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
 <li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
 <li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
 <li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
@@ -95,15 +110,16 @@
 <li><a href="../resources/examples.html">Example Code</a></li>
 </ul></div>
 </nav>
-<main class="content">
+<main class="content" id="main">
 <article><p class="crumb">Advanced Lighting</p><h1 id="shadow-mapping">Shadow Mapping<a class="headerlink" href="#shadow-mapping" title="Permanent link">#</a></h1>
-<div class="example-box"><strong>Example code</strong> <code>examples/Sources/14-ShadowMapping</code>, run with <code>swift run ShadowMapping</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
+<div class="example-box lang-swift"><strong>Example project</strong> <code>examples/Sources/14-ShadowMapping</code>, run with <code>swift run ShadowMapping</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
 
 <p>Shadows anchor objects to the ground and reveal how things are arranged in space. The standard real-time technique is <strong>shadow mapping</strong>, and it is built from parts you already know: a depth buffer and render-to-texture.</p>
 <h2 id="the-idea">The idea<a class="headerlink" href="#the-idea" title="Permanent link">#</a></h2>
 <p>A point is in shadow if something sits between it and the light. Put a camera at the light and render the scene's <strong>depth</strong> into a texture. That texture, the <strong>shadow map</strong>, records for every direction how far the light reaches before hitting something.</p>
 <p>When shading a fragment in the main pass, transform it into the light's view and compare its depth with the shadow map. If the fragment is farther from the light than the stored value, something closer is blocking the light.</p>
 <h2 id="the-shadow-map-texture">The shadow map texture<a class="headerlink" href="#the-shadow-map-texture" title="Permanent link">#</a></h2>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">shadowSize</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">2048</span>
 <span class="kd">let</span><span class="w"> </span><span class="nv">descriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLTextureDescriptor</span><span class="p">.</span><span class="n">texture2DDescriptor</span><span class="p">(</span>
 <span class="w">    </span><span class="n">pixelFormat</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">depth32Float</span><span class="p">,</span><span class="w"> </span><span class="n">width</span><span class="p">:</span><span class="w"> </span><span class="n">shadowSize</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">:</span><span class="w"> </span><span class="n">shadowSize</span><span class="p">,</span><span class="w"> </span><span class="n">mipmapped</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
@@ -117,10 +133,27 @@
 <span class="n">shadowPass</span><span class="p">.</span><span class="n">depthAttachment</span><span class="p">.</span><span class="n">clearDepth</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mf">1.0</span>
 <span class="n">shadowPass</span><span class="p">.</span><span class="n">depthAttachment</span><span class="p">.</span><span class="n">storeAction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">store</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="k">const</span><span class="w"> </span><span class="n">NS</span><span class="o">::</span><span class="n">UInteger</span><span class="w"> </span><span class="n">shadowSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2048</span><span class="p">;</span>
+<span class="n">MTL</span><span class="o">::</span><span class="n">TextureDescriptor</span><span class="o">*</span><span class="w"> </span><span class="n">descriptor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MTL</span><span class="o">::</span><span class="n">TextureDescriptor</span><span class="o">::</span><span class="n">texture2DDescriptor</span><span class="p">(</span>
+<span class="w">    </span><span class="n">MTL</span><span class="o">::</span><span class="n">PixelFormatDepth32Float</span><span class="p">,</span><span class="w"> </span><span class="n">shadowSize</span><span class="p">,</span><span class="w"> </span><span class="n">shadowSize</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setUsage</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">TextureUsageRenderTarget</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">MTL</span><span class="o">::</span><span class="n">TextureUsageShaderRead</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setStorageMode</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">StorageModePrivate</span><span class="p">);</span>
+<span class="n">shadowMap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">device</span><span class="o">-&gt;</span><span class="n">newTexture</span><span class="p">(</span><span class="n">descriptor</span><span class="p">);</span>
+
+<span class="n">shadowPass</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MTL</span><span class="o">::</span><span class="n">RenderPassDescriptor</span><span class="o">::</span><span class="n">alloc</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">();</span>
+<span class="n">shadowPass</span><span class="o">-&gt;</span><span class="n">depthAttachment</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">setTexture</span><span class="p">(</span><span class="n">shadowMap</span><span class="p">);</span>
+<span class="n">shadowPass</span><span class="o">-&gt;</span><span class="n">depthAttachment</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">setLoadAction</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">LoadActionClear</span><span class="p">);</span>
+<span class="n">shadowPass</span><span class="o">-&gt;</span><span class="n">depthAttachment</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">setClearDepth</span><span class="p">(</span><span class="mf">1.0</span><span class="p">);</span>
+<span class="n">shadowPass</span><span class="o">-&gt;</span><span class="n">depthAttachment</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">setStoreAction</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">StoreActionStore</span><span class="p">);</span>
+</code></pre></div>
+</div>
 
 <p>The pass has <strong>no color attachment</strong> at all. This time the depth must be stored, since reading it is the whole point.</p>
 <h2 id="the-lights-matrices">The light's matrices<a class="headerlink" href="#the-lights-matrices" title="Permanent link">#</a></h2>
 <p>A directional light has parallel rays, so its projection is <strong>orthographic</strong>: a box with no perspective. Add to <code>Math.swift</code>:</p>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">extension</span><span class="w"> </span><span class="nc">float4x4</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="c1">/// Right-handed orthographic projection with a 0...1 depth range.</span>
 <span class="w">    </span><span class="kd">init</span><span class="p">(</span><span class="n">orthographicLeft</span><span class="w"> </span><span class="n">l</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">,</span><span class="w"> </span><span class="kr">right</span><span class="w"> </span><span class="n">r</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">,</span><span class="w"> </span><span class="n">bottom</span><span class="w"> </span><span class="n">b</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">,</span><span class="w"> </span><span class="n">top</span><span class="w"> </span><span class="n">t</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">,</span>
@@ -133,13 +166,33 @@
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="c1">/// Right-handed orthographic projection with a 0...1 depth range.</span>
+<span class="kr">inline</span><span class="w"> </span><span class="n">simd</span><span class="o">::</span><span class="n">float4x4</span><span class="w"> </span><span class="nf">orthographic</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">l</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">r</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">t</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">simd_matrix</span><span class="p">(</span><span class="n">simd_make_float4</span><span class="p">(</span><span class="mi">2</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">r</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">l</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span>
+<span class="w">                       </span><span class="n">simd_make_float4</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">t</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">b</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span>
+<span class="w">                       </span><span class="n">simd_make_float4</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">f</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span>
+<span class="w">                       </span><span class="n">simd_make_float4</span><span class="p">((</span><span class="n">l</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">r</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">l</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">r</span><span class="p">),</span><span class="w"> </span><span class="p">(</span><span class="n">t</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t</span><span class="p">),</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">f</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
 
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">lightPosition</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Float3</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 <span class="kd">let</span><span class="w"> </span><span class="nv">lightView</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">float4x4</span><span class="p">(</span><span class="n">lookAt</span><span class="p">:</span><span class="w"> </span><span class="n">lightPosition</span><span class="p">,</span><span class="w"> </span><span class="n">center</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">up</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">])</span>
 <span class="kd">let</span><span class="w"> </span><span class="nv">lightProjection</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">float4x4</span><span class="p">(</span><span class="n">orthographicLeft</span><span class="p">:</span><span class="w"> </span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="kr">right</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="n">bottom</span><span class="p">:</span><span class="w"> </span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="n">top</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
 <span class="w">                               </span><span class="n">near</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">far</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">)</span>
 <span class="kd">let</span><span class="w"> </span><span class="nv">lightViewProjection</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">lightProjection</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">lightView</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">simd</span><span class="o">::</span><span class="n">float3</span><span class="w"> </span><span class="n">lightPosition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">-2</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">};</span>
+<span class="n">simd</span><span class="o">::</span><span class="n">float4x4</span><span class="w"> </span><span class="n">lightView</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lookAt</span><span class="p">(</span><span class="n">lightPosition</span><span class="p">,</span><span class="w"> </span><span class="n">simd</span><span class="o">::</span><span class="n">float3</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">},</span><span class="w"> </span><span class="n">simd</span><span class="o">::</span><span class="n">float3</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">});</span>
+<span class="n">simd</span><span class="o">::</span><span class="n">float4x4</span><span class="w"> </span><span class="n">lightProjection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">orthographic</span><span class="p">(</span><span class="mi">-10</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">-10</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">12</span><span class="p">);</span>
+<span class="n">simd</span><span class="o">::</span><span class="n">float4x4</span><span class="w"> </span><span class="n">lightViewProjection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lightProjection</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">lightView</span><span class="p">;</span>
+</code></pre></div>
+</div>
 
 <p>The box must contain everything that casts or receives shadows in the area you care about. Keep it as tight as you can: the shadow map's resolution is spread over the box.</p>
 <h2 id="the-depth-pass">The depth pass<a class="headerlink" href="#the-depth-pass" title="Permanent link">#</a></h2>
@@ -150,6 +203,7 @@
 <span class="p">}</span>
 </code></pre></div>
 
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">descriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLRenderPipelineDescriptor</span><span class="p">()</span>
 <span class="n">descriptor</span><span class="p">.</span><span class="n">vertexFunction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">library</span><span class="p">.</span><span class="n">makeFunction</span><span class="p">(</span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="s">"vertex_shadow"</span><span class="p">)</span>
 <span class="n">descriptor</span><span class="p">.</span><span class="n">fragmentFunction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kc">nil</span>
@@ -157,6 +211,16 @@
 <span class="n">descriptor</span><span class="p">.</span><span class="n">depthAttachmentPixelFormat</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">depth32Float</span>
 <span class="n">shadowPipelineState</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeRenderPipelineState</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">descriptor</span><span class="p">)</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">MTL</span><span class="o">::</span><span class="n">RenderPipelineDescriptor</span><span class="o">*</span><span class="w"> </span><span class="n">descriptor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MTL</span><span class="o">::</span><span class="n">RenderPipelineDescriptor</span><span class="o">::</span><span class="n">alloc</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">();</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setVertexFunction</span><span class="p">(</span><span class="n">library</span><span class="o">-&gt;</span><span class="n">newFunction</span><span class="p">(</span><span class="n">MTLSTR</span><span class="p">(</span><span class="s">"vertex_shadow"</span><span class="p">)));</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setFragmentFunction</span><span class="p">(</span><span class="nb">nullptr</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setVertexDescriptor</span><span class="p">(</span><span class="n">vertexDescriptor</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setDepthAttachmentPixelFormat</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">PixelFormatDepth32Float</span><span class="p">);</span>
+<span class="n">shadowPipelineState</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">device</span><span class="o">-&gt;</span><span class="n">newRenderPipelineState</span><span class="p">(</span><span class="n">descriptor</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">error</span><span class="p">);</span>
+</code></pre></div>
+</div>
 
 <p>A vertex function may return a bare <code>float4</code>; it is taken as the position. Each frame, render the scene with this pipeline into <code>shadowPass</code> before the main pass, using the same command buffer.</p>
 <h2 id="using-the-shadow-map">Using the shadow map<a class="headerlink" href="#using-the-shadow-map" title="Permanent link">#</a></h2>
@@ -182,6 +246,7 @@
 <li>Depth textures have their own shader type, <code>depth2d&lt;float&gt;</code>.</li>
 </ul>
 <p><code>sample_compare</code> compares the reference depth against the texture and returns 1 if the test passes and 0 if not. The test is configured on the sampler:</p>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">shadowSamplerDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLSamplerDescriptor</span><span class="p">()</span>
 <span class="n">shadowSamplerDescriptor</span><span class="p">.</span><span class="n">minFilter</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">linear</span>
 <span class="n">shadowSamplerDescriptor</span><span class="p">.</span><span class="n">magFilter</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">linear</span>
@@ -190,6 +255,17 @@
 <span class="n">shadowSamplerDescriptor</span><span class="p">.</span><span class="n">tAddressMode</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">clampToEdge</span>
 <span class="n">shadowSampler</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeSamplerState</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">shadowSamplerDescriptor</span><span class="p">)</span><span class="o">!</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">MTL</span><span class="o">::</span><span class="n">SamplerDescriptor</span><span class="o">*</span><span class="w"> </span><span class="n">shadowSamplerDescriptor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MTL</span><span class="o">::</span><span class="n">SamplerDescriptor</span><span class="o">::</span><span class="n">alloc</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">();</span>
+<span class="n">shadowSamplerDescriptor</span><span class="o">-&gt;</span><span class="n">setMinFilter</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">SamplerMinMagFilterLinear</span><span class="p">);</span>
+<span class="n">shadowSamplerDescriptor</span><span class="o">-&gt;</span><span class="n">setMagFilter</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">SamplerMinMagFilterLinear</span><span class="p">);</span>
+<span class="n">shadowSamplerDescriptor</span><span class="o">-&gt;</span><span class="n">setCompareFunction</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">CompareFunctionLessEqual</span><span class="p">);</span>
+<span class="n">shadowSamplerDescriptor</span><span class="o">-&gt;</span><span class="n">setSAddressMode</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">SamplerAddressModeClampToEdge</span><span class="p">);</span>
+<span class="n">shadowSamplerDescriptor</span><span class="o">-&gt;</span><span class="n">setTAddressMode</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">SamplerAddressModeClampToEdge</span><span class="p">);</span>
+<span class="n">shadowSampler</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">device</span><span class="o">-&gt;</span><span class="n">newSamplerState</span><span class="p">(</span><span class="n">shadowSamplerDescriptor</span><span class="p">);</span>
+</code></pre></div>
+</div>
 
 <p>With <code>.lessEqual</code>, the result is 1 where the fragment is at or in front of the stored depth, meaning lit. Apply it to the diffuse and specular terms and leave ambient alone:</p>
 <div class="codehilite"><pre><span></span><code><span class="kt">float</span><span class="w"> </span><span class="n">lit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">calcShadow</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">shadowPosition</span><span class="p">,</span><span class="w"> </span><span class="n">shadowMap</span><span class="p">,</span><span class="w"> </span><span class="n">shadowSampler</span><span class="p">);</span>
@@ -199,10 +275,18 @@
 <h2 id="shadow-acne">Shadow acne<a class="headerlink" href="#shadow-acne" title="Permanent link">#</a></h2>
 <p>The first result is covered in dark stripes. The shadow map has limited resolution, so many fragments share one texel, and across a slanted surface half of them come out slightly behind the stored depth. This is <strong>shadow acne</strong>.</p>
 <p>The cure is a <strong>depth bias</strong>: push the stored depth a little away from the light. Metal applies it during rasterization of the shadow pass:</p>
+<div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">shadowEncoder</span><span class="p">.</span><span class="n">setDepthBias</span><span class="p">(</span><span class="mf">0.015</span><span class="p">,</span><span class="w"> </span><span class="n">slopeScale</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="n">clamp</span><span class="p">:</span><span class="w"> </span><span class="mf">0.02</span><span class="p">)</span>
 </code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">shadowEncoder</span><span class="o">-&gt;</span><span class="n">setDepthBias</span><span class="p">(</span><span class="mf">0.015f</span><span class="p">,</span><span class="w"> </span><span class="mf">7.0f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.02f</span><span class="p">);</span><span class="w">      </span><span class="c1">// bias, slope scale, clamp</span>
+</code></pre></div>
+</div>
 
 <p>The constant part is measured in units that depend on the depth format, so treat these numbers as a starting point. The slope-scaled part automatically increases the bias on surfaces at a steep angle to the light, which need it most. Too much bias detaches the shadow from its caster, an artifact known as <strong>peter panning</strong>. Tune until both disappear. Rendering only back faces into the shadow map (<code>setCullMode(.front)</code>) also helps for closed meshes.</p>
+<div class="lm-demo" data-demo="shadow-mapping"></div>
+
 <h2 id="softer-edges">Softer edges<a class="headerlink" href="#softer-edges" title="Permanent link">#</a></h2>
 <p>Because the comparison sampler uses linear filtering, the GPU compares the four nearest texels and blends the <em>results</em>. That is hardware <strong>percentage-closer filtering</strong> (PCF), and it softens edges for free. Averaging a few more taps softens them further:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float2</span><span class="w"> </span><span class="n">texel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">float2</span><span class="p">(</span><span class="n">shadowMap</span><span class="p">.</span><span class="n">get_width</span><span class="p">(),</span><span class="w"> </span><span class="n">shadowMap</span><span class="p">.</span><span class="n">get_height</span><span class="p">());</span>
@@ -226,9 +310,17 @@
 <li>Display the shadow map on a full-screen triangle to check what the light sees.</li>
 <li>Set the bias to zero, then to a large value, and identify acne and peter panning.</li>
 <li>Move the light over time and watch the shadows follow.</li>
-</ul></article><div class="pager"><a class="prev" href="../advanced-lighting/gamma-correction.html"><small>Previous</small>Gamma Correction</a><a class="next" href="../advanced-lighting/point-shadows.html"><small>Next</small>Point Shadows</a></div>
+</ul></article><nav class="pager" aria-label="Previous and next chapter"><a class="prev" href="../advanced-lighting/gamma-correction.html"><small>Previous</small>Gamma Correction</a><a class="next" href="../advanced-lighting/point-shadows.html"><small>Next</small>Point Shadows</a></nav>
+<footer class="site-footer">
+  <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>
+  <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
+</footer>
 </main>
+<aside class="toc" aria-label="On this page"><h4>On this page</h4><ul><li><a href="#the-idea">The idea</a></li><li><a href="#the-shadow-map-texture">The shadow map texture</a></li><li><a href="#the-lights-matrices">The light&#x27;s matrices</a></li><li><a href="#the-depth-pass">The depth pass</a></li><li><a href="#using-the-shadow-map">Using the shadow map</a></li><li><a href="#shadow-acne">Shadow acne</a></li><li><a href="#softer-edges">Softer edges</a></li><li><a href="#outside-the-map">Outside the map</a></li><li><a href="#beyond-one-map">Beyond one map</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
 </div>
-<script src="../assets/site.js"></script>
+<script defer src="../assets/textures.js"></script>
+<script defer src="../assets/live.js"></script>
+<script defer src="../assets/demos.js"></script>
+<script defer src="../assets/site.js"></script>
 </body>
 </html>

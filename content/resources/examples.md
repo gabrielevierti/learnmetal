@@ -1,5 +1,7 @@
 # Example Code
 
+There are two sets of projects: Swift examples for the main chapters, and a C++ starter for readers using metal-cpp.
+
 The repository includes a Swift package with runnable examples for the main chapters. Each one is a small macOS app in a single `main.swift` plus a `Shaders.metal` file.
 
 <p><a class="cta" href="../downloads/learnmetal-examples.zip">Download all examples (.zip)</a></p>
@@ -46,6 +48,15 @@ Chapters that are not in this list have their code inline only.
 - **Textures are generated in code**, so there is nothing else to download.
 - **Examples 01 to 03 write the frame loop by hand.** Later ones inherit it from a `BaseRenderer` class to stay short.
 
-## About the figures
+## C++ starter
 
-The images in the chapters are illustrations. They are drawn by a small software renderer in the repository's `tools/` folder, which implements the same math as each chapter's shaders with numpy. They are not screenshots of the Metal examples, so expect small differences in textures and framing when you run the code.
+<p><a class="cta" href="../downloads/learnmetal-cpp-starter.zip">Download the C++ starter (.zip)</a></p>
+
+The starter is the Hello Triangle chapter in C++: a GLFW window, a `CAMetalLayer`, and a renderer written with Apple's metal-cpp. It needs `brew install glfw cmake` and a copy of [metal-cpp](https://developer.apple.com/metal/cpp/) unzipped into the folder. Build it with CMake as described in [Project Setup](../getting-started/project-setup.html). It is the base that the C++ code in the chapters builds on.
+
+## About the live demos and the figures
+
+The live demos run in your browser with WebGL. The shader you edit is Metal Shading Language, translated to GLSL on the fly by a small script (`assets/live.js`). The translator covers the subset of the language the chapters use; it is a teaching aid and not a full Metal implementation, so a few things differ from a real Mac, such as stricter rules about mixing `int` and `float`.
+
+
+The remaining static images are illustrations. They are drawn by a small software renderer in the repository's `tools/` folder, which implements the same math as each chapter's shaders with numpy. They are not screenshots of the Metal examples, so expect small differences in textures and framing when you run the code.
