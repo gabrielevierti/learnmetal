@@ -1,0 +1,3 @@
+Allocate three buffers, each large enough for ten `Uniforms`. Each frame wait on the semaphore, pick the next buffer, write the ten structs through `contents()`, bind the buffer once with `setVertexBuffer` at index 1, and before each draw call `setVertexBufferOffset(stride * i, index: 1)`. Signal the semaphore in the command buffer's completion handler.
+---
+Blit the texture into a shared buffer as shown above. In the completion handler wrap the bytes in a `CGContext` (8 bits per component, 4 bytes per pixel, premultiplied, with `byteOrder32Little` for a BGRA texture), call `makeImage()`, and write it with `CGImageDestination` using the PNG type. Do the file writing off the render thread.

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en" data-root="../" data-site="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MetalFX Upscaling | learnmetal</title>
+<meta name="description" content="Apple Platforms: MetalFX Upscaling. Learn 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering, in Swift or C++.">
+<meta name="author" content="Gabriele Vierti">
+<link rel="icon" href="../assets/favicon.png">
+<script>
+(function () {
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem("theme"); l = localStorage.getItem("lang"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  d.dataset.theme = t;
+  var q = /[?&]lang=(swift|cpp)/.exec(location.search);      // links can pick a language: page.html?lang=cpp
+  if (q) l = q[1];
+  d.dataset.lang = l === "cpp" ? "cpp" : "swift";
+})();
+</script>
+<script>window.LM_T = {"copy": "Copy", "copied": "Copied", "none": "No results for", "loading": "Loading the index", "progress": "{n} of {total} chapters read", "reset": "Reset progress", "read": "read"};</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body class="" data-key="apple-platforms/metalfx">
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Open the chapter list">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a class="brand" href="../index.html"><img src="../assets/logo.png" alt="LearnMetal" width="136" height="32"></a>
+  <div class="search" role="search">
+    <input id="search" type="search" placeholder="Search" aria-label="Search" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results" hidden></div>
+  </div>
+  <button id="search-toggle" class="icon-btn" aria-label="Search">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <div class="lang-switch site-lang" role="group" aria-label="Language of the text">
+    <a href="../apple-platforms/metalfx.html" aria-current="true">EN</a>
+    <a href="../it/apple-platforms/metalfx.html">IT</a>
+  </div>
+  <div class="lang-switch" role="group" aria-label="Language of the host code">
+    <button type="button" data-set-lang="swift">Swift</button>
+    <button type="button" data-set-lang="cpp">C++</button>
+  </div>
+  <a class="icon-btn" href="https://github.com/gabrielevierti" aria-label="Gabriele Vierti on GitHub"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Switch between light and dark">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"/></svg>
+  </button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Chapters">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a data-key="getting-started/introduction" href="../getting-started/introduction.html">Introduction</a></li>
+<li><a data-key="getting-started/project-setup" href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a data-key="getting-started/hello-view" href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a data-key="getting-started/hello-triangle" href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a data-key="getting-started/shaders" href="../getting-started/shaders.html">Shaders</a></li>
+<li><a data-key="getting-started/textures" href="../getting-started/textures.html">Textures</a></li>
+<li><a data-key="getting-started/transformations" href="../getting-started/transformations.html">Transformations</a></li>
+<li><a data-key="getting-started/coordinate-systems" href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a data-key="getting-started/camera" href="../getting-started/camera.html">Camera</a></li>
+<li><a data-key="getting-started/review" href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a data-key="lighting/colors" href="../lighting/colors.html">Colors</a></li>
+<li><a data-key="lighting/basic-lighting" href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a data-key="lighting/materials" href="../lighting/materials.html">Materials</a></li>
+<li><a data-key="lighting/lighting-maps" href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a data-key="lighting/light-casters" href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a data-key="lighting/multiple-lights" href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a data-key="lighting/review" href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a data-key="model-loading/model-io" href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a data-key="model-loading/mesh" href="../model-loading/mesh.html">Mesh</a></li>
+<li><a data-key="model-loading/model" href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a data-key="advanced-metal/depth-testing" href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a data-key="advanced-metal/stencil-testing" href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a data-key="advanced-metal/blending" href="../advanced-metal/blending.html">Blending</a></li>
+<li><a data-key="advanced-metal/face-culling" href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a data-key="advanced-metal/render-targets" href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a data-key="advanced-metal/cubemaps" href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a data-key="advanced-metal/advanced-data" href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a data-key="advanced-metal/advanced-msl" href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a data-key="advanced-metal/no-geometry-shaders" href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a data-key="advanced-metal/instancing" href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a data-key="advanced-metal/anti-aliasing" href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a data-key="advanced-lighting/blinn-phong" href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a data-key="advanced-lighting/gamma-correction" href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a data-key="advanced-lighting/shadow-mapping" href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a data-key="advanced-lighting/point-shadows" href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a data-key="advanced-lighting/normal-mapping" href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a data-key="advanced-lighting/parallax-mapping" href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a data-key="advanced-lighting/hdr" href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a data-key="advanced-lighting/bloom" href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a data-key="advanced-lighting/deferred-shading" href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a data-key="advanced-lighting/ssao" href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a data-key="pbr/theory" href="../pbr/theory.html">Theory</a></li>
+<li><a data-key="pbr/lighting" href="../pbr/lighting.html">Lighting</a></li>
+<li><a data-key="pbr/diffuse-irradiance" href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a data-key="pbr/specular-ibl" href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a data-key="in-practice/debugging" href="../in-practice/debugging.html">Debugging</a></li>
+<li><a data-key="in-practice/text-rendering" href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a data-key="in-practice/2d-game" href="../in-practice/2d-game.html">A 2D Game</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a data-key="beyond/compute-shaders" href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a data-key="beyond/tessellation" href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a data-key="beyond/ray-tracing" href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+<li><a data-key="beyond/mesh-shaders" href="../beyond/mesh-shaders.html">Mesh Shaders</a></li>
+</ul></div>
+<div class="nav-section"><h4>Apple Platforms</h4><ul>
+<li><a data-key="apple-platforms/tile-based-gpus" href="../apple-platforms/tile-based-gpus.html">Tile-Based GPUs</a></li>
+<li><a class="active" aria-current="page" data-key="apple-platforms/metalfx" href="../apple-platforms/metalfx.html">MetalFX Upscaling</a></li>
+<li><a data-key="apple-platforms/metal-4" href="../apple-platforms/metal-4.html">Metal 4</a></li>
+<li><a data-key="apple-platforms/visionos" href="../apple-platforms/visionos.html">visionOS</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a data-key="resources/examples" href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content" id="main">
+<article><p class="crumb">Apple Platforms</p><h1 id="metalfx-upscaling">MetalFX Upscaling<a class="headerlink" href="#metalfx-upscaling" title="Permanent link">#</a></h1>
+<p>The cost of a frame grows with the number of pixels. <strong>MetalFX</strong> lets you render the scene at a lower resolution and produces a full-resolution image that looks close to one rendered natively. A game that renders 1280 × 720 and upscales to 2560 × 1440 shades a quarter of the pixels.</p>
+<p>MetalFX offers two upscalers, and since 2025 a denoising upscaler for ray tracing and a frame interpolator.</p>
+<table>
+<thead>
+<tr>
+<th>Effect</th>
+<th>Needs</th>
+<th>Use it when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Spatial scaler</td>
+<td>The color image</td>
+<td>You want the simplest integration, or have no motion vectors</td>
+</tr>
+<tr>
+<td>Temporal scaler</td>
+<td>Color, depth, motion vectors, camera jitter</td>
+<td>You want the best quality, and anti-aliasing with it</td>
+</tr>
+<tr>
+<td>Temporal denoised scaler</td>
+<td>The above plus normals, albedo, roughness</td>
+<td>The image is ray traced with few rays per pixel</td>
+</tr>
+<tr>
+<td>Frame interpolator</td>
+<td>Two frames, depth, motion vectors</td>
+<td>You want a higher frame rate than you can render</td>
+</tr>
+</tbody>
+</table>
+<p>The scalers are available from macOS 13 and iOS 16 on devices with Apple silicon. The denoised scaler and the frame interpolator need the 2025 systems (macOS 26, iOS 26).</p>
+<h2 id="where-it-goes-in-the-frame">Where it goes in the frame<a class="headerlink" href="#where-it-goes-in-the-frame" title="Permanent link">#</a></h2>
+<p>Upscaling replaces nothing in your renderer. It is one more step, and its place matters.</p>
+<ol>
+<li>Render the scene at low resolution into an HDR texture.</li>
+<li><strong>Upscale</strong> to the output resolution.</li>
+<li>Post-process at full resolution: bloom, tone mapping.</li>
+<li>Draw the user interface at full resolution, on top.</li>
+</ol>
+<p>Text and interface elements must never go through the upscaler: draw them afterwards, at native resolution.</p>
+<h2 id="the-spatial-scaler">The spatial scaler<a class="headerlink" href="#the-spatial-scaler" title="Permanent link">#</a></h2>
+<p>It works on a single image, with no history. Create it once, and again whenever a size changes.</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="kd">import</span><span class="w"> </span><span class="nc">MetalFX</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nv">descriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MTLFXSpatialScalerDescriptor</span><span class="p">()</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">inputWidth</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">renderWidth</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">inputHeight</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">renderHeight</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">outputWidth</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">outputWidth</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">outputHeight</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">outputHeight</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">colorTextureFormat</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">rgba16Float</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">outputTextureFormat</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">rgba16Float</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">colorProcessingMode</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">hdr</span><span class="w">                 </span><span class="c1">// the input is linear HDR, before tone mapping</span>
+
+<span class="k">guard</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">scaler</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">descriptor</span><span class="p">.</span><span class="n">makeSpatialScaler</span><span class="p">(</span><span class="n">device</span><span class="p">:</span><span class="w"> </span><span class="n">device</span><span class="p">)</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="bp">fatalError</span><span class="p">(</span><span class="s">"MetalFX spatial scaling is not supported on this device"</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;MetalFX/MetalFX.hpp&gt;</span><span class="w">      </span><span class="c1">// with MTLFX_PRIVATE_IMPLEMENTATION defined in one .cpp file</span>
+
+<span class="n">MTLFX</span><span class="o">::</span><span class="n">SpatialScalerDescriptor</span><span class="o">*</span><span class="w"> </span><span class="n">descriptor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MTLFX</span><span class="o">::</span><span class="n">SpatialScalerDescriptor</span><span class="o">::</span><span class="n">alloc</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">();</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setInputWidth</span><span class="p">(</span><span class="n">renderWidth</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setInputHeight</span><span class="p">(</span><span class="n">renderHeight</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setOutputWidth</span><span class="p">(</span><span class="n">outputWidth</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setOutputHeight</span><span class="p">(</span><span class="n">outputHeight</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setColorTextureFormat</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">PixelFormatRGBA16Float</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setOutputTextureFormat</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">PixelFormatRGBA16Float</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setColorProcessingMode</span><span class="p">(</span><span class="n">MTLFX</span><span class="o">::</span><span class="n">SpatialScalerColorProcessingModeHDR</span><span class="p">);</span>
+
+<span class="n">MTLFX</span><span class="o">::</span><span class="n">SpatialScaler</span><span class="o">*</span><span class="w"> </span><span class="n">scaler</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">newSpatialScaler</span><span class="p">(</span><span class="n">device</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">release</span><span class="p">();</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">scaler</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">throw</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">runtime_error</span><span class="p">(</span><span class="s">"MetalFX spatial scaling is not supported on this device"</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+
+<p>Each frame, hand it the textures and encode it into the command buffer, between your passes. It is not part of a render pass.</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="n">scaler</span><span class="p">.</span><span class="n">colorTexture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">sceneTexture</span>
+<span class="n">scaler</span><span class="p">.</span><span class="n">outputTexture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">upscaledTexture</span>
+<span class="n">scaler</span><span class="p">.</span><span class="n">encode</span><span class="p">(</span><span class="n">commandBuffer</span><span class="p">:</span><span class="w"> </span><span class="n">commandBuffer</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">scaler</span><span class="o">-&gt;</span><span class="n">setColorTexture</span><span class="p">(</span><span class="n">sceneTexture</span><span class="p">);</span>
+<span class="n">scaler</span><span class="o">-&gt;</span><span class="n">setOutputTexture</span><span class="p">(</span><span class="n">upscaledTexture</span><span class="p">);</span>
+<span class="n">scaler</span><span class="o">-&gt;</span><span class="n">encodeToCommandBuffer</span><span class="p">(</span><span class="n">commandBuffer</span><span class="p">);</span>
+</code></pre></div>
+</div>
+
+<p>The output texture must be created with the usage the scaler asks for in <code>outputTextureUsage</code>, and with <code>storageMode = .private</code>.</p>
+<h2 id="the-temporal-scaler">The temporal scaler<a class="headerlink" href="#the-temporal-scaler" title="Permanent link">#</a></h2>
+<p>The temporal scaler gathers detail from previous frames. Each frame you shift the whole image by a fraction of a pixel, the <strong>jitter</strong>, so that over several frames every pixel is sampled at many positions. The scaler lines up the old frames with the new one using <strong>motion vectors</strong>, and blends them. The result has more real detail than any single frame, and it is anti-aliased, so MSAA becomes unnecessary.</p>
+<p>It needs three inputs beyond the color.</p>
+<ul>
+<li><strong>Depth</strong>, from the same low-resolution pass.</li>
+<li><strong>Motion vectors</strong>: for each pixel, how far the surface moved on screen since the last frame. Render them as an extra color attachment (<code>rg16Float</code>).</li>
+<li><strong>The jitter offset</strong> you applied to the projection this frame.</li>
+</ul>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">descriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MTLFXTemporalScalerDescriptor</span><span class="p">()</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">inputWidth</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">renderWidth</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">inputHeight</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">renderHeight</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">outputWidth</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">outputWidth</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">outputHeight</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">outputHeight</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">colorTextureFormat</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">rgba16Float</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">depthTextureFormat</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">depth32Float</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">motionTextureFormat</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">rg16Float</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">outputTextureFormat</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">rgba16Float</span>
+
+<span class="k">guard</span><span class="w"> </span><span class="n">MTLFXTemporalScalerDescriptor</span><span class="p">.</span><span class="n">supportsDevice</span><span class="p">(</span><span class="n">device</span><span class="p">),</span>
+<span class="w">      </span><span class="kd">let</span><span class="w"> </span><span class="nv">scaler</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">descriptor</span><span class="p">.</span><span class="n">makeTemporalScaler</span><span class="p">(</span><span class="n">device</span><span class="p">:</span><span class="w"> </span><span class="n">device</span><span class="p">)</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="bp">fatalError</span><span class="p">(</span><span class="s">"MetalFX temporal scaling is not supported on this device"</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="n">scaler</span><span class="p">.</span><span class="n">motionVectorScaleX</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">Float</span><span class="p">(</span><span class="n">renderWidth</span><span class="p">)</span><span class="w">        </span><span class="c1">// our vectors are in uv units; the scaler wants pixels</span>
+<span class="n">scaler</span><span class="p">.</span><span class="n">motionVectorScaleY</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">Float</span><span class="p">(</span><span class="n">renderHeight</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">MTLFX</span><span class="o">::</span><span class="n">TemporalScalerDescriptor</span><span class="o">*</span><span class="w"> </span><span class="n">descriptor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MTLFX</span><span class="o">::</span><span class="n">TemporalScalerDescriptor</span><span class="o">::</span><span class="n">alloc</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">();</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setInputWidth</span><span class="p">(</span><span class="n">renderWidth</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setInputHeight</span><span class="p">(</span><span class="n">renderHeight</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setOutputWidth</span><span class="p">(</span><span class="n">outputWidth</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setOutputHeight</span><span class="p">(</span><span class="n">outputHeight</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setColorTextureFormat</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">PixelFormatRGBA16Float</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setDepthTextureFormat</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">PixelFormatDepth32Float</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setMotionTextureFormat</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">PixelFormatRG16Float</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setOutputTextureFormat</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">PixelFormatRGBA16Float</span><span class="p">);</span>
+
+<span class="n">MTLFX</span><span class="o">::</span><span class="n">TemporalScaler</span><span class="o">*</span><span class="w"> </span><span class="n">scaler</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">newTemporalScaler</span><span class="p">(</span><span class="n">device</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">release</span><span class="p">();</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">scaler</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">throw</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">runtime_error</span><span class="p">(</span><span class="s">"MetalFX temporal scaling is not supported on this device"</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="n">scaler</span><span class="o">-&gt;</span><span class="n">setMotionVectorScaleX</span><span class="p">(</span><span class="kt">float</span><span class="p">(</span><span class="n">renderWidth</span><span class="p">));</span><span class="w">     </span><span class="c1">// our vectors are in uv units; the scaler wants pixels</span>
+<span class="n">scaler</span><span class="o">-&gt;</span><span class="n">setMotionVectorScaleY</span><span class="p">(</span><span class="kt">float</span><span class="p">(</span><span class="n">renderHeight</span><span class="p">));</span>
+</code></pre></div>
+</div>
+
+<h3 id="jitter">Jitter<a class="headerlink" href="#jitter" title="Permanent link">#</a></h3>
+<p>Use a low-discrepancy sequence, such as Halton with bases 2 and 3, and move the projection by that sub-pixel amount.</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">halton</span><span class="p">(</span><span class="kc">_</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">,</span><span class="w"> </span><span class="kc">_</span><span class="w"> </span><span class="n">base</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Float</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">f</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">result</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">index</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">f</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="nb">Float</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+<span class="w">        </span><span class="n">result</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nb">Float</span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">base</span><span class="p">)</span>
+<span class="w">        </span><span class="n">i</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="n">base</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">result</span>
+<span class="p">}</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nv">jitter</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;(</span><span class="n">halton</span><span class="p">(</span><span class="n">frameIndex</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">8</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">0.5</span><span class="p">,</span>
+<span class="w">                          </span><span class="n">halton</span><span class="p">(</span><span class="n">frameIndex</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">8</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">0.5</span><span class="p">)</span><span class="w">       </span><span class="c1">// in pixels, -0.5 ... 0.5</span>
+
+<span class="c1">// Shift clip space by that many pixels. Column 2 is multiplied by z, which cancels the divide by w.</span>
+<span class="kd">var</span><span class="w"> </span><span class="nv">jittered</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">projection</span>
+<span class="n">jittered</span><span class="p">.</span><span class="n">columns</span><span class="p">.</span><span class="mf">2.</span><span class="n">x</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">jitter</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">Float</span><span class="p">(</span><span class="n">renderWidth</span><span class="p">)</span>
+<span class="n">jittered</span><span class="p">.</span><span class="n">columns</span><span class="p">.</span><span class="mf">2.</span><span class="n">y</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">jitter</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">Float</span><span class="p">(</span><span class="n">renderHeight</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="kt">float</span><span class="w"> </span><span class="nf">halton</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">index</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">base</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0f</span><span class="p">,</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">index</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="n">base</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">f</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="kt">float</span><span class="p">(</span><span class="n">base</span><span class="p">);</span>
+<span class="w">        </span><span class="n">result</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="kt">float</span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">base</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">result</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">simd</span><span class="o">::</span><span class="n">float2</span><span class="w"> </span><span class="n">jitter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">halton</span><span class="p">(</span><span class="n">frameIndex</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">8</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">0.5f</span><span class="p">,</span>
+<span class="w">                        </span><span class="n">halton</span><span class="p">(</span><span class="n">frameIndex</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">8</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">0.5f</span><span class="w"> </span><span class="p">};</span><span class="w">      </span><span class="c1">// in pixels, -0.5 ... 0.5</span>
+
+<span class="c1">// Shift clip space by that many pixels. Column 2 is multiplied by z, which cancels the divide by w.</span>
+<span class="n">simd</span><span class="o">::</span><span class="n">float4x4</span><span class="w"> </span><span class="n">jittered</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">projection</span><span class="p">;</span>
+<span class="n">jittered</span><span class="p">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">2</span><span class="p">].</span><span class="n">x</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mf">2.0f</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">jitter</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="kt">float</span><span class="p">(</span><span class="n">renderWidth</span><span class="p">);</span>
+<span class="n">jittered</span><span class="p">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">2</span><span class="p">].</span><span class="n">y</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="mf">2.0f</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">jitter</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="kt">float</span><span class="p">(</span><span class="n">renderHeight</span><span class="p">);</span>
+</code></pre></div>
+</div>
+
+<p>Whether the sign of each term is right depends on your projection convention. If the image shimmers or blurs when the camera is still, flip one sign at a time: with the correct signs a static scene converges to a sharp image in a few frames.</p>
+<h3 id="motion-vectors">Motion vectors<a class="headerlink" href="#motion-vectors" title="Permanent link">#</a></h3>
+<p>In the vertex function compute the clip-space position of the vertex in this frame and in the previous one, both <strong>without</strong> jitter, and pass them on. The fragment function turns them into a uv-space difference.</p>
+<div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">SceneOut</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">color</span><span class="w">  </span><span class="p">[[</span><span class="na">color</span><span class="p">(</span><span class="mi">0</span><span class="p">)]];</span>
+<span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">motion</span><span class="w"> </span><span class="p">[[</span><span class="na">color</span><span class="p">(</span><span class="mi">1</span><span class="p">)]];</span>
+<span class="p">};</span>
+
+<span class="n">fragment</span><span class="w"> </span><span class="n">SceneOut</span><span class="w"> </span><span class="n">fragment_scene</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]]</span><span class="w"> </span><span class="cm">/* ... */</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">SceneOut</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">shade</span><span class="p">(</span><span class="n">in</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">current</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">currentClip</span><span class="p">.</span><span class="n">xy</span><span class="w">  </span><span class="o">/</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">currentClip</span><span class="p">.</span><span class="n">w</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">previous</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">previousClip</span><span class="p">.</span><span class="n">xy</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">previousClip</span><span class="p">.</span><span class="n">w</span><span class="p">;</span>
+<span class="w">    </span><span class="c1">// NDC to uv: scale by 0.5 and flip y. The vector points from this frame back to the previous one.</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">motion</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">previous</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">current</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">float2</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.5</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Every moving object needs its previous model matrix, and the camera its previous view-projection matrix.</p>
+<h3 id="encoding">Encoding<a class="headerlink" href="#encoding" title="Permanent link">#</a></h3>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="n">scaler</span><span class="p">.</span><span class="n">colorTexture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">sceneTexture</span>
+<span class="n">scaler</span><span class="p">.</span><span class="n">depthTexture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">depthTexture</span>
+<span class="n">scaler</span><span class="p">.</span><span class="n">motionTexture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">motionTexture</span>
+<span class="n">scaler</span><span class="p">.</span><span class="n">outputTexture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">upscaledTexture</span>
+<span class="n">scaler</span><span class="p">.</span><span class="n">jitterOffsetX</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">jitter</span><span class="p">.</span><span class="n">x</span>
+<span class="n">scaler</span><span class="p">.</span><span class="n">jitterOffsetY</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">jitter</span><span class="p">.</span><span class="n">y</span>
+<span class="n">scaler</span><span class="p">.</span><span class="n">reset</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">cameraDidCut</span><span class="w">                            </span><span class="c1">// true for one frame after a teleport or scene change</span>
+<span class="n">scaler</span><span class="p">.</span><span class="n">encode</span><span class="p">(</span><span class="n">commandBuffer</span><span class="p">:</span><span class="w"> </span><span class="n">commandBuffer</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">scaler</span><span class="o">-&gt;</span><span class="n">setColorTexture</span><span class="p">(</span><span class="n">sceneTexture</span><span class="p">);</span>
+<span class="n">scaler</span><span class="o">-&gt;</span><span class="n">setDepthTexture</span><span class="p">(</span><span class="n">depthTexture</span><span class="p">);</span>
+<span class="n">scaler</span><span class="o">-&gt;</span><span class="n">setMotionTexture</span><span class="p">(</span><span class="n">motionTexture</span><span class="p">);</span>
+<span class="n">scaler</span><span class="o">-&gt;</span><span class="n">setOutputTexture</span><span class="p">(</span><span class="n">upscaledTexture</span><span class="p">);</span>
+<span class="n">scaler</span><span class="o">-&gt;</span><span class="n">setJitterOffsetX</span><span class="p">(</span><span class="n">jitter</span><span class="p">.</span><span class="n">x</span><span class="p">);</span>
+<span class="n">scaler</span><span class="o">-&gt;</span><span class="n">setJitterOffsetY</span><span class="p">(</span><span class="n">jitter</span><span class="p">.</span><span class="n">y</span><span class="p">);</span>
+<span class="n">scaler</span><span class="o">-&gt;</span><span class="n">setReset</span><span class="p">(</span><span class="n">cameraDidCut</span><span class="p">);</span><span class="w">                        </span><span class="c1">// true for one frame after a teleport or scene change</span>
+<span class="n">scaler</span><span class="o">-&gt;</span><span class="n">encodeToCommandBuffer</span><span class="p">(</span><span class="n">commandBuffer</span><span class="p">);</span>
+</code></pre></div>
+</div>
+
+<p>Set <code>isDepthReversed</code> if you use reverse-Z. Set <code>reset</code> whenever the history is useless, or ghosts of the old scene will linger.</p>
+<h2 id="getting-the-quality-right">Getting the quality right<a class="headerlink" href="#getting-the-quality-right" title="Permanent link">#</a></h2>
+<ul>
+<li><strong>Texture detail.</strong> A low-resolution render picks blurrier mip levels. Give your samplers a negative LOD bias of <code>log2(renderWidth / outputWidth)</code>, for example -1 when upscaling 2×, so textures keep their full-resolution sharpness.</li>
+<li><strong>Ghosting</strong> behind moving objects means wrong or missing motion vectors. Check animated, skinned and instanced objects first.</li>
+<li><strong>Transparent and particle effects</strong> have no motion vectors of their own. Mark them in the scaler's <strong>reactive mask</strong> so it trusts the new frame more there.</li>
+<li><strong>Exposure.</strong> The scaler works in linear HDR and needs to know roughly how bright the image will be shown. Either enable <code>isAutoExposureEnabled</code> on the descriptor, or supply your own exposure texture.</li>
+<li><strong>Dynamic resolution.</strong> Create the scaler for the largest input size and set <code>inputContentWidth</code> and <code>inputContentHeight</code> each frame to the region actually rendered.</li>
+</ul>
+<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<ul>
+<li>Add the spatial scaler to the render-target example: render at half size and compare with the <code>.linear</code> stretch.<details class="solution"><summary>Show solution</summary><p>Create the scaler with the half-size input and the drawable-size output, encode it after the scene pass, and let the final pass sample the upscaled texture. Edges and texture detail are visibly crisper than with the linear filter, which only blurs. Thin lines still flicker, because a spatial scaler cannot invent samples it never had; that is what the temporal scaler fixes.</p></details></li>
+<li>Visualize the motion texture while moving the camera.<details class="solution"><summary>Show solution</summary><p>Return the motion from a debug pass, scaled up so it is visible.</p>
+<div class="codehilite"><pre><span></span><code><span class="n">float2</span><span class="w"> </span><span class="n">motion</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">motionTexture</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">rg</span><span class="p">;</span>
+<span class="k">return</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">abs</span><span class="p">(</span><span class="n">motion</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">20.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+</code></pre></div>
+
+<p>With a still camera the image is black except for moving objects. Panning right tints everything red, tilting tints it green, and nearer surfaces are brighter than far ones, because they move farther on screen.</p></details></li>
+<li>With the temporal scaler running, stop sending the jitter offset and describe what happens.<details class="solution"><summary>Show solution</summary><p>The scaler assumes the samples sit at pixel centers while they are in fact shifted every frame. It lines the history up wrongly, and the image shakes by a fraction of a pixel or turns soft. The opposite mistake, sending offsets without jittering the projection, gives a stable image with no extra detail and no anti-aliasing.</p></details></li>
+</ul></article><nav class="pager" id="pager"><a class="prev" href="../apple-platforms/tile-based-gpus.html"><small>Previous</small>Tile-Based GPUs</a><a class="next" href="../apple-platforms/metal-4.html"><small>Next</small>Metal 4</a></nav>
+<footer class="site-footer">
+  <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>
+  <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
+</footer>
+</main>
+<aside class="toc" aria-label="On this page"><h4>On this page</h4><ul><li><a href="#where-it-goes-in-the-frame">Where it goes in the frame</a></li><li><a href="#the-spatial-scaler">The spatial scaler</a></li><li><a href="#the-temporal-scaler">The temporal scaler</a></li><li><a href="#getting-the-quality-right">Getting the quality right</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+</div>
+<script defer src="../assets/textures.js"></script>
+<script defer src="../assets/live.js"></script>
+<script defer src="../assets/demos.js"></script>
+<script defer src="../assets/site.js"></script>
+</body>
+</html>

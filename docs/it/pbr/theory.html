@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="it" data-root="../../" data-site="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teoria | learnmetal</title>
+<meta name="description" content="PBR: Teoria. Impara la grafica 3D con Metal di Apple, dal primo triangolo al rendering fisicamente corretto, in Swift o C++.">
+<meta name="author" content="Gabriele Vierti">
+<link rel="icon" href="../../assets/favicon.png">
+<script>
+(function () {
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem("theme"); l = localStorage.getItem("lang"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  d.dataset.theme = t;
+  var q = /[?&]lang=(swift|cpp)/.exec(location.search);      // links can pick a language: page.html?lang=cpp
+  if (q) l = q[1];
+  d.dataset.lang = l === "cpp" ? "cpp" : "swift";
+})();
+</script>
+<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../../assets/code.css">
+</head>
+<body class="" data-key="pbr/theory">
+<a class="skip" href="#main">Vai al contenuto</a>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Apri l'elenco dei capitoli">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a class="brand" href="../index.html"><img src="../../assets/logo.png" alt="LearnMetal" width="136" height="32"></a>
+  <div class="search" role="search">
+    <input id="search" type="search" placeholder="Cerca" aria-label="Cerca" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results" hidden></div>
+  </div>
+  <button id="search-toggle" class="icon-btn" aria-label="Cerca">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <div class="lang-switch site-lang" role="group" aria-label="Lingua del testo">
+    <a href="../../pbr/theory.html">EN</a>
+    <a href="../../it/pbr/theory.html" aria-current="true">IT</a>
+  </div>
+  <div class="lang-switch" role="group" aria-label="Linguaggio del codice">
+    <button type="button" data-set-lang="swift">Swift</button>
+    <button type="button" data-set-lang="cpp">C++</button>
+  </div>
+  <a class="icon-btn" href="https://github.com/gabrielevierti" aria-label="Gabriele Vierti on GitHub"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Passa dal tema chiaro a quello scuro">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"/></svg>
+  </button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Capitoli">
+<div class="nav-section"><h4>Per iniziare</h4><ul>
+<li><a data-key="getting-started/introduction" href="../getting-started/introduction.html">Introduzione</a></li>
+<li><a data-key="getting-started/project-setup" href="../getting-started/project-setup.html">Preparare il progetto</a></li>
+<li><a data-key="getting-started/hello-view" href="../getting-started/hello-view.html">La prima vista</a></li>
+<li><a data-key="getting-started/hello-triangle" href="../getting-started/hello-triangle.html">Il primo triangolo</a></li>
+<li><a data-key="getting-started/shaders" href="../getting-started/shaders.html">Shader</a></li>
+<li><a data-key="getting-started/textures" href="../getting-started/textures.html">Texture</a></li>
+<li><a data-key="getting-started/transformations" href="../getting-started/transformations.html">Trasformazioni</a></li>
+<li><a data-key="getting-started/coordinate-systems" href="../getting-started/coordinate-systems.html">Sistemi di coordinate</a></li>
+<li><a data-key="getting-started/camera" href="../getting-started/camera.html">Camera</a></li>
+<li><a data-key="getting-started/review" href="../getting-started/review.html">Riepilogo</a></li>
+</ul></div>
+<div class="nav-section"><h4>Illuminazione</h4><ul>
+<li><a data-key="lighting/colors" href="../lighting/colors.html">Colori</a></li>
+<li><a data-key="lighting/basic-lighting" href="../lighting/basic-lighting.html">Illuminazione di base</a></li>
+<li><a data-key="lighting/materials" href="../lighting/materials.html">Materiali</a></li>
+<li><a data-key="lighting/lighting-maps" href="../lighting/lighting-maps.html">Mappe di illuminazione</a></li>
+<li><a data-key="lighting/light-casters" href="../lighting/light-casters.html">Tipi di luce</a></li>
+<li><a data-key="lighting/multiple-lights" href="../lighting/multiple-lights.html">Più luci</a></li>
+<li><a data-key="lighting/review" href="../lighting/review.html">Riepilogo</a></li>
+</ul></div>
+<div class="nav-section"><h4>Caricare i modelli</h4><ul>
+<li><a data-key="model-loading/model-io" href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a data-key="model-loading/mesh" href="../model-loading/mesh.html">Mesh</a></li>
+<li><a data-key="model-loading/model" href="../model-loading/model.html">Modello</a></li>
+</ul></div>
+<div class="nav-section"><h4>Metal avanzato</h4><ul>
+<li><a data-key="advanced-metal/depth-testing" href="../advanced-metal/depth-testing.html">Test di profondità</a></li>
+<li><a data-key="advanced-metal/stencil-testing" href="../advanced-metal/stencil-testing.html">Test di stencil</a></li>
+<li><a data-key="advanced-metal/blending" href="../advanced-metal/blending.html">Blending</a></li>
+<li><a data-key="advanced-metal/face-culling" href="../advanced-metal/face-culling.html">Face culling</a></li>
+<li><a data-key="advanced-metal/render-targets" href="../advanced-metal/render-targets.html">Render target</a></li>
+<li><a data-key="advanced-metal/cubemaps" href="../advanced-metal/cubemaps.html">Cubemap</a></li>
+<li><a data-key="advanced-metal/advanced-data" href="../advanced-metal/advanced-data.html">Dati avanzati</a></li>
+<li><a data-key="advanced-metal/advanced-msl" href="../advanced-metal/advanced-msl.html">MSL avanzato</a></li>
+<li><a data-key="advanced-metal/no-geometry-shaders" href="../advanced-metal/no-geometry-shaders.html">Vivere senza geometry shader</a></li>
+<li><a data-key="advanced-metal/instancing" href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a data-key="advanced-metal/anti-aliasing" href="../advanced-metal/anti-aliasing.html">Anti-aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Illuminazione avanzata</h4><ul>
+<li><a data-key="advanced-lighting/blinn-phong" href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a data-key="advanced-lighting/gamma-correction" href="../advanced-lighting/gamma-correction.html">Correzione gamma</a></li>
+<li><a data-key="advanced-lighting/shadow-mapping" href="../advanced-lighting/shadow-mapping.html">Shadow mapping</a></li>
+<li><a data-key="advanced-lighting/point-shadows" href="../advanced-lighting/point-shadows.html">Ombre da luci puntiformi</a></li>
+<li><a data-key="advanced-lighting/normal-mapping" href="../advanced-lighting/normal-mapping.html">Normal mapping</a></li>
+<li><a data-key="advanced-lighting/parallax-mapping" href="../advanced-lighting/parallax-mapping.html">Parallax mapping</a></li>
+<li><a data-key="advanced-lighting/hdr" href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a data-key="advanced-lighting/bloom" href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a data-key="advanced-lighting/deferred-shading" href="../advanced-lighting/deferred-shading.html">Deferred shading</a></li>
+<li><a data-key="advanced-lighting/ssao" href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a class="active" aria-current="page" data-key="pbr/theory" href="../pbr/theory.html">Teoria</a></li>
+<li><a data-key="pbr/lighting" href="../pbr/lighting.html">Illuminazione</a></li>
+<li><a data-key="pbr/diffuse-irradiance" href="../pbr/diffuse-irradiance.html">Irradianza diffusa</a></li>
+<li><a data-key="pbr/specular-ibl" href="../pbr/specular-ibl.html">IBL speculare</a></li>
+</ul></div>
+<div class="nav-section"><h4>In pratica</h4><ul>
+<li><a data-key="in-practice/debugging" href="../in-practice/debugging.html">Debug</a></li>
+<li><a data-key="in-practice/text-rendering" href="../in-practice/text-rendering.html">Rendering del testo</a></li>
+<li><a data-key="in-practice/2d-game" href="../in-practice/2d-game.html">Un gioco 2D</a></li>
+</ul></div>
+<div class="nav-section"><h4>Oltre</h4><ul>
+<li><a data-key="beyond/compute-shaders" href="../beyond/compute-shaders.html">Compute shader</a></li>
+<li><a data-key="beyond/tessellation" href="../beyond/tessellation.html">Tassellazione</a></li>
+<li><a data-key="beyond/ray-tracing" href="../beyond/ray-tracing.html">Ray tracing</a></li>
+<li><a data-key="beyond/mesh-shaders" href="../beyond/mesh-shaders.html">Mesh shader</a></li>
+</ul></div>
+<div class="nav-section"><h4>Piattaforme Apple</h4><ul>
+<li><a data-key="apple-platforms/tile-based-gpus" href="../apple-platforms/tile-based-gpus.html">GPU tile-based</a></li>
+<li><a data-key="apple-platforms/metalfx" href="../apple-platforms/metalfx.html">Upscaling con MetalFX</a></li>
+<li><a data-key="apple-platforms/metal-4" href="../apple-platforms/metal-4.html">Metal 4</a></li>
+<li><a data-key="apple-platforms/visionos" href="../apple-platforms/visionos.html">visionOS</a></li>
+</ul></div>
+<div class="nav-section"><h4>Risorse</h4><ul>
+<li><a data-key="resources/examples" href="../resources/examples.html">Codice di esempio</a></li>
+</ul></div>
+</nav>
+<main class="content" id="main">
+<article><p class="crumb">PBR</p><h1 id="theory">Theory<a class="headerlink" href="#theory" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
+<p><strong>Physically based rendering</strong> (PBR) is a family of techniques that model light in a way that is closer to physics than Phong or Blinn-Phong. The pay-off is practical:</p>
+<ul>
+<li>Materials look right under <strong>any</strong> lighting, without per-scene tweaking.</li>
+<li>Artists author materials with a few intuitive parameters that mean the same thing in every engine.</li>
+</ul>
+<p>A lighting model is usually called physically based when it meets three conditions: it is built on a <strong>microfacet</strong> model of surfaces, it <strong>conserves energy</strong>, and it uses a physically based <strong>BRDF</strong>. This chapter explains each, and the next one turns them into shader code.</p>
+<h2 id="microfacets">Microfacets<a class="headerlink" href="#microfacets" title="Permanent link">#</a></h2>
+<p>At a microscopic scale no surface is smooth. It is made of tiny perfect mirrors called <strong>microfacets</strong>, each pointing in its own direction. On a rough surface their orientations vary wildly, and incoming light scatters widely, producing broad, dim highlights. On a smooth surface they are nearly aligned, and reflections are sharp and bright.</p>
+<p>We cannot model individual microfacets, so we describe them statistically with one number, the <strong>roughness</strong>, from 0 (mirror) to 1 (completely rough). What matters to a highlight is the fraction of microfacets whose normal matches the <strong>halfway vector</strong> between the light and the viewer, the same vector we met in <a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a>.</p>
+<h2 id="energy-conservation">Energy conservation<a class="headerlink" href="#energy-conservation" title="Permanent link">#</a></h2>
+<p>Outgoing light can never exceed incoming light, apart from surfaces that emit light themselves. When light hits a surface it splits into two parts:</p>
+<ul>
+<li>The <strong>reflected</strong> part bounces off the surface directly. This is <strong>specular</strong> light.</li>
+<li>The <strong>refracted</strong> part enters the material, scatters inside, and is partly absorbed. What comes back out, colored by the material, is <strong>diffuse</strong> light.</li>
+</ul>
+<p>The two are mutually exclusive: light that was reflected cannot also be refracted. So if a fraction <code>kS</code> is reflected, at most <code>1 - kS</code> is left for diffuse.</p>
+<p><strong>Metals</strong> behave differently from non-metals (<strong>dielectrics</strong>). A metal absorbs all refracted light, so it has no diffuse color at all, only tinted specular reflection. This is the basis of the <strong>metalness</strong> parameter.</p>
+<h2 id="the-reflectance-equation">The reflectance equation<a class="headerlink" href="#the-reflectance-equation" title="Permanent link">#</a></h2>
+<p>PBR is built on this equation:</p>
+<div class="codehilite"><pre><span></span><code>Lo(p, wo) = ∫Ω  fr(p, wi, wo) · Li(p, wi) · (n · wi)  dwi
+</code></pre></div>
+
+<p>It reads more gently than it looks. The light <code>Lo</code> leaving point <code>p</code> toward the viewer <code>wo</code> is the sum, over every incoming direction <code>wi</code> in the hemisphere <code>Ω</code> above the surface, of:</p>
+<ul>
+<li><code>Li</code>, the <strong>radiance</strong> arriving from that direction, which is the strength and color of the light,</li>
+<li><code>n · wi</code>, the familiar cosine factor that weakens light arriving at a shallow angle,</li>
+<li><code>fr</code>, the <strong>BRDF</strong>, which says how much of the light from <code>wi</code> is reflected toward <code>wo</code> for this material.</li>
+</ul>
+<p>For a handful of point lights the integral collapses into a simple sum over the lights, which is what the next chapter does. For light arriving from the whole environment we have to actually solve it, and that is the subject of the IBL chapters.</p>
+<h2 id="the-cook-torrance-brdf">The Cook-Torrance BRDF<a class="headerlink" href="#the-cook-torrance-brdf" title="Permanent link">#</a></h2>
+<p>The BRDF used by practically every real-time renderer has a diffuse and a specular part:</p>
+<div class="codehilite"><pre><span></span><code>fr = kD · f_lambert + f_cook-torrance
+</code></pre></div>
+
+<p>The diffuse part is the <strong>Lambertian</strong> term, a constant: <code>albedo / π</code>.</p>
+<p>The specular part is</p>
+<div class="codehilite"><pre><span></span><code>                   D · F · G
+f_cook-torrance = ─────────────────
+                  4 (wo · n)(wi · n)
+</code></pre></div>
+
+<p>with three functions, each approximating one aspect of microfacet behavior.</p>
+<h3 id="d-normal-distribution-function">D: normal distribution function<a class="headerlink" href="#d-normal-distribution-function" title="Permanent link">#</a></h3>
+<p>How many microfacets are aligned with the halfway vector <code>h</code>? The <strong>Trowbridge-Reitz GGX</strong> distribution, with <code>α = roughness²</code>:</p>
+<div class="codehilite"><pre><span></span><code>              α²
+D = ─────────────────────────
+    π ((n · h)² (α² − 1) + 1)²
+</code></pre></div>
+
+<p>Low roughness concentrates the result into a small, intense spot. High roughness spreads it out.</p>
+<h3 id="g-geometry-function">G: geometry function<a class="headerlink" href="#g-geometry-function" title="Permanent link">#</a></h3>
+<p>Microfacets shadow and mask one another, especially on rough surfaces at grazing angles. The <strong>Schlick-GGX</strong> approximation for one direction is</p>
+<div class="codehilite"><pre><span></span><code>              n · v
+G1(v) = ─────────────────
+        (n · v)(1 − k) + k
+</code></pre></div>
+
+<p>where <code>k = (roughness + 1)² / 8</code> for direct lighting and <code>k = roughness² / 2</code> for image-based lighting. <strong>Smith's method</strong> combines the view and light directions: <code>G = G1(view) · G1(light)</code>.</p>
+<h3 id="f-fresnel-equation">F: Fresnel equation<a class="headerlink" href="#f-fresnel-equation" title="Permanent link">#</a></h3>
+<p>Every surface becomes more reflective at grazing angles. Look straight down at a lake and you see the bottom; look across it and you see the sky. The <strong>Fresnel-Schlick</strong> approximation:</p>
+<div class="codehilite"><pre><span></span><code>F = F0 + (1 − F0)(1 − (h · v))⁵
+</code></pre></div>
+
+<p><code>F0</code> is the <strong>base reflectivity</strong>, the reflectance when looking straight at the surface. Dielectrics have a low, colorless F0 around 0.04. Metals have a high, colored one:</p>
+<table>
+<thead>
+<tr>
+<th>Material</th>
+<th>F0 (linear RGB)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Water</td>
+<td>0.02, 0.02, 0.02</td>
+</tr>
+<tr>
+<td>Plastic, glass</td>
+<td>0.04, 0.04, 0.04</td>
+</tr>
+<tr>
+<td>Iron</td>
+<td>0.56, 0.57, 0.58</td>
+</tr>
+<tr>
+<td>Copper</td>
+<td>0.95, 0.64, 0.54</td>
+</tr>
+<tr>
+<td>Gold</td>
+<td>1.00, 0.71, 0.29</td>
+</tr>
+<tr>
+<td>Aluminium</td>
+<td>0.91, 0.92, 0.92</td>
+</tr>
+</tbody>
+</table>
+<p>In the metalness workflow, F0 is computed by blending between 0.04 and the albedo color using the metalness value.</p>
+<p>The Fresnel term F <em>is</em> the reflected fraction <code>kS</code>. So <code>kD = (1 − F)(1 − metalness)</code>.</p>
+<figure><img src="../../assets/img/pbr/theory.webp" alt="One light on five dielectric spheres. Roughness alone changes the highlight from a sharp point to a broad sheen." width="880" height="260" loading="lazy"><figcaption>One light on five dielectric spheres. Roughness alone changes the highlight from a sharp point to a broad sheen.</figcaption></figure>
+
+<h2 id="material-parameters">Material parameters<a class="headerlink" href="#material-parameters" title="Permanent link">#</a></h2>
+<p>A PBR material in the common <strong>metallic-roughness</strong> workflow consists of:</p>
+<table>
+<thead>
+<tr>
+<th>Map</th>
+<th>Color space</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Albedo</strong></td>
+<td>sRGB</td>
+<td>Base color, with no lighting or shadows baked in. For metals, the F0 color.</td>
+</tr>
+<tr>
+<td><strong>Normal</strong></td>
+<td>linear</td>
+<td>Tangent-space normal, as in normal mapping.</td>
+</tr>
+<tr>
+<td><strong>Metallic</strong></td>
+<td>linear</td>
+<td>0 for dielectrics, 1 for metals. Rarely in between.</td>
+</tr>
+<tr>
+<td><strong>Roughness</strong></td>
+<td>linear</td>
+<td>Microfacet roughness.</td>
+</tr>
+<tr>
+<td><strong>Ambient occlusion</strong></td>
+<td>linear</td>
+<td>Pre-baked occlusion of crevices.</td>
+</tr>
+</tbody>
+</table>
+<p>This is the material model used by USD's preview surface and by glTF, so the assets Model I/O loads map directly onto it (<code>.baseColor</code>, <code>.metallic</code>, <code>.roughness</code>, <code>.tangentSpaceNormal</code>, <code>.ambientOcclusion</code>).</p>
+<p>Because PBR depends on correct light intensities, it requires the linear workflow and HDR pipeline from the previous section. Check that both are in place before continuing.</p></article><nav class="pager" id="pager"><a class="prev" href="../advanced-lighting/ssao.html"><small>Precedente</small>SSAO</a><a class="next" href="../pbr/lighting.html"><small>Successivo</small>Illuminazione</a></nav>
+<footer class="site-footer">
+  <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
+  <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
+</footer>
+</main>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#microfacets">Microfacets</a></li><li><a href="#energy-conservation">Energy conservation</a></li><li><a href="#the-reflectance-equation">The reflectance equation</a></li><li><a href="#the-cook-torrance-brdf">The Cook-Torrance BRDF</a></li><li><a href="#material-parameters">Material parameters</a></li></ul></aside>
+</div>
+<script defer src="../../assets/textures.js"></script>
+<script defer src="../../assets/live.js"></script>
+<script defer src="../../assets/demos.js"></script>
+<script defer src="../../assets/site.js"></script>
+</body>
+</html>

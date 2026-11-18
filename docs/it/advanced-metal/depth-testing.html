@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="it" data-root="../../" data-site="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test di profondità | learnmetal</title>
+<meta name="description" content="Metal avanzato: Test di profondità. Impara la grafica 3D con Metal di Apple, dal primo triangolo al rendering fisicamente corretto, in Swift o C++.">
+<meta name="author" content="Gabriele Vierti">
+<link rel="icon" href="../../assets/favicon.png">
+<script>
+(function () {
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem("theme"); l = localStorage.getItem("lang"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  d.dataset.theme = t;
+  var q = /[?&]lang=(swift|cpp)/.exec(location.search);      // links can pick a language: page.html?lang=cpp
+  if (q) l = q[1];
+  d.dataset.lang = l === "cpp" ? "cpp" : "swift";
+})();
+</script>
+<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../../assets/code.css">
+</head>
+<body class="" data-key="advanced-metal/depth-testing">
+<a class="skip" href="#main">Vai al contenuto</a>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Apri l'elenco dei capitoli">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a class="brand" href="../index.html"><img src="../../assets/logo.png" alt="LearnMetal" width="136" height="32"></a>
+  <div class="search" role="search">
+    <input id="search" type="search" placeholder="Cerca" aria-label="Cerca" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results" hidden></div>
+  </div>
+  <button id="search-toggle" class="icon-btn" aria-label="Cerca">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <div class="lang-switch site-lang" role="group" aria-label="Lingua del testo">
+    <a href="../../advanced-metal/depth-testing.html">EN</a>
+    <a href="../../it/advanced-metal/depth-testing.html" aria-current="true">IT</a>
+  </div>
+  <div class="lang-switch" role="group" aria-label="Linguaggio del codice">
+    <button type="button" data-set-lang="swift">Swift</button>
+    <button type="button" data-set-lang="cpp">C++</button>
+  </div>
+  <a class="icon-btn" href="https://github.com/gabrielevierti" aria-label="Gabriele Vierti on GitHub"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Passa dal tema chiaro a quello scuro">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"/></svg>
+  </button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Capitoli">
+<div class="nav-section"><h4>Per iniziare</h4><ul>
+<li><a data-key="getting-started/introduction" href="../getting-started/introduction.html">Introduzione</a></li>
+<li><a data-key="getting-started/project-setup" href="../getting-started/project-setup.html">Preparare il progetto</a></li>
+<li><a data-key="getting-started/hello-view" href="../getting-started/hello-view.html">La prima vista</a></li>
+<li><a data-key="getting-started/hello-triangle" href="../getting-started/hello-triangle.html">Il primo triangolo</a></li>
+<li><a data-key="getting-started/shaders" href="../getting-started/shaders.html">Shader</a></li>
+<li><a data-key="getting-started/textures" href="../getting-started/textures.html">Texture</a></li>
+<li><a data-key="getting-started/transformations" href="../getting-started/transformations.html">Trasformazioni</a></li>
+<li><a data-key="getting-started/coordinate-systems" href="../getting-started/coordinate-systems.html">Sistemi di coordinate</a></li>
+<li><a data-key="getting-started/camera" href="../getting-started/camera.html">Camera</a></li>
+<li><a data-key="getting-started/review" href="../getting-started/review.html">Riepilogo</a></li>
+</ul></div>
+<div class="nav-section"><h4>Illuminazione</h4><ul>
+<li><a data-key="lighting/colors" href="../lighting/colors.html">Colori</a></li>
+<li><a data-key="lighting/basic-lighting" href="../lighting/basic-lighting.html">Illuminazione di base</a></li>
+<li><a data-key="lighting/materials" href="../lighting/materials.html">Materiali</a></li>
+<li><a data-key="lighting/lighting-maps" href="../lighting/lighting-maps.html">Mappe di illuminazione</a></li>
+<li><a data-key="lighting/light-casters" href="../lighting/light-casters.html">Tipi di luce</a></li>
+<li><a data-key="lighting/multiple-lights" href="../lighting/multiple-lights.html">Più luci</a></li>
+<li><a data-key="lighting/review" href="../lighting/review.html">Riepilogo</a></li>
+</ul></div>
+<div class="nav-section"><h4>Caricare i modelli</h4><ul>
+<li><a data-key="model-loading/model-io" href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a data-key="model-loading/mesh" href="../model-loading/mesh.html">Mesh</a></li>
+<li><a data-key="model-loading/model" href="../model-loading/model.html">Modello</a></li>
+</ul></div>
+<div class="nav-section"><h4>Metal avanzato</h4><ul>
+<li><a class="active" aria-current="page" data-key="advanced-metal/depth-testing" href="../advanced-metal/depth-testing.html">Test di profondità</a></li>
+<li><a data-key="advanced-metal/stencil-testing" href="../advanced-metal/stencil-testing.html">Test di stencil</a></li>
+<li><a data-key="advanced-metal/blending" href="../advanced-metal/blending.html">Blending</a></li>
+<li><a data-key="advanced-metal/face-culling" href="../advanced-metal/face-culling.html">Face culling</a></li>
+<li><a data-key="advanced-metal/render-targets" href="../advanced-metal/render-targets.html">Render target</a></li>
+<li><a data-key="advanced-metal/cubemaps" href="../advanced-metal/cubemaps.html">Cubemap</a></li>
+<li><a data-key="advanced-metal/advanced-data" href="../advanced-metal/advanced-data.html">Dati avanzati</a></li>
+<li><a data-key="advanced-metal/advanced-msl" href="../advanced-metal/advanced-msl.html">MSL avanzato</a></li>
+<li><a data-key="advanced-metal/no-geometry-shaders" href="../advanced-metal/no-geometry-shaders.html">Vivere senza geometry shader</a></li>
+<li><a data-key="advanced-metal/instancing" href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a data-key="advanced-metal/anti-aliasing" href="../advanced-metal/anti-aliasing.html">Anti-aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Illuminazione avanzata</h4><ul>
+<li><a data-key="advanced-lighting/blinn-phong" href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a data-key="advanced-lighting/gamma-correction" href="../advanced-lighting/gamma-correction.html">Correzione gamma</a></li>
+<li><a data-key="advanced-lighting/shadow-mapping" href="../advanced-lighting/shadow-mapping.html">Shadow mapping</a></li>
+<li><a data-key="advanced-lighting/point-shadows" href="../advanced-lighting/point-shadows.html">Ombre da luci puntiformi</a></li>
+<li><a data-key="advanced-lighting/normal-mapping" href="../advanced-lighting/normal-mapping.html">Normal mapping</a></li>
+<li><a data-key="advanced-lighting/parallax-mapping" href="../advanced-lighting/parallax-mapping.html">Parallax mapping</a></li>
+<li><a data-key="advanced-lighting/hdr" href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a data-key="advanced-lighting/bloom" href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a data-key="advanced-lighting/deferred-shading" href="../advanced-lighting/deferred-shading.html">Deferred shading</a></li>
+<li><a data-key="advanced-lighting/ssao" href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a data-key="pbr/theory" href="../pbr/theory.html">Teoria</a></li>
+<li><a data-key="pbr/lighting" href="../pbr/lighting.html">Illuminazione</a></li>
+<li><a data-key="pbr/diffuse-irradiance" href="../pbr/diffuse-irradiance.html">Irradianza diffusa</a></li>
+<li><a data-key="pbr/specular-ibl" href="../pbr/specular-ibl.html">IBL speculare</a></li>
+</ul></div>
+<div class="nav-section"><h4>In pratica</h4><ul>
+<li><a data-key="in-practice/debugging" href="../in-practice/debugging.html">Debug</a></li>
+<li><a data-key="in-practice/text-rendering" href="../in-practice/text-rendering.html">Rendering del testo</a></li>
+<li><a data-key="in-practice/2d-game" href="../in-practice/2d-game.html">Un gioco 2D</a></li>
+</ul></div>
+<div class="nav-section"><h4>Oltre</h4><ul>
+<li><a data-key="beyond/compute-shaders" href="../beyond/compute-shaders.html">Compute shader</a></li>
+<li><a data-key="beyond/tessellation" href="../beyond/tessellation.html">Tassellazione</a></li>
+<li><a data-key="beyond/ray-tracing" href="../beyond/ray-tracing.html">Ray tracing</a></li>
+<li><a data-key="beyond/mesh-shaders" href="../beyond/mesh-shaders.html">Mesh shader</a></li>
+</ul></div>
+<div class="nav-section"><h4>Piattaforme Apple</h4><ul>
+<li><a data-key="apple-platforms/tile-based-gpus" href="../apple-platforms/tile-based-gpus.html">GPU tile-based</a></li>
+<li><a data-key="apple-platforms/metalfx" href="../apple-platforms/metalfx.html">Upscaling con MetalFX</a></li>
+<li><a data-key="apple-platforms/metal-4" href="../apple-platforms/metal-4.html">Metal 4</a></li>
+<li><a data-key="apple-platforms/visionos" href="../apple-platforms/visionos.html">visionOS</a></li>
+</ul></div>
+<div class="nav-section"><h4>Risorse</h4><ul>
+<li><a data-key="resources/examples" href="../resources/examples.html">Codice di esempio</a></li>
+</ul></div>
+</nav>
+<main class="content" id="main">
+<article><p class="crumb">Metal avanzato</p><h1 id="depth-testing">Depth Testing<a class="headerlink" href="#depth-testing" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
+<p>We turned on the depth buffer in <a href="../getting-started/coordinate-systems.html">Coordinate Systems</a> and moved on. It deserves a closer look, because several later techniques, shadows above all, depend on understanding exactly what it stores.</p>
+<h2 id="how-the-test-works">How the test works<a class="headerlink" href="#how-the-test-works" title="Permanent link">#</a></h2>
+<p>The depth attachment stores one value per pixel. For every fragment the GPU compares the fragment's depth with the stored value using the <strong>compare function</strong> of the current depth-stencil state. If the test passes, the fragment is kept, and if depth writing is enabled, its depth replaces the stored one. If it fails, the fragment is discarded.</p>
+<p>The test conceptually runs after the fragment function. In practice GPUs run it <em>before</em> whenever they can (<strong>early depth testing</strong>), skipping the fragment function for hidden pixels. Apple GPUs go further with hidden surface removal: for opaque geometry they work out the visible fragment for each pixel first and shade only that one.</p>
+<h2 id="compare-functions">Compare functions<a class="headerlink" href="#compare-functions" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th><code>MTLCompareFunction</code></th>
+<th>Fragment passes when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.less</code></td>
+<td>its depth is less than the stored depth</td>
+</tr>
+<tr>
+<td><code>.lessEqual</code></td>
+<td>less than or equal</td>
+</tr>
+<tr>
+<td><code>.equal</code></td>
+<td>equal</td>
+</tr>
+<tr>
+<td><code>.greater</code>, <code>.greaterEqual</code></td>
+<td>greater (or equal)</td>
+</tr>
+<tr>
+<td><code>.notEqual</code></td>
+<td>different</td>
+</tr>
+<tr>
+<td><code>.always</code></td>
+<td>always. This is the default, meaning no depth test</td>
+</tr>
+<tr>
+<td><code>.never</code></td>
+<td>never</td>
+</tr>
+</tbody>
+</table>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">descriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLDepthStencilDescriptor</span><span class="p">()</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">depthCompareFunction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">less</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">isDepthWriteEnabled</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">depthState</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeDepthStencilState</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">descriptor</span><span class="p">)</span><span class="o">!</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">MTL</span><span class="o">::</span><span class="n">DepthStencilDescriptor</span><span class="o">*</span><span class="w"> </span><span class="n">descriptor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MTL</span><span class="o">::</span><span class="n">DepthStencilDescriptor</span><span class="o">::</span><span class="n">alloc</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">();</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setDepthCompareFunction</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">CompareFunctionLess</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setDepthWriteEnabled</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span>
+<span class="n">MTL</span><span class="o">::</span><span class="n">DepthStencilState</span><span class="o">*</span><span class="w"> </span><span class="n">depthState</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">device</span><span class="o">-&gt;</span><span class="n">newDepthStencilState</span><span class="p">(</span><span class="n">descriptor</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">release</span><span class="p">();</span>
+</code></pre></div>
+</div>
+
+<p>A state with testing on and <strong>writing off</strong> is common: <code>isDepthWriteEnabled = false</code> lets fragments be hidden by existing geometry without affecting the buffer. Transparent objects and particle effects use it.</p>
+<p>Depth-stencil states are cheap, immutable objects. Create the handful you need at startup and switch between them with <code>encoder.setDepthStencilState</code>.</p>
+<h2 id="the-values-are-not-linear">The values are not linear<a class="headerlink" href="#the-values-are-not-linear" title="Permanent link">#</a></h2>
+<p>The depth buffer does not store distance. After the projection matrix and the perspective divide, depth in Metal is</p>
+<div class="codehilite"><pre><span></span><code>depth = far * (z - near) / (z * (far - near))
+</code></pre></div>
+
+<p>for a point at distance <code>z</code> in front of the camera. It is 0 at the near plane and 1 at the far plane, but in between it is strongly non-linear. With near 0.1 and far 100, a point just 1 unit away already has depth 0.9, and at 10 units it is 0.99. Most of the precision is spent close to the camera, which is where the eye notices errors most.</p>
+<h2 id="visualizing-depth">Visualizing depth<a class="headerlink" href="#visualizing-depth" title="Permanent link">#</a></h2>
+<p>The built-in <code>[[position]]</code> input of a fragment function contains the pixel coordinates in x and y and the depth in z:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_depth</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">float3</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">z</span><span class="p">),</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Almost everything is white unless you are very close. To see something useful, convert back to linear distance:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="nf">linearizeDepth</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">depth</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">near</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">far</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">near</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">far</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">far</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">depth</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">far</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">near</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_depth</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">distance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">linearizeDepth</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="mf">100.0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">float3</span><span class="p">(</span><span class="n">distance</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">100.0</span><span class="p">),</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Keep this function. Screen-space effects such as SSAO need it.</p>
+<div class="lm-demo" data-demo="depth-testing" data-fallback="../../assets/img/advanced-metal/depth-testing.webp"></div>
+
+<h2 id="z-fighting">Z-fighting<a class="headerlink" href="#z-fighting" title="Permanent link">#</a></h2>
+<p>When two surfaces are nearly coplanar, their depth values round to the same number and the winner flips from pixel to pixel, producing a flickering stripe pattern called <strong>z-fighting</strong>. Remedies:</p>
+<ul>
+<li><strong>Do not place surfaces that close.</strong> A small offset that nobody notices is the simplest cure.</li>
+<li><strong>Push the near plane out.</strong> Going from 0.01 to 0.1 gains a lot of precision.</li>
+<li><strong>Use a 32-bit float depth buffer.</strong> <code>.depth32Float</code> is supported everywhere in Metal and is what we use. <code>.depth16Unorm</code> saves memory at the cost of precision.</li>
+<li><strong>Use a depth bias</strong> for decals and similar: <code>encoder.setDepthBias(_:slopeScale:clamp:)</code> nudges the depth of what you draw next.</li>
+</ul>
+<h2 id="reverse-z">Reverse-Z<a class="headerlink" href="#reverse-z" title="Permanent link">#</a></h2>
+<p>Floating-point numbers have the most precision near 0, and the perspective mapping needs the most precision near 1. The two can be made to cancel by flipping the range: map the near plane to 1 and the far plane to 0, clear depth to 0, and test with <code>.greater</code>.</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="n">view</span><span class="p">.</span><span class="n">clearDepth</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mf">0.0</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">depthCompareFunction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">greater</span>
+<span class="c1">// and swap near and far when building the projection matrix</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">passDescriptor</span><span class="o">-&gt;</span><span class="n">depthAttachment</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">setClearDepth</span><span class="p">(</span><span class="mf">0.0</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setDepthCompareFunction</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">CompareFunctionGreater</span><span class="p">);</span>
+<span class="c1">// and swap near and far when building the projection matrix</span>
+</code></pre></div>
+</div>
+
+<p>This <strong>reverse-Z</strong> setup gives almost uniform precision over huge view distances and is standard in modern engines. It works in Metal precisely because NDC depth runs from 0 to 1. We keep the conventional direction in this series so that the code stays easy to compare with other material.</p>
+<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<ul>
+<li>Draw the scene with <code>.always</code> and explain the result in terms of draw order.<details class="solution"><summary>Mostra la soluzione</summary><p>With <code>.always</code> nothing is ever rejected, so each pixel shows whatever was drawn last. Objects drawn later appear in front of objects drawn earlier even when they are behind them, and within one cube the faces at the end of the vertex buffer cover the others.</p></details></li>
+<li>Put two quads 0.0001 apart and move the camera away until they fight. Then try each remedy.<details class="solution"><summary>Mostra la soluzione</summary><p>At close range the two quads have distinct depth values. As the camera moves away, both depths approach 1 and round to the same number, and the flickering stripes appear. Each remedy works: a larger gap, a farther near plane (try 1.0 instead of 0.1), a depth bias on the second quad with <code>setDepthBias</code>, or reverse-Z.</p></details></li>
+</ul></article><nav class="pager" id="pager"><a class="prev" href="../model-loading/model.html"><small>Precedente</small>Modello</a><a class="next" href="../advanced-metal/stencil-testing.html"><small>Successivo</small>Test di stencil</a></nav>
+<footer class="site-footer">
+  <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
+  <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
+</footer>
+</main>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#how-the-test-works">How the test works</a></li><li><a href="#compare-functions">Compare functions</a></li><li><a href="#the-values-are-not-linear">The values are not linear</a></li><li><a href="#visualizing-depth">Visualizing depth</a></li><li><a href="#z-fighting">Z-fighting</a></li><li><a href="#reverse-z">Reverse-Z</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+</div>
+<script defer src="../../assets/textures.js"></script>
+<script defer src="../../assets/live.js"></script>
+<script defer src="../../assets/demos.js"></script>
+<script defer src="../../assets/site.js"></script>
+</body>
+</html>

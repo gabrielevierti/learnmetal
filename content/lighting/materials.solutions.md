@@ -1,0 +1,3 @@
+Copy the four values of a row into the material uniform and set the light's ambient, diffuse and specular to white. The live demo above has the presets; switch between them and compare how wide and how colored the highlight is.
+---
+A metal has no diffuse reflection of its own. All the light it returns is reflected at the surface, and that reflection is tinted by the metal: gold reflects yellow light. So its highlight has the metal's color. A plastic's highlight comes from its clear outer layer and stays white, whatever the color underneath. This is the idea the PBR section later makes precise with the metalness parameter.

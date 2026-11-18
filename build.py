@@ -8,6 +8,7 @@ Reads Markdown from content/ and writes the finished site to docs/,
 which is what GitHub Pages serves.
 """
 import html
+import json
 import re
 import shutil
 import zipfile
@@ -97,6 +98,13 @@ SECTIONS = [
         ("compute-shaders", "Compute Shaders"),
         ("tessellation", "Tessellation"),
         ("ray-tracing", "Ray Tracing"),
+        ("mesh-shaders", "Mesh Shaders"),
+    ]),
+    ("apple-platforms", "Apple Platforms", [
+        ("tile-based-gpus", "Tile-Based GPUs"),
+        ("metalfx", "MetalFX Upscaling"),
+        ("metal-4", "Metal 4"),
+        ("visionos", "visionOS"),
     ]),
     ("resources", "Resources", [
         ("examples", "Example Code"),
@@ -213,6 +221,11 @@ DEMOS = {
     "lighting/multiple-lights": [("multiple-lights", "The cost of many lights", "lighting/multiple-lights")],
     "advanced-metal/depth-testing": [("depth-testing", "Z-fighting", "advanced-metal/depth-testing")],
     "advanced-metal/face-culling": [("face-culling", "Exercises", None)],
+    "advanced-metal/stencil-testing": [("stencil-testing", "Reading the comparison correctly", "advanced-metal/stencil-testing")],
+    "advanced-metal/blending": [("blending", "Exercises", "advanced-metal/blending")],
+    "advanced-lighting/bloom": [("bloom", "Doing it better", None)],
+    "advanced-lighting/deferred-shading": [("deferred-shading", "Light volumes", "advanced-lighting/deferred-shading")],
+    "advanced-lighting/ssao": [("ssao", "Tuning and cost", "advanced-lighting/ssao")],
     "advanced-metal/render-targets": [("render-targets", "Exercises", "advanced-metal/render-targets")],
     "advanced-metal/cubemaps": [("cubemaps", "Rendering into a cubemap", "advanced-metal/cubemaps")],
     "advanced-metal/instancing": [("instancing", "Animating instances", "advanced-metal/instancing")],
@@ -236,9 +249,82 @@ BLURBS = {
     "advanced-lighting": "Shadows, normal and parallax mapping, HDR, bloom, deferred shading and SSAO.",
     "pbr": "Physically based materials and image-based lighting.",
     "in-practice": "Debugging tools, text rendering and a small playable game.",
-    "beyond": "Compute shaders, tessellation and ray tracing.",
+    "beyond": "Compute shaders, tessellation, ray tracing and mesh shaders.",
+    "apple-platforms": "What is specific to Apple hardware: tile-based GPUs, MetalFX, Metal 4 and visionOS.",
     "resources": "Runnable example projects for Swift and C++.",
 }
+
+STRINGS = {
+    "en": dict(skip="Skip to content", menu="Open the chapter list", search="Search", text_lang="Language of the text",
+               code_lang="Language of the host code", theme="Switch between light and dark", chapters="Chapters",
+               rights="All rights reserved.", prev="Previous", next="Next", toc="On this page", solution="Show solution",
+               path="The path", start="Start with chapter one", get="Get the example projects",
+               hero="Learn Metal by changing the code and watching the pixels move.",
+               hero_more="Every technique comes with a live demo: edit the shader on the page and it recompiles as you type.",
+               tagline=None, untranslated="",
+               js=dict(copy="Copy", copied="Copied", none="No results for", loading="Loading the index",
+                       progress="{n} of {total} chapters read", reset="Reset progress", read="read")),
+    "it": dict(skip="Vai al contenuto", menu="Apri l'elenco dei capitoli", search="Cerca", text_lang="Lingua del testo",
+               code_lang="Linguaggio del codice", theme="Passa dal tema chiaro a quello scuro", chapters="Capitoli",
+               rights="Tutti i diritti riservati.", prev="Precedente", next="Successivo", toc="In questa pagina",
+               solution="Mostra la soluzione", path="Il percorso", start="Inizia dal primo capitolo",
+               get="Scarica i progetti di esempio",
+               hero="Impara Metal cambiando il codice e guardando i pixel muoversi.",
+               hero_more="Ogni tecnica ha una demo interattiva: modifica lo shader nella pagina e si ricompila mentre scrivi.",
+               tagline="Impara la grafica 3D con Metal di Apple, dal primo triangolo al rendering fisicamente corretto, in Swift o C++.",
+               untranslated=('<div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> '
+                             'Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>'),
+               js=dict(copy="Copia", copied="Copiato", none="Nessun risultato per", loading="Carico l'indice",
+                       progress="{n} capitoli letti su {total}", reset="Azzera il progresso", read="letto")),
+}
+
+IT_TITLES = {
+    "getting-started": "Per iniziare", "lighting": "Illuminazione", "model-loading": "Caricare i modelli",
+    "advanced-metal": "Metal avanzato", "advanced-lighting": "Illuminazione avanzata", "pbr": "PBR",
+    "in-practice": "In pratica", "beyond": "Oltre", "apple-platforms": "Piattaforme Apple", "resources": "Risorse",
+    "getting-started/introduction": "Introduzione", "getting-started/project-setup": "Preparare il progetto",
+    "getting-started/hello-view": "La prima vista", "getting-started/hello-triangle": "Il primo triangolo",
+    "getting-started/shaders": "Shader", "getting-started/textures": "Texture",
+    "getting-started/transformations": "Trasformazioni", "getting-started/coordinate-systems": "Sistemi di coordinate",
+    "getting-started/camera": "Camera", "getting-started/review": "Riepilogo",
+    "lighting/colors": "Colori", "lighting/basic-lighting": "Illuminazione di base", "lighting/materials": "Materiali",
+    "lighting/lighting-maps": "Mappe di illuminazione", "lighting/light-casters": "Tipi di luce",
+    "lighting/multiple-lights": "Più luci", "lighting/review": "Riepilogo",
+    "model-loading/model-io": "Model I/O", "model-loading/mesh": "Mesh", "model-loading/model": "Modello",
+    "advanced-metal/depth-testing": "Test di profondità", "advanced-metal/stencil-testing": "Test di stencil",
+    "advanced-metal/blending": "Blending", "advanced-metal/face-culling": "Face culling",
+    "advanced-metal/render-targets": "Render target", "advanced-metal/cubemaps": "Cubemap",
+    "advanced-metal/advanced-data": "Dati avanzati", "advanced-metal/advanced-msl": "MSL avanzato",
+    "advanced-metal/no-geometry-shaders": "Vivere senza geometry shader", "advanced-metal/instancing": "Instancing",
+    "advanced-metal/anti-aliasing": "Anti-aliasing",
+    "advanced-lighting/blinn-phong": "Blinn-Phong", "advanced-lighting/gamma-correction": "Correzione gamma",
+    "advanced-lighting/shadow-mapping": "Shadow mapping", "advanced-lighting/point-shadows": "Ombre da luci puntiformi",
+    "advanced-lighting/normal-mapping": "Normal mapping", "advanced-lighting/parallax-mapping": "Parallax mapping",
+    "advanced-lighting/hdr": "HDR", "advanced-lighting/bloom": "Bloom",
+    "advanced-lighting/deferred-shading": "Deferred shading", "advanced-lighting/ssao": "SSAO",
+    "pbr/theory": "Teoria", "pbr/lighting": "Illuminazione", "pbr/diffuse-irradiance": "Irradianza diffusa",
+    "pbr/specular-ibl": "IBL speculare",
+    "in-practice/debugging": "Debug", "in-practice/text-rendering": "Rendering del testo", "in-practice/2d-game": "Un gioco 2D",
+    "beyond/compute-shaders": "Compute shader", "beyond/tessellation": "Tassellazione", "beyond/ray-tracing": "Ray tracing",
+    "beyond/mesh-shaders": "Mesh shader",
+    "apple-platforms/tile-based-gpus": "GPU tile-based", "apple-platforms/metalfx": "Upscaling con MetalFX",
+    "apple-platforms/metal-4": "Metal 4", "apple-platforms/visionos": "visionOS",
+    "resources/examples": "Codice di esempio",
+}
+
+BLURBS_IT = {
+    "getting-started": "Apri una vista, disegna un triangolo, applicagli una texture, muovilo con le matrici e giraci attorno con una camera.",
+    "lighting": "Il modello di Phong, i materiali, le mappe di illuminazione e ogni tipo di sorgente di luce.",
+    "model-loading": "Trasforma i file dei modelli in vertex buffer, index buffer e materiali con Model I/O.",
+    "advanced-metal": "Profondità e stencil, blending, render target, cubemap, instancing e anti-aliasing.",
+    "advanced-lighting": "Ombre, normal e parallax mapping, HDR, bloom, deferred shading e SSAO.",
+    "pbr": "Materiali fisicamente corretti e illuminazione basata su immagini.",
+    "in-practice": "Strumenti di debug, rendering del testo e un piccolo gioco giocabile.",
+    "beyond": "Compute shader, tassellazione, ray tracing e mesh shader.",
+    "apple-platforms": "Ciò che è specifico dell'hardware Apple: GPU tile-based, MetalFX, Metal 4 e visionOS.",
+    "resources": "Progetti di esempio eseguibili per Swift e C++.",
+}
+
 
 GH_ICON = ('<svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38'
            'l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66'
@@ -247,7 +333,7 @@ GH_ICON = ('<svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><
            'c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg>')
 
 PAGE = """<!DOCTYPE html>
-<html lang="en">
+<html lang="{lang}" data-root="{root}" data-site="{site_root}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -266,33 +352,45 @@ PAGE = """<!DOCTYPE html>
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 }})();
 </script>
+<script>window.LM_T = {strings};</script>
 <link rel="stylesheet" href="{root}assets/style.css">
 <link rel="stylesheet" href="{root}assets/code.css">
 </head>
-<body class="{body_class}">
-<a class="skip" href="#main">Skip to content</a>
+<body class="{body_class}" data-key="{key}">
+<a class="skip" href="#main">{t_skip}</a>
 <header class="topbar">
-  <button id="menu-toggle" class="icon-btn" aria-label="Open the chapter list">
+  <button id="menu-toggle" class="icon-btn" aria-label="{t_menu}">
     <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
   </button>
-  <a class="brand" href="{root}index.html"><img src="{root}assets/logo.png" alt="LearnMetal" width="136" height="32"></a>
-  <div class="lang-switch" role="group" aria-label="Language of the host code">
+  <a class="brand" href="{site_root}index.html"><img src="{root}assets/logo.png" alt="LearnMetal" width="136" height="32"></a>
+  <div class="search" role="search">
+    <input id="search" type="search" placeholder="{t_search}" aria-label="{t_search}" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results" hidden></div>
+  </div>
+  <button id="search-toggle" class="icon-btn" aria-label="{t_search}">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <div class="lang-switch site-lang" role="group" aria-label="{t_text_lang}">
+    <a href="{en_url}"{en_cur}>EN</a>
+    <a href="{it_url}"{it_cur}>IT</a>
+  </div>
+  <div class="lang-switch" role="group" aria-label="{t_code_lang}">
     <button type="button" data-set-lang="swift">Swift</button>
     <button type="button" data-set-lang="cpp">C++</button>
   </div>
   <a class="icon-btn" href="{github}" aria-label="{author} on GitHub">{gh}</a>
-  <button id="theme-toggle" class="icon-btn" aria-label="Switch between light and dark">
+  <button id="theme-toggle" class="icon-btn" aria-label="{t_theme}">
     <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"/></svg>
   </button>
 </header>
 <div class="layout">
-<nav class="sidebar" id="sidebar" aria-label="Chapters">
+<nav class="sidebar" id="sidebar" aria-label="{t_chapters}">
 {nav}
 </nav>
 <main class="content" id="main">
 {body}
 <footer class="site-footer">
-  <p>&copy; {year} {author}. All rights reserved.</p>
+  <p>&copy; {year} {author}. {t_rights}</p>
   <p><a href="{github}">{gh} github.com/gabrielevierti</a></p>
 </footer>
 </main>
@@ -325,13 +423,20 @@ def flat_chapters():
     return out
 
 
-def build_nav(root, current=None):
+def title_of(lang, folder, slug=None, default=""):
+    if lang == "it":
+        return IT_TITLES.get(folder if slug is None else f"{folder}/{slug}", default)
+    return default
+
+
+def build_nav(root, current=None, lang="en"):
     parts = []
     for folder, section, chapters in SECTIONS:
-        parts.append(f'<div class="nav-section"><h4>{html.escape(section)}</h4><ul>')
+        parts.append(f'<div class="nav-section"><h4>{html.escape(title_of(lang, folder, None, section))}</h4><ul>')
         for slug, title in chapters:
             cls = ' class="active" aria-current="page"' if current == (folder, slug) else ""
-            parts.append(f'<li><a{cls} href="{root}{folder}/{slug}.html">{html.escape(title)}</a></li>')
+            parts.append(f'<li><a{cls} data-key="{folder}/{slug}" href="{root}{folder}/{slug}.html">'
+                         f'{html.escape(title_of(lang, folder, slug, title))}</a></li>')
         parts.append("</ul></div>")
     return "\n".join(parts)
 
@@ -363,10 +468,23 @@ def demo_tag(demo, fallback):
     return f'<div class="lm-demo" data-demo="{demo}"{fb}></div>'
 
 
-def insert_before(lines, key, anchor, block):
+def headings(lines):
+    out, fenced = [], False
+    for i, line in enumerate(lines):
+        if line.startswith("```"):
+            fenced = not fenced
+        elif not fenced and line.startswith("## "):
+            out.append(i)
+    return out
+
+
+def insert_before(lines, key, anchor, block, ref=None):
     target = f"## {anchor}"
-    if anchor != "END" and target in lines:
-        i = lines.index(target)
+    source = ref if ref is not None else lines
+    if anchor != "END" and target in source:
+        i = source.index(target)
+        if ref is not None:
+            i = headings(lines)[headings(ref).index(i)]
         lines[i:i] = block
     else:
         if anchor != "END":
@@ -379,21 +497,55 @@ CPP_BLOCK = re.compile(r"^```cpp\n.*?^```[ \t]*$", re.S | re.M)
 REGION = re.compile(r"^<!-- (swift|cpp) -->\n(.*?)^<!-- /\1 -->[ \t]*$", re.S | re.M)
 
 
-def preprocess(text, key, folder, slug):
-    """Insert demos, figures and the example box, then build the Swift / C++ variants."""
+FENCE = re.compile(r"^```.*?^```[ \t]*$", re.S | re.M)
+
+
+def localized(folder, slug, lang):
+    """The chapter text in the requested language, and whether it is a translation."""
+    english = (CONTENT / folder / f"{slug}.md").read_text()
+    path = CONTENT / folder / f"{slug}.{lang}.md"
+    if lang == "en" or not path.exists():
+        return english, english, lang == "en"
+    blocks = iter(FENCE.findall(english))          # {{code}} stands for the next code block of the English text
+    text = re.sub(r"^\{\{code\}\}[ \t]*$", lambda m: next(blocks), path.read_text(), flags=re.M)
+    figures = iter(re.findall(r"^<figure>.*?^</figure>[ \t]*$", english, flags=re.S | re.M))   # {{figure}}: the next inline figure
+    text = re.sub(r"^\{\{figure\}\}[ \t]*$", lambda m: next(figures), text, flags=re.M)
+    if next(blocks, None) is not None:
+        print(f"warning: {folder}/{slug}.{lang}.md uses fewer code blocks than the English chapter")
+    return text, english, True
+
+
+def preprocess(text, key, folder, slug, ref_text=None, lang="en"):
+    """Insert demos, figures, solutions and the example box, then build the Swift / C++ variants."""
     lines = text.split("\n")
+    ref = ref_text.split("\n") if ref_text is not None and ref_text != text else None
     replaced = {fig for _, _, fig in DEMOS.get(key, []) if fig}
     for name, caption, anchor in FIGURES.get(key, []):
         if name not in replaced:
-            insert_before(lines, key, anchor, ["", image_tag(name, caption), ""])
+            insert_before(lines, key, anchor, ["", image_tag(name, caption), ""], ref)
     for demo, anchor, fallback in DEMOS.get(key, []):
-        insert_before(lines, key, anchor, ["", demo_tag(demo, fallback), ""])
+        insert_before(lines, key, anchor, ["", demo_tag(demo, fallback), ""], ref)
+
+    # Mark the end of every exercise, so its solution can be attached after the conversion to HTML.
+    inside, n, fenced = False, 0, False
+    for i, line in enumerate(lines):
+        if line.startswith("```"):
+            fenced = not fenced
+        if fenced:
+            continue
+        if line.startswith("## "):
+            inside = line[3:].strip() in ("Exercises", "Esercizi")
+        elif inside and line.startswith("- "):
+            lines[i] = f"{line} LMSOL{n}LM"
+            n += 1
     if key in EXAMPLES:
         target_name, folder_name = EXAMPLES[key]
-        box = (f'<div class="example-box lang-swift"><strong>Example project</strong> '
-               f'<code>examples/Sources/{folder_name}</code>, run with <code>swift run {target_name}</code>. '
-               f'<a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see '
-               f'<a href="../resources/examples.html">how to run them</a>.</div>')
+        words = (("Progetto di esempio", "si esegue con", "Scarica tutti gli esempi", "oppure guarda", "come eseguirli") if lang == "it"
+                 else ("Example project", "run with", "Download all examples", "or see", "how to run them"))
+        box = (f'<div class="example-box lang-swift"><strong>{words[0]}</strong> '
+               f'<code>examples/Sources/{folder_name}</code>, {words[1]} <code>swift run {target_name}</code>. '
+               f'<a href="../downloads/learnmetal-examples.zip">{words[2]}</a> {words[3]} '
+               f'<a href="../resources/examples.html">{words[4]}</a>.</div>')
         i = next(k for k, line in enumerate(lines) if line.startswith("# "))
         lines[i + 1:i + 1] = ["", box, ""]
     text = "\n".join(lines)
@@ -438,18 +590,148 @@ def zip_folder(source, dest, prefix):
                 z.write(f, f"{prefix}/{rel}")
 
 
-def toc_html(tokens):
+def toc_html(tokens, label):
     items = [t for t in tokens[0]["children"]] if tokens and tokens[0].get("children") else []
     if len(items) < 2:
         return ""
     links = "".join(f'<li><a href="#{t["id"]}">{html.escape(t["name"])}</a></li>' for t in items)
-    return f'<aside class="toc" aria-label="On this page"><h4>On this page</h4><ul>{links}</ul></aside>'
+    return f'<aside class="toc" aria-label="{label}"><h4>{label}</h4><ul>{links}</ul></aside>'
 
 
-def page(**kw):
-    defaults = dict(github=GITHUB, author=AUTHOR, year=YEAR, gh=GH_ICON, toc="", body_class="")
+def page(lang="en", **kw):
+    t = STRINGS[lang]
+    defaults = dict(github=GITHUB, author=AUTHOR, year=YEAR, gh=GH_ICON, toc="", body_class="", key="", lang=lang,
+                    strings=json.dumps(t["js"], ensure_ascii=False),
+                    en_cur=' aria-current="true"' if lang == "en" else "", it_cur=' aria-current="true"' if lang == "it" else "")
+    defaults.update({f"t_{k}": v for k, v in t.items() if isinstance(v, str)})
     defaults.update(kw)
     return PAGE.format(**defaults)
+
+
+def attach_solutions(body, folder, slug, lang, label):
+    path = CONTENT / folder / f"{slug}.solutions.{lang}.md"
+    if not path.exists():
+        path = CONTENT / folder / f"{slug}.solutions.md"
+    solutions = [x.strip() for x in re.split(r"^---[ \t]*$", path.read_text(), flags=re.M)] if path.exists() else []
+    count = len(re.findall(r"LMSOL\d+LM", body))
+    if solutions and count != len(solutions):
+        print(f"warning: {folder}/{slug}: {count} exercises but {len(solutions)} solutions")
+
+    def one(m):
+        i = int(m.group(1))
+        if i >= len(solutions):
+            return ""
+        return f'<details class="solution"><summary>{label}</summary>{md().convert(solutions[i])}</details>'
+
+    return re.sub(r"\s*LMSOL(\d+)LM", one, body)
+
+
+TAG = re.compile(r"<[^>]+>")
+
+
+def index_entries(url, title, body):
+    """One search entry per section of a page: [url, page title, heading, text]."""
+    body = re.sub(r"<pre.*?</pre>|<figure.*?</figure>|<details.*?</details>", " ", body, flags=re.S)
+    parts = re.split(r'<h2 id="([^"]+)">(.*?)</h2>', body, flags=re.S)
+    out = []
+
+    def clean(x):
+        return re.sub(r"\s+", " ", html.unescape(TAG.sub(" ", x))).replace(" #", "").strip()
+
+    intro = clean(re.sub(r"<h1.*?</h1>|<p class=\"crumb\">.*?</p>", " ", parts[0], flags=re.S))
+    out.append([url, title, "", intro])
+    for i in range(1, len(parts), 3):
+        out.append([f"{url}#{parts[i]}", title, clean(parts[i + 1]), clean(parts[i + 2])])
+    return out
+
+
+def build_site(lang):
+    t = STRINGS[lang]
+    out = OUT if lang == "en" else OUT / lang
+    up = "" if lang == "en" else "../"            # from this language's root to the site root
+    chapters = flat_chapters()
+    index, missing, translated = [], [], 0
+    for i, (folder, section, slug, title) in enumerate(chapters):
+        src = CONTENT / folder / f"{slug}.md"
+        if not src.exists():
+            missing.append(str(src.relative_to(ROOT)))
+            continue
+        key = f"{folder}/{slug}"
+        text, english, is_translated = localized(folder, slug, lang)
+        translated += is_translated
+        m = md()
+        body = m.convert(preprocess(text, key, folder, slug, english, lang))
+        body = attach_solutions(body, folder, slug, lang, t["solution"])
+        if not is_translated:
+            body = re.sub(r"(</h1>)", r"\1" + t["untranslated"], body, count=1)
+        if lang != "en":
+            body = re.sub(r'="\.\./(assets|downloads)/', r'="../../\1/', body)
+        name = title_of(lang, folder, slug, title)
+        section_name = title_of(lang, folder, None, section)
+        pager = ['<nav class="pager" id="pager">']
+        if i > 0:
+            pf, _, ps, pt = chapters[i - 1]
+            pager.append(f'<a class="prev" href="../{pf}/{ps}.html"><small>{t["prev"]}</small>{html.escape(title_of(lang, pf, ps, pt))}</a>')
+        else:
+            pager.append("<span></span>")
+        if i + 1 < len(chapters):
+            nf, _, ns, nt = chapters[i + 1]
+            pager.append(f'<a class="next" href="../{nf}/{ns}.html"><small>{t["next"]}</small>{html.escape(title_of(lang, nf, ns, nt))}</a>')
+        pager.append("</nav>")
+        crumb = f'<p class="crumb">{html.escape(section_name)}</p>'
+        dest = out / folder / f"{slug}.html"
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_text(page(
+            lang,
+            title=f"{name} | {SITE}",
+            description=html.escape(f"{section_name}: {name}. {t['tagline'] or TAGLINE}"),
+            root=f"../{up}", site_root="../", key=key,
+            en_url=f"../{up}{folder}/{slug}.html", it_url=f"../{up}it/{folder}/{slug}.html",
+            nav=build_nav("../", (folder, slug), lang),
+            body=f"<article>{crumb}{body}</article>{''.join(pager)}",
+            toc=toc_html(m.toc_tokens, t["toc"]),
+        ))
+        index += index_entries(f"{folder}/{slug}.html", name, body)
+
+    # Home page
+    first = chapters[0]
+    tagline = t["tagline"] or TAGLINE
+    hero = f"""
+<section class="hero">
+  <div class="hero-text">
+    <h1>{t["hero"]}</h1>
+    <p>{html.escape(tagline)} {t["hero_more"]}</p>
+    <p class="hero-actions">
+      <a class="cta" href="{first[0]}/{first[2]}.html">{t["start"]}</a>
+      <a class="cta ghost" href="resources/examples.html">{t["get"]}</a>
+    </p>
+  </div>
+  <div class="hero-demo"><div class="lm-demo" data-demo="pbr" data-collapse="1"></div></div>
+</section>"""
+    blurbs = BLURBS_IT if lang == "it" else BLURBS
+    rows = [f'<section class="syllabus"><div class="syl-top"><h2>{t["path"]}</h2><p id="progress" class="progress" hidden></p></div><ol>']
+    for folder, section, chs in SECTIONS:
+        links = "".join(f'<li><a data-key="{folder}/{slug}" href="{folder}/{slug}.html">{html.escape(title_of(lang, folder, slug, title))}</a></li>'
+                        for slug, title in chs)
+        rows.append(f'<li><div class="syl-head"><h3><a href="{folder}/{chs[0][0]}.html">{html.escape(title_of(lang, folder, None, section))}</a></h3>'
+                    f'<p>{html.escape(blurbs.get(folder, ""))}</p></div><ul>{links}</ul></li>')
+    rows.append("</ol></section>")
+    home = CONTENT / f"index.{lang}.md"
+    intro = md().convert((home if home.exists() else CONTENT / "index.md").read_text())
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "index.html").write_text(page(
+        lang,
+        title="LearnMetal | " + ("Impara la grafica con Metal in Swift e C++" if lang == "it" else "Learn Metal graphics programming in Swift and C++"),
+        description=html.escape(tagline),
+        root=up, site_root="", en_url=f"{up}index.html", it_url=f"{up}it/index.html",
+        nav=build_nav("", None, lang),
+        body=f"{hero}{''.join(rows)}<article class='home-notes'>{intro}</article>",
+        body_class="home",
+    ))
+    (out / "search-index.js").write_text("window.LM_SEARCH = " + json.dumps(index, ensure_ascii=False, separators=(",", ":")) + ";\n")
+    print(f"[{lang}] {len(chapters) - len(missing)} chapters, {translated} in this language, {len(index)} search entries")
+    for m_ in missing:
+        print("missing:", m_)
 
 
 def build():
@@ -460,71 +742,8 @@ def build():
     write_code_css()
     zip_folder(EXAMPLES_DIR, OUT / "downloads" / "learnmetal-examples.zip", "learnmetal-examples")
     zip_folder(CPP_DIR, OUT / "downloads" / "learnmetal-cpp-starter.zip", "learnmetal-cpp-starter")
-
-    chapters = flat_chapters()
-    missing = []
-    for i, (folder, section, slug, title) in enumerate(chapters):
-        src = CONTENT / folder / f"{slug}.md"
-        if not src.exists():
-            missing.append(str(src.relative_to(ROOT)))
-            continue
-        m = md()
-        body = m.convert(preprocess(src.read_text(), f"{folder}/{slug}", folder, slug))
-        pager = ['<nav class="pager" aria-label="Previous and next chapter">']
-        if i > 0:
-            pf, _, ps, pt = chapters[i - 1]
-            pager.append(f'<a class="prev" href="../{pf}/{ps}.html"><small>Previous</small>{html.escape(pt)}</a>')
-        else:
-            pager.append("<span></span>")
-        if i + 1 < len(chapters):
-            nf, _, ns, nt = chapters[i + 1]
-            pager.append(f'<a class="next" href="../{nf}/{ns}.html"><small>Next</small>{html.escape(nt)}</a>')
-        pager.append("</nav>")
-        crumb = f'<p class="crumb">{html.escape(section)}</p>'
-        dest = OUT / folder / f"{slug}.html"
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        dest.write_text(page(
-            title=f"{title} | {SITE}",
-            description=html.escape(f"{section}: {title}. {TAGLINE}"),
-            root="../",
-            nav=build_nav("../", (folder, slug)),
-            body=f"<article>{crumb}{body}</article>{''.join(pager)}",
-            toc=toc_html(m.toc_tokens),
-        ))
-
-    # Home page
-    first = chapters[0]
-    hero = f"""
-<section class="hero">
-  <div class="hero-text">
-    <h1>Learn Metal by changing the code and watching the pixels move.</h1>
-    <p>{html.escape(TAGLINE)} Every technique comes with a live demo: edit the shader on the page and it recompiles as you type.</p>
-    <p class="hero-actions">
-      <a class="cta" href="{first[0]}/{first[2]}.html">Start with chapter one</a>
-      <a class="cta ghost" href="resources/examples.html">Get the example projects</a>
-    </p>
-  </div>
-  <div class="hero-demo"><div class="lm-demo" data-demo="pbr" data-collapse="1"></div></div>
-</section>"""
-    rows = ['<section class="syllabus"><h2>The path</h2><ol>']
-    for folder, section, chs in SECTIONS:
-        links = "".join(f'<li><a href="{folder}/{slug}.html">{html.escape(title)}</a></li>' for slug, title in chs)
-        rows.append(f'<li><div class="syl-head"><h3><a href="{folder}/{chs[0][0]}.html">{html.escape(section)}</a></h3>'
-                    f'<p>{html.escape(BLURBS.get(folder, ""))}</p></div><ul>{links}</ul></li>')
-    rows.append("</ol></section>")
-    intro = md().convert((CONTENT / "index.md").read_text())
-    (OUT / "index.html").write_text(page(
-        title="LearnMetal | Learn Metal graphics programming in Swift and C++",
-        description=html.escape(TAGLINE),
-        root="",
-        nav=build_nav(""),
-        body=f"{hero}{''.join(rows)}<article class='home-notes'>{intro}</article>",
-        body_class="home",
-    ))
-
-    print(f"Built {len(chapters) - len(missing)} chapters into {OUT.relative_to(ROOT)}/")
-    for m_ in missing:
-        print("missing:", m_)
+    for lang in ("en", "it"):
+        build_site(lang)
 
 
 if __name__ == "__main__":

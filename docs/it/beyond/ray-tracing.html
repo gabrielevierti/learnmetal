@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="it" data-root="../../" data-site="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ray tracing | learnmetal</title>
+<meta name="description" content="Oltre: Ray tracing. Impara la grafica 3D con Metal di Apple, dal primo triangolo al rendering fisicamente corretto, in Swift o C++.">
+<meta name="author" content="Gabriele Vierti">
+<link rel="icon" href="../../assets/favicon.png">
+<script>
+(function () {
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem("theme"); l = localStorage.getItem("lang"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  d.dataset.theme = t;
+  var q = /[?&]lang=(swift|cpp)/.exec(location.search);      // links can pick a language: page.html?lang=cpp
+  if (q) l = q[1];
+  d.dataset.lang = l === "cpp" ? "cpp" : "swift";
+})();
+</script>
+<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../../assets/code.css">
+</head>
+<body class="" data-key="beyond/ray-tracing">
+<a class="skip" href="#main">Vai al contenuto</a>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Apri l'elenco dei capitoli">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a class="brand" href="../index.html"><img src="../../assets/logo.png" alt="LearnMetal" width="136" height="32"></a>
+  <div class="search" role="search">
+    <input id="search" type="search" placeholder="Cerca" aria-label="Cerca" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results" hidden></div>
+  </div>
+  <button id="search-toggle" class="icon-btn" aria-label="Cerca">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <div class="lang-switch site-lang" role="group" aria-label="Lingua del testo">
+    <a href="../../beyond/ray-tracing.html">EN</a>
+    <a href="../../it/beyond/ray-tracing.html" aria-current="true">IT</a>
+  </div>
+  <div class="lang-switch" role="group" aria-label="Linguaggio del codice">
+    <button type="button" data-set-lang="swift">Swift</button>
+    <button type="button" data-set-lang="cpp">C++</button>
+  </div>
+  <a class="icon-btn" href="https://github.com/gabrielevierti" aria-label="Gabriele Vierti on GitHub"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Passa dal tema chiaro a quello scuro">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"/></svg>
+  </button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Capitoli">
+<div class="nav-section"><h4>Per iniziare</h4><ul>
+<li><a data-key="getting-started/introduction" href="../getting-started/introduction.html">Introduzione</a></li>
+<li><a data-key="getting-started/project-setup" href="../getting-started/project-setup.html">Preparare il progetto</a></li>
+<li><a data-key="getting-started/hello-view" href="../getting-started/hello-view.html">La prima vista</a></li>
+<li><a data-key="getting-started/hello-triangle" href="../getting-started/hello-triangle.html">Il primo triangolo</a></li>
+<li><a data-key="getting-started/shaders" href="../getting-started/shaders.html">Shader</a></li>
+<li><a data-key="getting-started/textures" href="../getting-started/textures.html">Texture</a></li>
+<li><a data-key="getting-started/transformations" href="../getting-started/transformations.html">Trasformazioni</a></li>
+<li><a data-key="getting-started/coordinate-systems" href="../getting-started/coordinate-systems.html">Sistemi di coordinate</a></li>
+<li><a data-key="getting-started/camera" href="../getting-started/camera.html">Camera</a></li>
+<li><a data-key="getting-started/review" href="../getting-started/review.html">Riepilogo</a></li>
+</ul></div>
+<div class="nav-section"><h4>Illuminazione</h4><ul>
+<li><a data-key="lighting/colors" href="../lighting/colors.html">Colori</a></li>
+<li><a data-key="lighting/basic-lighting" href="../lighting/basic-lighting.html">Illuminazione di base</a></li>
+<li><a data-key="lighting/materials" href="../lighting/materials.html">Materiali</a></li>
+<li><a data-key="lighting/lighting-maps" href="../lighting/lighting-maps.html">Mappe di illuminazione</a></li>
+<li><a data-key="lighting/light-casters" href="../lighting/light-casters.html">Tipi di luce</a></li>
+<li><a data-key="lighting/multiple-lights" href="../lighting/multiple-lights.html">Più luci</a></li>
+<li><a data-key="lighting/review" href="../lighting/review.html">Riepilogo</a></li>
+</ul></div>
+<div class="nav-section"><h4>Caricare i modelli</h4><ul>
+<li><a data-key="model-loading/model-io" href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a data-key="model-loading/mesh" href="../model-loading/mesh.html">Mesh</a></li>
+<li><a data-key="model-loading/model" href="../model-loading/model.html">Modello</a></li>
+</ul></div>
+<div class="nav-section"><h4>Metal avanzato</h4><ul>
+<li><a data-key="advanced-metal/depth-testing" href="../advanced-metal/depth-testing.html">Test di profondità</a></li>
+<li><a data-key="advanced-metal/stencil-testing" href="../advanced-metal/stencil-testing.html">Test di stencil</a></li>
+<li><a data-key="advanced-metal/blending" href="../advanced-metal/blending.html">Blending</a></li>
+<li><a data-key="advanced-metal/face-culling" href="../advanced-metal/face-culling.html">Face culling</a></li>
+<li><a data-key="advanced-metal/render-targets" href="../advanced-metal/render-targets.html">Render target</a></li>
+<li><a data-key="advanced-metal/cubemaps" href="../advanced-metal/cubemaps.html">Cubemap</a></li>
+<li><a data-key="advanced-metal/advanced-data" href="../advanced-metal/advanced-data.html">Dati avanzati</a></li>
+<li><a data-key="advanced-metal/advanced-msl" href="../advanced-metal/advanced-msl.html">MSL avanzato</a></li>
+<li><a data-key="advanced-metal/no-geometry-shaders" href="../advanced-metal/no-geometry-shaders.html">Vivere senza geometry shader</a></li>
+<li><a data-key="advanced-metal/instancing" href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a data-key="advanced-metal/anti-aliasing" href="../advanced-metal/anti-aliasing.html">Anti-aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Illuminazione avanzata</h4><ul>
+<li><a data-key="advanced-lighting/blinn-phong" href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a data-key="advanced-lighting/gamma-correction" href="../advanced-lighting/gamma-correction.html">Correzione gamma</a></li>
+<li><a data-key="advanced-lighting/shadow-mapping" href="../advanced-lighting/shadow-mapping.html">Shadow mapping</a></li>
+<li><a data-key="advanced-lighting/point-shadows" href="../advanced-lighting/point-shadows.html">Ombre da luci puntiformi</a></li>
+<li><a data-key="advanced-lighting/normal-mapping" href="../advanced-lighting/normal-mapping.html">Normal mapping</a></li>
+<li><a data-key="advanced-lighting/parallax-mapping" href="../advanced-lighting/parallax-mapping.html">Parallax mapping</a></li>
+<li><a data-key="advanced-lighting/hdr" href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a data-key="advanced-lighting/bloom" href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a data-key="advanced-lighting/deferred-shading" href="../advanced-lighting/deferred-shading.html">Deferred shading</a></li>
+<li><a data-key="advanced-lighting/ssao" href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a data-key="pbr/theory" href="../pbr/theory.html">Teoria</a></li>
+<li><a data-key="pbr/lighting" href="../pbr/lighting.html">Illuminazione</a></li>
+<li><a data-key="pbr/diffuse-irradiance" href="../pbr/diffuse-irradiance.html">Irradianza diffusa</a></li>
+<li><a data-key="pbr/specular-ibl" href="../pbr/specular-ibl.html">IBL speculare</a></li>
+</ul></div>
+<div class="nav-section"><h4>In pratica</h4><ul>
+<li><a data-key="in-practice/debugging" href="../in-practice/debugging.html">Debug</a></li>
+<li><a data-key="in-practice/text-rendering" href="../in-practice/text-rendering.html">Rendering del testo</a></li>
+<li><a data-key="in-practice/2d-game" href="../in-practice/2d-game.html">Un gioco 2D</a></li>
+</ul></div>
+<div class="nav-section"><h4>Oltre</h4><ul>
+<li><a data-key="beyond/compute-shaders" href="../beyond/compute-shaders.html">Compute shader</a></li>
+<li><a data-key="beyond/tessellation" href="../beyond/tessellation.html">Tassellazione</a></li>
+<li><a class="active" aria-current="page" data-key="beyond/ray-tracing" href="../beyond/ray-tracing.html">Ray tracing</a></li>
+<li><a data-key="beyond/mesh-shaders" href="../beyond/mesh-shaders.html">Mesh shader</a></li>
+</ul></div>
+<div class="nav-section"><h4>Piattaforme Apple</h4><ul>
+<li><a data-key="apple-platforms/tile-based-gpus" href="../apple-platforms/tile-based-gpus.html">GPU tile-based</a></li>
+<li><a data-key="apple-platforms/metalfx" href="../apple-platforms/metalfx.html">Upscaling con MetalFX</a></li>
+<li><a data-key="apple-platforms/metal-4" href="../apple-platforms/metal-4.html">Metal 4</a></li>
+<li><a data-key="apple-platforms/visionos" href="../apple-platforms/visionos.html">visionOS</a></li>
+</ul></div>
+<div class="nav-section"><h4>Risorse</h4><ul>
+<li><a data-key="resources/examples" href="../resources/examples.html">Codice di esempio</a></li>
+</ul></div>
+</nav>
+<main class="content" id="main">
+<article><p class="crumb">Oltre</p><h1 id="ray-tracing">Ray Tracing<a class="headerlink" href="#ray-tracing" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
+<p>Rasterization answers one question very quickly: which triangle covers this pixel? Everything else, including shadows, reflections and ambient occlusion, has been an approximation layered on top: shadow maps, environment maps, screen-space tricks. Each breaks down somewhere.</p>
+<p><strong>Ray tracing</strong> answers a more general question: what does a ray starting <em>here</em> and going <em>that way</em> hit first? With that one operation, shadows, reflections and occlusion become exact and almost trivial to express. Metal has a ray tracing API that runs on all Apple silicon, with hardware acceleration on recent chips.</p>
+<p>This chapter is an introduction. The goal is to understand the pieces and trace your first rays, then add ray traced shadows to the rasterized renderer you already have.</p>
+<h2 id="acceleration-structures">Acceleration structures<a class="headerlink" href="#acceleration-structures" title="Permanent link">#</a></h2>
+<p>Testing a ray against every triangle in a scene is hopeless. An <strong>acceleration structure</strong> organizes the triangles in a tree of bounding boxes, so a ray can skip almost all of them. Metal builds and traverses this structure for you.</p>
+<p>There are two levels:</p>
+<ul>
+<li>A <strong>primitive acceleration structure</strong> holds the triangles of one mesh.</li>
+<li>An <strong>instance acceleration structure</strong> holds many instances of primitive structures, each with its own transform. Moving an object means updating a matrix and refitting the top level, not rebuilding the mesh.</li>
+</ul>
+<p>Check for support first:</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="k">guard</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">supportsRaytracing</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* fall back to shadow maps */</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">device</span><span class="o">-&gt;</span><span class="n">supportsRaytracing</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* fall back to shadow maps */</span><span class="w"> </span><span class="k">return</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+</div>
+
+<h2 id="building-a-primitive-structure">Building a primitive structure<a class="headerlink" href="#building-a-primitive-structure" title="Permanent link">#</a></h2>
+<p>Describe the geometry using the vertex and index buffers you already have:</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">geometry</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLAccelerationStructureTriangleGeometryDescriptor</span><span class="p">()</span>
+<span class="n">geometry</span><span class="p">.</span><span class="n">vertexBuffer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">vertexBuffers</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">buffer</span>
+<span class="n">geometry</span><span class="p">.</span><span class="n">vertexBufferOffset</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">vertexBuffers</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">offset</span>
+<span class="n">geometry</span><span class="p">.</span><span class="n">vertexStride</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">32</span><span class="w">                       </span><span class="c1">// positions are at offset 0</span>
+<span class="n">geometry</span><span class="p">.</span><span class="n">indexBuffer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">submesh</span><span class="p">.</span><span class="n">indexBuffer</span><span class="p">.</span><span class="n">buffer</span>
+<span class="n">geometry</span><span class="p">.</span><span class="n">indexBufferOffset</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">submesh</span><span class="p">.</span><span class="n">indexBuffer</span><span class="p">.</span><span class="n">offset</span>
+<span class="n">geometry</span><span class="p">.</span><span class="n">indexType</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">submesh</span><span class="p">.</span><span class="n">indexType</span>
+<span class="n">geometry</span><span class="p">.</span><span class="n">triangleCount</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">submesh</span><span class="p">.</span><span class="n">indexCount</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">3</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nv">descriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLPrimitiveAccelerationStructureDescriptor</span><span class="p">()</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">geometryDescriptors</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="n">geometry</span><span class="p">]</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">MTL</span><span class="o">::</span><span class="n">AccelerationStructureTriangleGeometryDescriptor</span><span class="o">*</span><span class="w"> </span><span class="n">geometry</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="n">MTL</span><span class="o">::</span><span class="n">AccelerationStructureTriangleGeometryDescriptor</span><span class="o">::</span><span class="n">alloc</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">();</span>
+<span class="n">geometry</span><span class="o">-&gt;</span><span class="n">setVertexBuffer</span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">vertexBuffer</span><span class="p">);</span>
+<span class="n">geometry</span><span class="o">-&gt;</span><span class="n">setVertexBufferOffset</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="n">geometry</span><span class="o">-&gt;</span><span class="n">setVertexStride</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">MeshVertex</span><span class="p">));</span><span class="w">        </span><span class="c1">// positions are at offset 0</span>
+<span class="n">geometry</span><span class="o">-&gt;</span><span class="n">setIndexBuffer</span><span class="p">(</span><span class="n">submesh</span><span class="p">.</span><span class="n">indexBuffer</span><span class="p">);</span>
+<span class="n">geometry</span><span class="o">-&gt;</span><span class="n">setIndexBufferOffset</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="n">geometry</span><span class="o">-&gt;</span><span class="n">setIndexType</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">IndexTypeUInt32</span><span class="p">);</span>
+<span class="n">geometry</span><span class="o">-&gt;</span><span class="n">setTriangleCount</span><span class="p">(</span><span class="n">submesh</span><span class="p">.</span><span class="n">indexCount</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span>
+
+<span class="n">MTL</span><span class="o">::</span><span class="n">PrimitiveAccelerationStructureDescriptor</span><span class="o">*</span><span class="w"> </span><span class="n">descriptor</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="n">MTL</span><span class="o">::</span><span class="n">PrimitiveAccelerationStructureDescriptor</span><span class="o">::</span><span class="n">alloc</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">();</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setGeometryDescriptors</span><span class="p">(</span><span class="n">NS</span><span class="o">::</span><span class="n">Array</span><span class="o">::</span><span class="n">array</span><span class="p">(</span><span class="n">geometry</span><span class="p">));</span>
+</code></pre></div>
+</div>
+
+<p>Building happens on the GPU, through a dedicated encoder:</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">sizes</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">accelerationStructureSizes</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">descriptor</span><span class="p">)</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">accelerationStructure</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeAccelerationStructure</span><span class="p">(</span><span class="n">size</span><span class="p">:</span><span class="w"> </span><span class="n">sizes</span><span class="p">.</span><span class="n">accelerationStructureSize</span><span class="p">)</span><span class="o">!</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">scratch</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeBuffer</span><span class="p">(</span><span class="n">length</span><span class="p">:</span><span class="w"> </span><span class="n">sizes</span><span class="p">.</span><span class="n">buildScratchBufferSize</span><span class="p">,</span><span class="w"> </span><span class="n">options</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">storageModePrivate</span><span class="p">)</span><span class="o">!</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nv">commandBuffer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">commandQueue</span><span class="p">.</span><span class="n">makeCommandBuffer</span><span class="p">()</span><span class="o">!</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">encoder</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">commandBuffer</span><span class="p">.</span><span class="n">makeAccelerationStructureCommandEncoder</span><span class="p">()</span><span class="o">!</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">build</span><span class="p">(</span><span class="n">accelerationStructure</span><span class="p">:</span><span class="w"> </span><span class="n">accelerationStructure</span><span class="p">,</span>
+<span class="w">              </span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">descriptor</span><span class="p">,</span>
+<span class="w">              </span><span class="n">scratchBuffer</span><span class="p">:</span><span class="w"> </span><span class="n">scratch</span><span class="p">,</span>
+<span class="w">              </span><span class="n">scratchBufferOffset</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">endEncoding</span><span class="p">()</span>
+<span class="n">commandBuffer</span><span class="p">.</span><span class="n">commit</span><span class="p">()</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">MTL</span><span class="o">::</span><span class="n">AccelerationStructureSizes</span><span class="w"> </span><span class="n">sizes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">device</span><span class="o">-&gt;</span><span class="n">accelerationStructureSizes</span><span class="p">(</span><span class="n">descriptor</span><span class="p">);</span>
+<span class="n">MTL</span><span class="o">::</span><span class="n">AccelerationStructure</span><span class="o">*</span><span class="w"> </span><span class="n">accelerationStructure</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="n">device</span><span class="o">-&gt;</span><span class="n">newAccelerationStructure</span><span class="p">(</span><span class="n">sizes</span><span class="p">.</span><span class="n">accelerationStructureSize</span><span class="p">);</span>
+<span class="n">MTL</span><span class="o">::</span><span class="n">Buffer</span><span class="o">*</span><span class="w"> </span><span class="n">scratch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">device</span><span class="o">-&gt;</span><span class="n">newBuffer</span><span class="p">(</span><span class="n">sizes</span><span class="p">.</span><span class="n">buildScratchBufferSize</span><span class="p">,</span><span class="w"> </span><span class="n">MTL</span><span class="o">::</span><span class="n">ResourceStorageModePrivate</span><span class="p">);</span>
+
+<span class="n">MTL</span><span class="o">::</span><span class="n">CommandBuffer</span><span class="o">*</span><span class="w"> </span><span class="n">commandBuffer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">commandQueue</span><span class="o">-&gt;</span><span class="n">commandBuffer</span><span class="p">();</span>
+<span class="n">MTL</span><span class="o">::</span><span class="n">AccelerationStructureCommandEncoder</span><span class="o">*</span><span class="w"> </span><span class="n">encoder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">commandBuffer</span><span class="o">-&gt;</span><span class="n">accelerationStructureCommandEncoder</span><span class="p">();</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">buildAccelerationStructure</span><span class="p">(</span><span class="n">accelerationStructure</span><span class="p">,</span><span class="w"> </span><span class="n">descriptor</span><span class="p">,</span><span class="w"> </span><span class="n">scratch</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">endEncoding</span><span class="p">();</span>
+<span class="n">commandBuffer</span><span class="o">-&gt;</span><span class="n">commit</span><span class="p">();</span>
+</code></pre></div>
+</div>
+
+<p>Build static geometry once at load time. The same encoder can <strong>compact</strong> a structure to save memory and <strong>refit</strong> one after vertices move.</p>
+<h2 id="intersecting-rays-in-a-shader">Intersecting rays in a shader<a class="headerlink" href="#intersecting-rays-in-a-shader" title="Permanent link">#</a></h2>
+<p>Ray tracing in Metal is not a separate pipeline. Any shader, whether a kernel or a fragment function, can receive an acceleration structure and shoot rays into it.</p>
+<div class="codehilite"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;metal_stdlib&gt;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">metal</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">raytracing</span><span class="p">;</span>
+
+<span class="n">kernel</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">trace</span><span class="p">(</span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="p">,</span><span class="w"> </span><span class="n">access</span><span class="o">::</span><span class="n">write</span><span class="o">&gt;</span><span class="w"> </span><span class="n">output</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
+<span class="w">                  </span><span class="n">constant</span><span class="w"> </span><span class="n">CameraUniforms</span><span class="w"> </span><span class="o">&amp;</span><span class="n">camera</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
+<span class="w">                  </span><span class="n">primitive_acceleration_structure</span><span class="w"> </span><span class="n">scene</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
+<span class="w">                  </span><span class="n">uint2</span><span class="w"> </span><span class="n">gid</span><span class="w"> </span><span class="p">[[</span><span class="na">thread_position_in_grid</span><span class="p">]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// A ray through this pixel.</span>
+<span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float2</span><span class="p">(</span><span class="n">output</span><span class="p">.</span><span class="n">get_width</span><span class="p">(),</span><span class="w"> </span><span class="n">output</span><span class="p">.</span><span class="n">get_height</span><span class="p">());</span>
+<span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">ndc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">float2</span><span class="p">(</span><span class="n">gid</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.5</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">size</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">ndc</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="n">ndc</span><span class="p">.</span><span class="n">y</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">ray</span><span class="w"> </span><span class="n">r</span><span class="p">;</span>
+<span class="w">    </span><span class="n">r</span><span class="p">.</span><span class="n">origin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">camera</span><span class="p">.</span><span class="n">position</span><span class="p">;</span>
+<span class="w">    </span><span class="n">r</span><span class="p">.</span><span class="n">direction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">camera</span><span class="p">.</span><span class="n">forward</span>
+<span class="w">                          </span><span class="o">+</span><span class="w"> </span><span class="n">ndc</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">camera</span><span class="p">.</span><span class="n">right</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">camera</span><span class="p">.</span><span class="n">tanHalfFov</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">camera</span><span class="p">.</span><span class="n">aspect</span>
+<span class="w">                          </span><span class="o">+</span><span class="w"> </span><span class="n">ndc</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">camera</span><span class="p">.</span><span class="n">up</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">camera</span><span class="p">.</span><span class="n">tanHalfFov</span><span class="p">);</span>
+<span class="w">    </span><span class="n">r</span><span class="p">.</span><span class="n">min_distance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.001</span><span class="p">;</span>
+<span class="w">    </span><span class="n">r</span><span class="p">.</span><span class="n">max_distance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">INFINITY</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">intersector</span><span class="o">&lt;</span><span class="n">triangle_data</span><span class="o">&gt;</span><span class="w"> </span><span class="n">i</span><span class="p">;</span>
+<span class="w">    </span><span class="n">intersection_result</span><span class="o">&lt;</span><span class="n">triangle_data</span><span class="o">&gt;</span><span class="w"> </span><span class="n">hit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="p">.</span><span class="n">intersect</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="w"> </span><span class="n">scene</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float3</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="mf">0.15</span><span class="p">);</span><span class="w">                 </span><span class="c1">// background</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">hit</span><span class="p">.</span><span class="n">type</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">intersection_type</span><span class="o">::</span><span class="n">triangle</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Visualize the barycentric coordinates of the hit.</span>
+<span class="w">        </span><span class="n">float2</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hit</span><span class="p">.</span><span class="n">triangle_barycentric_coord</span><span class="p">;</span>
+<span class="w">        </span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float3</span><span class="p">(</span><span class="mf">1.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">y</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">output</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">float4</span><span class="p">(</span><span class="n">color</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">),</span><span class="w"> </span><span class="n">gid</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="n">computeEncoder</span><span class="p">.</span><span class="n">setAccelerationStructure</span><span class="p">(</span><span class="n">accelerationStructure</span><span class="p">,</span><span class="w"> </span><span class="n">bufferIndex</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">computeEncoder</span><span class="o">-&gt;</span><span class="n">setAccelerationStructure</span><span class="p">(</span><span class="n">accelerationStructure</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+</code></pre></div>
+</div>
+
+<p>The intersection result tells you the distance to the hit, which primitive and which geometry were hit, and the barycentric coordinates of the hit point within the triangle. With the primitive index you look up the triangle's vertices in your own buffers and interpolate normals and texture coordinates. Metal can also store small per-primitive data inside the structure to make that lookup cheaper.</p>
+<p>Run this kernel, show the output texture with the full-screen triangle, and you have a ray traced image of your mesh with no rasterization involved.</p>
+<h2 id="hybrid-rendering-ray-traced-shadows">Hybrid rendering: ray traced shadows<a class="headerlink" href="#hybrid-rendering-ray-traced-shadows" title="Permanent link">#</a></h2>
+<p>A full path tracer is a project of its own. The most practical use of ray tracing is <strong>hybrid</strong>: rasterize the scene as before, and use rays only for the effects that rasterization does badly.</p>
+<p>Shadows are the easiest win. In the lighting fragment function, shoot one ray from the surface toward the light. If it hits anything, the point is in shadow:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="nf">traceShadow</span><span class="p">(</span><span class="n">float3</span><span class="w"> </span><span class="n">worldPosition</span><span class="p">,</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="n">normal</span><span class="p">,</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="n">lightPosition</span><span class="p">,</span>
+<span class="w">                         </span><span class="n">primitive_acceleration_structure</span><span class="w"> </span><span class="n">scene</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">toLight</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lightPosition</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">worldPosition</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">distance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">length</span><span class="p">(</span><span class="n">toLight</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">ray</span><span class="w"> </span><span class="n">r</span><span class="p">;</span>
+<span class="w">    </span><span class="n">r</span><span class="p">.</span><span class="n">origin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">worldPosition</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">normal</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.001</span><span class="p">;</span><span class="w">     </span><span class="c1">// step off the surface</span>
+<span class="w">    </span><span class="n">r</span><span class="p">.</span><span class="n">direction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">toLight</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">distance</span><span class="p">;</span>
+<span class="w">    </span><span class="n">r</span><span class="p">.</span><span class="n">min_distance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.001</span><span class="p">;</span>
+<span class="w">    </span><span class="n">r</span><span class="p">.</span><span class="n">max_distance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">distance</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">intersector</span><span class="o">&lt;</span><span class="n">triangle_data</span><span class="o">&gt;</span><span class="w"> </span><span class="n">i</span><span class="p">;</span>
+<span class="w">    </span><span class="n">i</span><span class="p">.</span><span class="n">accept_any_intersection</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span><span class="w">               </span><span class="c1">// any hit will do</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">i</span><span class="p">.</span><span class="n">intersect</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="w"> </span><span class="n">scene</span><span class="p">).</span><span class="n">type</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">intersection_type</span><span class="o">::</span><span class="n">none</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_main</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
+<span class="w">                              </span><span class="n">constant</span><span class="w"> </span><span class="n">FragmentUniforms</span><span class="w"> </span><span class="o">&amp;</span><span class="n">uniforms</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
+<span class="w">                              </span><span class="n">primitive_acceleration_structure</span><span class="w"> </span><span class="n">scene</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">3</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">lit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">traceShadow</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">worldPosition</span><span class="p">,</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">normal</span><span class="p">),</span><span class="w"> </span><span class="n">light</span><span class="p">.</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="n">scene</span><span class="p">);</span>
+<span class="w">    </span><span class="n">color</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">lit</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">diffuse</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">specular</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="n">encoder</span><span class="p">.</span><span class="n">setFragmentAccelerationStructure</span><span class="p">(</span><span class="n">accelerationStructure</span><span class="p">,</span><span class="w"> </span><span class="n">bufferIndex</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setFragmentAccelerationStructure</span><span class="p">(</span><span class="n">accelerationStructure</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span>
+</code></pre></div>
+</div>
+
+<p>Compare with <a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a> and <a href="../advanced-lighting/point-shadows.html">Point Shadows</a>: no extra passes, no shadow textures, no bias tuning, no resolution limit, and it works for any type of light. <code>accept_any_intersection(true)</code> lets traversal stop at the first hit, which makes shadow rays cheap.</p>
+<p>The same pattern gives:</p>
+<ul>
+<li><strong>Reflections</strong>: trace along <code>reflect(-V, N)</code> and shade the hit point.</li>
+<li><strong>Ambient occlusion</strong>: trace a few short rays in the hemisphere above the surface and count the hits. Real occlusion, replacing <a href="../advanced-lighting/ssao.html">SSAO</a>.</li>
+<li><strong>Soft shadows</strong>: aim rays at random points on an area light and average over frames.</li>
+</ul>
+<div class="lm-demo" data-demo="ray-tracing" data-fallback="../../assets/img/beyond/ray-tracing.webp"></div>
+
+<h2 id="noise-and-denoising">Noise and denoising<a class="headerlink" href="#noise-and-denoising" title="Permanent link">#</a></h2>
+<p>One ray per pixel gives hard shadows and mirror reflections. Soft effects need many rays in random directions, and a real-time budget allows only a few per pixel. The result is noisy. The standard remedy is to <strong>accumulate</strong> results over several frames and to <strong>denoise</strong>. Metal Performance Shaders includes <code>MPSSVGFDenoiser</code>, and MetalFX offers denoised upscaling on recent systems.</p>
+<h2 id="going-further">Going further<a class="headerlink" href="#going-further" title="Permanent link">#</a></h2>
+<ul>
+<li><strong>Instance acceleration structures</strong> for scenes with many moving objects (<code>MTLInstanceAccelerationStructureDescriptor</code>).</li>
+<li><strong>Intersection functions</strong> for custom primitives such as spheres and curves, and for alpha-tested geometry like foliage.</li>
+<li><strong>Path tracing</strong>: follow rays through several bounces to compute global illumination. Apple's sample code "Accelerating ray tracing using Metal" is a compact, readable path tracer and the natural next step.</li>
+</ul>
+<h2 id="the-end-and-the-beginning">The end, and the beginning<a class="headerlink" href="#the-end-and-the-beginning" title="Permanent link">#</a></h2>
+<p>This is the last chapter. You started with an empty view and now have the vocabulary to read any Metal sample, engine source or graphics paper. Pick something you want to see on screen and build it. Read Apple's sample code, watch the Metal sessions from WWDC, and keep the frame debugger open. There is always one more technique to learn, and you now have the foundation to learn it.</p></article><nav class="pager" id="pager"><a class="prev" href="../beyond/tessellation.html"><small>Precedente</small>Tassellazione</a><a class="next" href="../beyond/mesh-shaders.html"><small>Successivo</small>Mesh shader</a></nav>
+<footer class="site-footer">
+  <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
+  <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
+</footer>
+</main>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#acceleration-structures">Acceleration structures</a></li><li><a href="#building-a-primitive-structure">Building a primitive structure</a></li><li><a href="#intersecting-rays-in-a-shader">Intersecting rays in a shader</a></li><li><a href="#hybrid-rendering-ray-traced-shadows">Hybrid rendering: ray traced shadows</a></li><li><a href="#noise-and-denoising">Noise and denoising</a></li><li><a href="#going-further">Going further</a></li><li><a href="#the-end-and-the-beginning">The end, and the beginning</a></li></ul></aside>
+</div>
+<script defer src="../../assets/textures.js"></script>
+<script defer src="../../assets/live.js"></script>
+<script defer src="../../assets/demos.js"></script>
+<script defer src="../../assets/site.js"></script>
+</body>
+</html>

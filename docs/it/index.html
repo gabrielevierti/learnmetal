@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="it" data-root="../" data-site="">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LearnMetal | Impara la grafica con Metal in Swift e C++</title>
+<meta name="description" content="Impara la grafica 3D con Metal di Apple, dal primo triangolo al rendering fisicamente corretto, in Swift o C++.">
+<meta name="author" content="Gabriele Vierti">
+<link rel="icon" href="../assets/favicon.png">
+<script>
+(function () {
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem("theme"); l = localStorage.getItem("lang"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  d.dataset.theme = t;
+  var q = /[?&]lang=(swift|cpp)/.exec(location.search);      // links can pick a language: page.html?lang=cpp
+  if (q) l = q[1];
+  d.dataset.lang = l === "cpp" ? "cpp" : "swift";
+})();
+</script>
+<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body class="home" data-key="">
+<a class="skip" href="#main">Vai al contenuto</a>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Apri l'elenco dei capitoli">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a class="brand" href="index.html"><img src="../assets/logo.png" alt="LearnMetal" width="136" height="32"></a>
+  <div class="search" role="search">
+    <input id="search" type="search" placeholder="Cerca" aria-label="Cerca" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results" hidden></div>
+  </div>
+  <button id="search-toggle" class="icon-btn" aria-label="Cerca">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <div class="lang-switch site-lang" role="group" aria-label="Lingua del testo">
+    <a href="../index.html">EN</a>
+    <a href="../it/index.html" aria-current="true">IT</a>
+  </div>
+  <div class="lang-switch" role="group" aria-label="Linguaggio del codice">
+    <button type="button" data-set-lang="swift">Swift</button>
+    <button type="button" data-set-lang="cpp">C++</button>
+  </div>
+  <a class="icon-btn" href="https://github.com/gabrielevierti" aria-label="Gabriele Vierti on GitHub"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Passa dal tema chiaro a quello scuro">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"/></svg>
+  </button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Capitoli">
+<div class="nav-section"><h4>Per iniziare</h4><ul>
+<li><a data-key="getting-started/introduction" href="getting-started/introduction.html">Introduzione</a></li>
+<li><a data-key="getting-started/project-setup" href="getting-started/project-setup.html">Preparare il progetto</a></li>
+<li><a data-key="getting-started/hello-view" href="getting-started/hello-view.html">La prima vista</a></li>
+<li><a data-key="getting-started/hello-triangle" href="getting-started/hello-triangle.html">Il primo triangolo</a></li>
+<li><a data-key="getting-started/shaders" href="getting-started/shaders.html">Shader</a></li>
+<li><a data-key="getting-started/textures" href="getting-started/textures.html">Texture</a></li>
+<li><a data-key="getting-started/transformations" href="getting-started/transformations.html">Trasformazioni</a></li>
+<li><a data-key="getting-started/coordinate-systems" href="getting-started/coordinate-systems.html">Sistemi di coordinate</a></li>
+<li><a data-key="getting-started/camera" href="getting-started/camera.html">Camera</a></li>
+<li><a data-key="getting-started/review" href="getting-started/review.html">Riepilogo</a></li>
+</ul></div>
+<div class="nav-section"><h4>Illuminazione</h4><ul>
+<li><a data-key="lighting/colors" href="lighting/colors.html">Colori</a></li>
+<li><a data-key="lighting/basic-lighting" href="lighting/basic-lighting.html">Illuminazione di base</a></li>
+<li><a data-key="lighting/materials" href="lighting/materials.html">Materiali</a></li>
+<li><a data-key="lighting/lighting-maps" href="lighting/lighting-maps.html">Mappe di illuminazione</a></li>
+<li><a data-key="lighting/light-casters" href="lighting/light-casters.html">Tipi di luce</a></li>
+<li><a data-key="lighting/multiple-lights" href="lighting/multiple-lights.html">Più luci</a></li>
+<li><a data-key="lighting/review" href="lighting/review.html">Riepilogo</a></li>
+</ul></div>
+<div class="nav-section"><h4>Caricare i modelli</h4><ul>
+<li><a data-key="model-loading/model-io" href="model-loading/model-io.html">Model I/O</a></li>
+<li><a data-key="model-loading/mesh" href="model-loading/mesh.html">Mesh</a></li>
+<li><a data-key="model-loading/model" href="model-loading/model.html">Modello</a></li>
+</ul></div>
+<div class="nav-section"><h4>Metal avanzato</h4><ul>
+<li><a data-key="advanced-metal/depth-testing" href="advanced-metal/depth-testing.html">Test di profondità</a></li>
+<li><a data-key="advanced-metal/stencil-testing" href="advanced-metal/stencil-testing.html">Test di stencil</a></li>
+<li><a data-key="advanced-metal/blending" href="advanced-metal/blending.html">Blending</a></li>
+<li><a data-key="advanced-metal/face-culling" href="advanced-metal/face-culling.html">Face culling</a></li>
+<li><a data-key="advanced-metal/render-targets" href="advanced-metal/render-targets.html">Render target</a></li>
+<li><a data-key="advanced-metal/cubemaps" href="advanced-metal/cubemaps.html">Cubemap</a></li>
+<li><a data-key="advanced-metal/advanced-data" href="advanced-metal/advanced-data.html">Dati avanzati</a></li>
+<li><a data-key="advanced-metal/advanced-msl" href="advanced-metal/advanced-msl.html">MSL avanzato</a></li>
+<li><a data-key="advanced-metal/no-geometry-shaders" href="advanced-metal/no-geometry-shaders.html">Vivere senza geometry shader</a></li>
+<li><a data-key="advanced-metal/instancing" href="advanced-metal/instancing.html">Instancing</a></li>
+<li><a data-key="advanced-metal/anti-aliasing" href="advanced-metal/anti-aliasing.html">Anti-aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Illuminazione avanzata</h4><ul>
+<li><a data-key="advanced-lighting/blinn-phong" href="advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a data-key="advanced-lighting/gamma-correction" href="advanced-lighting/gamma-correction.html">Correzione gamma</a></li>
+<li><a data-key="advanced-lighting/shadow-mapping" href="advanced-lighting/shadow-mapping.html">Shadow mapping</a></li>
+<li><a data-key="advanced-lighting/point-shadows" href="advanced-lighting/point-shadows.html">Ombre da luci puntiformi</a></li>
+<li><a data-key="advanced-lighting/normal-mapping" href="advanced-lighting/normal-mapping.html">Normal mapping</a></li>
+<li><a data-key="advanced-lighting/parallax-mapping" href="advanced-lighting/parallax-mapping.html">Parallax mapping</a></li>
+<li><a data-key="advanced-lighting/hdr" href="advanced-lighting/hdr.html">HDR</a></li>
+<li><a data-key="advanced-lighting/bloom" href="advanced-lighting/bloom.html">Bloom</a></li>
+<li><a data-key="advanced-lighting/deferred-shading" href="advanced-lighting/deferred-shading.html">Deferred shading</a></li>
+<li><a data-key="advanced-lighting/ssao" href="advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a data-key="pbr/theory" href="pbr/theory.html">Teoria</a></li>
+<li><a data-key="pbr/lighting" href="pbr/lighting.html">Illuminazione</a></li>
+<li><a data-key="pbr/diffuse-irradiance" href="pbr/diffuse-irradiance.html">Irradianza diffusa</a></li>
+<li><a data-key="pbr/specular-ibl" href="pbr/specular-ibl.html">IBL speculare</a></li>
+</ul></div>
+<div class="nav-section"><h4>In pratica</h4><ul>
+<li><a data-key="in-practice/debugging" href="in-practice/debugging.html">Debug</a></li>
+<li><a data-key="in-practice/text-rendering" href="in-practice/text-rendering.html">Rendering del testo</a></li>
+<li><a data-key="in-practice/2d-game" href="in-practice/2d-game.html">Un gioco 2D</a></li>
+</ul></div>
+<div class="nav-section"><h4>Oltre</h4><ul>
+<li><a data-key="beyond/compute-shaders" href="beyond/compute-shaders.html">Compute shader</a></li>
+<li><a data-key="beyond/tessellation" href="beyond/tessellation.html">Tassellazione</a></li>
+<li><a data-key="beyond/ray-tracing" href="beyond/ray-tracing.html">Ray tracing</a></li>
+<li><a data-key="beyond/mesh-shaders" href="beyond/mesh-shaders.html">Mesh shader</a></li>
+</ul></div>
+<div class="nav-section"><h4>Piattaforme Apple</h4><ul>
+<li><a data-key="apple-platforms/tile-based-gpus" href="apple-platforms/tile-based-gpus.html">GPU tile-based</a></li>
+<li><a data-key="apple-platforms/metalfx" href="apple-platforms/metalfx.html">Upscaling con MetalFX</a></li>
+<li><a data-key="apple-platforms/metal-4" href="apple-platforms/metal-4.html">Metal 4</a></li>
+<li><a data-key="apple-platforms/visionos" href="apple-platforms/visionos.html">visionOS</a></li>
+</ul></div>
+<div class="nav-section"><h4>Risorse</h4><ul>
+<li><a data-key="resources/examples" href="resources/examples.html">Codice di esempio</a></li>
+</ul></div>
+</nav>
+<main class="content" id="main">
+
+<section class="hero">
+  <div class="hero-text">
+    <h1>Impara Metal cambiando il codice e guardando i pixel muoversi.</h1>
+    <p>Impara la grafica 3D con Metal di Apple, dal primo triangolo al rendering fisicamente corretto, in Swift o C++. Ogni tecnica ha una demo interattiva: modifica lo shader nella pagina e si ricompila mentre scrivi.</p>
+    <p class="hero-actions">
+      <a class="cta" href="getting-started/introduction.html">Inizia dal primo capitolo</a>
+      <a class="cta ghost" href="resources/examples.html">Scarica i progetti di esempio</a>
+    </p>
+  </div>
+  <div class="hero-demo"><div class="lm-demo" data-demo="pbr" data-collapse="1"></div></div>
+</section><section class="syllabus"><div class="syl-top"><h2>Il percorso</h2><p id="progress" class="progress" hidden></p></div><ol><li><div class="syl-head"><h3><a href="getting-started/introduction.html">Per iniziare</a></h3><p>Apri una vista, disegna un triangolo, applicagli una texture, muovilo con le matrici e giraci attorno con una camera.</p></div><ul><li><a data-key="getting-started/introduction" href="getting-started/introduction.html">Introduzione</a></li><li><a data-key="getting-started/project-setup" href="getting-started/project-setup.html">Preparare il progetto</a></li><li><a data-key="getting-started/hello-view" href="getting-started/hello-view.html">La prima vista</a></li><li><a data-key="getting-started/hello-triangle" href="getting-started/hello-triangle.html">Il primo triangolo</a></li><li><a data-key="getting-started/shaders" href="getting-started/shaders.html">Shader</a></li><li><a data-key="getting-started/textures" href="getting-started/textures.html">Texture</a></li><li><a data-key="getting-started/transformations" href="getting-started/transformations.html">Trasformazioni</a></li><li><a data-key="getting-started/coordinate-systems" href="getting-started/coordinate-systems.html">Sistemi di coordinate</a></li><li><a data-key="getting-started/camera" href="getting-started/camera.html">Camera</a></li><li><a data-key="getting-started/review" href="getting-started/review.html">Riepilogo</a></li></ul></li><li><div class="syl-head"><h3><a href="lighting/colors.html">Illuminazione</a></h3><p>Il modello di Phong, i materiali, le mappe di illuminazione e ogni tipo di sorgente di luce.</p></div><ul><li><a data-key="lighting/colors" href="lighting/colors.html">Colori</a></li><li><a data-key="lighting/basic-lighting" href="lighting/basic-lighting.html">Illuminazione di base</a></li><li><a data-key="lighting/materials" href="lighting/materials.html">Materiali</a></li><li><a data-key="lighting/lighting-maps" href="lighting/lighting-maps.html">Mappe di illuminazione</a></li><li><a data-key="lighting/light-casters" href="lighting/light-casters.html">Tipi di luce</a></li><li><a data-key="lighting/multiple-lights" href="lighting/multiple-lights.html">Più luci</a></li><li><a data-key="lighting/review" href="lighting/review.html">Riepilogo</a></li></ul></li><li><div class="syl-head"><h3><a href="model-loading/model-io.html">Caricare i modelli</a></h3><p>Trasforma i file dei modelli in vertex buffer, index buffer e materiali con Model I/O.</p></div><ul><li><a data-key="model-loading/model-io" href="model-loading/model-io.html">Model I/O</a></li><li><a data-key="model-loading/mesh" href="model-loading/mesh.html">Mesh</a></li><li><a data-key="model-loading/model" href="model-loading/model.html">Modello</a></li></ul></li><li><div class="syl-head"><h3><a href="advanced-metal/depth-testing.html">Metal avanzato</a></h3><p>Profondità e stencil, blending, render target, cubemap, instancing e anti-aliasing.</p></div><ul><li><a data-key="advanced-metal/depth-testing" href="advanced-metal/depth-testing.html">Test di profondità</a></li><li><a data-key="advanced-metal/stencil-testing" href="advanced-metal/stencil-testing.html">Test di stencil</a></li><li><a data-key="advanced-metal/blending" href="advanced-metal/blending.html">Blending</a></li><li><a data-key="advanced-metal/face-culling" href="advanced-metal/face-culling.html">Face culling</a></li><li><a data-key="advanced-metal/render-targets" href="advanced-metal/render-targets.html">Render target</a></li><li><a data-key="advanced-metal/cubemaps" href="advanced-metal/cubemaps.html">Cubemap</a></li><li><a data-key="advanced-metal/advanced-data" href="advanced-metal/advanced-data.html">Dati avanzati</a></li><li><a data-key="advanced-metal/advanced-msl" href="advanced-metal/advanced-msl.html">MSL avanzato</a></li><li><a data-key="advanced-metal/no-geometry-shaders" href="advanced-metal/no-geometry-shaders.html">Vivere senza geometry shader</a></li><li><a data-key="advanced-metal/instancing" href="advanced-metal/instancing.html">Instancing</a></li><li><a data-key="advanced-metal/anti-aliasing" href="advanced-metal/anti-aliasing.html">Anti-aliasing</a></li></ul></li><li><div class="syl-head"><h3><a href="advanced-lighting/blinn-phong.html">Illuminazione avanzata</a></h3><p>Ombre, normal e parallax mapping, HDR, bloom, deferred shading e SSAO.</p></div><ul><li><a data-key="advanced-lighting/blinn-phong" href="advanced-lighting/blinn-phong.html">Blinn-Phong</a></li><li><a data-key="advanced-lighting/gamma-correction" href="advanced-lighting/gamma-correction.html">Correzione gamma</a></li><li><a data-key="advanced-lighting/shadow-mapping" href="advanced-lighting/shadow-mapping.html">Shadow mapping</a></li><li><a data-key="advanced-lighting/point-shadows" href="advanced-lighting/point-shadows.html">Ombre da luci puntiformi</a></li><li><a data-key="advanced-lighting/normal-mapping" href="advanced-lighting/normal-mapping.html">Normal mapping</a></li><li><a data-key="advanced-lighting/parallax-mapping" href="advanced-lighting/parallax-mapping.html">Parallax mapping</a></li><li><a data-key="advanced-lighting/hdr" href="advanced-lighting/hdr.html">HDR</a></li><li><a data-key="advanced-lighting/bloom" href="advanced-lighting/bloom.html">Bloom</a></li><li><a data-key="advanced-lighting/deferred-shading" href="advanced-lighting/deferred-shading.html">Deferred shading</a></li><li><a data-key="advanced-lighting/ssao" href="advanced-lighting/ssao.html">SSAO</a></li></ul></li><li><div class="syl-head"><h3><a href="pbr/theory.html">PBR</a></h3><p>Materiali fisicamente corretti e illuminazione basata su immagini.</p></div><ul><li><a data-key="pbr/theory" href="pbr/theory.html">Teoria</a></li><li><a data-key="pbr/lighting" href="pbr/lighting.html">Illuminazione</a></li><li><a data-key="pbr/diffuse-irradiance" href="pbr/diffuse-irradiance.html">Irradianza diffusa</a></li><li><a data-key="pbr/specular-ibl" href="pbr/specular-ibl.html">IBL speculare</a></li></ul></li><li><div class="syl-head"><h3><a href="in-practice/debugging.html">In pratica</a></h3><p>Strumenti di debug, rendering del testo e un piccolo gioco giocabile.</p></div><ul><li><a data-key="in-practice/debugging" href="in-practice/debugging.html">Debug</a></li><li><a data-key="in-practice/text-rendering" href="in-practice/text-rendering.html">Rendering del testo</a></li><li><a data-key="in-practice/2d-game" href="in-practice/2d-game.html">Un gioco 2D</a></li></ul></li><li><div class="syl-head"><h3><a href="beyond/compute-shaders.html">Oltre</a></h3><p>Compute shader, tassellazione, ray tracing e mesh shader.</p></div><ul><li><a data-key="beyond/compute-shaders" href="beyond/compute-shaders.html">Compute shader</a></li><li><a data-key="beyond/tessellation" href="beyond/tessellation.html">Tassellazione</a></li><li><a data-key="beyond/ray-tracing" href="beyond/ray-tracing.html">Ray tracing</a></li><li><a data-key="beyond/mesh-shaders" href="beyond/mesh-shaders.html">Mesh shader</a></li></ul></li><li><div class="syl-head"><h3><a href="apple-platforms/tile-based-gpus.html">Piattaforme Apple</a></h3><p>Ciò che è specifico dell&#x27;hardware Apple: GPU tile-based, MetalFX, Metal 4 e visionOS.</p></div><ul><li><a data-key="apple-platforms/tile-based-gpus" href="apple-platforms/tile-based-gpus.html">GPU tile-based</a></li><li><a data-key="apple-platforms/metalfx" href="apple-platforms/metalfx.html">Upscaling con MetalFX</a></li><li><a data-key="apple-platforms/metal-4" href="apple-platforms/metal-4.html">Metal 4</a></li><li><a data-key="apple-platforms/visionos" href="apple-platforms/visionos.html">visionOS</a></li></ul></li><li><div class="syl-head"><h3><a href="resources/examples.html">Risorse</a></h3><p>Progetti di esempio eseguibili per Swift e C++.</p></div><ul><li><a data-key="resources/examples" href="resources/examples.html">Codice di esempio</a></li></ul></li></ol></section><article class='home-notes'><h2 id="come-funziona">Come funziona<a class="headerlink" href="#come-funziona" title="Permanent link">#</a></h2>
+<p>Ogni capitolo introduce un'idea, spiega perché funziona e mostra il codice che la realizza. I capitoli si appoggiano l'uno all'altro: alla fine hai un piccolo renderer che capisci riga per riga.</p>
+<ul>
+<li><strong>Swift o C++.</strong> Scegli il linguaggio con il selettore nella barra in alto. Swift usa MetalKit; C++ usa metal-cpp di Apple con GLFW. Ogni capitolo è disponibile in entrambi.</li>
+<li><strong>Demo interattive.</strong> Le demo girano nel browser. Lo shader che modifichi è vero Metal Shading Language, tradotto al volo per poter girare su qualsiasi piattaforma.</li>
+<li><strong>Progetti di esempio.</strong> I progetti eseguibili dei capitoli principali sono nel repository e si possono <a href="resources/examples.html">scaricare</a>.</li>
+<li><strong>Italiano in corso.</strong> La traduzione procede capitolo per capitolo. Quelli non ancora tradotti restano in inglese e sono segnalati.</li>
+</ul>
+<p>Per eseguire Metal serve un Mac con Xcode. Arrivi da OpenGL, Vulkan o Direct3D? Cerca i riquadri <strong>Coming from OpenGL</strong>.</p></article>
+<footer class="site-footer">
+  <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
+  <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
+</footer>
+</main>
+
+</div>
+<script defer src="../assets/textures.js"></script>
+<script defer src="../assets/live.js"></script>
+<script defer src="../assets/demos.js"></script>
+<script defer src="../assets/site.js"></script>
+</body>
+</html>

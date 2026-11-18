@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="it" data-root="../../" data-site="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preparare il progetto | learnmetal</title>
+<meta name="description" content="Per iniziare: Preparare il progetto. Impara la grafica 3D con Metal di Apple, dal primo triangolo al rendering fisicamente corretto, in Swift o C++.">
+<meta name="author" content="Gabriele Vierti">
+<link rel="icon" href="../../assets/favicon.png">
+<script>
+(function () {
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem("theme"); l = localStorage.getItem("lang"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  d.dataset.theme = t;
+  var q = /[?&]lang=(swift|cpp)/.exec(location.search);      // links can pick a language: page.html?lang=cpp
+  if (q) l = q[1];
+  d.dataset.lang = l === "cpp" ? "cpp" : "swift";
+})();
+</script>
+<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../../assets/code.css">
+</head>
+<body class="" data-key="getting-started/project-setup">
+<a class="skip" href="#main">Vai al contenuto</a>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Apri l'elenco dei capitoli">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a class="brand" href="../index.html"><img src="../../assets/logo.png" alt="LearnMetal" width="136" height="32"></a>
+  <div class="search" role="search">
+    <input id="search" type="search" placeholder="Cerca" aria-label="Cerca" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results" hidden></div>
+  </div>
+  <button id="search-toggle" class="icon-btn" aria-label="Cerca">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <div class="lang-switch site-lang" role="group" aria-label="Lingua del testo">
+    <a href="../../getting-started/project-setup.html">EN</a>
+    <a href="../../it/getting-started/project-setup.html" aria-current="true">IT</a>
+  </div>
+  <div class="lang-switch" role="group" aria-label="Linguaggio del codice">
+    <button type="button" data-set-lang="swift">Swift</button>
+    <button type="button" data-set-lang="cpp">C++</button>
+  </div>
+  <a class="icon-btn" href="https://github.com/gabrielevierti" aria-label="Gabriele Vierti on GitHub"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Passa dal tema chiaro a quello scuro">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"/></svg>
+  </button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Capitoli">
+<div class="nav-section"><h4>Per iniziare</h4><ul>
+<li><a data-key="getting-started/introduction" href="../getting-started/introduction.html">Introduzione</a></li>
+<li><a class="active" aria-current="page" data-key="getting-started/project-setup" href="../getting-started/project-setup.html">Preparare il progetto</a></li>
+<li><a data-key="getting-started/hello-view" href="../getting-started/hello-view.html">La prima vista</a></li>
+<li><a data-key="getting-started/hello-triangle" href="../getting-started/hello-triangle.html">Il primo triangolo</a></li>
+<li><a data-key="getting-started/shaders" href="../getting-started/shaders.html">Shader</a></li>
+<li><a data-key="getting-started/textures" href="../getting-started/textures.html">Texture</a></li>
+<li><a data-key="getting-started/transformations" href="../getting-started/transformations.html">Trasformazioni</a></li>
+<li><a data-key="getting-started/coordinate-systems" href="../getting-started/coordinate-systems.html">Sistemi di coordinate</a></li>
+<li><a data-key="getting-started/camera" href="../getting-started/camera.html">Camera</a></li>
+<li><a data-key="getting-started/review" href="../getting-started/review.html">Riepilogo</a></li>
+</ul></div>
+<div class="nav-section"><h4>Illuminazione</h4><ul>
+<li><a data-key="lighting/colors" href="../lighting/colors.html">Colori</a></li>
+<li><a data-key="lighting/basic-lighting" href="../lighting/basic-lighting.html">Illuminazione di base</a></li>
+<li><a data-key="lighting/materials" href="../lighting/materials.html">Materiali</a></li>
+<li><a data-key="lighting/lighting-maps" href="../lighting/lighting-maps.html">Mappe di illuminazione</a></li>
+<li><a data-key="lighting/light-casters" href="../lighting/light-casters.html">Tipi di luce</a></li>
+<li><a data-key="lighting/multiple-lights" href="../lighting/multiple-lights.html">Più luci</a></li>
+<li><a data-key="lighting/review" href="../lighting/review.html">Riepilogo</a></li>
+</ul></div>
+<div class="nav-section"><h4>Caricare i modelli</h4><ul>
+<li><a data-key="model-loading/model-io" href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a data-key="model-loading/mesh" href="../model-loading/mesh.html">Mesh</a></li>
+<li><a data-key="model-loading/model" href="../model-loading/model.html">Modello</a></li>
+</ul></div>
+<div class="nav-section"><h4>Metal avanzato</h4><ul>
+<li><a data-key="advanced-metal/depth-testing" href="../advanced-metal/depth-testing.html">Test di profondità</a></li>
+<li><a data-key="advanced-metal/stencil-testing" href="../advanced-metal/stencil-testing.html">Test di stencil</a></li>
+<li><a data-key="advanced-metal/blending" href="../advanced-metal/blending.html">Blending</a></li>
+<li><a data-key="advanced-metal/face-culling" href="../advanced-metal/face-culling.html">Face culling</a></li>
+<li><a data-key="advanced-metal/render-targets" href="../advanced-metal/render-targets.html">Render target</a></li>
+<li><a data-key="advanced-metal/cubemaps" href="../advanced-metal/cubemaps.html">Cubemap</a></li>
+<li><a data-key="advanced-metal/advanced-data" href="../advanced-metal/advanced-data.html">Dati avanzati</a></li>
+<li><a data-key="advanced-metal/advanced-msl" href="../advanced-metal/advanced-msl.html">MSL avanzato</a></li>
+<li><a data-key="advanced-metal/no-geometry-shaders" href="../advanced-metal/no-geometry-shaders.html">Vivere senza geometry shader</a></li>
+<li><a data-key="advanced-metal/instancing" href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a data-key="advanced-metal/anti-aliasing" href="../advanced-metal/anti-aliasing.html">Anti-aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Illuminazione avanzata</h4><ul>
+<li><a data-key="advanced-lighting/blinn-phong" href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a data-key="advanced-lighting/gamma-correction" href="../advanced-lighting/gamma-correction.html">Correzione gamma</a></li>
+<li><a data-key="advanced-lighting/shadow-mapping" href="../advanced-lighting/shadow-mapping.html">Shadow mapping</a></li>
+<li><a data-key="advanced-lighting/point-shadows" href="../advanced-lighting/point-shadows.html">Ombre da luci puntiformi</a></li>
+<li><a data-key="advanced-lighting/normal-mapping" href="../advanced-lighting/normal-mapping.html">Normal mapping</a></li>
+<li><a data-key="advanced-lighting/parallax-mapping" href="../advanced-lighting/parallax-mapping.html">Parallax mapping</a></li>
+<li><a data-key="advanced-lighting/hdr" href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a data-key="advanced-lighting/bloom" href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a data-key="advanced-lighting/deferred-shading" href="../advanced-lighting/deferred-shading.html">Deferred shading</a></li>
+<li><a data-key="advanced-lighting/ssao" href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a data-key="pbr/theory" href="../pbr/theory.html">Teoria</a></li>
+<li><a data-key="pbr/lighting" href="../pbr/lighting.html">Illuminazione</a></li>
+<li><a data-key="pbr/diffuse-irradiance" href="../pbr/diffuse-irradiance.html">Irradianza diffusa</a></li>
+<li><a data-key="pbr/specular-ibl" href="../pbr/specular-ibl.html">IBL speculare</a></li>
+</ul></div>
+<div class="nav-section"><h4>In pratica</h4><ul>
+<li><a data-key="in-practice/debugging" href="../in-practice/debugging.html">Debug</a></li>
+<li><a data-key="in-practice/text-rendering" href="../in-practice/text-rendering.html">Rendering del testo</a></li>
+<li><a data-key="in-practice/2d-game" href="../in-practice/2d-game.html">Un gioco 2D</a></li>
+</ul></div>
+<div class="nav-section"><h4>Oltre</h4><ul>
+<li><a data-key="beyond/compute-shaders" href="../beyond/compute-shaders.html">Compute shader</a></li>
+<li><a data-key="beyond/tessellation" href="../beyond/tessellation.html">Tassellazione</a></li>
+<li><a data-key="beyond/ray-tracing" href="../beyond/ray-tracing.html">Ray tracing</a></li>
+<li><a data-key="beyond/mesh-shaders" href="../beyond/mesh-shaders.html">Mesh shader</a></li>
+</ul></div>
+<div class="nav-section"><h4>Piattaforme Apple</h4><ul>
+<li><a data-key="apple-platforms/tile-based-gpus" href="../apple-platforms/tile-based-gpus.html">GPU tile-based</a></li>
+<li><a data-key="apple-platforms/metalfx" href="../apple-platforms/metalfx.html">Upscaling con MetalFX</a></li>
+<li><a data-key="apple-platforms/metal-4" href="../apple-platforms/metal-4.html">Metal 4</a></li>
+<li><a data-key="apple-platforms/visionos" href="../apple-platforms/visionos.html">visionOS</a></li>
+</ul></div>
+<div class="nav-section"><h4>Risorse</h4><ul>
+<li><a data-key="resources/examples" href="../resources/examples.html">Codice di esempio</a></li>
+</ul></div>
+</nav>
+<main class="content" id="main">
+<article><p class="crumb">Per iniziare</p><h1 id="preparare-il-progetto">Preparare il progetto<a class="headerlink" href="#preparare-il-progetto" title="Permanent link">#</a></h1>
+<p>Per preparare un progetto Metal bastano pochi minuti. Metal fa parte del sistema, quindi non c'è niente da compilare prima di poter disegnare.</p>
+<p>Usa il selettore <strong>Swift / C++</strong> in cima alla pagina per scegliere il linguaggio. I capitoli, gli shader e le demo interattive sono uguali per entrambi; cambia solo il codice dell'applicazione.</p>
+<h2 id="che-cosa-serve">Che cosa serve<a class="headerlink" href="#che-cosa-serve" title="Permanent link">#</a></h2>
+<ul>
+<li>Un Mac con una versione recente di macOS.</li>
+<li>Xcode, gratuito sul Mac App Store. A chi usa C++ bastano i command line tools.</li>
+</ul>
+<p>Gli esempi sono per macOS perché è il ciclo più rapido: premi Run e compare una finestra.</p>
+<div class="lang-swift">
+<p>Tutto, tranne le poche righe che ospitano la vista, funziona senza modifiche su iOS, e le differenze sono mostrate qui sotto.</p>
+<div class="admonition note">
+<p class="admonition-title">Simulatore o dispositivo?</p>
+<p>Metal funziona nel Simulatore iOS, ma con funzionalità e prestazioni ridotte. Quando il tuo obiettivo è iPhone o iPad, prova su un dispositivo vero.</p>
+</div>
+<h2 id="creare-il-progetto">Creare il progetto<a class="headerlink" href="#creare-il-progetto" title="Permanent link">#</a></h2>
+<ol>
+<li>In Xcode scegli <strong>File → New → Project</strong>.</li>
+<li>Seleziona <strong>macOS → App</strong>.</li>
+<li>Chiamalo <code>LearnMetal</code>, imposta <strong>Interface</strong> su <strong>SwiftUI</strong> e <strong>Language</strong> su <strong>Swift</strong>.</li>
+</ol>
+<p>Xcode offre anche un template <strong>Game</strong> con Metal come tecnologia. Genera un cubo che ruota già funzionante: bello da vedere, ma nasconde proprio le parti che vogliamo scrivere noi, quindi partiamo da un'app vuota.</p>
+<h2 id="metalkit-e-mtkview">MetalKit e MTKView<a class="headerlink" href="#metalkit-e-mtkview" title="Permanent link">#</a></h2>
+<p>Per disegnare con Metal serve una superficie che il sistema possa mettere a schermo. La via di basso livello è un <code>CAMetalLayer</code> con un display link gestito da te. <strong>MetalKit</strong> racchiude entrambi in una vista chiamata <code>MTKView</code> che:</p>
+<ul>
+<li>possiede il layer e a ogni frame ti consegna un nuovo <strong>drawable</strong> (una texture che verrà mostrata a schermo),</li>
+<li>crea per te, su richiesta, le texture di profondità e di multisampling,</li>
+<li>chiama il tuo codice una volta per ogni aggiornamento dello schermo.</li>
+</ul>
+<p>Dici alla vista che cosa disegnare dandole un <strong>delegate</strong>, un oggetto che implementa due metodi di <code>MTKViewDelegate</code>. Quel delegate è il nostro renderer, ed è lì che vivrà quasi tutto il codice di questa serie.</p>
+<h2 id="ospitare-la-vista-in-swiftui">Ospitare la vista in SwiftUI<a class="headerlink" href="#ospitare-la-vista-in-swiftui" title="Permanent link">#</a></h2>
+<p><code>MTKView</code> è una vista AppKit (UIKit su iOS), quindi a SwiftUI serve un piccolo adattatore. Aggiungi un nuovo file Swift <code>MetalView.swift</code>:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">import</span><span class="w"> </span><span class="nc">SwiftUI</span>
+<span class="kd">import</span><span class="w"> </span><span class="nc">MetalKit</span>
+
+<span class="kd">struct</span><span class="w"> </span><span class="nc">MetalView</span><span class="p">:</span><span class="w"> </span><span class="n">NSViewRepresentable</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kr">final</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nc">Coordinator</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="nv">renderer</span><span class="p">:</span><span class="w"> </span><span class="n">Renderer</span><span class="p">?</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nf">makeCoordinator</span><span class="p">()</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="n">Coordinator</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">Coordinator</span><span class="p">()</span><span class="w"> </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nf">makeNSView</span><span class="p">(</span><span class="n">context</span><span class="p">:</span><span class="w"> </span><span class="n">Context</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="bp">MTKView</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">view</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTKView</span><span class="p">()</span>
+<span class="w">        </span><span class="n">context</span><span class="p">.</span><span class="n">coordinator</span><span class="p">.</span><span class="n">renderer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Renderer</span><span class="p">(</span><span class="n">view</span><span class="p">:</span><span class="w"> </span><span class="n">view</span><span class="p">)</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">view</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nf">updateNSView</span><span class="p">(</span><span class="kc">_</span><span class="w"> </span><span class="n">view</span><span class="p">:</span><span class="w"> </span><span class="bp">MTKView</span><span class="p">,</span><span class="w"> </span><span class="n">context</span><span class="p">:</span><span class="w"> </span><span class="n">Context</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Il coordinator esiste per un solo motivo: <code>MTKView</code> tiene il suo delegate con un riferimento debole, quindi qualcos'altro deve mantenere in vita il renderer.</p>
+<p>Su iOS l'adattatore è lo stesso con nomi diversi: adotta <code>UIViewRepresentable</code> e implementa <code>makeUIView</code> e <code>updateUIView</code>.</p>
+<p>Poi mostra la vista in <code>ContentView.swift</code>:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">import</span><span class="w"> </span><span class="nc">SwiftUI</span>
+
+<span class="kd">struct</span><span class="w"> </span><span class="nc">ContentView</span><span class="p">:</span><span class="w"> </span><span class="n">View</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">body</span><span class="p">:</span><span class="w"> </span><span class="n">some</span><span class="w"> </span><span class="n">View</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">MetalView</span><span class="p">()</span>
+<span class="w">            </span><span class="p">.</span><span class="n">frame</span><span class="p">(</span><span class="n">minWidth</span><span class="p">:</span><span class="w"> </span><span class="mi">800</span><span class="p">,</span><span class="w"> </span><span class="n">minHeight</span><span class="p">:</span><span class="w"> </span><span class="mi">600</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Il progetto non compila ancora perché <code>Renderer</code> non esiste. È l'argomento del prossimo capitolo.</p>
+<figure><img src="../../assets/img/getting-started/project-setup.webp" alt="The pieces of the project. The renderer is where almost all code in this series lives." width="880" height="290" loading="lazy"><figcaption>The pieces of the project. The renderer is where almost all code in this series lives.</figcaption></figure>
+
+<h2 id="dove-vanno-gli-shader">Dove vanno gli shader<a class="headerlink" href="#dove-vanno-gli-shader" title="Permanent link">#</a></h2>
+<p>Gli shader stanno in file con estensione <code>.metal</code>. Creane uno con <strong>File → New → File → Metal File</strong> e chiamalo <code>Shaders.metal</code>. Xcode gli dà questo contenuto:</p>
+<div class="codehilite"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;metal_stdlib&gt;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">metal</span><span class="p">;</span>
+</code></pre></div>
+
+<p>Per ora lascialo così. Ogni file <code>.metal</code> che appartiene al target dell'app viene compilato durante la build e incluso automaticamente nell'app.</p>
+<h2 id="attivare-le-reti-di-sicurezza">Attivare le reti di sicurezza<a class="headerlink" href="#attivare-le-reti-di-sicurezza" title="Permanent link">#</a></h2>
+<p>Apri <strong>Product → Scheme → Edit Scheme → Run → Diagnostics</strong> (in alcune versioni di Xcode le opzioni di Metal sono sotto <strong>Options</strong>) e controlla che <strong>Metal API Validation</strong> sia attiva. La validazione controlla ogni chiamata a Metal e, quando fai qualcosa di non permesso, si ferma con un messaggio leggibile invece di mostrare uno schermo nero. È attiva in modo predefinito nelle esecuzioni di debug, e conviene lasciarla così. <strong>Shader Validation</strong>, nello stesso posto, intercetta le letture fuori dai limiti e altri errori simili dentro gli shader; attivala ogni volta che uno shader si comporta male.</p>
+</div>
+
+<div class="lang-cpp">
+<h2 id="metal-cpp">metal-cpp<a class="headerlink" href="#metal-cpp" title="Permanent link">#</a></h2>
+<p>Metal è un'API Objective-C. <strong>metal-cpp</strong> è il wrapper C++ ufficiale di Apple, fatto di soli header: ogni classe e ogni metodo di Metal ha un equivalente C++ senza costi aggiuntivi. Scaricalo da <a href="https://developer.apple.com/metal/cpp/">developer.apple.com/metal/cpp</a> e decomprimilo nel progetto in una cartella <code>metal-cpp</code>.</p>
+<p>La corrispondenza con i nomi Objective-C e Swift è meccanica:</p>
+<table>
+<thead>
+<tr>
+<th>Swift</th>
+<th>C++ con metal-cpp</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MTLDevice</code>, <code>MTLBuffer</code></td>
+<td><code>MTL::Device*</code>, <code>MTL::Buffer*</code></td>
+</tr>
+<tr>
+<td><code>device.makeCommandQueue()</code></td>
+<td><code>device-&gt;newCommandQueue()</code></td>
+</tr>
+<tr>
+<td><code>MTLRenderPipelineDescriptor()</code></td>
+<td><code>MTL::RenderPipelineDescriptor::alloc()-&gt;init()</code></td>
+</tr>
+<tr>
+<td><code>descriptor.colorAttachments[0].pixelFormat = .bgra8Unorm</code></td>
+<td><code>descriptor-&gt;colorAttachments()-&gt;object(0)-&gt;setPixelFormat(MTL::PixelFormatBGRA8Unorm)</code></td>
+</tr>
+<tr>
+<td><code>encoder.setVertexBuffer(buffer, offset: 0, index: 0)</code></td>
+<td><code>encoder-&gt;setVertexBuffer(buffer, 0, 0)</code></td>
+</tr>
+<tr>
+<td><code>"vertex_main"</code></td>
+<td><code>MTLSTR("vertex_main")</code></td>
+</tr>
+</tbody>
+</table>
+<p>Tre regole coprono la gestione della memoria, perché in C++ non c'è ARC:</p>
+<ul>
+<li>Gli oggetti che ottieni da un metodo che inizia con <code>new</code>, o da <code>alloc()-&gt;init()</code>, sono <strong>tuoi</strong>. Chiama <code>release()</code> quando hai finito.</li>
+<li>Tutto il resto è <strong>autoreleased</strong>: valido finché non viene rilasciato l'<code>NS::AutoreleasePool</code> che lo racchiude. Crea un pool all'inizio di ogni frame.</li>
+<li>Per tenere un oggetto autoreleased, chiama <code>retain()</code>.</li>
+</ul>
+<p>L'implementazione del wrapper va compilata esattamente una volta. Crea <code>metal_impl.cpp</code>:</p>
+<div class="codehilite"><pre><span></span><code><span class="cp">#define NS_PRIVATE_IMPLEMENTATION</span>
+<span class="cp">#define CA_PRIVATE_IMPLEMENTATION</span>
+<span class="cp">#define MTL_PRIVATE_IMPLEMENTATION</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Foundation/Foundation.hpp&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Metal/Metal.hpp&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;QuartzCore/QuartzCore.hpp&gt;</span>
+</code></pre></div>
+
+<h2 id="una-finestra">Una finestra<a class="headerlink" href="#una-finestra" title="Permanent link">#</a></h2>
+<p>metal-cpp copre Metal, Foundation e QuartzCore. Non copre AppKit né MetalKit, quindi <code>MTKView</code> non c'è. Apriamo una finestra con <strong>GLFW</strong> (<code>brew install glfw cmake</code>) e le agganciamo un <code>CAMetalLayer</code>. Quel singolo passaggio deve toccare AppKit, quindi sta in un minuscolo file Objective-C++, <code>glfw_bridge.mm</code>:</p>
+<div class="codehilite"><pre><span></span><code><span class="cp">#import &lt;Cocoa/Cocoa.h&gt;</span>
+<span class="cp">#import &lt;Metal/Metal.h&gt;</span>
+<span class="cp">#import &lt;QuartzCore/CAMetalLayer.h&gt;</span>
+<span class="cp">#define GLFW_EXPOSE_NATIVE_COCOA</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;GLFW/glfw3.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;GLFW/glfw3native.h&gt;</span>
+
+<span class="c1">// Gives the GLFW window a CAMetalLayer and returns it. The view keeps the layer alive.</span>
+<span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="nf">attachMetalLayer</span><span class="p">(</span><span class="n">GLFWwindow</span><span class="o">*</span><span class="w"> </span><span class="n">window</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">device</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">NSWindow</span><span class="o">*</span><span class="w"> </span><span class="n">nsWindow</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glfwGetCocoaWindow</span><span class="p">(</span><span class="n">window</span><span class="p">);</span>
+<span class="w">    </span><span class="bp">CAMetalLayer</span><span class="o">*</span><span class="w"> </span><span class="n">layer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="bp">CAMetalLayer</span><span class="w"> </span><span class="n">layer</span><span class="p">];</span>
+<span class="w">    </span><span class="n">layer</span><span class="p">.</span><span class="n">device</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="k">__bridge</span><span class="w"> </span><span class="kt">id</span><span class="o">&lt;</span><span class="bp">MTLDevice</span><span class="o">&gt;</span><span class="p">)</span><span class="n">device</span><span class="p">;</span>
+<span class="w">    </span><span class="n">layer</span><span class="p">.</span><span class="n">pixelFormat</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MTLPixelFormatBGRA8Unorm</span><span class="p">;</span>
+<span class="w">    </span><span class="n">nsWindow</span><span class="p">.</span><span class="n">contentView</span><span class="p">.</span><span class="n">wantsLayer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">YES</span><span class="p">;</span>
+<span class="w">    </span><span class="n">nsWindow</span><span class="p">.</span><span class="n">contentView</span><span class="p">.</span><span class="n">layer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">layer</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="k">__bridge</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="n">layer</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>main.cpp</code> crea la finestra, il device e il renderer, ed esegue il ciclo:</p>
+<div class="codehilite"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;GLFW/glfw3.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">"Renderer.hpp"</span>
+
+<span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="nf">attachMetalLayer</span><span class="p">(</span><span class="n">GLFWwindow</span><span class="o">*</span><span class="w"> </span><span class="n">window</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">device</span><span class="p">);</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">glfwInit</span><span class="p">();</span>
+<span class="w">    </span><span class="n">glfwWindowHint</span><span class="p">(</span><span class="n">GLFW_CLIENT_API</span><span class="p">,</span><span class="w"> </span><span class="n">GLFW_NO_API</span><span class="p">);</span><span class="w">        </span><span class="c1">// no OpenGL context</span>
+<span class="w">    </span><span class="n">GLFWwindow</span><span class="o">*</span><span class="w"> </span><span class="n">window</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glfwCreateWindow</span><span class="p">(</span><span class="mi">800</span><span class="p">,</span><span class="w"> </span><span class="mi">600</span><span class="p">,</span><span class="w"> </span><span class="s">"LearnMetal"</span><span class="p">,</span><span class="w"> </span><span class="nb">nullptr</span><span class="p">,</span><span class="w"> </span><span class="nb">nullptr</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">MTL</span><span class="o">::</span><span class="n">Device</span><span class="o">*</span><span class="w"> </span><span class="n">device</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MTL</span><span class="o">::</span><span class="n">CreateSystemDefaultDevice</span><span class="p">();</span>
+<span class="w">    </span><span class="k">auto</span><span class="o">*</span><span class="w"> </span><span class="n">layer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">CA</span><span class="o">::</span><span class="n">MetalLayer</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">attachMetalLayer</span><span class="p">(</span><span class="n">window</span><span class="p">,</span><span class="w"> </span><span class="n">device</span><span class="p">));</span>
+<span class="w">    </span><span class="n">Renderer</span><span class="w"> </span><span class="n">renderer</span><span class="p">(</span><span class="n">device</span><span class="p">,</span><span class="w"> </span><span class="n">layer</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">glfwWindowShouldClose</span><span class="p">(</span><span class="n">window</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">glfwPollEvents</span><span class="p">();</span>
+
+<span class="w">        </span><span class="c1">// The drawable follows the window size, in pixels.</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">;</span>
+<span class="w">        </span><span class="n">glfwGetFramebufferSize</span><span class="p">(</span><span class="n">window</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">height</span><span class="p">);</span>
+<span class="w">        </span><span class="n">layer</span><span class="o">-&gt;</span><span class="n">setDrawableSize</span><span class="p">(</span><span class="n">CGSizeMake</span><span class="p">(</span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">));</span>
+<span class="w">        </span><span class="n">renderer</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">);</span>
+
+<span class="w">        </span><span class="n">renderer</span><span class="p">.</span><span class="n">draw</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">device</span><span class="o">-&gt;</span><span class="n">release</span><span class="p">();</span>
+<span class="w">    </span><span class="n">glfwDestroyWindow</span><span class="p">(</span><span class="n">window</span><span class="p">);</span>
+<span class="w">    </span><span class="n">glfwTerminate</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Il layer fa la parte che in Swift fa <code>MTKView</code>: ogni volta che glielo chiedi ti consegna un <strong>drawable</strong>, una texture che verrà mostrata a schermo. Presentare un drawable aspetta lo schermo, quindi questo ciclo gira alla frequenza di aggiornamento del display.</p>
+<p>Ovunque un capitolo nomini <code>MTKView</code>, l'equivalente C++ è una di tre cose che fai da te: chiedere al layer il prossimo drawable, compilare un render pass descriptor o creare una texture di profondità. Ognuna viene mostrata la prima volta che serve.</p>
+<h2 id="compilare-con-cmake">Compilare con CMake<a class="headerlink" href="#compilare-con-cmake" title="Permanent link">#</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="nb">cmake_minimum_required</span><span class="p">(</span><span class="s">VERSION</span><span class="w"> </span><span class="s">3.20</span><span class="p">)</span>
+<span class="nb">project</span><span class="p">(</span><span class="s">LearnMetal</span><span class="w"> </span><span class="s">LANGUAGES</span><span class="w"> </span><span class="s">CXX</span><span class="w"> </span><span class="s">OBJCXX</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">CMAKE_CXX_STANDARD</span><span class="w"> </span><span class="s">17</span><span class="p">)</span>
+
+<span class="nb">find_package</span><span class="p">(</span><span class="s">glfw3</span><span class="w"> </span><span class="s">REQUIRED</span><span class="p">)</span>
+
+<span class="nb">add_executable</span><span class="p">(</span><span class="s">LearnMetal</span><span class="w"> </span><span class="s">main.cpp</span><span class="w"> </span><span class="s">Renderer.cpp</span><span class="w"> </span><span class="s">metal_impl.cpp</span><span class="w"> </span><span class="s">glfw_bridge.mm</span><span class="p">)</span>
+<span class="nb">target_include_directories</span><span class="p">(</span><span class="s">LearnMetal</span><span class="w"> </span><span class="s">PRIVATE</span><span class="w"> </span><span class="s">metal-cpp</span><span class="p">)</span>
+<span class="nb">target_link_libraries</span><span class="p">(</span><span class="s">LearnMetal</span><span class="w"> </span><span class="s">PRIVATE</span><span class="w"> </span><span class="s">glfw</span>
+<span class="w">    </span><span class="s2">"-framework Metal"</span><span class="w"> </span><span class="s2">"-framework Foundation"</span><span class="w"> </span><span class="s2">"-framework QuartzCore"</span><span class="w"> </span><span class="s2">"-framework Cocoa"</span><span class="p">)</span>
+
+<span class="c"># Copy the shader source next to the executable; it is compiled when the app starts.</span>
+<span class="nb">configure_file</span><span class="p">(</span><span class="s">Shaders.metal</span><span class="w"> </span><span class="o">${</span><span class="nv">CMAKE_BINARY_DIR</span><span class="o">}</span><span class="s">/Shaders.metal</span><span class="w"> </span><span class="s">COPYONLY</span><span class="p">)</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code>cmake<span class="w"> </span>-B<span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>cmake<span class="w"> </span>--build<span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>./LearnMetal
+</code></pre></div>
+
+<p>Il progetto non compila ancora perché <code>Renderer</code> non esiste. È l'argomento del prossimo capitolo.</p>
+<h2 id="dove-vanno-gli-shader">Dove vanno gli shader<a class="headerlink" href="#dove-vanno-gli-shader" title="Permanent link">#</a></h2>
+<p>Gli shader stanno in un file chiamato <code>Shaders.metal</code>:</p>
+<div class="codehilite"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;metal_stdlib&gt;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">metal</span><span class="p">;</span>
+</code></pre></div>
+
+<p>Xcode compila i file <code>.metal</code> durante la build. Fuori da Xcode la via più semplice è compilare il sorgente all'avvio dell'app, così un errore nello shader viene anche segnalato nel terminale con il numero di riga:</p>
+<div class="codehilite"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;fstream&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;sstream&gt;</span>
+
+<span class="n">MTL</span><span class="o">::</span><span class="n">Library</span><span class="o">*</span><span class="w"> </span><span class="nf">loadLibrary</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">Device</span><span class="o">*</span><span class="w"> </span><span class="n">device</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">path</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">ifstream</span><span class="w"> </span><span class="n">file</span><span class="p">(</span><span class="n">path</span><span class="p">);</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">stringstream</span><span class="w"> </span><span class="n">source</span><span class="p">;</span>
+<span class="w">    </span><span class="n">source</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">file</span><span class="p">.</span><span class="n">rdbuf</span><span class="p">();</span>
+
+<span class="w">    </span><span class="n">NS</span><span class="o">::</span><span class="n">Error</span><span class="o">*</span><span class="w"> </span><span class="n">error</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">nullptr</span><span class="p">;</span>
+<span class="w">    </span><span class="n">MTL</span><span class="o">::</span><span class="n">Library</span><span class="o">*</span><span class="w"> </span><span class="n">library</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">device</span><span class="o">-&gt;</span><span class="n">newLibrary</span><span class="p">(</span>
+<span class="w">        </span><span class="n">NS</span><span class="o">::</span><span class="n">String</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="n">source</span><span class="p">.</span><span class="n">str</span><span class="p">().</span><span class="n">c_str</span><span class="p">(),</span><span class="w"> </span><span class="n">NS</span><span class="o">::</span><span class="n">UTF8StringEncoding</span><span class="p">),</span><span class="w"> </span><span class="nb">nullptr</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">error</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">library</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cerr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Shader error: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">error</span><span class="o">-&gt;</span><span class="n">localizedDescription</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">utf8String</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">library</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Per un'app da distribuire precompileresti con <code>xcrun metal</code> e <code>xcrun metallib</code> e caricheresti il file <code>.metallib</code> risultante.</p>
+<h2 id="attivare-le-reti-di-sicurezza">Attivare le reti di sicurezza<a class="headerlink" href="#attivare-le-reti-di-sicurezza" title="Permanent link">#</a></h2>
+<p>Il livello di validazione di Metal controlla ogni chiamata e, quando fai qualcosa di non permesso, si ferma con un messaggio leggibile invece di mostrare uno schermo nero. Fuori da Xcode si attiva con le variabili d'ambiente:</p>
+<div class="codehilite"><pre><span></span><code><span class="nv">MTL_DEBUG_LAYER</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="nv">MTL_SHADER_VALIDATION</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>./LearnMetal
+</code></pre></div>
+
+<p>Lascia <code>MTL_DEBUG_LAYER</code> attivo ogni volta che sviluppi. Un progetto di partenza con tutti i file di questo capitolo e dei due successivi è nella cartella <code>examples-cpp</code> del repository.</p>
+</div>
+
+<p>Il capitolo <a href="../in-practice/debugging.html">Debug</a> tratta questi strumenti a fondo. Puoi leggerlo quando vuoi.</p></article><nav class="pager" id="pager"><a class="prev" href="../getting-started/introduction.html"><small>Precedente</small>Introduzione</a><a class="next" href="../getting-started/hello-view.html"><small>Successivo</small>La prima vista</a></nav>
+<footer class="site-footer">
+  <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
+  <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
+</footer>
+</main>
+
+</div>
+<script defer src="../../assets/textures.js"></script>
+<script defer src="../../assets/live.js"></script>
+<script defer src="../../assets/demos.js"></script>
+<script defer src="../../assets/site.js"></script>
+</body>
+</html>

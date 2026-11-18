@@ -1,0 +1,3 @@
+With 1 sample the long edge is a staircase with steps several pixels long. With 2 samples each step gets one intermediate shade; with 4 there are three, and the edge reads as a smooth line. Nearly horizontal and nearly vertical edges show the difference most, because their steps are the longest.
+---
+Without alpha-to-coverage, `discard_fragment` decides per pixel, so MSAA cannot smooth the cut-out edges inside the quad. With `isAlphaToCoverageEnabled` the alpha value turns into a coverage mask: an alpha of 0.5 covers two of four samples, and the resolve averages them into a soft edge, with no sorting needed.

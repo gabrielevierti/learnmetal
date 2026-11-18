@@ -1,0 +1,3 @@
+With `rotation * translation * scale` the quad is scaled, then moved away from the origin, then rotated. The rotation now acts on the moved quad, so it swings around the center of the screen in a circle instead of spinning in place. Try it in the live demo with the order selector.
+---
+Build a second matrix, send it with a second `setVertexBytes`, and issue the draw call again. The vertex buffer, pipeline and texture stay bound. In Swift: `float4x4(translation: [-0.5, 0.5, 0]) * float4x4(scale: Float3(repeating: abs(sin(time)) * 0.5))`. The scale passes through zero, where the quad vanishes for a frame.

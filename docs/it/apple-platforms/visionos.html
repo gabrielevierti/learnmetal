@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="it" data-root="../../" data-site="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>visionOS | learnmetal</title>
+<meta name="description" content="Piattaforme Apple: visionOS. Impara la grafica 3D con Metal di Apple, dal primo triangolo al rendering fisicamente corretto, in Swift o C++.">
+<meta name="author" content="Gabriele Vierti">
+<link rel="icon" href="../../assets/favicon.png">
+<script>
+(function () {
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem("theme"); l = localStorage.getItem("lang"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  d.dataset.theme = t;
+  var q = /[?&]lang=(swift|cpp)/.exec(location.search);      // links can pick a language: page.html?lang=cpp
+  if (q) l = q[1];
+  d.dataset.lang = l === "cpp" ? "cpp" : "swift";
+})();
+</script>
+<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../../assets/code.css">
+</head>
+<body class="" data-key="apple-platforms/visionos">
+<a class="skip" href="#main">Vai al contenuto</a>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Apri l'elenco dei capitoli">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a class="brand" href="../index.html"><img src="../../assets/logo.png" alt="LearnMetal" width="136" height="32"></a>
+  <div class="search" role="search">
+    <input id="search" type="search" placeholder="Cerca" aria-label="Cerca" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results" hidden></div>
+  </div>
+  <button id="search-toggle" class="icon-btn" aria-label="Cerca">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <div class="lang-switch site-lang" role="group" aria-label="Lingua del testo">
+    <a href="../../apple-platforms/visionos.html">EN</a>
+    <a href="../../it/apple-platforms/visionos.html" aria-current="true">IT</a>
+  </div>
+  <div class="lang-switch" role="group" aria-label="Linguaggio del codice">
+    <button type="button" data-set-lang="swift">Swift</button>
+    <button type="button" data-set-lang="cpp">C++</button>
+  </div>
+  <a class="icon-btn" href="https://github.com/gabrielevierti" aria-label="Gabriele Vierti on GitHub"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Passa dal tema chiaro a quello scuro">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"/></svg>
+  </button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Capitoli">
+<div class="nav-section"><h4>Per iniziare</h4><ul>
+<li><a data-key="getting-started/introduction" href="../getting-started/introduction.html">Introduzione</a></li>
+<li><a data-key="getting-started/project-setup" href="../getting-started/project-setup.html">Preparare il progetto</a></li>
+<li><a data-key="getting-started/hello-view" href="../getting-started/hello-view.html">La prima vista</a></li>
+<li><a data-key="getting-started/hello-triangle" href="../getting-started/hello-triangle.html">Il primo triangolo</a></li>
+<li><a data-key="getting-started/shaders" href="../getting-started/shaders.html">Shader</a></li>
+<li><a data-key="getting-started/textures" href="../getting-started/textures.html">Texture</a></li>
+<li><a data-key="getting-started/transformations" href="../getting-started/transformations.html">Trasformazioni</a></li>
+<li><a data-key="getting-started/coordinate-systems" href="../getting-started/coordinate-systems.html">Sistemi di coordinate</a></li>
+<li><a data-key="getting-started/camera" href="../getting-started/camera.html">Camera</a></li>
+<li><a data-key="getting-started/review" href="../getting-started/review.html">Riepilogo</a></li>
+</ul></div>
+<div class="nav-section"><h4>Illuminazione</h4><ul>
+<li><a data-key="lighting/colors" href="../lighting/colors.html">Colori</a></li>
+<li><a data-key="lighting/basic-lighting" href="../lighting/basic-lighting.html">Illuminazione di base</a></li>
+<li><a data-key="lighting/materials" href="../lighting/materials.html">Materiali</a></li>
+<li><a data-key="lighting/lighting-maps" href="../lighting/lighting-maps.html">Mappe di illuminazione</a></li>
+<li><a data-key="lighting/light-casters" href="../lighting/light-casters.html">Tipi di luce</a></li>
+<li><a data-key="lighting/multiple-lights" href="../lighting/multiple-lights.html">Più luci</a></li>
+<li><a data-key="lighting/review" href="../lighting/review.html">Riepilogo</a></li>
+</ul></div>
+<div class="nav-section"><h4>Caricare i modelli</h4><ul>
+<li><a data-key="model-loading/model-io" href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a data-key="model-loading/mesh" href="../model-loading/mesh.html">Mesh</a></li>
+<li><a data-key="model-loading/model" href="../model-loading/model.html">Modello</a></li>
+</ul></div>
+<div class="nav-section"><h4>Metal avanzato</h4><ul>
+<li><a data-key="advanced-metal/depth-testing" href="../advanced-metal/depth-testing.html">Test di profondità</a></li>
+<li><a data-key="advanced-metal/stencil-testing" href="../advanced-metal/stencil-testing.html">Test di stencil</a></li>
+<li><a data-key="advanced-metal/blending" href="../advanced-metal/blending.html">Blending</a></li>
+<li><a data-key="advanced-metal/face-culling" href="../advanced-metal/face-culling.html">Face culling</a></li>
+<li><a data-key="advanced-metal/render-targets" href="../advanced-metal/render-targets.html">Render target</a></li>
+<li><a data-key="advanced-metal/cubemaps" href="../advanced-metal/cubemaps.html">Cubemap</a></li>
+<li><a data-key="advanced-metal/advanced-data" href="../advanced-metal/advanced-data.html">Dati avanzati</a></li>
+<li><a data-key="advanced-metal/advanced-msl" href="../advanced-metal/advanced-msl.html">MSL avanzato</a></li>
+<li><a data-key="advanced-metal/no-geometry-shaders" href="../advanced-metal/no-geometry-shaders.html">Vivere senza geometry shader</a></li>
+<li><a data-key="advanced-metal/instancing" href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a data-key="advanced-metal/anti-aliasing" href="../advanced-metal/anti-aliasing.html">Anti-aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Illuminazione avanzata</h4><ul>
+<li><a data-key="advanced-lighting/blinn-phong" href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a data-key="advanced-lighting/gamma-correction" href="../advanced-lighting/gamma-correction.html">Correzione gamma</a></li>
+<li><a data-key="advanced-lighting/shadow-mapping" href="../advanced-lighting/shadow-mapping.html">Shadow mapping</a></li>
+<li><a data-key="advanced-lighting/point-shadows" href="../advanced-lighting/point-shadows.html">Ombre da luci puntiformi</a></li>
+<li><a data-key="advanced-lighting/normal-mapping" href="../advanced-lighting/normal-mapping.html">Normal mapping</a></li>
+<li><a data-key="advanced-lighting/parallax-mapping" href="../advanced-lighting/parallax-mapping.html">Parallax mapping</a></li>
+<li><a data-key="advanced-lighting/hdr" href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a data-key="advanced-lighting/bloom" href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a data-key="advanced-lighting/deferred-shading" href="../advanced-lighting/deferred-shading.html">Deferred shading</a></li>
+<li><a data-key="advanced-lighting/ssao" href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a data-key="pbr/theory" href="../pbr/theory.html">Teoria</a></li>
+<li><a data-key="pbr/lighting" href="../pbr/lighting.html">Illuminazione</a></li>
+<li><a data-key="pbr/diffuse-irradiance" href="../pbr/diffuse-irradiance.html">Irradianza diffusa</a></li>
+<li><a data-key="pbr/specular-ibl" href="../pbr/specular-ibl.html">IBL speculare</a></li>
+</ul></div>
+<div class="nav-section"><h4>In pratica</h4><ul>
+<li><a data-key="in-practice/debugging" href="../in-practice/debugging.html">Debug</a></li>
+<li><a data-key="in-practice/text-rendering" href="../in-practice/text-rendering.html">Rendering del testo</a></li>
+<li><a data-key="in-practice/2d-game" href="../in-practice/2d-game.html">Un gioco 2D</a></li>
+</ul></div>
+<div class="nav-section"><h4>Oltre</h4><ul>
+<li><a data-key="beyond/compute-shaders" href="../beyond/compute-shaders.html">Compute shader</a></li>
+<li><a data-key="beyond/tessellation" href="../beyond/tessellation.html">Tassellazione</a></li>
+<li><a data-key="beyond/ray-tracing" href="../beyond/ray-tracing.html">Ray tracing</a></li>
+<li><a data-key="beyond/mesh-shaders" href="../beyond/mesh-shaders.html">Mesh shader</a></li>
+</ul></div>
+<div class="nav-section"><h4>Piattaforme Apple</h4><ul>
+<li><a data-key="apple-platforms/tile-based-gpus" href="../apple-platforms/tile-based-gpus.html">GPU tile-based</a></li>
+<li><a data-key="apple-platforms/metalfx" href="../apple-platforms/metalfx.html">Upscaling con MetalFX</a></li>
+<li><a data-key="apple-platforms/metal-4" href="../apple-platforms/metal-4.html">Metal 4</a></li>
+<li><a class="active" aria-current="page" data-key="apple-platforms/visionos" href="../apple-platforms/visionos.html">visionOS</a></li>
+</ul></div>
+<div class="nav-section"><h4>Risorse</h4><ul>
+<li><a data-key="resources/examples" href="../resources/examples.html">Codice di esempio</a></li>
+</ul></div>
+</nav>
+<main class="content" id="main">
+<article><p class="crumb">Piattaforme Apple</p><h1 id="visionos">visionOS<a class="headerlink" href="#visionos" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
+<p>On Apple Vision Pro most apps draw with RealityKit. When you want your own renderer, for a game engine or a visualization, you draw <strong>fully immersive</strong> content with Metal through a framework called <strong>Compositor Services</strong>. Your shaders and pipelines are the ones from this book. What is new is everything around the frame: there are two eyes, the camera is a person's head, and the deadline is strict.</p>
+<h2 id="what-is-different">What is different<a class="headerlink" href="#what-is-different" title="Permanent link">#</a></h2>
+<ul>
+<li><strong>Two views.</strong> Each frame is rendered once per eye, with a different view and projection matrix for each.</li>
+<li><strong>You do not own the camera.</strong> The view matrix comes from the headset's tracked position, through ARKit.</li>
+<li><strong>You do not own the frame loop.</strong> There is no <code>MTKView</code> and no display link. Compositor Services gives you frames, and tells you when to start working on each.</li>
+<li><strong>The system reprojects.</strong> Just before display, the system warps your image to match the latest head position. To do that it needs your depth buffer, so depth must be correct for every pixel you draw.</li>
+<li><strong>Foveation.</strong> The headset renders the periphery at a lower resolution. You get this almost for free, but it changes how viewports and post-processing work.</li>
+<li><strong>Latency is comfort.</strong> A late frame is not a small stutter here. Aim for the display's rate, 90 frames per second or more, every frame.</li>
+</ul>
+<h2 id="the-app-and-the-layer">The app and the layer<a class="headerlink" href="#the-app-and-the-layer" title="Permanent link">#</a></h2>
+<p>The entry point is SwiftUI. An <code>ImmersiveSpace</code> whose content is a <code>CompositorLayer</code> hands you a <code>LayerRenderer</code>, the object that replaces the view. Start a dedicated render thread from there; never render on the main thread.</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="kd">import</span><span class="w"> </span><span class="nc">SwiftUI</span>
+<span class="kd">import</span><span class="w"> </span><span class="nc">CompositorServices</span>
+
+<span class="kd">struct</span><span class="w"> </span><span class="nc">LayerConfiguration</span><span class="p">:</span><span class="w"> </span><span class="n">CompositorLayerConfiguration</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nf">makeConfiguration</span><span class="p">(</span><span class="n">capabilities</span><span class="p">:</span><span class="w"> </span><span class="n">LayerRenderer</span><span class="p">.</span><span class="n">Capabilities</span><span class="p">,</span>
+<span class="w">                           </span><span class="n">configuration</span><span class="p">:</span><span class="w"> </span><span class="kr">inout</span><span class="w"> </span><span class="n">LayerRenderer</span><span class="p">.</span><span class="n">Configuration</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">foveation</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">capabilities</span><span class="p">.</span><span class="n">supportsFoveation</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">layouts</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">capabilities</span><span class="p">.</span><span class="n">supportedLayouts</span><span class="p">(</span><span class="n">options</span><span class="p">:</span><span class="w"> </span><span class="n">foveation</span><span class="w"> </span><span class="p">?</span><span class="w"> </span><span class="p">[.</span><span class="n">foveationEnabled</span><span class="p">]</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[])</span>
+
+<span class="w">        </span><span class="n">configuration</span><span class="p">.</span><span class="n">layout</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">layouts</span><span class="p">.</span><span class="bp">contains</span><span class="p">(.</span><span class="n">layered</span><span class="p">)</span><span class="w"> </span><span class="p">?</span><span class="w"> </span><span class="p">.</span><span class="n">layered</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">dedicated</span>
+<span class="w">        </span><span class="n">configuration</span><span class="p">.</span><span class="n">isFoveationEnabled</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">foveation</span>
+<span class="w">        </span><span class="n">configuration</span><span class="p">.</span><span class="n">colorFormat</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">rgba16Float</span><span class="w">          </span><span class="c1">// HDR</span>
+<span class="w">        </span><span class="n">configuration</span><span class="p">.</span><span class="n">depthFormat</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">depth32Float</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="p">@</span><span class="n">main</span>
+<span class="kd">struct</span><span class="w"> </span><span class="nc">ImmersiveApp</span><span class="p">:</span><span class="w"> </span><span class="n">App</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">body</span><span class="p">:</span><span class="w"> </span><span class="n">some</span><span class="w"> </span><span class="n">Scene</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">WindowGroup</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">ContentView</span><span class="p">()</span><span class="w"> </span><span class="p">}</span><span class="w">                      </span><span class="c1">// a window with a button that opens the space</span>
+
+<span class="w">        </span><span class="n">ImmersiveSpace</span><span class="p">(</span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="s">"Scene"</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">CompositorLayer</span><span class="p">(</span><span class="n">configuration</span><span class="p">:</span><span class="w"> </span><span class="n">LayerConfiguration</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">layerRenderer</span><span class="w"> </span><span class="k">in</span>
+<span class="w">                </span><span class="kd">let</span><span class="w"> </span><span class="nv">renderer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Renderer</span><span class="p">(</span><span class="n">layerRenderer</span><span class="p">)</span>
+<span class="w">                </span><span class="kd">let</span><span class="w"> </span><span class="nv">thread</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Thread</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">renderer</span><span class="p">.</span><span class="n">renderLoop</span><span class="p">()</span><span class="w"> </span><span class="p">}</span>
+<span class="w">                </span><span class="n">thread</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">"Render Thread"</span>
+<span class="w">                </span><span class="n">thread</span><span class="p">.</span><span class="n">start</span><span class="p">()</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+
+<div class="lang-cpp">
+<p>The entry point of a visionOS app is always SwiftUI, so a small Swift file like the one below stays in a C++ project. Everything after that can be C++: Compositor Services has a C API (<code>cp_layer_renderer_t</code>, <code>cp_frame_t</code>, <code>cp_drawable_t</code>), which is what engines use. The Swift closure passes the layer renderer to a C function that starts your render thread.</p>
+<div class="codehilite"><pre><span></span><code><span class="n">ImmersiveSpace</span><span class="p">(</span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="s">"Scene"</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">CompositorLayer</span><span class="p">(</span><span class="n">configuration</span><span class="p">:</span><span class="w"> </span><span class="n">LayerConfiguration</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">layerRenderer</span><span class="w"> </span><span class="k">in</span>
+<span class="w">        </span><span class="n">engine_start</span><span class="p">(</span><span class="n">layerRenderer</span><span class="p">)</span><span class="w">          </span><span class="c1">// a C function, declared in the bridging header</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>There is no GLFW on visionOS, and metal-cpp needs a bridge: the C API returns Objective-C texture objects, which you cast to <code>MTL::Texture*</code> in an Objective-C++ file, as in the <code>glfw_bridge.mm</code> of the macOS starter.</p>
+</div>
+
+<p>The <strong>layout</strong> decides how the two eyes' images are stored. <code>.dedicated</code> gives one texture per eye and needs two render passes. <code>.layered</code> gives one array texture with a slice per eye, and lets you draw both eyes in one pass. Prefer layered.</p>
+<h2 id="the-frame-loop">The frame loop<a class="headerlink" href="#the-frame-loop" title="Permanent link">#</a></h2>
+<p>The loop follows the state of the layer: wait while it is paused, render while it is running, and leave when it is invalidated.</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">renderLoop</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">switch</span><span class="w"> </span><span class="n">layerRenderer</span><span class="p">.</span><span class="n">state</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="p">.</span><span class="n">paused</span><span class="p">:</span><span class="w">      </span><span class="n">layerRenderer</span><span class="p">.</span><span class="n">waitUntilRunning</span><span class="p">()</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="p">.</span><span class="n">running</span><span class="p">:</span><span class="w">     </span><span class="n">autoreleasepool</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">renderFrame</span><span class="p">()</span><span class="w"> </span><span class="p">}</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="p">.</span><span class="n">invalidated</span><span class="p">:</span><span class="w"> </span><span class="k">return</span>
+<span class="w">        </span><span class="p">@</span><span class="n">unknown</span><span class="w"> </span><span class="k">default</span><span class="p">:</span><span class="w">  </span><span class="k">return</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+
+<p>A frame has two phases that you announce to the system. In the <strong>update</strong> phase you run everything that does not depend on where the head is: animation, physics, input. Then you sleep until the last sensible moment, ask for the head pose, and enter the <strong>submission</strong> phase, where you encode and commit. Waiting matters: the later you read the pose, the less the system has to correct.</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">renderFrame</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">guard</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">frame</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">layerRenderer</span><span class="p">.</span><span class="n">queryNextFrame</span><span class="p">()</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">frame</span><span class="p">.</span><span class="n">startUpdate</span><span class="p">()</span>
+<span class="w">    </span><span class="n">scene</span><span class="p">.</span><span class="n">update</span><span class="p">()</span><span class="w">                                         </span><span class="c1">// nothing here may depend on the head pose</span>
+<span class="w">    </span><span class="n">frame</span><span class="p">.</span><span class="n">endUpdate</span><span class="p">()</span>
+
+<span class="w">    </span><span class="k">guard</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">timing</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">frame</span><span class="p">.</span><span class="n">predictTiming</span><span class="p">()</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="n">LayerRenderer</span><span class="p">.</span><span class="n">Clock</span><span class="p">().</span><span class="n">wait</span><span class="p">(</span><span class="n">until</span><span class="p">:</span><span class="w"> </span><span class="n">timing</span><span class="p">.</span><span class="n">optimalInputTime</span><span class="p">)</span>
+
+<span class="w">    </span><span class="n">frame</span><span class="p">.</span><span class="n">startSubmission</span><span class="p">()</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">drawable</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">frame</span><span class="p">.</span><span class="n">queryDrawables</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Where will the head be when this frame is shown?</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">time</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">LayerRenderer</span><span class="p">.</span><span class="n">Clock</span><span class="p">.</span><span class="n">Instant</span><span class="p">.</span><span class="n">epoch</span>
+<span class="w">            </span><span class="p">.</span><span class="n">duration</span><span class="p">(</span><span class="n">to</span><span class="p">:</span><span class="w"> </span><span class="n">drawable</span><span class="p">.</span><span class="n">frameTiming</span><span class="p">.</span><span class="n">presentationTime</span><span class="p">).</span><span class="n">timeInterval</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">anchor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">worldTracking</span><span class="p">.</span><span class="n">queryDeviceAnchor</span><span class="p">(</span><span class="n">atTimestamp</span><span class="p">:</span><span class="w"> </span><span class="n">time</span><span class="p">)</span>
+<span class="w">        </span><span class="n">drawable</span><span class="p">.</span><span class="n">deviceAnchor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">anchor</span>
+
+<span class="w">        </span><span class="k">guard</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">commandBuffer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">commandQueue</span><span class="p">.</span><span class="n">makeCommandBuffer</span><span class="p">()</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">continue</span><span class="w"> </span><span class="p">}</span>
+<span class="w">        </span><span class="n">draw</span><span class="p">(</span><span class="n">drawable</span><span class="p">,</span><span class="w"> </span><span class="n">anchor</span><span class="p">:</span><span class="w"> </span><span class="n">anchor</span><span class="p">,</span><span class="w"> </span><span class="n">commandBuffer</span><span class="p">:</span><span class="w"> </span><span class="n">commandBuffer</span><span class="p">)</span>
+<span class="w">        </span><span class="n">drawable</span><span class="p">.</span><span class="n">encodePresent</span><span class="p">(</span><span class="n">commandBuffer</span><span class="p">:</span><span class="w"> </span><span class="n">commandBuffer</span><span class="p">)</span>
+<span class="w">        </span><span class="n">commandBuffer</span><span class="p">.</span><span class="n">commit</span><span class="p">()</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">frame</span><span class="p">.</span><span class="n">endSubmission</span><span class="p">()</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+
+<div class="lang-cpp">
+<p>With the C API the same frame reads as follows. Each call matches a Swift method one to one.</p>
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">Engine::renderFrame</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">cp_frame_t</span><span class="w"> </span><span class="n">frame</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cp_layer_renderer_query_next_frame</span><span class="p">(</span><span class="n">layerRenderer</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">frame</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">nullptr</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">cp_frame_timing_t</span><span class="w"> </span><span class="n">timing</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cp_frame_predict_timing</span><span class="p">(</span><span class="n">frame</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">timing</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">nullptr</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">cp_frame_start_update</span><span class="p">(</span><span class="n">frame</span><span class="p">);</span>
+<span class="w">    </span><span class="n">scene</span><span class="p">.</span><span class="n">update</span><span class="p">();</span><span class="w">                                        </span><span class="c1">// nothing here may depend on the head pose</span>
+<span class="w">    </span><span class="n">cp_frame_end_update</span><span class="p">(</span><span class="n">frame</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">cp_time_wait_until</span><span class="p">(</span><span class="n">cp_frame_timing_get_optimal_input_time</span><span class="p">(</span><span class="n">timing</span><span class="p">));</span>
+
+<span class="w">    </span><span class="n">cp_frame_start_submission</span><span class="p">(</span><span class="n">frame</span><span class="p">);</span>
+<span class="w">    </span><span class="n">cp_drawable_array_t</span><span class="w"> </span><span class="n">drawables</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cp_frame_query_drawables</span><span class="p">(</span><span class="n">frame</span><span class="p">);</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">cp_drawable_array_get_count</span><span class="p">(</span><span class="n">drawables</span><span class="p">);</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">cp_drawable_t</span><span class="w"> </span><span class="n">drawable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cp_drawable_array_get_drawable</span><span class="p">(</span><span class="n">drawables</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">);</span>
+
+<span class="w">        </span><span class="c1">// Where will the head be when this frame is shown?</span>
+<span class="w">        </span><span class="n">cp_frame_timing_t</span><span class="w"> </span><span class="n">drawableTiming</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cp_drawable_get_frame_timing</span><span class="p">(</span><span class="n">drawable</span><span class="p">);</span>
+<span class="w">        </span><span class="n">CFTimeInterval</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cp_time_to_cf_time_interval</span><span class="p">(</span><span class="n">cp_frame_timing_get_presentation_time</span><span class="p">(</span><span class="n">drawableTiming</span><span class="p">));</span>
+<span class="w">        </span><span class="n">ar_device_anchor_t</span><span class="w"> </span><span class="n">anchor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ar_device_anchor_create</span><span class="p">();</span>
+<span class="w">        </span><span class="n">ar_world_tracking_provider_query_device_anchor_at_timestamp</span><span class="p">(</span><span class="n">worldTracking</span><span class="p">,</span><span class="w"> </span><span class="n">time</span><span class="p">,</span><span class="w"> </span><span class="n">anchor</span><span class="p">);</span>
+<span class="w">        </span><span class="n">cp_drawable_set_device_anchor</span><span class="p">(</span><span class="n">drawable</span><span class="p">,</span><span class="w"> </span><span class="n">anchor</span><span class="p">);</span>
+
+<span class="w">        </span><span class="n">drawAndPresent</span><span class="p">(</span><span class="n">drawable</span><span class="p">,</span><span class="w"> </span><span class="n">anchor</span><span class="p">);</span><span class="w">                  </span><span class="c1">// encode, cp_drawable_encode_present, commit</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">cp_frame_end_submission</span><span class="p">(</span><span class="n">frame</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+
+<p><code>worldTracking</code> is an ARKit <code>WorldTrackingProvider</code> that you start once with <code>ARKitSession().run([worldTracking])</code>. Setting <code>deviceAnchor</code> on the drawable tells the system which pose you rendered for, so it can correct the difference.</p>
+<h2 id="two-eyes-two-matrices">Two eyes, two matrices<a class="headerlink" href="#two-eyes-two-matrices" title="Permanent link">#</a></h2>
+<p>Each drawable has a list of views, normally two. A view gives the eye's transform relative to the device, and the drawable computes the eye's projection. Both are different for each eye, and the projection is not symmetric, so do not build it from a field of view.</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">deviceTransform</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">anchor</span><span class="p">?.</span><span class="n">originFromAnchorTransform</span><span class="w"> </span><span class="p">??</span><span class="w"> </span><span class="n">matrix_identity_float4x4</span>
+
+<span class="kd">var</span><span class="w"> </span><span class="nv">uniforms</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="n">ViewUniforms</span><span class="p">]()</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">index</span><span class="p">,</span><span class="w"> </span><span class="n">view</span><span class="p">)</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">drawable</span><span class="p">.</span><span class="n">views</span><span class="p">.</span><span class="n">enumerated</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">eyeToWorld</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">deviceTransform</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">view</span><span class="p">.</span><span class="n">transform</span>
+<span class="w">    </span><span class="n">uniforms</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">ViewUniforms</span><span class="p">(</span>
+<span class="w">        </span><span class="n">view</span><span class="p">:</span><span class="w"> </span><span class="n">eyeToWorld</span><span class="p">.</span><span class="n">inverse</span><span class="p">,</span>
+<span class="w">        </span><span class="n">projection</span><span class="p">:</span><span class="w"> </span><span class="n">drawable</span><span class="p">.</span><span class="n">computeProjection</span><span class="p">(</span><span class="n">viewIndex</span><span class="p">:</span><span class="w"> </span><span class="n">index</span><span class="p">)))</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+
+<div class="lang-cpp">
+<p>In C++ read the same values with <code>cp_drawable_get_view</code>, <code>cp_view_get_transform</code> and <code>cp_drawable_compute_projection</code>, and the device transform with <code>ar_anchor_get_origin_from_anchor_transform</code>. The view matrix is <code>simd_inverse(simd_mul(deviceTransform, eyeTransform))</code>.</p>
+</div>
+
+<p>visionOS uses <strong>reverse-Z</strong>: the projection maps the near plane to depth 1 and the far plane to 0. Clear depth to 0 and compare with <code>.greater</code>. Units are meters, and the origin is on the floor where the space was opened.</p>
+<h2 id="both-eyes-in-one-pass">Both eyes in one pass<a class="headerlink" href="#both-eyes-in-one-pass" title="Permanent link">#</a></h2>
+<p>With the layered layout the render pass targets an array texture. <strong>Vertex amplification</strong> runs the vertex function once per eye for each draw call and routes each result to its slice, so the scene is encoded once.</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">pass</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLRenderPassDescriptor</span><span class="p">()</span>
+<span class="n">pass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">texture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">drawable</span><span class="p">.</span><span class="n">colorTextures</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">pass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">loadAction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">clear</span>
+<span class="n">pass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">storeAction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">store</span>
+<span class="n">pass</span><span class="p">.</span><span class="n">depthAttachment</span><span class="p">.</span><span class="n">texture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">drawable</span><span class="p">.</span><span class="n">depthTextures</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">pass</span><span class="p">.</span><span class="n">depthAttachment</span><span class="p">.</span><span class="n">loadAction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">clear</span>
+<span class="n">pass</span><span class="p">.</span><span class="n">depthAttachment</span><span class="p">.</span><span class="n">clearDepth</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span><span class="w">                        </span><span class="c1">// reverse-Z: 0 is far</span>
+<span class="n">pass</span><span class="p">.</span><span class="n">depthAttachment</span><span class="p">.</span><span class="n">storeAction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">store</span><span class="w">                  </span><span class="c1">// the system needs the depth to reproject</span>
+<span class="n">pass</span><span class="p">.</span><span class="n">renderTargetArrayLength</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">drawable</span><span class="p">.</span><span class="n">views</span><span class="p">.</span><span class="bp">count</span>
+<span class="n">pass</span><span class="p">.</span><span class="n">rasterizationRateMap</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">drawable</span><span class="p">.</span><span class="n">rasterizationRateMaps</span><span class="p">.</span><span class="bp">first</span><span class="w">     </span><span class="c1">// foveation</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nv">encoder</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">commandBuffer</span><span class="p">.</span><span class="n">makeRenderCommandEncoder</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">pass</span><span class="p">)</span><span class="o">!</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setViewports</span><span class="p">(</span><span class="n">drawable</span><span class="p">.</span><span class="n">views</span><span class="p">.</span><span class="bp">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nv">$0</span><span class="p">.</span><span class="n">textureMap</span><span class="p">.</span><span class="n">viewport</span><span class="w"> </span><span class="p">})</span>
+
+<span class="kd">var</span><span class="w"> </span><span class="nv">mappings</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">(</span><span class="mf">0.</span><span class="p">.&lt;</span><span class="n">drawable</span><span class="p">.</span><span class="n">views</span><span class="p">.</span><span class="bp">count</span><span class="p">).</span><span class="bp">map</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">MTLVertexAmplificationViewMapping</span><span class="p">(</span><span class="n">viewportArrayIndexOffset</span><span class="p">:</span><span class="w"> </span><span class="nb">UInt32</span><span class="p">(</span><span class="nv">$0</span><span class="p">),</span>
+<span class="w">                                      </span><span class="n">renderTargetArrayIndexOffset</span><span class="p">:</span><span class="w"> </span><span class="nb">UInt32</span><span class="p">(</span><span class="nv">$0</span><span class="p">))</span>
+<span class="p">}</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setVertexAmplificationCount</span><span class="p">(</span><span class="n">drawable</span><span class="p">.</span><span class="n">views</span><span class="p">.</span><span class="bp">count</span><span class="p">,</span><span class="w"> </span><span class="n">viewMappings</span><span class="p">:</span><span class="w"> </span><span class="p">&amp;</span><span class="n">mappings</span><span class="p">)</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setVertexBytes</span><span class="p">(</span><span class="n">uniforms</span><span class="p">,</span><span class="w"> </span><span class="n">length</span><span class="p">:</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="n">ViewUniforms</span><span class="p">&gt;.</span><span class="bp">stride</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="bp">count</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div>
+</div>
+
+<div class="lang-cpp">
+<p>The render pass is built the same way with metal-cpp, from <code>cp_drawable_get_color_texture(drawable, 0)</code>, <code>cp_drawable_get_depth_texture(drawable, 0)</code>, <code>cp_drawable_get_view_count(drawable)</code> and <code>cp_drawable_get_rasterization_rate_map(drawable, 0)</code>. Then call <code>encoder-&gt;setViewports</code>, <code>encoder-&gt;setVertexAmplificationCount(count, mappings)</code> and bind the array of per-eye uniforms.</p>
+</div>
+
+<p>The pipeline descriptor needs <code>maxVertexAmplificationCount = 2</code>, and the vertex function picks its matrices with the amplification index.</p>
+<div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">ViewUniforms</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float4x4</span><span class="w"> </span><span class="n">view</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float4x4</span><span class="w"> </span><span class="n">projection</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="n">vertex</span><span class="w"> </span><span class="n">VertexOut</span><span class="w"> </span><span class="n">vertex_main</span><span class="p">(</span><span class="n">VertexIn</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
+<span class="w">                             </span><span class="n">ushort</span><span class="w"> </span><span class="n">eye</span><span class="w"> </span><span class="p">[[</span><span class="na">amplification_id</span><span class="p">]],</span>
+<span class="w">                             </span><span class="n">constant</span><span class="w"> </span><span class="n">ViewUniforms</span><span class="w"> </span><span class="o">*</span><span class="n">views</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
+<span class="w">                             </span><span class="n">constant</span><span class="w"> </span><span class="n">ModelUniforms</span><span class="w"> </span><span class="o">&amp;</span><span class="n">model</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">2</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">VertexOut</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">world</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">model</span><span class="p">.</span><span class="n">matrix</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">views</span><span class="p">[</span><span class="n">eye</span><span class="p">].</span><span class="n">projection</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">views</span><span class="p">[</span><span class="n">eye</span><span class="p">].</span><span class="n">view</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">world</span><span class="p">;</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">worldPosition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">world</span><span class="p">.</span><span class="n">xyz</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Note what is stored: unlike on the Mac, the depth attachment uses <code>.store</code>, because the compositor reads it. This is the one place where the advice of the <a href="tile-based-gpus.html">tile-based GPU</a> chapter is overruled.</p>
+<h2 id="practical-notes">Practical notes<a class="headerlink" href="#practical-notes" title="Permanent link">#</a></h2>
+<ul>
+<li><strong>Foveation and post-processing.</strong> With a rasterization rate map the texture is not uniform, so a full-screen pass that samples it must convert coordinates through the map. Start without post-processing.</li>
+<li><strong>Passthrough.</strong> For mixed immersion, where your content appears in the person's room, clear to transparent black and write premultiplied alpha; the system composites the camera image behind you.</li>
+<li><strong>Input.</strong> There are no keys or mouse. Pinches and gazes arrive as spatial events on the layer renderer, and hands through ARKit hand tracking.</li>
+<li><strong>The Simulator</strong> does not support every layout or foveation. Check the capabilities instead of assuming, as the configuration above does.</li>
+<li><strong>Budget.</strong> Two views at high resolution and 90 Hz leave a few milliseconds of GPU time. Forward rendering with MSAA, few passes and half-precision shaders is the usual choice.</li>
+</ul>
+<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<ul>
+<li>Draw the ten-cube scene of Getting Started two meters in front of the starting position.<details class="solution"><summary>Mostra la soluzione</summary><p>Units are meters and the origin is on the floor, with -z ahead of the starting direction. Scale the cube positions down, since the original scene spans several units, and move them to eye height: a model matrix of translation (0, 1.4, -2) times a scale of 0.25 applied before each cube's own transform. Use the per-eye view and projection matrices in place of the camera's.</p></details></li>
+<li>Give each eye a different clear color and check that the layers are routed correctly.<details class="solution"><summary>Mostra la soluzione</summary><p>With one pass and a layered texture you cannot clear slices to different colors, so tint in the fragment function: pass the amplification index from the vertex function as a flat value and multiply the color by red for 0 and blue for 1. If both eyes show the same tint, the view mappings are wrong, usually a <code>renderTargetArrayIndexOffset</code> left at 0.</p></details></li>
+<li>Switch to the dedicated layout and render with two passes. Compare the CPU time of encoding.<details class="solution"><summary>Mostra la soluzione</summary><p>Set <code>configuration.layout = .dedicated</code>. Each eye then has its own texture: <code>drawable.colorTextures[i]</code> and <code>drawable.depthTextures[i]</code>. Create two render pass descriptors without <code>renderTargetArrayLength</code>, and encode the whole scene twice, with one eye's matrices each and no vertex amplification. The image is identical, and the encoding time on the CPU roughly doubles, which is what the layered layout saves.</p></details></li>
+</ul></article><nav class="pager" id="pager"><a class="prev" href="../apple-platforms/metal-4.html"><small>Precedente</small>Metal 4</a><a class="next" href="../resources/examples.html"><small>Successivo</small>Codice di esempio</a></nav>
+<footer class="site-footer">
+  <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
+  <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
+</footer>
+</main>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#what-is-different">What is different</a></li><li><a href="#the-app-and-the-layer">The app and the layer</a></li><li><a href="#the-frame-loop">The frame loop</a></li><li><a href="#two-eyes-two-matrices">Two eyes, two matrices</a></li><li><a href="#both-eyes-in-one-pass">Both eyes in one pass</a></li><li><a href="#practical-notes">Practical notes</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+</div>
+<script defer src="../../assets/textures.js"></script>
+<script defer src="../../assets/live.js"></script>
+<script defer src="../../assets/demos.js"></script>
+<script defer src="../../assets/site.js"></script>
+</body>
+</html>

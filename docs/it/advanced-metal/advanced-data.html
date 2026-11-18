@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="it" data-root="../../" data-site="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dati avanzati | learnmetal</title>
+<meta name="description" content="Metal avanzato: Dati avanzati. Impara la grafica 3D con Metal di Apple, dal primo triangolo al rendering fisicamente corretto, in Swift o C++.">
+<meta name="author" content="Gabriele Vierti">
+<link rel="icon" href="../../assets/favicon.png">
+<script>
+(function () {
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem("theme"); l = localStorage.getItem("lang"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  d.dataset.theme = t;
+  var q = /[?&]lang=(swift|cpp)/.exec(location.search);      // links can pick a language: page.html?lang=cpp
+  if (q) l = q[1];
+  d.dataset.lang = l === "cpp" ? "cpp" : "swift";
+})();
+</script>
+<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../../assets/code.css">
+</head>
+<body class="" data-key="advanced-metal/advanced-data">
+<a class="skip" href="#main">Vai al contenuto</a>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Apri l'elenco dei capitoli">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a class="brand" href="../index.html"><img src="../../assets/logo.png" alt="LearnMetal" width="136" height="32"></a>
+  <div class="search" role="search">
+    <input id="search" type="search" placeholder="Cerca" aria-label="Cerca" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results" hidden></div>
+  </div>
+  <button id="search-toggle" class="icon-btn" aria-label="Cerca">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <div class="lang-switch site-lang" role="group" aria-label="Lingua del testo">
+    <a href="../../advanced-metal/advanced-data.html">EN</a>
+    <a href="../../it/advanced-metal/advanced-data.html" aria-current="true">IT</a>
+  </div>
+  <div class="lang-switch" role="group" aria-label="Linguaggio del codice">
+    <button type="button" data-set-lang="swift">Swift</button>
+    <button type="button" data-set-lang="cpp">C++</button>
+  </div>
+  <a class="icon-btn" href="https://github.com/gabrielevierti" aria-label="Gabriele Vierti on GitHub"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Passa dal tema chiaro a quello scuro">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"/></svg>
+  </button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Capitoli">
+<div class="nav-section"><h4>Per iniziare</h4><ul>
+<li><a data-key="getting-started/introduction" href="../getting-started/introduction.html">Introduzione</a></li>
+<li><a data-key="getting-started/project-setup" href="../getting-started/project-setup.html">Preparare il progetto</a></li>
+<li><a data-key="getting-started/hello-view" href="../getting-started/hello-view.html">La prima vista</a></li>
+<li><a data-key="getting-started/hello-triangle" href="../getting-started/hello-triangle.html">Il primo triangolo</a></li>
+<li><a data-key="getting-started/shaders" href="../getting-started/shaders.html">Shader</a></li>
+<li><a data-key="getting-started/textures" href="../getting-started/textures.html">Texture</a></li>
+<li><a data-key="getting-started/transformations" href="../getting-started/transformations.html">Trasformazioni</a></li>
+<li><a data-key="getting-started/coordinate-systems" href="../getting-started/coordinate-systems.html">Sistemi di coordinate</a></li>
+<li><a data-key="getting-started/camera" href="../getting-started/camera.html">Camera</a></li>
+<li><a data-key="getting-started/review" href="../getting-started/review.html">Riepilogo</a></li>
+</ul></div>
+<div class="nav-section"><h4>Illuminazione</h4><ul>
+<li><a data-key="lighting/colors" href="../lighting/colors.html">Colori</a></li>
+<li><a data-key="lighting/basic-lighting" href="../lighting/basic-lighting.html">Illuminazione di base</a></li>
+<li><a data-key="lighting/materials" href="../lighting/materials.html">Materiali</a></li>
+<li><a data-key="lighting/lighting-maps" href="../lighting/lighting-maps.html">Mappe di illuminazione</a></li>
+<li><a data-key="lighting/light-casters" href="../lighting/light-casters.html">Tipi di luce</a></li>
+<li><a data-key="lighting/multiple-lights" href="../lighting/multiple-lights.html">Più luci</a></li>
+<li><a data-key="lighting/review" href="../lighting/review.html">Riepilogo</a></li>
+</ul></div>
+<div class="nav-section"><h4>Caricare i modelli</h4><ul>
+<li><a data-key="model-loading/model-io" href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a data-key="model-loading/mesh" href="../model-loading/mesh.html">Mesh</a></li>
+<li><a data-key="model-loading/model" href="../model-loading/model.html">Modello</a></li>
+</ul></div>
+<div class="nav-section"><h4>Metal avanzato</h4><ul>
+<li><a data-key="advanced-metal/depth-testing" href="../advanced-metal/depth-testing.html">Test di profondità</a></li>
+<li><a data-key="advanced-metal/stencil-testing" href="../advanced-metal/stencil-testing.html">Test di stencil</a></li>
+<li><a data-key="advanced-metal/blending" href="../advanced-metal/blending.html">Blending</a></li>
+<li><a data-key="advanced-metal/face-culling" href="../advanced-metal/face-culling.html">Face culling</a></li>
+<li><a data-key="advanced-metal/render-targets" href="../advanced-metal/render-targets.html">Render target</a></li>
+<li><a data-key="advanced-metal/cubemaps" href="../advanced-metal/cubemaps.html">Cubemap</a></li>
+<li><a class="active" aria-current="page" data-key="advanced-metal/advanced-data" href="../advanced-metal/advanced-data.html">Dati avanzati</a></li>
+<li><a data-key="advanced-metal/advanced-msl" href="../advanced-metal/advanced-msl.html">MSL avanzato</a></li>
+<li><a data-key="advanced-metal/no-geometry-shaders" href="../advanced-metal/no-geometry-shaders.html">Vivere senza geometry shader</a></li>
+<li><a data-key="advanced-metal/instancing" href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a data-key="advanced-metal/anti-aliasing" href="../advanced-metal/anti-aliasing.html">Anti-aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Illuminazione avanzata</h4><ul>
+<li><a data-key="advanced-lighting/blinn-phong" href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a data-key="advanced-lighting/gamma-correction" href="../advanced-lighting/gamma-correction.html">Correzione gamma</a></li>
+<li><a data-key="advanced-lighting/shadow-mapping" href="../advanced-lighting/shadow-mapping.html">Shadow mapping</a></li>
+<li><a data-key="advanced-lighting/point-shadows" href="../advanced-lighting/point-shadows.html">Ombre da luci puntiformi</a></li>
+<li><a data-key="advanced-lighting/normal-mapping" href="../advanced-lighting/normal-mapping.html">Normal mapping</a></li>
+<li><a data-key="advanced-lighting/parallax-mapping" href="../advanced-lighting/parallax-mapping.html">Parallax mapping</a></li>
+<li><a data-key="advanced-lighting/hdr" href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a data-key="advanced-lighting/bloom" href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a data-key="advanced-lighting/deferred-shading" href="../advanced-lighting/deferred-shading.html">Deferred shading</a></li>
+<li><a data-key="advanced-lighting/ssao" href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a data-key="pbr/theory" href="../pbr/theory.html">Teoria</a></li>
+<li><a data-key="pbr/lighting" href="../pbr/lighting.html">Illuminazione</a></li>
+<li><a data-key="pbr/diffuse-irradiance" href="../pbr/diffuse-irradiance.html">Irradianza diffusa</a></li>
+<li><a data-key="pbr/specular-ibl" href="../pbr/specular-ibl.html">IBL speculare</a></li>
+</ul></div>
+<div class="nav-section"><h4>In pratica</h4><ul>
+<li><a data-key="in-practice/debugging" href="../in-practice/debugging.html">Debug</a></li>
+<li><a data-key="in-practice/text-rendering" href="../in-practice/text-rendering.html">Rendering del testo</a></li>
+<li><a data-key="in-practice/2d-game" href="../in-practice/2d-game.html">Un gioco 2D</a></li>
+</ul></div>
+<div class="nav-section"><h4>Oltre</h4><ul>
+<li><a data-key="beyond/compute-shaders" href="../beyond/compute-shaders.html">Compute shader</a></li>
+<li><a data-key="beyond/tessellation" href="../beyond/tessellation.html">Tassellazione</a></li>
+<li><a data-key="beyond/ray-tracing" href="../beyond/ray-tracing.html">Ray tracing</a></li>
+<li><a data-key="beyond/mesh-shaders" href="../beyond/mesh-shaders.html">Mesh shader</a></li>
+</ul></div>
+<div class="nav-section"><h4>Piattaforme Apple</h4><ul>
+<li><a data-key="apple-platforms/tile-based-gpus" href="../apple-platforms/tile-based-gpus.html">GPU tile-based</a></li>
+<li><a data-key="apple-platforms/metalfx" href="../apple-platforms/metalfx.html">Upscaling con MetalFX</a></li>
+<li><a data-key="apple-platforms/metal-4" href="../apple-platforms/metal-4.html">Metal 4</a></li>
+<li><a data-key="apple-platforms/visionos" href="../apple-platforms/visionos.html">visionOS</a></li>
+</ul></div>
+<div class="nav-section"><h4>Risorse</h4><ul>
+<li><a data-key="resources/examples" href="../resources/examples.html">Codice di esempio</a></li>
+</ul></div>
+</nav>
+<main class="content" id="main">
+<article><p class="crumb">Metal avanzato</p><h1 id="advanced-data">Advanced Data<a class="headerlink" href="#advanced-data" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
+<p>Buffers and textures have been black boxes created with one call. This chapter opens them up: where their memory lives, how to update it efficiently every frame, and how to copy data around on the GPU.</p>
+<h2 id="buffers-are-just-memory">Buffers are just memory<a class="headerlink" href="#buffers-are-just-memory" title="Permanent link">#</a></h2>
+<p>An <code>MTLBuffer</code> is an untyped block of bytes. Metal attaches no meaning to it. The same buffer can hold vertices in its first half and uniforms in its second, and you say which part to use through the <code>offset</code> parameter when binding.</p>
+<p>Create an empty buffer and fill it later:</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">buffer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeBuffer</span><span class="p">(</span><span class="n">length</span><span class="p">:</span><span class="w"> </span><span class="mi">1024</span><span class="p">,</span><span class="w"> </span><span class="n">options</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">storageModeShared</span><span class="p">)</span><span class="o">!</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">MTL</span><span class="o">::</span><span class="n">Buffer</span><span class="o">*</span><span class="w"> </span><span class="n">buffer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">device</span><span class="o">-&gt;</span><span class="n">newBuffer</span><span class="p">(</span><span class="mi">1024</span><span class="p">,</span><span class="w"> </span><span class="n">MTL</span><span class="o">::</span><span class="n">ResourceStorageModeShared</span><span class="p">);</span>
+</code></pre></div>
+</div>
+
+<p><code>buffer.contents()</code> returns a raw pointer to the memory. Writing through it is the fastest way to update data:</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">pointer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">buffer</span><span class="p">.</span><span class="n">contents</span><span class="p">().</span><span class="n">bindMemory</span><span class="p">(</span><span class="n">to</span><span class="p">:</span><span class="w"> </span><span class="n">Uniforms</span><span class="p">.</span><span class="kc">self</span><span class="p">,</span><span class="w"> </span><span class="n">capacity</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+<span class="n">pointer</span><span class="p">.</span><span class="n">pointee</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">uniforms</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">Uniforms</span><span class="o">*</span><span class="w"> </span><span class="n">pointer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">Uniforms</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">buffer</span><span class="o">-&gt;</span><span class="n">contents</span><span class="p">());</span>
+<span class="o">*</span><span class="n">pointer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">;</span>
+</code></pre></div>
+</div>
+
+<p>or for an array:</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="n">buffer</span><span class="p">.</span><span class="n">contents</span><span class="p">().</span><span class="n">copyMemory</span><span class="p">(</span><span class="n">from</span><span class="p">:</span><span class="w"> </span><span class="n">vertices</span><span class="p">,</span>
+<span class="w">                             </span><span class="n">byteCount</span><span class="p">:</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="n">Vertex</span><span class="p">&gt;.</span><span class="bp">stride</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">vertices</span><span class="p">.</span><span class="bp">count</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">std</span><span class="o">::</span><span class="n">memcpy</span><span class="p">(</span><span class="n">buffer</span><span class="o">-&gt;</span><span class="n">contents</span><span class="p">(),</span><span class="w"> </span><span class="n">vertices</span><span class="p">.</span><span class="n">data</span><span class="p">(),</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">Vertex</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">vertices</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+</code></pre></div>
+</div>
+
+<h2 id="storage-modes">Storage modes<a class="headerlink" href="#storage-modes" title="Permanent link">#</a></h2>
+<p>A resource's <strong>storage mode</strong> says who can access its memory.</p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>CPU access</th>
+<th>GPU access</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.shared</code></td>
+<td>yes</td>
+<td>yes</td>
+<td>One copy in memory visible to both. The default for buffers on Apple silicon.</td>
+</tr>
+<tr>
+<td><code>.private</code></td>
+<td>no</td>
+<td>yes</td>
+<td>GPU only. Best for render targets and static data.</td>
+</tr>
+<tr>
+<td><code>.managed</code></td>
+<td>yes</td>
+<td>yes</td>
+<td>Two synchronized copies. Only meaningful on Macs with discrete GPUs.</td>
+</tr>
+<tr>
+<td><code>.memoryless</code></td>
+<td>no</td>
+<td>during a pass</td>
+<td>Textures only, Apple GPUs. Exists only while a render pass runs.</td>
+</tr>
+</tbody>
+</table>
+<p>Apple silicon has <strong>unified memory</strong>: the CPU and GPU share the same physical RAM. A shared buffer is not copied when the GPU uses it, so "uploading" data is nothing more than writing to memory. Rules of thumb:</p>
+<ul>
+<li>Data you rewrite every frame: <code>.shared</code>.</li>
+<li>Textures you render into and static meshes you never touch again: <code>.private</code>.</li>
+<li>Depth or multisample attachments that you do not keep: <code>.memoryless</code>.</li>
+</ul>
+<h2 id="updating-uniforms-safely">Updating uniforms safely<a class="headerlink" href="#updating-uniforms-safely" title="Permanent link">#</a></h2>
+<p><code>setVertexBytes</code> is convenient but limited to 4 KB per call and copies the data each time. A real renderer keeps uniforms in buffers. There is one hazard: the GPU runs behind the CPU. If you overwrite a buffer for frame N+1 while the GPU is still drawing frame N, frame N reads the wrong data.</p>
+<p>The standard cure is a small <strong>ring of buffers</strong>, one per frame in flight, with a semaphore that stops the CPU from getting too far ahead:</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">maxFramesInFlight</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">3</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">frameSemaphore</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">DispatchSemaphore</span><span class="p">(</span><span class="n">value</span><span class="p">:</span><span class="w"> </span><span class="n">maxFramesInFlight</span><span class="p">)</span>
+<span class="kd">var</span><span class="w"> </span><span class="nv">uniformBuffers</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="bp">MTLBuffer</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[]</span>
+<span class="kd">var</span><span class="w"> </span><span class="nv">frameIndex</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span>
+
+<span class="c1">// init</span>
+<span class="k">for</span><span class="w"> </span><span class="kc">_</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mf">0.</span><span class="p">.&lt;</span><span class="n">maxFramesInFlight</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">uniformBuffers</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">device</span><span class="p">.</span><span class="n">makeBuffer</span><span class="p">(</span><span class="n">length</span><span class="p">:</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="n">Uniforms</span><span class="p">&gt;.</span><span class="bp">stride</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">maxObjects</span><span class="p">,</span>
+<span class="w">                                            </span><span class="n">options</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">storageModeShared</span><span class="p">)</span><span class="o">!</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;dispatch/dispatch.h&gt;</span>
+
+<span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">maxFramesInFlight</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
+<span class="n">dispatch_semaphore_t</span><span class="w"> </span><span class="n">frameSemaphore</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dispatch_semaphore_create</span><span class="p">(</span><span class="n">maxFramesInFlight</span><span class="p">);</span>
+<span class="n">MTL</span><span class="o">::</span><span class="n">Buffer</span><span class="o">*</span><span class="w"> </span><span class="n">uniformBuffers</span><span class="p">[</span><span class="n">maxFramesInFlight</span><span class="p">];</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">frameIndex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="c1">// constructor</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">maxFramesInFlight</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">uniformBuffers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">device</span><span class="o">-&gt;</span><span class="n">newBuffer</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">Uniforms</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">maxObjects</span><span class="p">,</span><span class="w"> </span><span class="n">MTL</span><span class="o">::</span><span class="n">ResourceStorageModeShared</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">draw</span><span class="p">(</span><span class="k">in</span><span class="w"> </span><span class="n">view</span><span class="p">:</span><span class="w"> </span><span class="bp">MTKView</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">frameSemaphore</span><span class="p">.</span><span class="n">wait</span><span class="p">()</span>
+<span class="w">    </span><span class="n">frameIndex</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">(</span><span class="n">frameIndex</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">maxFramesInFlight</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">uniformBuffer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">uniformBuffers</span><span class="p">[</span><span class="n">frameIndex</span><span class="p">]</span>
+
+<span class="w">    </span><span class="k">guard</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">commandBuffer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">commandQueue</span><span class="p">.</span><span class="n">makeCommandBuffer</span><span class="p">()</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">frameSemaphore</span><span class="p">.</span><span class="n">signal</span><span class="p">()</span>
+<span class="w">        </span><span class="k">return</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">commandBuffer</span><span class="p">.</span><span class="n">addCompletedHandler</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">[</span><span class="n">frameSemaphore</span><span class="p">]</span><span class="w"> </span><span class="kc">_</span><span class="w"> </span><span class="k">in</span>
+<span class="w">        </span><span class="n">frameSemaphore</span><span class="p">.</span><span class="n">signal</span><span class="p">()</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Write all objects' uniforms into the buffer...</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">uniformsPointer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">uniformBuffer</span><span class="p">.</span><span class="n">contents</span><span class="p">().</span><span class="n">bindMemory</span><span class="p">(</span><span class="n">to</span><span class="p">:</span><span class="w"> </span><span class="n">Uniforms</span><span class="p">.</span><span class="kc">self</span><span class="p">,</span><span class="w"> </span><span class="n">capacity</span><span class="p">:</span><span class="w"> </span><span class="n">maxObjects</span><span class="p">)</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">object</span><span class="p">)</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">objects</span><span class="p">.</span><span class="n">enumerated</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">uniformsPointer</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">object</span><span class="p">.</span><span class="n">uniforms</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// ...then bind once and move the offset per draw.</span>
+<span class="w">    </span><span class="n">encoder</span><span class="p">.</span><span class="n">setVertexBuffer</span><span class="p">(</span><span class="n">uniformBuffer</span><span class="p">,</span><span class="w"> </span><span class="n">offset</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">objects</span><span class="p">.</span><span class="bp">indices</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">encoder</span><span class="p">.</span><span class="n">setVertexBufferOffset</span><span class="p">(</span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="n">Uniforms</span><span class="p">&gt;.</span><span class="bp">stride</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+<span class="w">        </span><span class="c1">// draw object i</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">Renderer::draw</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">dispatch_semaphore_wait</span><span class="p">(</span><span class="n">frameSemaphore</span><span class="p">,</span><span class="w"> </span><span class="n">DISPATCH_TIME_FOREVER</span><span class="p">);</span>
+<span class="w">    </span><span class="n">frameIndex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">frameIndex</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">maxFramesInFlight</span><span class="p">;</span>
+<span class="w">    </span><span class="n">MTL</span><span class="o">::</span><span class="n">Buffer</span><span class="o">*</span><span class="w"> </span><span class="n">uniformBuffer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uniformBuffers</span><span class="p">[</span><span class="n">frameIndex</span><span class="p">];</span>
+
+<span class="w">    </span><span class="n">MTL</span><span class="o">::</span><span class="n">CommandBuffer</span><span class="o">*</span><span class="w"> </span><span class="n">commandBuffer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">commandQueue</span><span class="o">-&gt;</span><span class="n">commandBuffer</span><span class="p">();</span>
+<span class="w">    </span><span class="n">dispatch_semaphore_t</span><span class="w"> </span><span class="n">semaphore</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">frameSemaphore</span><span class="p">;</span>
+<span class="w">    </span><span class="n">commandBuffer</span><span class="o">-&gt;</span><span class="n">addCompletedHandler</span><span class="p">([</span><span class="n">semaphore</span><span class="p">](</span><span class="n">MTL</span><span class="o">::</span><span class="n">CommandBuffer</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">dispatch_semaphore_signal</span><span class="p">(</span><span class="n">semaphore</span><span class="p">);</span>
+<span class="w">    </span><span class="p">});</span>
+
+<span class="w">    </span><span class="c1">// Write all objects' uniforms into the buffer...</span>
+<span class="w">    </span><span class="n">Uniforms</span><span class="o">*</span><span class="w"> </span><span class="n">uniformsPointer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">Uniforms</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">uniformBuffer</span><span class="o">-&gt;</span><span class="n">contents</span><span class="p">());</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">objects</span><span class="p">.</span><span class="n">size</span><span class="p">();</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">uniformsPointer</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">objects</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">uniforms</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// ...then bind once and move the offset per draw.</span>
+<span class="w">    </span><span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setVertexBuffer</span><span class="p">(</span><span class="n">uniformBuffer</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">objects</span><span class="p">.</span><span class="n">size</span><span class="p">();</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setVertexBufferOffset</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">Uniforms</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">        </span><span class="c1">// draw object i</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+
+<p><code>setVertexBufferOffset</code> is much cheaper than rebinding a buffer. One large buffer with per-object offsets is how thousands of draws stay fast. Make sure every early return after <code>wait()</code> signals the semaphore, or the app freezes after three frames.</p>
+<figure><img src="../../assets/img/advanced-metal/advanced-data.webp" alt="advanced data" width="880" height="270" loading="lazy"></figure>
+
+<h2 id="copying-on-the-gpu-the-blit-encoder">Copying on the GPU: the blit encoder<a class="headerlink" href="#copying-on-the-gpu-the-blit-encoder" title="Permanent link">#</a></h2>
+<p>A third kind of encoder, next to render and compute, moves data between resources:</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">blit</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">commandBuffer</span><span class="p">.</span><span class="n">makeBlitCommandEncoder</span><span class="p">()</span><span class="o">!</span>
+
+<span class="c1">// Buffer to buffer</span>
+<span class="n">blit</span><span class="p">.</span><span class="n">copy</span><span class="p">(</span><span class="n">from</span><span class="p">:</span><span class="w"> </span><span class="n">sourceBuffer</span><span class="p">,</span><span class="w"> </span><span class="n">sourceOffset</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">          </span><span class="n">to</span><span class="p">:</span><span class="w"> </span><span class="n">destinationBuffer</span><span class="p">,</span><span class="w"> </span><span class="n">destinationOffset</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">          </span><span class="n">size</span><span class="p">:</span><span class="w"> </span><span class="n">sourceBuffer</span><span class="p">.</span><span class="n">length</span><span class="p">)</span>
+
+<span class="c1">// Texture to texture (same format and size)</span>
+<span class="n">blit</span><span class="p">.</span><span class="n">copy</span><span class="p">(</span><span class="n">from</span><span class="p">:</span><span class="w"> </span><span class="n">sourceTexture</span><span class="p">,</span><span class="w"> </span><span class="n">to</span><span class="p">:</span><span class="w"> </span><span class="n">destinationTexture</span><span class="p">)</span>
+
+<span class="c1">// Build the mipmap chain of a texture you rendered or filled yourself</span>
+<span class="n">blit</span><span class="p">.</span><span class="n">generateMipmaps</span><span class="p">(</span><span class="k">for</span><span class="p">:</span><span class="w"> </span><span class="n">texture</span><span class="p">)</span>
+
+<span class="n">blit</span><span class="p">.</span><span class="n">endEncoding</span><span class="p">()</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">MTL</span><span class="o">::</span><span class="n">BlitCommandEncoder</span><span class="o">*</span><span class="w"> </span><span class="n">blit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">commandBuffer</span><span class="o">-&gt;</span><span class="n">blitCommandEncoder</span><span class="p">();</span>
+
+<span class="c1">// Buffer to buffer</span>
+<span class="n">blit</span><span class="o">-&gt;</span><span class="n">copyFromBuffer</span><span class="p">(</span><span class="n">sourceBuffer</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">destinationBuffer</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">sourceBuffer</span><span class="o">-&gt;</span><span class="n">length</span><span class="p">());</span>
+
+<span class="c1">// Texture to texture (same format and size)</span>
+<span class="n">blit</span><span class="o">-&gt;</span><span class="n">copyFromTexture</span><span class="p">(</span><span class="n">sourceTexture</span><span class="p">,</span><span class="w"> </span><span class="n">destinationTexture</span><span class="p">);</span>
+
+<span class="c1">// Build the mipmap chain of a texture you rendered or filled yourself</span>
+<span class="n">blit</span><span class="o">-&gt;</span><span class="n">generateMipmaps</span><span class="p">(</span><span class="n">texture</span><span class="p">);</span>
+
+<span class="n">blit</span><span class="o">-&gt;</span><span class="n">endEncoding</span><span class="p">();</span>
+</code></pre></div>
+</div>
+
+<p>The blit encoder is also how you fill a <code>.private</code> resource: write the data into a shared staging buffer and blit it across.</p>
+<h2 id="reading-data-back">Reading data back<a class="headerlink" href="#reading-data-back" title="Permanent link">#</a></h2>
+<p>To read pixels back, the result has to be in CPU-visible memory after the GPU has finished:</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">bytesPerRow</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">texture</span><span class="p">.</span><span class="n">width</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">4</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">readback</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeBuffer</span><span class="p">(</span><span class="n">length</span><span class="p">:</span><span class="w"> </span><span class="n">bytesPerRow</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">texture</span><span class="p">.</span><span class="n">height</span><span class="p">,</span><span class="w"> </span><span class="n">options</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">storageModeShared</span><span class="p">)</span><span class="o">!</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nv">blit</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">commandBuffer</span><span class="p">.</span><span class="n">makeBlitCommandEncoder</span><span class="p">()</span><span class="o">!</span>
+<span class="n">blit</span><span class="p">.</span><span class="n">copy</span><span class="p">(</span><span class="n">from</span><span class="p">:</span><span class="w"> </span><span class="n">texture</span><span class="p">,</span><span class="w"> </span><span class="n">sourceSlice</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">sourceLevel</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">          </span><span class="n">sourceOrigin</span><span class="p">:</span><span class="w"> </span><span class="n">MTLOrigin</span><span class="p">(</span><span class="n">x</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span>
+<span class="w">          </span><span class="n">sourceSize</span><span class="p">:</span><span class="w"> </span><span class="n">MTLSize</span><span class="p">(</span><span class="n">width</span><span class="p">:</span><span class="w"> </span><span class="n">texture</span><span class="p">.</span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">:</span><span class="w"> </span><span class="n">texture</span><span class="p">.</span><span class="n">height</span><span class="p">,</span><span class="w"> </span><span class="n">depth</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span>
+<span class="w">          </span><span class="n">to</span><span class="p">:</span><span class="w"> </span><span class="n">readback</span><span class="p">,</span><span class="w"> </span><span class="n">destinationOffset</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">          </span><span class="n">destinationBytesPerRow</span><span class="p">:</span><span class="w"> </span><span class="n">bytesPerRow</span><span class="p">,</span>
+<span class="w">          </span><span class="n">destinationBytesPerImage</span><span class="p">:</span><span class="w"> </span><span class="n">bytesPerRow</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">texture</span><span class="p">.</span><span class="n">height</span><span class="p">)</span>
+<span class="n">blit</span><span class="p">.</span><span class="n">endEncoding</span><span class="p">()</span>
+
+<span class="n">commandBuffer</span><span class="p">.</span><span class="n">addCompletedHandler</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kc">_</span><span class="w"> </span><span class="k">in</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">pixels</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">readback</span><span class="p">.</span><span class="n">contents</span><span class="p">()</span><span class="w">   </span><span class="c1">// valid now</span>
+<span class="p">}</span>
+<span class="n">commandBuffer</span><span class="p">.</span><span class="n">commit</span><span class="p">()</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">NS</span><span class="o">::</span><span class="n">UInteger</span><span class="w"> </span><span class="n">bytesPerRow</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">texture</span><span class="o">-&gt;</span><span class="n">width</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span>
+<span class="n">MTL</span><span class="o">::</span><span class="n">Buffer</span><span class="o">*</span><span class="w"> </span><span class="n">readback</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">device</span><span class="o">-&gt;</span><span class="n">newBuffer</span><span class="p">(</span><span class="n">bytesPerRow</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">texture</span><span class="o">-&gt;</span><span class="n">height</span><span class="p">(),</span><span class="w"> </span><span class="n">MTL</span><span class="o">::</span><span class="n">ResourceStorageModeShared</span><span class="p">);</span>
+
+<span class="n">MTL</span><span class="o">::</span><span class="n">BlitCommandEncoder</span><span class="o">*</span><span class="w"> </span><span class="n">blit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">commandBuffer</span><span class="o">-&gt;</span><span class="n">blitCommandEncoder</span><span class="p">();</span>
+<span class="n">blit</span><span class="o">-&gt;</span><span class="n">copyFromTexture</span><span class="p">(</span><span class="n">texture</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">                                        </span><span class="c1">// slice, level</span>
+<span class="w">                      </span><span class="n">MTL</span><span class="o">::</span><span class="n">Origin</span><span class="o">::</span><span class="n">Make</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span>
+<span class="w">                      </span><span class="n">MTL</span><span class="o">::</span><span class="n">Size</span><span class="o">::</span><span class="n">Make</span><span class="p">(</span><span class="n">texture</span><span class="o">-&gt;</span><span class="n">width</span><span class="p">(),</span><span class="w"> </span><span class="n">texture</span><span class="o">-&gt;</span><span class="n">height</span><span class="p">(),</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span>
+<span class="w">                      </span><span class="n">readback</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">                                          </span><span class="c1">// destination, offset</span>
+<span class="w">                      </span><span class="n">bytesPerRow</span><span class="p">,</span>
+<span class="w">                      </span><span class="n">bytesPerRow</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">texture</span><span class="o">-&gt;</span><span class="n">height</span><span class="p">());</span>
+<span class="n">blit</span><span class="o">-&gt;</span><span class="n">endEncoding</span><span class="p">();</span>
+
+<span class="n">commandBuffer</span><span class="o">-&gt;</span><span class="n">addCompletedHandler</span><span class="p">([</span><span class="n">readback</span><span class="p">](</span><span class="n">MTL</span><span class="o">::</span><span class="n">CommandBuffer</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">pixels</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">readback</span><span class="o">-&gt;</span><span class="n">contents</span><span class="p">();</span><span class="w">   </span><span class="c1">// valid now</span>
+<span class="p">});</span>
+<span class="n">commandBuffer</span><span class="o">-&gt;</span><span class="n">commit</span><span class="p">();</span>
+</code></pre></div>
+</div>
+
+<p>Never block the render loop with <code>waitUntilCompleted()</code> to get results. Use the completion handler.</p>
+<h2 id="texture-descriptors-in-full">Texture descriptors in full<a class="headerlink" href="#texture-descriptors-in-full" title="Permanent link">#</a></h2>
+<p><code>MTLTextureDescriptor</code> has more to offer than width and height:</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>textureType</code></td>
+<td><code>.type2D</code>, <code>.type2DArray</code>, <code>.typeCube</code>, <code>.type3D</code>, <code>.type2DMultisample</code>, and more.</td>
+</tr>
+<tr>
+<td><code>pixelFormat</code></td>
+<td>Channel layout and precision.</td>
+</tr>
+<tr>
+<td><code>mipmapLevelCount</code></td>
+<td>Number of mip levels.</td>
+</tr>
+<tr>
+<td><code>arrayLength</code></td>
+<td>Layers in an array texture.</td>
+</tr>
+<tr>
+<td><code>sampleCount</code></td>
+<td>Samples per pixel for multisampling.</td>
+</tr>
+<tr>
+<td><code>usage</code></td>
+<td><code>.shaderRead</code>, <code>.shaderWrite</code>, <code>.renderTarget</code>, <code>.pixelFormatView</code>. Declare only what you need; it lets Metal optimize.</td>
+</tr>
+<tr>
+<td><code>storageMode</code></td>
+<td>As above.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Texture arrays</strong> stack many same-sized images in one texture, indexed by layer in the shader with <code>texture2d_array&lt;float&gt;</code>. They replace texture atlases without the bleeding problems.</p>
+<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<ul>
+<li>Convert the ten-cube scene from <code>setVertexBytes</code> to the ring-buffer scheme.<details class="solution"><summary>Mostra la soluzione</summary><p>Allocate three buffers, each large enough for ten <code>Uniforms</code>. Each frame wait on the semaphore, pick the next buffer, write the ten structs through <code>contents()</code>, bind the buffer once with <code>setVertexBuffer</code> at index 1, and before each draw call <code>setVertexBufferOffset(stride * i, index: 1)</code>. Signal the semaphore in the command buffer's completion handler.</p></details></li>
+<li>Render the scene to a texture, read it back, and save it as a PNG with Core Graphics.<details class="solution"><summary>Mostra la soluzione</summary><p>Blit the texture into a shared buffer as shown above. In the completion handler wrap the bytes in a <code>CGContext</code> (8 bits per component, 4 bytes per pixel, premultiplied, with <code>byteOrder32Little</code> for a BGRA texture), call <code>makeImage()</code>, and write it with <code>CGImageDestination</code> using the PNG type. Do the file writing off the render thread.</p></details></li>
+</ul></article><nav class="pager" id="pager"><a class="prev" href="../advanced-metal/cubemaps.html"><small>Precedente</small>Cubemap</a><a class="next" href="../advanced-metal/advanced-msl.html"><small>Successivo</small>MSL avanzato</a></nav>
+<footer class="site-footer">
+  <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
+  <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
+</footer>
+</main>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#buffers-are-just-memory">Buffers are just memory</a></li><li><a href="#storage-modes">Storage modes</a></li><li><a href="#updating-uniforms-safely">Updating uniforms safely</a></li><li><a href="#copying-on-the-gpu-the-blit-encoder">Copying on the GPU: the blit encoder</a></li><li><a href="#reading-data-back">Reading data back</a></li><li><a href="#texture-descriptors-in-full">Texture descriptors in full</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+</div>
+<script defer src="../../assets/textures.js"></script>
+<script defer src="../../assets/live.js"></script>
+<script defer src="../../assets/demos.js"></script>
+<script defer src="../../assets/site.js"></script>
+</body>
+</html>

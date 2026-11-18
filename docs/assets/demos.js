@@ -1340,6 +1340,351 @@ fragment float4 fragment_main(ScreenOut in [[stage_in]],
 }`,
   });
 
+  // ---------------------------------------------------------------- stencil, blending
+
+  const PAIR = [M.translate(-1, 0, -1), M.translate(2, 0, 0)];
+
+  LM.define("stencil-testing", {
+    caption: "Each crate is drawn twice: once marking the stencil buffer, once enlarged and only where the stencil is not marked.",
+    camera: { eye: [0.3, 1.8, 5], target: [0.4, 0, -0.3] }, animate: false,
+    textures: { colorTexture: "crate", floorTexture: "planks" },
+    controls: [
+      { id: "thickness", label: "outline scale", min: 0, max: 0.2, value: 0.06 },
+      { id: "color", type: "color", label: "color", value: "#ff8b1a" },
+      { id: "through", type: "check", label: "ignore depth (show through objects)", value: true },
+    ],
+    uniforms: (s) => ({ outline: 0, outlineColor: s.color }),
+    objects: (s) => [floor(-0.5, 24, { colorTexture: "floorTexture" })]
+      .concat(PAIR.map((m) => ({ mesh: "cube", model: m, stencil: "write" })))
+      .concat(PAIR.map((m) => ({ mesh: "cube", model: M.mul(m, M.scale(1 + s.thickness)), stencil: "outline",
+        depthTest: !s.through, depthWrite: false, uniforms: { outline: 1 } }))),
+    prelude: LIT,
+    code: `
+struct FragmentUniforms {
+    float3 outlineColor;
+    int outline;          // 1 while drawing the enlarged copies
+};
+
+fragment float4 fragment_main(VertexOut in [[stage_in]],
+                              constant FragmentUniforms &uniforms [[buffer(1)]],
+                              texture2d<float> colorTexture [[texture(0)]],
+                              sampler s [[sampler(0)]]) {
+    // Second pass: a flat color. The stencil test has already rejected
+    // every fragment that lies over the object itself.
+    if (uniforms.outline != 0) {
+        return float4(uniforms.outlineColor, 1.0);
+    }
+
+    float light = 0.35 + 0.65 * max(dot(normalize(in.normal), normalize(float3(0.4, 1.0, 0.6))), 0.0);
+    return float4(colorTexture.sample(s, in.uv).rgb * light, 1.0);
+}`,
+  });
+
+  const WINDOWS = [[[-1.4, 0, 0.6], [0.85, 0.15, 0.15]], [[1.2, 0, 1.2], [0.15, 0.4, 0.9]],
+    [[0.2, 0, 2.0], [0.2, 0.75, 0.3]], [[2.6, 0, 1.6], [0.9, 0.75, 0.1]]];
+
+  LM.define("blending", {
+    caption: "Drag to orbit. Turn sorting off, or let the windows write depth, and watch windows disappear behind each other.",
+    camera: { eye: [0.3, 1.2, 5.2], target: [0.5, 0, 0.6] }, animate: false,
+    textures: { colorTexture: "crate", floorTexture: "planks" },
+    controls: [
+      { id: "alpha", label: "alpha", min: 0, max: 1, value: 0.45 },
+      { id: "sort", type: "check", label: "sort back to front", value: true },
+      { id: "write", type: "check", label: "windows write depth", value: false },
+    ],
+    uniforms: () => ({ useTint: 0, tint: [0, 0, 0, 1] }),
+    objects: (s, t, b) => {
+      const dist = (w) => { const d = LM.vec.sub(w[0], b.viewPosition); return LM.vec.dot(d, d); };
+      const windows = WINDOWS.slice();
+      if (s.sort) windows.sort((x, y) => dist(y) - dist(x));      // farthest first
+      return [floor(-0.5, 24, { colorTexture: "floorTexture" })]
+        .concat(PAIR.map((m) => ({ mesh: "cube", model: m })))
+        .concat(windows.map((w) => ({ mesh: "quad", model: M.translate(w[0][0], w[0][1], w[0][2]), blend: true,
+          depthWrite: s.write, uniforms: { useTint: 1, tint: w[1].concat([s.alpha]) } })));
+    },
+    prelude: LIT,
+    code: `
+struct FragmentUniforms {
+    float4 tint;          // rgb and alpha of a window
+    int useTint;          // 1 while drawing the windows
+};
+
+fragment float4 fragment_main(VertexOut in [[stage_in]],
+                              constant FragmentUniforms &uniforms [[buffer(1)]],
+                              texture2d<float> colorTexture [[texture(0)]],
+                              sampler s [[sampler(0)]]) {
+    if (uniforms.useTint != 0) {
+        // The pipeline blends this with what is already in the texture:
+        // result = source.rgb * source.a + destination.rgb * (1 - source.a)
+        return uniforms.tint;
+    }
+
+    float light = 0.35 + 0.65 * max(dot(normalize(in.normal), normalize(float3(0.4, 1.0, 0.6))), 0.0);
+    return float4(colorTexture.sample(s, in.uv).rgb * light, 1.0);
+}`,
+  });
+
+  // ---------------------------------------------------------------- bloom, deferred shading, SSAO
+
+  const GLOW = [[[-2.4, 0.3, 0.2], [1, 0.25, 0.15]], [[2.6, 0.5, -0.6], [0.2, 0.5, 1]], [[0.4, 0.2, 1.4], [0.3, 1, 0.4]], [[0.2, 1.8, -2.2], [1, 0.8, 0.3]]];
+  const CRATES = () => [
+    { mesh: "cube", model: M.mul(M.translate(-1.0, 0, -1.2), M.rotate(rad(25), 0, 1, 0)) },
+    { mesh: "cube", model: M.mul(M.translate(1.4, 0, -0.2), M.rotate(rad(-15), 0, 1, 0)) },
+    { mesh: "cube", model: M.chain(M.translate(0.2, 0.8, -1.0), M.rotate(rad(40), 0, 1, 0), M.scale(0.6)) }];
+
+  LM.define("bloom", {
+    caption: "The scene is rendered into a floating-point texture. Pixels brighter than the threshold are blurred through the mip chain and added back.",
+    camera: { eye: [0.3, 1.6, 5.2], target: [0.2, 0.1, -0.5], fov: 50 }, clear: () => [0.004, 0.004, 0.004], animate: false,
+    textures: { colorTexture: "crate", floorTexture: "planks" },
+    sceneHDR: true, sceneMips: true,
+    controls: [
+      { id: "on", type: "check", label: "bloom", value: true },
+      { id: "threshold", label: "threshold", min: 0, max: 3, value: 1 },
+      { id: "intensity", label: "intensity", min: 0, max: 3, value: 1 },
+      { id: "exposure", label: "exposure", min: 0.2, max: 3, value: 1.1 },
+    ],
+    uniforms: (s) => {
+      const u = { enabled: s.on ? 1 : 0, threshold: s.threshold, intensity: s.intensity, exposure: s.exposure };
+      GLOW.forEach((l, i) => { u["lights[" + i + "].position"] = l[0]; u["lights[" + i + "].color"] = l[1].map((c) => c * 5); });
+      return u;
+    },
+    objects: () => [floor(-0.5, 24, { colorTexture: "floorTexture" })].concat(CRATES())
+      .concat(GLOW.map((l) => lamp(l[0], l[1].map((c) => c * 6), 0.2))),      // emissive: far above 1.0
+    sceneSource: LIT + `
+struct PointLight { float3 position; float3 color; };
+fragment float4 fragment_scene(VertexOut in [[stage_in]],
+                               constant PointLight *lights [[buffer(2)]],
+                               texture2d<float> colorTexture [[texture(0)]],
+                               sampler s [[sampler(0)]]) {
+    float3 albedo = pow(colorTexture.sample(s, in.uv).rgb, float3(2.2));
+    float3 normal = normalize(in.normal);
+    float3 hdr = 0.02 * albedo;
+    for (int i = 0; i < 4; i++) {
+        float3 toLight = lights[i].position - in.worldPosition;
+        float distance = length(toLight);
+        hdr += max(dot(normal, toLight / distance), 0.0) * albedo * lights[i].color / (distance * distance);
+    }
+    return float4(hdr, 1.0);
+}`,
+    prelude: SCREEN,
+    code: `
+struct BloomUniforms {
+    float threshold;
+    float intensity;
+    float exposure;
+    int enabled;
+};
+
+// Keep only what is brighter than the threshold.
+static float3 brightPart(float3 color, float threshold) {
+    float brightness = dot(color, float3(0.2126, 0.7152, 0.0722));
+    return color * saturate(brightness - threshold) / max(brightness, 0.0001);
+}
+
+fragment float4 fragment_composite(ScreenOut in [[stage_in]],
+                                   constant BloomUniforms &uniforms [[buffer(0)]],
+                                   texture2d<float> scene [[texture(0)]],
+                                   sampler s [[sampler(0)]]) {
+    float3 hdr = scene.sample(s, in.uv, level(0.0)).rgb;
+
+    if (uniforms.enabled != 0) {
+        // Each mip level is a blurrier copy of the scene. Summing the bright
+        // part of several levels gives a wide, smooth glow.
+        float3 glow = float3(0.0);
+        for (int mip = 2; mip <= 6; mip++) {
+            glow += brightPart(scene.sample(s, in.uv, level(float(mip))).rgb, uniforms.threshold);
+        }
+        hdr += glow * uniforms.intensity / 5.0;          // add the glow before tone mapping
+    }
+
+    float3 mapped = 1.0 - exp(-hdr * uniforms.exposure);
+    return float4(pow(mapped, float3(1.0 / 2.2)), 1.0);
+}`,
+  });
+
+  const GBUFFER = LIT + `
+struct GBufferOut {
+    float4 albedo   [[color(0)]];
+    float4 normal   [[color(1)]];
+    float4 position [[color(2)]];
+};
+fragment GBufferOut fragment_gbuffer(VertexOut in [[stage_in]],
+                                     texture2d<float> colorTexture [[texture(0)]],
+                                     sampler s [[sampler(0)]]) {
+    GBufferOut out;
+    out.albedo = float4(pow(colorTexture.sample(s, in.uv).rgb, float3(2.2)), 1.0);
+    out.normal = float4(normalize(in.normal), 1.0);
+    out.position = float4(in.worldPosition, 1.0);
+    return out;
+}`;
+  const GRID = () => {
+    const out = [floor(-0.5, 24, { colorTexture: "floorTexture" })];
+    for (let i = 0; i < 8; i++) out.push({ mesh: "cube",
+      model: M.chain(M.translate(-3 + 2 * (i % 4), 0, -3 + 2 * Math.floor(i / 4)), M.rotate(rad(17 * i), 0, 1, 0), M.scale(0.9)) });
+    return out;
+  };
+
+  LM.define("deferred-shading", {
+    caption: "The geometry pass fills three textures. This lighting pass then runs once per pixel, whatever the number of objects.",
+    camera: { eye: [0, 3.4, 6.5], target: [0, 0, -0.8], fov: 50 }, clear: () => [0, 0, 0],
+    textures: { colorTexture: "crate", floorTexture: "planks" },
+    sceneTargets: ["gAlbedo", "gNormal", "gPosition"], sceneHDR: true,
+    controls: [
+      { id: "show", type: "select", label: "show", value: "0", options: [["0", "Lighting pass"], ["1", "G-buffer: albedo"], ["2", "G-buffer: normal"], ["3", "G-buffer: position"]] },
+      { id: "count", label: "lights", min: 1, max: 64, step: 1, value: 32 },
+    ],
+    uniforms: (s) => ({ show: +s.show, lightCount: s.count }),
+    objects: GRID,
+    sceneSource: GBUFFER,
+    prelude: SCREEN,
+    code: `
+struct LightingUniforms {
+    float3 viewPosition;
+    float time;
+    float lightCount;
+    int show;
+};
+
+static float hash(float n) {
+    return fract(sin(n * 12.9898) * 43758.5453);
+}
+
+fragment float4 fragment_lighting(ScreenOut in [[stage_in]],
+                                  constant LightingUniforms &uniforms [[buffer(1)]],
+                                  texture2d<float> gAlbedo   [[texture(0)]],
+                                  texture2d<float> gNormal   [[texture(1)]],
+                                  texture2d<float> gPosition [[texture(2)]],
+                                  sampler s [[sampler(0)]]) {
+    // Everything the lighting needs comes from the G-buffer, not from geometry.
+    float3 albedo = gAlbedo.sample(s, in.uv).rgb;
+    float3 normal = gNormal.sample(s, in.uv).xyz;
+    float3 position = gPosition.sample(s, in.uv).xyz;
+
+    if (uniforms.show == 1) { return float4(pow(albedo, float3(1.0 / 2.2)), 1.0); }
+    if (uniforms.show == 2) { return float4(normal * 0.5 + 0.5, 1.0); }
+    if (uniforms.show == 3) { return float4(saturate(position * 0.12 + 0.5), 1.0); }
+    if (length(normal) < 0.5) { return float4(0.0, 0.0, 0.0, 1.0); }      // background: nothing was drawn here
+
+    float3 viewDir = normalize(uniforms.viewPosition - position);
+    float3 color = albedo * 0.02;
+
+    for (int i = 0; i < 64; i++) {
+        if (float(i) >= uniforms.lightCount) { break; }
+        float id = float(i);
+        float angle = hash(id) * 6.2831 + uniforms.time * (hash(id + 0.5) - 0.5);
+        float3 lightPosition = float3(cos(angle), 0.0, sin(angle)) * (1.0 + hash(id + 0.2) * 4.0)
+                             + float3(0.0, 0.1 + hash(id + 0.7) * 0.9, -1.0);
+        float3 lightColor = 0.5 + 0.5 * cos(6.2831 * (hash(id + 0.3) + float3(0.0, 0.33, 0.67)));
+
+        float3 toLight = lightPosition - position;
+        float distance = length(toLight);
+        if (distance > 3.0) { continue; }                 // outside this light's volume
+
+        float3 lightDir = toLight / distance;
+        float3 halfway = normalize(lightDir + viewDir);
+        float attenuation = saturate(1.0 - distance / 3.0) / (1.0 + distance * distance);
+        float diff = max(dot(normal, lightDir), 0.0);
+        float spec = pow(max(dot(normal, halfway), 0.0), 32.0) * 0.3;
+        color += (diff * albedo + spec) * lightColor * attenuation * 3.0;
+    }
+    return float4(pow(color, float3(1.0 / 2.2)), 1.0);
+}`,
+  });
+
+  LM.define("ssao", {
+    caption: "For every pixel, sample points in a hemisphere above the surface and count how many are hidden behind the G-buffer.",
+    camera: { eye: [0.6, 1.7, 4.4], target: [0.1, 0.2, 0], fov: 45 }, clear: () => [0, 0, 0], animate: false,
+    sceneTargets: ["gAlbedo", "gNormal", "gPosition"], sceneHDR: true,
+    controls: [
+      { id: "show", type: "select", label: "show", value: "1", options: [["0", "Ambient with occlusion"], ["1", "Occlusion buffer"], ["2", "Constant ambient"]] },
+      { id: "radius", label: "radius", min: 0.05, max: 1.5, value: 0.5 },
+      { id: "samples", label: "samples", min: 4, max: 64, step: 1, value: 32 },
+      { id: "blur", type: "check", label: "blur", value: true },
+    ],
+    uniforms: (s) => ({ show: +s.show, radius: s.radius, sampleCount: s.samples, bias: 0.03, blur: s.blur ? 1 : 0 }),
+    objects: () => [floor(-0.5, 24),
+      { mesh: "cube", model: M.translate(-0.9, 0, 0) },
+      { mesh: "cube", model: M.mul(M.translate(0.25, 0, -0.3), M.rotate(rad(20), 0, 1, 0)) },
+      { mesh: "cube", model: M.chain(M.translate(-0.3, 0.9, -0.2), M.rotate(rad(45), 0, 1, 0), M.scale(0.8)) },
+      { mesh: "sphere", model: M.mul(M.translate(1.5, 0.1, 0.4), M.scale(1.2)) },
+      { mesh: "cube", model: M.mul(M.translate(0, 1.5, -2.5), M.scale(9, 4, 0.2)) }],
+    sceneSource: GBUFFER.replace("pow(colorTexture.sample(s, in.uv).rgb, float3(2.2))", "float3(0.8)"),
+    finalSource: SCREEN + `
+struct FinalUniforms { int show; int blur; };
+fragment float4 fragment_final(ScreenOut in [[stage_in]], constant FinalUniforms &uniforms [[buffer(0)]],
+                               texture2d<float> pass1 [[texture(0)]], texture2d<float> gNormal [[texture(1)]],
+                               sampler s [[sampler(0)]]) {
+    float ao = pass1.sample(s, in.uv).r;
+    if (uniforms.blur != 0) {
+        float2 texel = 1.0 / float2(pass1.get_width(), pass1.get_height());
+        ao = 0.0;
+        for (int x = -2; x < 2; x++) { for (int y = -2; y < 2; y++) {
+            ao += pass1.sample(s, in.uv + (float2(float(x), float(y)) + 0.5) * texel).r;
+        } }
+        ao /= 16.0;
+    }
+    float3 normal = gNormal.sample(s, in.uv).xyz;
+    if (length(normal) < 0.5) { return float4(0.75, 0.75, 0.75, 1.0); }
+    if (uniforms.show == 1) { return float4(float3(ao), 1.0); }
+    float diffuse = max(dot(normal, normalize(float3(0.5, 1.0, 0.6))), 0.0) * 0.45;
+    float ambient = 0.4 * (uniforms.show == 0 ? ao : 1.0);
+    return float4(float3(diffuse + ambient), 1.0);
+}`,
+    prelude: SCREEN,
+    code: `
+struct SSAOUniforms {
+    float4x4 viewProjection;
+    float3 viewPosition;
+    float3 cameraFront;
+    float radius;
+    float bias;
+    float sampleCount;
+};
+
+static float hash(float2 p) {
+    return fract(sin(dot(p, float2(12.9898, 78.233))) * 43758.5453);
+}
+
+fragment float4 fragment_ssao(ScreenOut in [[stage_in]],
+                              constant SSAOUniforms &uniforms [[buffer(0)]],
+                              texture2d<float> gNormal   [[texture(0)]],
+                              texture2d<float> gPosition [[texture(1)]],
+                              sampler s [[sampler(0)]]) {
+    float3 normal = gNormal.sample(s, in.uv).xyz;
+    if (length(normal) < 0.5) { return float4(1.0); }                 // background
+    float3 position = gPosition.sample(s, in.uv).xyz;
+    float depth = dot(position - uniforms.viewPosition, uniforms.cameraFront);
+
+    // A random basis around the normal, different for every pixel.
+    float3 random = normalize(float3(hash(in.position.xy), hash(in.position.yx + 7.0), hash(in.position.xy * 1.7 + 3.0)) * 2.0 - 1.0);
+    float3 tangent = normalize(random - normal * dot(random, normal));
+    float3 bitangent = cross(normal, tangent);
+
+    float occlusion = 0.0;
+    for (int i = 0; i < 64; i++) {
+        if (float(i) >= uniforms.sampleCount) { break; }
+        float fi = float(i);
+
+        // A point in the hemisphere above the surface, more likely close to it.
+        float3 k = normalize(float3(hash(float2(fi, 1.0)) * 2.0 - 1.0, hash(float2(fi, 2.0)) * 2.0 - 1.0, hash(float2(fi, 3.0))));
+        float t = hash(float2(fi, 4.0));
+        k *= mix(0.1, 1.0, t * t);
+        float3 samplePosition = position + (tangent * k.x + bitangent * k.y + normal * k.z) * uniforms.radius;
+
+        // Where is that point on screen, and what does the G-buffer hold there?
+        float4 clip = uniforms.viewProjection * float4(samplePosition, 1.0);
+        float2 uv = clip.xy / clip.w * float2(0.5, -0.5) + 0.5;
+        float sceneDepth = dot(gPosition.sample(s, uv).xyz - uniforms.viewPosition, uniforms.cameraFront);
+        float sampleDepth = dot(samplePosition - uniforms.viewPosition, uniforms.cameraFront);
+
+        // Occluded if the scene is closer to the camera than the sample point.
+        float rangeCheck = smoothstep(0.0, 1.0, uniforms.radius / max(abs(depth - sceneDepth), 0.0001));
+        occlusion += (sceneDepth <= sampleDepth - uniforms.bias ? 1.0 : 0.0) * rangeCheck;
+    }
+    return float4(float3(1.0 - occlusion / uniforms.sampleCount), 1.0);
+}`,
+  });
+
   // ---------------------------------------------------------------- 2D canvas demos
 
   LM.define("tessellation", {

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-root="../" data-site="../">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -18,16 +18,28 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
+<script>window.LM_T = {"copy": "Copy", "copied": "Copied", "none": "No results for", "loading": "Loading the index", "progress": "{n} of {total} chapters read", "reset": "Reset progress", "read": "read"};</script>
 <link rel="stylesheet" href="../assets/style.css">
 <link rel="stylesheet" href="../assets/code.css">
 </head>
-<body class="">
+<body class="" data-key="advanced-metal/stencil-testing">
 <a class="skip" href="#main">Skip to content</a>
 <header class="topbar">
   <button id="menu-toggle" class="icon-btn" aria-label="Open the chapter list">
     <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
   </button>
   <a class="brand" href="../index.html"><img src="../assets/logo.png" alt="LearnMetal" width="136" height="32"></a>
+  <div class="search" role="search">
+    <input id="search" type="search" placeholder="Search" aria-label="Search" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results" hidden></div>
+  </div>
+  <button id="search-toggle" class="icon-btn" aria-label="Search">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <div class="lang-switch site-lang" role="group" aria-label="Language of the text">
+    <a href="../advanced-metal/stencil-testing.html" aria-current="true">EN</a>
+    <a href="../it/advanced-metal/stencil-testing.html">IT</a>
+  </div>
   <div class="lang-switch" role="group" aria-label="Language of the host code">
     <button type="button" data-set-lang="swift">Swift</button>
     <button type="button" data-set-lang="cpp">C++</button>
@@ -40,74 +52,81 @@
 <div class="layout">
 <nav class="sidebar" id="sidebar" aria-label="Chapters">
 <div class="nav-section"><h4>Getting Started</h4><ul>
-<li><a href="../getting-started/introduction.html">Introduction</a></li>
-<li><a href="../getting-started/project-setup.html">Project Setup</a></li>
-<li><a href="../getting-started/hello-view.html">Hello View</a></li>
-<li><a href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
-<li><a href="../getting-started/shaders.html">Shaders</a></li>
-<li><a href="../getting-started/textures.html">Textures</a></li>
-<li><a href="../getting-started/transformations.html">Transformations</a></li>
-<li><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
-<li><a href="../getting-started/camera.html">Camera</a></li>
-<li><a href="../getting-started/review.html">Review</a></li>
+<li><a data-key="getting-started/introduction" href="../getting-started/introduction.html">Introduction</a></li>
+<li><a data-key="getting-started/project-setup" href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a data-key="getting-started/hello-view" href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a data-key="getting-started/hello-triangle" href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a data-key="getting-started/shaders" href="../getting-started/shaders.html">Shaders</a></li>
+<li><a data-key="getting-started/textures" href="../getting-started/textures.html">Textures</a></li>
+<li><a data-key="getting-started/transformations" href="../getting-started/transformations.html">Transformations</a></li>
+<li><a data-key="getting-started/coordinate-systems" href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a data-key="getting-started/camera" href="../getting-started/camera.html">Camera</a></li>
+<li><a data-key="getting-started/review" href="../getting-started/review.html">Review</a></li>
 </ul></div>
 <div class="nav-section"><h4>Lighting</h4><ul>
-<li><a href="../lighting/colors.html">Colors</a></li>
-<li><a href="../lighting/basic-lighting.html">Basic Lighting</a></li>
-<li><a href="../lighting/materials.html">Materials</a></li>
-<li><a href="../lighting/lighting-maps.html">Lighting Maps</a></li>
-<li><a href="../lighting/light-casters.html">Light Casters</a></li>
-<li><a href="../lighting/multiple-lights.html">Multiple Lights</a></li>
-<li><a href="../lighting/review.html">Review</a></li>
+<li><a data-key="lighting/colors" href="../lighting/colors.html">Colors</a></li>
+<li><a data-key="lighting/basic-lighting" href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a data-key="lighting/materials" href="../lighting/materials.html">Materials</a></li>
+<li><a data-key="lighting/lighting-maps" href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a data-key="lighting/light-casters" href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a data-key="lighting/multiple-lights" href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a data-key="lighting/review" href="../lighting/review.html">Review</a></li>
 </ul></div>
 <div class="nav-section"><h4>Model Loading</h4><ul>
-<li><a href="../model-loading/model-io.html">Model I/O</a></li>
-<li><a href="../model-loading/mesh.html">Mesh</a></li>
-<li><a href="../model-loading/model.html">Model</a></li>
+<li><a data-key="model-loading/model-io" href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a data-key="model-loading/mesh" href="../model-loading/mesh.html">Mesh</a></li>
+<li><a data-key="model-loading/model" href="../model-loading/model.html">Model</a></li>
 </ul></div>
 <div class="nav-section"><h4>Advanced Metal</h4><ul>
-<li><a href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
-<li><a class="active" aria-current="page" href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
-<li><a href="../advanced-metal/blending.html">Blending</a></li>
-<li><a href="../advanced-metal/face-culling.html">Face Culling</a></li>
-<li><a href="../advanced-metal/render-targets.html">Render Targets</a></li>
-<li><a href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
-<li><a href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
-<li><a href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
-<li><a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
-<li><a href="../advanced-metal/instancing.html">Instancing</a></li>
-<li><a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+<li><a data-key="advanced-metal/depth-testing" href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a class="active" aria-current="page" data-key="advanced-metal/stencil-testing" href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a data-key="advanced-metal/blending" href="../advanced-metal/blending.html">Blending</a></li>
+<li><a data-key="advanced-metal/face-culling" href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a data-key="advanced-metal/render-targets" href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a data-key="advanced-metal/cubemaps" href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a data-key="advanced-metal/advanced-data" href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a data-key="advanced-metal/advanced-msl" href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a data-key="advanced-metal/no-geometry-shaders" href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a data-key="advanced-metal/instancing" href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a data-key="advanced-metal/anti-aliasing" href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
 </ul></div>
 <div class="nav-section"><h4>Advanced Lighting</h4><ul>
-<li><a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
-<li><a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
-<li><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
-<li><a href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
-<li><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
-<li><a href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
-<li><a href="../advanced-lighting/hdr.html">HDR</a></li>
-<li><a href="../advanced-lighting/bloom.html">Bloom</a></li>
-<li><a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
-<li><a href="../advanced-lighting/ssao.html">SSAO</a></li>
+<li><a data-key="advanced-lighting/blinn-phong" href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a data-key="advanced-lighting/gamma-correction" href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a data-key="advanced-lighting/shadow-mapping" href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a data-key="advanced-lighting/point-shadows" href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a data-key="advanced-lighting/normal-mapping" href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a data-key="advanced-lighting/parallax-mapping" href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a data-key="advanced-lighting/hdr" href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a data-key="advanced-lighting/bloom" href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a data-key="advanced-lighting/deferred-shading" href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a data-key="advanced-lighting/ssao" href="../advanced-lighting/ssao.html">SSAO</a></li>
 </ul></div>
 <div class="nav-section"><h4>PBR</h4><ul>
-<li><a href="../pbr/theory.html">Theory</a></li>
-<li><a href="../pbr/lighting.html">Lighting</a></li>
-<li><a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
-<li><a href="../pbr/specular-ibl.html">Specular IBL</a></li>
+<li><a data-key="pbr/theory" href="../pbr/theory.html">Theory</a></li>
+<li><a data-key="pbr/lighting" href="../pbr/lighting.html">Lighting</a></li>
+<li><a data-key="pbr/diffuse-irradiance" href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a data-key="pbr/specular-ibl" href="../pbr/specular-ibl.html">Specular IBL</a></li>
 </ul></div>
 <div class="nav-section"><h4>In Practice</h4><ul>
-<li><a href="../in-practice/debugging.html">Debugging</a></li>
-<li><a href="../in-practice/text-rendering.html">Text Rendering</a></li>
-<li><a href="../in-practice/2d-game.html">A 2D Game</a></li>
+<li><a data-key="in-practice/debugging" href="../in-practice/debugging.html">Debugging</a></li>
+<li><a data-key="in-practice/text-rendering" href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a data-key="in-practice/2d-game" href="../in-practice/2d-game.html">A 2D Game</a></li>
 </ul></div>
 <div class="nav-section"><h4>Beyond</h4><ul>
-<li><a href="../beyond/compute-shaders.html">Compute Shaders</a></li>
-<li><a href="../beyond/tessellation.html">Tessellation</a></li>
-<li><a href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+<li><a data-key="beyond/compute-shaders" href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a data-key="beyond/tessellation" href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a data-key="beyond/ray-tracing" href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+<li><a data-key="beyond/mesh-shaders" href="../beyond/mesh-shaders.html">Mesh Shaders</a></li>
+</ul></div>
+<div class="nav-section"><h4>Apple Platforms</h4><ul>
+<li><a data-key="apple-platforms/tile-based-gpus" href="../apple-platforms/tile-based-gpus.html">Tile-Based GPUs</a></li>
+<li><a data-key="apple-platforms/metalfx" href="../apple-platforms/metalfx.html">MetalFX Upscaling</a></li>
+<li><a data-key="apple-platforms/metal-4" href="../apple-platforms/metal-4.html">Metal 4</a></li>
+<li><a data-key="apple-platforms/visionos" href="../apple-platforms/visionos.html">visionOS</a></li>
 </ul></div>
 <div class="nav-section"><h4>Resources</h4><ul>
-<li><a href="../resources/examples.html">Example Code</a></li>
+<li><a data-key="resources/examples" href="../resources/examples.html">Example Code</a></li>
 </ul></div>
 </nav>
 <main class="content" id="main">
@@ -277,7 +296,7 @@
 <p class="admonition-title">Better outlines</p>
 <p>Scaling works for convex shapes centered on their origin. For arbitrary models, move each vertex along its normal in the vertex function instead: <code>position + normal * thickness</code>.</p>
 </div>
-<figure><img src="../assets/img/advanced-metal/stencil-testing.webp" alt="Outlines drawn where the stencil buffer was not marked by the crates." width="880" height="495" loading="lazy"><figcaption>Outlines drawn where the stencil buffer was not marked by the crates.</figcaption></figure>
+<div class="lm-demo" data-demo="stencil-testing" data-fallback="../assets/img/advanced-metal/stencil-testing.webp"></div>
 
 <h2 id="reading-the-comparison-correctly">Reading the comparison correctly<a class="headerlink" href="#reading-the-comparison-correctly" title="Permanent link">#</a></h2>
 <p>The comparison is written as <em>reference</em> <strong>op</strong> <em>stored</em>. With <code>.less</code> and a reference of 1, a fragment passes where <code>1 &lt; stored</code>. It is easy to read this backwards.</p>
@@ -289,9 +308,9 @@
 </ul>
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
-<li>Make the outline respect depth, so it is hidden behind closer objects.</li>
-<li>Outline only one of the cubes.</li>
-</ul></article><nav class="pager" aria-label="Previous and next chapter"><a class="prev" href="../advanced-metal/depth-testing.html"><small>Previous</small>Depth Testing</a><a class="next" href="../advanced-metal/blending.html"><small>Next</small>Blending</a></nav>
+<li>Make the outline respect depth, so it is hidden behind closer objects.<details class="solution"><summary>Show solution</summary><p>Give the outline state a normal depth test: <code>depthCompareFunction = .less</code> instead of <code>.always</code>. The enlarged copy is then hidden by anything closer to the camera. In the live demo, untick "ignore depth".</p></details></li>
+<li>Outline only one of the cubes.<details class="solution"><summary>Show solution</summary><p>Use the stencil-writing state only while drawing the cube you want outlined, and draw the others with the ordinary depth state. Then draw the enlarged copy of that one cube only. The reference value could also select between objects: write 1 for one cube and 2 for another, and test against the value you want.</p></details></li>
+</ul></article><nav class="pager" id="pager"><a class="prev" href="../advanced-metal/depth-testing.html"><small>Previous</small>Depth Testing</a><a class="next" href="../advanced-metal/blending.html"><small>Next</small>Blending</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>

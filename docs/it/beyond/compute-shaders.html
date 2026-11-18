@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="it" data-root="../../" data-site="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compute shader | learnmetal</title>
+<meta name="description" content="Oltre: Compute shader. Impara la grafica 3D con Metal di Apple, dal primo triangolo al rendering fisicamente corretto, in Swift o C++.">
+<meta name="author" content="Gabriele Vierti">
+<link rel="icon" href="../../assets/favicon.png">
+<script>
+(function () {
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem("theme"); l = localStorage.getItem("lang"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  d.dataset.theme = t;
+  var q = /[?&]lang=(swift|cpp)/.exec(location.search);      // links can pick a language: page.html?lang=cpp
+  if (q) l = q[1];
+  d.dataset.lang = l === "cpp" ? "cpp" : "swift";
+})();
+</script>
+<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../../assets/code.css">
+</head>
+<body class="" data-key="beyond/compute-shaders">
+<a class="skip" href="#main">Vai al contenuto</a>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Apri l'elenco dei capitoli">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a class="brand" href="../index.html"><img src="../../assets/logo.png" alt="LearnMetal" width="136" height="32"></a>
+  <div class="search" role="search">
+    <input id="search" type="search" placeholder="Cerca" aria-label="Cerca" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results" hidden></div>
+  </div>
+  <button id="search-toggle" class="icon-btn" aria-label="Cerca">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <div class="lang-switch site-lang" role="group" aria-label="Lingua del testo">
+    <a href="../../beyond/compute-shaders.html">EN</a>
+    <a href="../../it/beyond/compute-shaders.html" aria-current="true">IT</a>
+  </div>
+  <div class="lang-switch" role="group" aria-label="Linguaggio del codice">
+    <button type="button" data-set-lang="swift">Swift</button>
+    <button type="button" data-set-lang="cpp">C++</button>
+  </div>
+  <a class="icon-btn" href="https://github.com/gabrielevierti" aria-label="Gabriele Vierti on GitHub"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Passa dal tema chiaro a quello scuro">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"/></svg>
+  </button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Capitoli">
+<div class="nav-section"><h4>Per iniziare</h4><ul>
+<li><a data-key="getting-started/introduction" href="../getting-started/introduction.html">Introduzione</a></li>
+<li><a data-key="getting-started/project-setup" href="../getting-started/project-setup.html">Preparare il progetto</a></li>
+<li><a data-key="getting-started/hello-view" href="../getting-started/hello-view.html">La prima vista</a></li>
+<li><a data-key="getting-started/hello-triangle" href="../getting-started/hello-triangle.html">Il primo triangolo</a></li>
+<li><a data-key="getting-started/shaders" href="../getting-started/shaders.html">Shader</a></li>
+<li><a data-key="getting-started/textures" href="../getting-started/textures.html">Texture</a></li>
+<li><a data-key="getting-started/transformations" href="../getting-started/transformations.html">Trasformazioni</a></li>
+<li><a data-key="getting-started/coordinate-systems" href="../getting-started/coordinate-systems.html">Sistemi di coordinate</a></li>
+<li><a data-key="getting-started/camera" href="../getting-started/camera.html">Camera</a></li>
+<li><a data-key="getting-started/review" href="../getting-started/review.html">Riepilogo</a></li>
+</ul></div>
+<div class="nav-section"><h4>Illuminazione</h4><ul>
+<li><a data-key="lighting/colors" href="../lighting/colors.html">Colori</a></li>
+<li><a data-key="lighting/basic-lighting" href="../lighting/basic-lighting.html">Illuminazione di base</a></li>
+<li><a data-key="lighting/materials" href="../lighting/materials.html">Materiali</a></li>
+<li><a data-key="lighting/lighting-maps" href="../lighting/lighting-maps.html">Mappe di illuminazione</a></li>
+<li><a data-key="lighting/light-casters" href="../lighting/light-casters.html">Tipi di luce</a></li>
+<li><a data-key="lighting/multiple-lights" href="../lighting/multiple-lights.html">Più luci</a></li>
+<li><a data-key="lighting/review" href="../lighting/review.html">Riepilogo</a></li>
+</ul></div>
+<div class="nav-section"><h4>Caricare i modelli</h4><ul>
+<li><a data-key="model-loading/model-io" href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a data-key="model-loading/mesh" href="../model-loading/mesh.html">Mesh</a></li>
+<li><a data-key="model-loading/model" href="../model-loading/model.html">Modello</a></li>
+</ul></div>
+<div class="nav-section"><h4>Metal avanzato</h4><ul>
+<li><a data-key="advanced-metal/depth-testing" href="../advanced-metal/depth-testing.html">Test di profondità</a></li>
+<li><a data-key="advanced-metal/stencil-testing" href="../advanced-metal/stencil-testing.html">Test di stencil</a></li>
+<li><a data-key="advanced-metal/blending" href="../advanced-metal/blending.html">Blending</a></li>
+<li><a data-key="advanced-metal/face-culling" href="../advanced-metal/face-culling.html">Face culling</a></li>
+<li><a data-key="advanced-metal/render-targets" href="../advanced-metal/render-targets.html">Render target</a></li>
+<li><a data-key="advanced-metal/cubemaps" href="../advanced-metal/cubemaps.html">Cubemap</a></li>
+<li><a data-key="advanced-metal/advanced-data" href="../advanced-metal/advanced-data.html">Dati avanzati</a></li>
+<li><a data-key="advanced-metal/advanced-msl" href="../advanced-metal/advanced-msl.html">MSL avanzato</a></li>
+<li><a data-key="advanced-metal/no-geometry-shaders" href="../advanced-metal/no-geometry-shaders.html">Vivere senza geometry shader</a></li>
+<li><a data-key="advanced-metal/instancing" href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a data-key="advanced-metal/anti-aliasing" href="../advanced-metal/anti-aliasing.html">Anti-aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Illuminazione avanzata</h4><ul>
+<li><a data-key="advanced-lighting/blinn-phong" href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a data-key="advanced-lighting/gamma-correction" href="../advanced-lighting/gamma-correction.html">Correzione gamma</a></li>
+<li><a data-key="advanced-lighting/shadow-mapping" href="../advanced-lighting/shadow-mapping.html">Shadow mapping</a></li>
+<li><a data-key="advanced-lighting/point-shadows" href="../advanced-lighting/point-shadows.html">Ombre da luci puntiformi</a></li>
+<li><a data-key="advanced-lighting/normal-mapping" href="../advanced-lighting/normal-mapping.html">Normal mapping</a></li>
+<li><a data-key="advanced-lighting/parallax-mapping" href="../advanced-lighting/parallax-mapping.html">Parallax mapping</a></li>
+<li><a data-key="advanced-lighting/hdr" href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a data-key="advanced-lighting/bloom" href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a data-key="advanced-lighting/deferred-shading" href="../advanced-lighting/deferred-shading.html">Deferred shading</a></li>
+<li><a data-key="advanced-lighting/ssao" href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a data-key="pbr/theory" href="../pbr/theory.html">Teoria</a></li>
+<li><a data-key="pbr/lighting" href="../pbr/lighting.html">Illuminazione</a></li>
+<li><a data-key="pbr/diffuse-irradiance" href="../pbr/diffuse-irradiance.html">Irradianza diffusa</a></li>
+<li><a data-key="pbr/specular-ibl" href="../pbr/specular-ibl.html">IBL speculare</a></li>
+</ul></div>
+<div class="nav-section"><h4>In pratica</h4><ul>
+<li><a data-key="in-practice/debugging" href="../in-practice/debugging.html">Debug</a></li>
+<li><a data-key="in-practice/text-rendering" href="../in-practice/text-rendering.html">Rendering del testo</a></li>
+<li><a data-key="in-practice/2d-game" href="../in-practice/2d-game.html">Un gioco 2D</a></li>
+</ul></div>
+<div class="nav-section"><h4>Oltre</h4><ul>
+<li><a class="active" aria-current="page" data-key="beyond/compute-shaders" href="../beyond/compute-shaders.html">Compute shader</a></li>
+<li><a data-key="beyond/tessellation" href="../beyond/tessellation.html">Tassellazione</a></li>
+<li><a data-key="beyond/ray-tracing" href="../beyond/ray-tracing.html">Ray tracing</a></li>
+<li><a data-key="beyond/mesh-shaders" href="../beyond/mesh-shaders.html">Mesh shader</a></li>
+</ul></div>
+<div class="nav-section"><h4>Piattaforme Apple</h4><ul>
+<li><a data-key="apple-platforms/tile-based-gpus" href="../apple-platforms/tile-based-gpus.html">GPU tile-based</a></li>
+<li><a data-key="apple-platforms/metalfx" href="../apple-platforms/metalfx.html">Upscaling con MetalFX</a></li>
+<li><a data-key="apple-platforms/metal-4" href="../apple-platforms/metal-4.html">Metal 4</a></li>
+<li><a data-key="apple-platforms/visionos" href="../apple-platforms/visionos.html">visionOS</a></li>
+</ul></div>
+<div class="nav-section"><h4>Risorse</h4><ul>
+<li><a data-key="resources/examples" href="../resources/examples.html">Codice di esempio</a></li>
+</ul></div>
+</nav>
+<main class="content" id="main">
+<article><p class="crumb">Oltre</p><h1 id="compute-shaders">Compute Shaders<a class="headerlink" href="#compute-shaders" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
+<div class="example-box lang-swift"><strong>Progetto di esempio</strong> <code>examples/Sources/17-ComputeParticles</code>, si esegue con <code>swift run ComputeParticles</code>. <a href="../../downloads/learnmetal-examples.zip">Scarica tutti gli esempi</a> oppure guarda <a href="../resources/examples.html">come eseguirli</a>.</div>
+
+<p>A GPU is a massively parallel computer that happens to be good at drawing triangles. <strong>Compute functions</strong>, called kernels in Metal, let you use that power for anything: image processing, physics, particle systems, simulations, culling, machine learning. They run outside the render pipeline, with no vertices or fragments, only data in and data out.</p>
+<p>In Metal, compute is not an add-on. It uses the same device, command buffers, buffers, textures and shading language as rendering, so results flow between the two with no copying.</p>
+<h2 id="a-first-kernel-image-processing">A first kernel: image processing<a class="headerlink" href="#a-first-kernel-image-processing" title="Permanent link">#</a></h2>
+<p>A kernel is a function marked <code>kernel</code> that returns <code>void</code>. It is executed once for every point in a grid that you define. For an image, the grid is the pixels:</p>
+<div class="codehilite"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;metal_stdlib&gt;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">metal</span><span class="p">;</span>
+
+<span class="n">kernel</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">grayscale</span><span class="p">(</span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="p">,</span><span class="w"> </span><span class="n">access</span><span class="o">::</span><span class="n">read</span><span class="o">&gt;</span><span class="w">  </span><span class="n">input</span><span class="w">  </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
+<span class="w">                      </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="p">,</span><span class="w"> </span><span class="n">access</span><span class="o">::</span><span class="n">write</span><span class="o">&gt;</span><span class="w"> </span><span class="n">output</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
+<span class="w">                      </span><span class="n">uint2</span><span class="w"> </span><span class="n">gid</span><span class="w"> </span><span class="p">[[</span><span class="na">thread_position_in_grid</span><span class="p">]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">input</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="n">gid</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">gray</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dot</span><span class="p">(</span><span class="n">color</span><span class="p">.</span><span class="n">rgb</span><span class="p">,</span><span class="w"> </span><span class="n">float3</span><span class="p">(</span><span class="mf">0.2126</span><span class="p">,</span><span class="w"> </span><span class="mf">0.7152</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0722</span><span class="p">));</span>
+<span class="w">    </span><span class="n">output</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">float4</span><span class="p">(</span><span class="n">float3</span><span class="p">(</span><span class="n">gray</span><span class="p">),</span><span class="w"> </span><span class="n">color</span><span class="p">.</span><span class="n">a</span><span class="p">),</span><span class="w"> </span><span class="n">gid</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<ul>
+<li>Textures declare how they are accessed: <code>access::read</code>, <code>access::write</code> or <code>access::read_write</code>. A texture that a kernel writes to must be created with <code>.shaderWrite</code> usage.</li>
+<li><code>[[thread_position_in_grid]]</code> is the coordinate of this invocation, here the pixel.</li>
+<li>There is no sampler: <code>read</code> and <code>write</code> address exact texels. You can still pass a sampler and call <code>sample</code> with normalized coordinates when you want filtering.</li>
+</ul>
+<h2 id="running-it">Running it<a class="headerlink" href="#running-it" title="Permanent link">#</a></h2>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">function</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">library</span><span class="p">.</span><span class="n">makeFunction</span><span class="p">(</span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="s">"grayscale"</span><span class="p">)</span><span class="o">!</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">computePipeline</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeComputePipelineState</span><span class="p">(</span><span class="n">function</span><span class="p">:</span><span class="w"> </span><span class="n">function</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">MTL</span><span class="o">::</span><span class="n">Function</span><span class="o">*</span><span class="w"> </span><span class="n">function</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">library</span><span class="o">-&gt;</span><span class="n">newFunction</span><span class="p">(</span><span class="n">MTLSTR</span><span class="p">(</span><span class="s">"grayscale"</span><span class="p">));</span>
+<span class="n">NS</span><span class="o">::</span><span class="n">Error</span><span class="o">*</span><span class="w"> </span><span class="n">error</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">nullptr</span><span class="p">;</span>
+<span class="n">MTL</span><span class="o">::</span><span class="n">ComputePipelineState</span><span class="o">*</span><span class="w"> </span><span class="n">computePipeline</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">device</span><span class="o">-&gt;</span><span class="n">newComputePipelineState</span><span class="p">(</span><span class="n">function</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">error</span><span class="p">);</span>
+</code></pre></div>
+</div>
+
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">encoder</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">commandBuffer</span><span class="p">.</span><span class="n">makeComputeCommandEncoder</span><span class="p">()</span><span class="o">!</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setComputePipelineState</span><span class="p">(</span><span class="n">computePipeline</span><span class="p">)</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setTexture</span><span class="p">(</span><span class="n">inputTexture</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setTexture</span><span class="p">(</span><span class="n">outputTexture</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nv">width</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">computePipeline</span><span class="p">.</span><span class="n">threadExecutionWidth</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">height</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">computePipeline</span><span class="p">.</span><span class="n">maxTotalThreadsPerThreadgroup</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">width</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">dispatchThreads</span><span class="p">(</span><span class="n">MTLSize</span><span class="p">(</span><span class="n">width</span><span class="p">:</span><span class="w"> </span><span class="n">inputTexture</span><span class="p">.</span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">:</span><span class="w"> </span><span class="n">inputTexture</span><span class="p">.</span><span class="n">height</span><span class="p">,</span><span class="w"> </span><span class="n">depth</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span>
+<span class="w">                        </span><span class="n">threadsPerThreadgroup</span><span class="p">:</span><span class="w"> </span><span class="n">MTLSize</span><span class="p">(</span><span class="n">width</span><span class="p">:</span><span class="w"> </span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">:</span><span class="w"> </span><span class="n">height</span><span class="p">,</span><span class="w"> </span><span class="n">depth</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">))</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">endEncoding</span><span class="p">()</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">MTL</span><span class="o">::</span><span class="n">ComputeCommandEncoder</span><span class="o">*</span><span class="w"> </span><span class="n">encoder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">commandBuffer</span><span class="o">-&gt;</span><span class="n">computeCommandEncoder</span><span class="p">();</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setComputePipelineState</span><span class="p">(</span><span class="n">computePipeline</span><span class="p">);</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setTexture</span><span class="p">(</span><span class="n">inputTexture</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setTexture</span><span class="p">(</span><span class="n">outputTexture</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+
+<span class="n">NS</span><span class="o">::</span><span class="n">UInteger</span><span class="w"> </span><span class="n">width</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">computePipeline</span><span class="o">-&gt;</span><span class="n">threadExecutionWidth</span><span class="p">();</span>
+<span class="n">NS</span><span class="o">::</span><span class="n">UInteger</span><span class="w"> </span><span class="n">height</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">computePipeline</span><span class="o">-&gt;</span><span class="n">maxTotalThreadsPerThreadgroup</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">width</span><span class="p">;</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">dispatchThreads</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">Size</span><span class="o">::</span><span class="n">Make</span><span class="p">(</span><span class="n">inputTexture</span><span class="o">-&gt;</span><span class="n">width</span><span class="p">(),</span><span class="w"> </span><span class="n">inputTexture</span><span class="o">-&gt;</span><span class="n">height</span><span class="p">(),</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span>
+<span class="w">                         </span><span class="n">MTL</span><span class="o">::</span><span class="n">Size</span><span class="o">::</span><span class="n">Make</span><span class="p">(</span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">));</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">endEncoding</span><span class="p">();</span>
+</code></pre></div>
+</div>
+
+<p>A compute encoder lives in a command buffer next to render encoders. A typical frame might run a compute pass to update particles, then a render pass that draws them, in one command buffer.</p>
+<figure><img src="../../assets/img/beyond/compute-shaders.webp" alt="A kernel reads one texture and writes another, one thread per pixel." width="880" height="246" loading="lazy"><figcaption>A kernel reads one texture and writes another, one thread per pixel.</figcaption></figure>
+
+<h2 id="threads-and-threadgroups">Threads and threadgroups<a class="headerlink" href="#threads-and-threadgroups" title="Permanent link">#</a></h2>
+<p>The GPU executes the grid in batches called <strong>threadgroups</strong>. Threads in one group run together and can share a small amount of fast memory.</p>
+<p><code>dispatchThreads</code> takes the total grid size and a threadgroup size, and Metal handles grids that are not an exact multiple of the group size. It requires non-uniform threadgroup support, which every Apple silicon device has. The older <code>dispatchThreadgroups</code> takes a number of <em>groups</em> instead, so the grid is rounded up and the kernel must check for out-of-range coordinates itself:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">gid</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">output</span><span class="p">.</span><span class="n">get_width</span><span class="p">()</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">gid</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">output</span><span class="p">.</span><span class="n">get_height</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+
+<p>The sizes used above, <code>threadExecutionWidth</code> wide and as tall as the maximum allows, are a good default for 2D work.</p>
+<h2 id="a-particle-system">A particle system<a class="headerlink" href="#a-particle-system" title="Permanent link">#</a></h2>
+<p>Buffers work in kernels just as textures do. Here every particle is moved by one thread:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">Particle</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">position</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">velocity</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">life</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">SimulationUniforms</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">deltaTime</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">gravity</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="n">kernel</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">update_particles</span><span class="p">(</span><span class="n">device</span><span class="w"> </span><span class="n">Particle</span><span class="w"> </span><span class="o">*</span><span class="n">particles</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
+<span class="w">                             </span><span class="n">constant</span><span class="w"> </span><span class="n">SimulationUniforms</span><span class="w"> </span><span class="o">&amp;</span><span class="n">uniforms</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
+<span class="w">                             </span><span class="n">uint</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="p">[[</span><span class="na">thread_position_in_grid</span><span class="p">]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Particle</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">particles</span><span class="p">[</span><span class="n">id</span><span class="p">];</span>
+
+<span class="w">    </span><span class="n">p</span><span class="p">.</span><span class="n">velocity</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">gravity</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">deltaTime</span><span class="p">;</span>
+<span class="w">    </span><span class="n">p</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">velocity</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">deltaTime</span><span class="p">;</span>
+<span class="w">    </span><span class="n">p</span><span class="p">.</span><span class="n">life</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">deltaTime</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">                 </span><span class="c1">// bounce on the ground</span>
+<span class="w">        </span><span class="n">p</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">p</span><span class="p">.</span><span class="n">velocity</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">*=</span><span class="w"> </span><span class="mf">-0.6</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">particles</span><span class="p">[</span><span class="n">id</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>The buffer is in the <code>device</code> address space because the kernel writes to it. The grid is one-dimensional:</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="n">encoder</span><span class="p">.</span><span class="n">setBuffer</span><span class="p">(</span><span class="n">particleBuffer</span><span class="p">,</span><span class="w"> </span><span class="n">offset</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setBytes</span><span class="p">(&amp;</span><span class="n">simulationUniforms</span><span class="p">,</span><span class="w"> </span><span class="n">length</span><span class="p">:</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="n">SimulationUniforms</span><span class="p">&gt;.</span><span class="bp">stride</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">dispatchThreads</span><span class="p">(</span><span class="n">MTLSize</span><span class="p">(</span><span class="n">width</span><span class="p">:</span><span class="w"> </span><span class="n">particleCount</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">depth</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span>
+<span class="w">                        </span><span class="n">threadsPerThreadgroup</span><span class="p">:</span><span class="w"> </span><span class="n">MTLSize</span><span class="p">(</span><span class="n">width</span><span class="p">:</span><span class="w"> </span><span class="n">computePipeline</span><span class="p">.</span><span class="n">threadExecutionWidth</span><span class="p">,</span>
+<span class="w">                                                       </span><span class="n">height</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">depth</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">))</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setBuffer</span><span class="p">(</span><span class="n">particleBuffer</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setBytes</span><span class="p">(</span><span class="o">&amp;</span><span class="n">simulationUniforms</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">SimulationUniforms</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">dispatchThreads</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">Size</span><span class="o">::</span><span class="n">Make</span><span class="p">(</span><span class="n">particleCount</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span>
+<span class="w">                         </span><span class="n">MTL</span><span class="o">::</span><span class="n">Size</span><span class="o">::</span><span class="n">Make</span><span class="p">(</span><span class="n">computePipeline</span><span class="o">-&gt;</span><span class="n">threadExecutionWidth</span><span class="p">(),</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">));</span>
+</code></pre></div>
+</div>
+
+<p>Then bind the same buffer to an instanced billboard vertex function like the one in <a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a>, with its <code>Particle</code> struct changed to match this one, and draw. The particle data never leaves the GPU, and a million particles animate comfortably.</p>
+<div class="admonition warning">
+<p class="admonition-title">Data races</p>
+<p>Threads run in parallel in no guaranteed order. Each thread must write only to its own element. If a thread reads data that another thread writes, as in a blur that reads neighbors, use separate input and output resources and swap them after each step. For shared counters, MSL provides atomic types such as <code>atomic_uint</code>.</p>
+</div>
+<h2 id="where-compute-is-used-in-a-renderer">Where compute is used in a renderer<a class="headerlink" href="#where-compute-is-used-in-a-renderer" title="Permanent link">#</a></h2>
+<ul>
+<li><strong>Post-processing</strong>: blur, bloom, tone mapping, depth of field. A kernel avoids the full-screen triangle and can read and write any pixel.</li>
+<li><strong>Culling</strong>: test object bounds against the view frustum and write a list of visible instances or an indirect command buffer.</li>
+<li><strong>Light assignment</strong>: build per-tile or per-cluster light lists for forward rendering with many lights.</li>
+<li><strong>Precomputation</strong>: the irradiance and prefiltered maps of the <a href="../pbr/diffuse-irradiance.html">IBL chapters</a> can be generated by kernels writing directly to cube faces.</li>
+<li><strong>Simulation</strong>: cloth, fluids, flocking.</li>
+<li><strong>Mesh generation</strong>: terrain, marching cubes, skinning.</li>
+</ul>
+<h2 id="compute-or-fragment">Compute or fragment?<a class="headerlink" href="#compute-or-fragment" title="Permanent link">#</a></h2>
+<p>A full-screen fragment function and a kernel can often do the same job. Fragment functions benefit from the tile-based architecture when they write to render pass attachments, especially memoryless ones. Kernels are more flexible: arbitrary reads and writes, several outputs of different sizes, shared threadgroup memory. On Apple GPUs, prefer a fragment function when the result goes straight into the current render pass, and a kernel otherwise. Measure when it matters.</p>
+<h2 id="ready-made-kernels">Ready-made kernels<a class="headerlink" href="#ready-made-kernels" title="Permanent link">#</a></h2>
+<p><strong>Metal Performance Shaders</strong> (MPS) is a library of tuned kernels: Gaussian blur, convolution, histogram, image scaling, matrix multiplication, and more. For standard image operations, use it before writing your own:</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="kd">import</span><span class="w"> </span><span class="nc">MetalPerformanceShaders</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nv">blur</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MPSImageGaussianBlur</span><span class="p">(</span><span class="n">device</span><span class="p">:</span><span class="w"> </span><span class="n">device</span><span class="p">,</span><span class="w"> </span><span class="n">sigma</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">)</span>
+<span class="n">blur</span><span class="p">.</span><span class="n">encode</span><span class="p">(</span><span class="n">commandBuffer</span><span class="p">:</span><span class="w"> </span><span class="n">commandBuffer</span><span class="p">,</span><span class="w"> </span><span class="n">sourceTexture</span><span class="p">:</span><span class="w"> </span><span class="n">source</span><span class="p">,</span><span class="w"> </span><span class="n">destinationTexture</span><span class="p">:</span><span class="w"> </span><span class="n">destination</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="c1">// Metal Performance Shaders has no metal-cpp wrapper. Call it from a small Objective-C++ file,</span>
+<span class="c1">// like the window bridge in Project Setup:</span>
+<span class="c1">//</span>
+<span class="c1">//   MPSImageGaussianBlur* blur = [[MPSImageGaussianBlur alloc] initWithDevice:device sigma:8];</span>
+<span class="c1">//   [blur encodeToCommandBuffer:commandBuffer sourceTexture:source destinationTexture:destination];</span>
+<span class="c1">//</span>
+<span class="c1">// metal-cpp objects are the Objective-C objects: cast with (__bridge id&lt;MTLTexture&gt;)texture.</span>
+</code></pre></div>
+</div>
+
+<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<ul>
+<li>Write a kernel that inverts an image and display the result.<details class="solution"><summary>Mostra la soluzione</summary><div class="codehilite"><pre><span></span><code><span class="n">kernel</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">invert</span><span class="p">(</span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="p">,</span><span class="w"> </span><span class="n">access</span><span class="o">::</span><span class="n">read</span><span class="o">&gt;</span><span class="w">  </span><span class="n">input</span><span class="w">  </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
+<span class="w">                   </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="p">,</span><span class="w"> </span><span class="n">access</span><span class="o">::</span><span class="n">write</span><span class="o">&gt;</span><span class="w"> </span><span class="n">output</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
+<span class="w">                   </span><span class="n">uint2</span><span class="w"> </span><span class="n">gid</span><span class="w"> </span><span class="p">[[</span><span class="na">thread_position_in_grid</span><span class="p">]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">input</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="n">gid</span><span class="p">);</span>
+<span class="w">    </span><span class="n">output</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">float4</span><span class="p">(</span><span class="mf">1.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">color</span><span class="p">.</span><span class="n">rgb</span><span class="p">,</span><span class="w"> </span><span class="n">color</span><span class="p">.</span><span class="n">a</span><span class="p">),</span><span class="w"> </span><span class="n">gid</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Create the output texture with <code>.shaderWrite</code> and <code>.shaderRead</code> usage, then show it with the full-screen triangle.</p></details></li>
+<li>Port the box blur from the SSAO chapter to a kernel.<details class="solution"><summary>Mostra la soluzione</summary><div class="codehilite"><pre><span></span><code><span class="n">kernel</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">box_blur</span><span class="p">(</span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="p">,</span><span class="w"> </span><span class="n">access</span><span class="o">::</span><span class="n">read</span><span class="o">&gt;</span><span class="w">  </span><span class="n">input</span><span class="w">  </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
+<span class="w">                     </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="p">,</span><span class="w"> </span><span class="n">access</span><span class="o">::</span><span class="n">write</span><span class="o">&gt;</span><span class="w"> </span><span class="n">output</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
+<span class="w">                     </span><span class="n">uint2</span><span class="w"> </span><span class="n">gid</span><span class="w"> </span><span class="p">[[</span><span class="na">thread_position_in_grid</span><span class="p">]])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">int2</span><span class="w"> </span><span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">int2</span><span class="p">(</span><span class="n">input</span><span class="p">.</span><span class="n">get_width</span><span class="p">(),</span><span class="w"> </span><span class="n">input</span><span class="p">.</span><span class="n">get_height</span><span class="p">());</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">-2</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">-2</span><span class="p">;</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="n">y</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">int2</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">clamp</span><span class="p">(</span><span class="n">int2</span><span class="p">(</span><span class="n">gid</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">int2</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">),</span><span class="w"> </span><span class="n">int2</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="n">size</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">            </span><span class="n">sum</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">input</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="n">uint2</span><span class="p">(</span><span class="n">p</span><span class="p">)).</span><span class="n">r</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">output</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">float4</span><span class="p">(</span><span class="n">sum</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">16.0</span><span class="p">),</span><span class="w"> </span><span class="n">gid</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Input and output must be different textures.</p></details></li>
+<li>Add an attractor point to the particle simulation that pulls particles toward the mouse.<details class="solution"><summary>Mostra la soluzione</summary><p>Add a <code>float3 attractor</code> to the simulation uniforms and accelerate each particle toward it. Unproject the mouse position onto a plane in front of the camera to get the point.</p>
+<div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">toAttractor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">attractor</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">position</span><span class="p">;</span>
+<span class="kt">float</span><span class="w"> </span><span class="n">distanceSquared</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">max</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">toAttractor</span><span class="p">,</span><span class="w"> </span><span class="n">toAttractor</span><span class="p">),</span><span class="w"> </span><span class="mf">0.25</span><span class="p">);</span>
+<span class="n">p</span><span class="p">.</span><span class="n">velocity</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">toAttractor</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mf">6.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">distanceSquared</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">deltaTime</span><span class="p">;</span>
+</code></pre></div>
+
+<p>The <code>max</code> keeps the force finite when a particle passes through the attractor.</p></details></li>
+</ul></article><nav class="pager" id="pager"><a class="prev" href="../in-practice/2d-game.html"><small>Precedente</small>Un gioco 2D</a><a class="next" href="../beyond/tessellation.html"><small>Successivo</small>Tassellazione</a></nav>
+<footer class="site-footer">
+  <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
+  <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
+</footer>
+</main>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#a-first-kernel-image-processing">A first kernel: image processing</a></li><li><a href="#running-it">Running it</a></li><li><a href="#threads-and-threadgroups">Threads and threadgroups</a></li><li><a href="#a-particle-system">A particle system</a></li><li><a href="#where-compute-is-used-in-a-renderer">Where compute is used in a renderer</a></li><li><a href="#compute-or-fragment">Compute or fragment?</a></li><li><a href="#ready-made-kernels">Ready-made kernels</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+</div>
+<script defer src="../../assets/textures.js"></script>
+<script defer src="../../assets/live.js"></script>
+<script defer src="../../assets/demos.js"></script>
+<script defer src="../../assets/site.js"></script>
+</body>
+</html>

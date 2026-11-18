@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="it" data-root="../../" data-site="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Metal 4 | learnmetal</title>
+<meta name="description" content="Piattaforme Apple: Metal 4. Impara la grafica 3D con Metal di Apple, dal primo triangolo al rendering fisicamente corretto, in Swift o C++.">
+<meta name="author" content="Gabriele Vierti">
+<link rel="icon" href="../../assets/favicon.png">
+<script>
+(function () {
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem("theme"); l = localStorage.getItem("lang"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  d.dataset.theme = t;
+  var q = /[?&]lang=(swift|cpp)/.exec(location.search);      // links can pick a language: page.html?lang=cpp
+  if (q) l = q[1];
+  d.dataset.lang = l === "cpp" ? "cpp" : "swift";
+})();
+</script>
+<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../../assets/code.css">
+</head>
+<body class="" data-key="apple-platforms/metal-4">
+<a class="skip" href="#main">Vai al contenuto</a>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Apri l'elenco dei capitoli">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a class="brand" href="../index.html"><img src="../../assets/logo.png" alt="LearnMetal" width="136" height="32"></a>
+  <div class="search" role="search">
+    <input id="search" type="search" placeholder="Cerca" aria-label="Cerca" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results" hidden></div>
+  </div>
+  <button id="search-toggle" class="icon-btn" aria-label="Cerca">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <div class="lang-switch site-lang" role="group" aria-label="Lingua del testo">
+    <a href="../../apple-platforms/metal-4.html">EN</a>
+    <a href="../../it/apple-platforms/metal-4.html" aria-current="true">IT</a>
+  </div>
+  <div class="lang-switch" role="group" aria-label="Linguaggio del codice">
+    <button type="button" data-set-lang="swift">Swift</button>
+    <button type="button" data-set-lang="cpp">C++</button>
+  </div>
+  <a class="icon-btn" href="https://github.com/gabrielevierti" aria-label="Gabriele Vierti on GitHub"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Passa dal tema chiaro a quello scuro">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"/></svg>
+  </button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Capitoli">
+<div class="nav-section"><h4>Per iniziare</h4><ul>
+<li><a data-key="getting-started/introduction" href="../getting-started/introduction.html">Introduzione</a></li>
+<li><a data-key="getting-started/project-setup" href="../getting-started/project-setup.html">Preparare il progetto</a></li>
+<li><a data-key="getting-started/hello-view" href="../getting-started/hello-view.html">La prima vista</a></li>
+<li><a data-key="getting-started/hello-triangle" href="../getting-started/hello-triangle.html">Il primo triangolo</a></li>
+<li><a data-key="getting-started/shaders" href="../getting-started/shaders.html">Shader</a></li>
+<li><a data-key="getting-started/textures" href="../getting-started/textures.html">Texture</a></li>
+<li><a data-key="getting-started/transformations" href="../getting-started/transformations.html">Trasformazioni</a></li>
+<li><a data-key="getting-started/coordinate-systems" href="../getting-started/coordinate-systems.html">Sistemi di coordinate</a></li>
+<li><a data-key="getting-started/camera" href="../getting-started/camera.html">Camera</a></li>
+<li><a data-key="getting-started/review" href="../getting-started/review.html">Riepilogo</a></li>
+</ul></div>
+<div class="nav-section"><h4>Illuminazione</h4><ul>
+<li><a data-key="lighting/colors" href="../lighting/colors.html">Colori</a></li>
+<li><a data-key="lighting/basic-lighting" href="../lighting/basic-lighting.html">Illuminazione di base</a></li>
+<li><a data-key="lighting/materials" href="../lighting/materials.html">Materiali</a></li>
+<li><a data-key="lighting/lighting-maps" href="../lighting/lighting-maps.html">Mappe di illuminazione</a></li>
+<li><a data-key="lighting/light-casters" href="../lighting/light-casters.html">Tipi di luce</a></li>
+<li><a data-key="lighting/multiple-lights" href="../lighting/multiple-lights.html">Più luci</a></li>
+<li><a data-key="lighting/review" href="../lighting/review.html">Riepilogo</a></li>
+</ul></div>
+<div class="nav-section"><h4>Caricare i modelli</h4><ul>
+<li><a data-key="model-loading/model-io" href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a data-key="model-loading/mesh" href="../model-loading/mesh.html">Mesh</a></li>
+<li><a data-key="model-loading/model" href="../model-loading/model.html">Modello</a></li>
+</ul></div>
+<div class="nav-section"><h4>Metal avanzato</h4><ul>
+<li><a data-key="advanced-metal/depth-testing" href="../advanced-metal/depth-testing.html">Test di profondità</a></li>
+<li><a data-key="advanced-metal/stencil-testing" href="../advanced-metal/stencil-testing.html">Test di stencil</a></li>
+<li><a data-key="advanced-metal/blending" href="../advanced-metal/blending.html">Blending</a></li>
+<li><a data-key="advanced-metal/face-culling" href="../advanced-metal/face-culling.html">Face culling</a></li>
+<li><a data-key="advanced-metal/render-targets" href="../advanced-metal/render-targets.html">Render target</a></li>
+<li><a data-key="advanced-metal/cubemaps" href="../advanced-metal/cubemaps.html">Cubemap</a></li>
+<li><a data-key="advanced-metal/advanced-data" href="../advanced-metal/advanced-data.html">Dati avanzati</a></li>
+<li><a data-key="advanced-metal/advanced-msl" href="../advanced-metal/advanced-msl.html">MSL avanzato</a></li>
+<li><a data-key="advanced-metal/no-geometry-shaders" href="../advanced-metal/no-geometry-shaders.html">Vivere senza geometry shader</a></li>
+<li><a data-key="advanced-metal/instancing" href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a data-key="advanced-metal/anti-aliasing" href="../advanced-metal/anti-aliasing.html">Anti-aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Illuminazione avanzata</h4><ul>
+<li><a data-key="advanced-lighting/blinn-phong" href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a data-key="advanced-lighting/gamma-correction" href="../advanced-lighting/gamma-correction.html">Correzione gamma</a></li>
+<li><a data-key="advanced-lighting/shadow-mapping" href="../advanced-lighting/shadow-mapping.html">Shadow mapping</a></li>
+<li><a data-key="advanced-lighting/point-shadows" href="../advanced-lighting/point-shadows.html">Ombre da luci puntiformi</a></li>
+<li><a data-key="advanced-lighting/normal-mapping" href="../advanced-lighting/normal-mapping.html">Normal mapping</a></li>
+<li><a data-key="advanced-lighting/parallax-mapping" href="../advanced-lighting/parallax-mapping.html">Parallax mapping</a></li>
+<li><a data-key="advanced-lighting/hdr" href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a data-key="advanced-lighting/bloom" href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a data-key="advanced-lighting/deferred-shading" href="../advanced-lighting/deferred-shading.html">Deferred shading</a></li>
+<li><a data-key="advanced-lighting/ssao" href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a data-key="pbr/theory" href="../pbr/theory.html">Teoria</a></li>
+<li><a data-key="pbr/lighting" href="../pbr/lighting.html">Illuminazione</a></li>
+<li><a data-key="pbr/diffuse-irradiance" href="../pbr/diffuse-irradiance.html">Irradianza diffusa</a></li>
+<li><a data-key="pbr/specular-ibl" href="../pbr/specular-ibl.html">IBL speculare</a></li>
+</ul></div>
+<div class="nav-section"><h4>In pratica</h4><ul>
+<li><a data-key="in-practice/debugging" href="../in-practice/debugging.html">Debug</a></li>
+<li><a data-key="in-practice/text-rendering" href="../in-practice/text-rendering.html">Rendering del testo</a></li>
+<li><a data-key="in-practice/2d-game" href="../in-practice/2d-game.html">Un gioco 2D</a></li>
+</ul></div>
+<div class="nav-section"><h4>Oltre</h4><ul>
+<li><a data-key="beyond/compute-shaders" href="../beyond/compute-shaders.html">Compute shader</a></li>
+<li><a data-key="beyond/tessellation" href="../beyond/tessellation.html">Tassellazione</a></li>
+<li><a data-key="beyond/ray-tracing" href="../beyond/ray-tracing.html">Ray tracing</a></li>
+<li><a data-key="beyond/mesh-shaders" href="../beyond/mesh-shaders.html">Mesh shader</a></li>
+</ul></div>
+<div class="nav-section"><h4>Piattaforme Apple</h4><ul>
+<li><a data-key="apple-platforms/tile-based-gpus" href="../apple-platforms/tile-based-gpus.html">GPU tile-based</a></li>
+<li><a data-key="apple-platforms/metalfx" href="../apple-platforms/metalfx.html">Upscaling con MetalFX</a></li>
+<li><a class="active" aria-current="page" data-key="apple-platforms/metal-4" href="../apple-platforms/metal-4.html">Metal 4</a></li>
+<li><a data-key="apple-platforms/visionos" href="../apple-platforms/visionos.html">visionOS</a></li>
+</ul></div>
+<div class="nav-section"><h4>Risorse</h4><ul>
+<li><a data-key="resources/examples" href="../resources/examples.html">Codice di esempio</a></li>
+</ul></div>
+</nav>
+<main class="content" id="main">
+<article><p class="crumb">Piattaforme Apple</p><h1 id="metal-4">Metal 4<a class="headerlink" href="#metal-4" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
+<p>Metal 4, introduced in 2025, is the first large revision of Metal's core API. Nothing you have learned is obsolete: shaders, pipelines, textures, render passes and the frame structure are the same ideas. What changes is who is responsible for what. Metal 4 does less behind your back, so a large renderer spends less CPU time and memory, and so that engines written for Direct3D 12 or Vulkan map onto it directly.</p>
+<p>It runs on Apple silicon: Macs with M1 or later and iPhones and iPads with A14 or later, on the 2025 systems (macOS 26, iOS 26) and newer. Check at runtime, and keep the classic path as a fallback.</p>
+<div class="admonition warning">
+<p class="admonition-title">Read this as a map</p>
+<p>This chapter explains the model and shows the shape of the code. The names follow Apple's documentation at the time of writing, but this part of Metal is young and the code here has not been compiled. Start real work from Apple's sample <em>Drawing a triangle with Metal 4</em>.</p>
+</div>
+<h2 id="side-by-side-with-the-metal-you-know">Side by side with the Metal you know<a class="headerlink" href="#side-by-side-with-the-metal-you-know" title="Permanent link">#</a></h2>
+<p>The new types carry an <code>MTL4</code> prefix and live next to the old ones. The device, textures, buffers, libraries and render pipeline states are shared.</p>
+<table>
+<thead>
+<tr>
+<th>Metal</th>
+<th>Metal 4</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MTLCommandQueue</code></td>
+<td><code>MTL4CommandQueue</code></td>
+</tr>
+<tr>
+<td><code>MTLCommandBuffer</code>, created by the queue, used once</td>
+<td><code>MTL4CommandBuffer</code>, created by the device, reused</td>
+</tr>
+<tr>
+<td>memory managed by Metal</td>
+<td><code>MTL4CommandAllocator</code></td>
+</tr>
+<tr>
+<td><code>MTLRenderCommandEncoder</code></td>
+<td><code>MTL4RenderCommandEncoder</code></td>
+</tr>
+<tr>
+<td>compute, blit and acceleration structure encoders</td>
+<td><code>MTL4ComputeCommandEncoder</code></td>
+</tr>
+<tr>
+<td><code>setVertexBuffer</code>, <code>setFragmentTexture</code>, ...</td>
+<td><code>MTL4ArgumentTable</code></td>
+</tr>
+<tr>
+<td>automatic retain and hazard tracking</td>
+<td>residency sets and barriers</td>
+</tr>
+<tr>
+<td><code>device.makeRenderPipelineState</code></td>
+<td><code>MTL4Compiler</code></td>
+</tr>
+</tbody>
+</table>
+<p>You can adopt it gradually: one part of a renderer can submit to an <code>MTL4CommandQueue</code> while the rest keeps its <code>MTLCommandQueue</code>, with events to order the work between them.</p>
+<h2 id="command-buffers-and-allocators">Command buffers and allocators<a class="headerlink" href="#command-buffers-and-allocators" title="Permanent link">#</a></h2>
+<p>A Metal 4 command buffer is a long-lived object. You begin it with an <strong>allocator</strong>, which supplies the memory the encoded commands are written into, end it, and commit it to a queue. Then you begin it again. Keep one allocator per frame in flight and reset it when you come back to it.</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">commandQueue</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeMTL4CommandQueue</span><span class="p">()</span><span class="o">!</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">commandBuffer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeCommandBuffer</span><span class="p">()</span><span class="o">!</span><span class="w">                       </span><span class="c1">// an MTL4CommandBuffer</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">allocators</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">(</span><span class="mf">0.</span><span class="p">.&lt;</span><span class="mi">3</span><span class="p">).</span><span class="bp">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kc">_</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeCommandAllocator</span><span class="p">()</span><span class="o">!</span><span class="w"> </span><span class="p">}</span><span class="w">  </span><span class="c1">// one per frame in flight</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">MTL4</span><span class="o">::</span><span class="n">CommandQueue</span><span class="o">*</span><span class="w"> </span><span class="n">commandQueue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">device</span><span class="o">-&gt;</span><span class="n">newMTL4CommandQueue</span><span class="p">();</span>
+<span class="n">MTL4</span><span class="o">::</span><span class="n">CommandBuffer</span><span class="o">*</span><span class="w"> </span><span class="n">commandBuffer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">device</span><span class="o">-&gt;</span><span class="n">newCommandBuffer</span><span class="p">();</span>
+<span class="n">MTL4</span><span class="o">::</span><span class="n">CommandAllocator</span><span class="o">*</span><span class="w"> </span><span class="n">allocators</span><span class="p">[</span><span class="mi">3</span><span class="p">];</span><span class="w">                  </span><span class="c1">// one per frame in flight</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">allocator</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">allocators</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">allocator</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">device</span><span class="o">-&gt;</span><span class="n">newCommandAllocator</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">allocator</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">allocators</span><span class="p">[</span><span class="n">frameNumber</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">3</span><span class="p">]</span>
+<span class="n">allocator</span><span class="p">.</span><span class="n">reset</span><span class="p">()</span><span class="w">                                        </span><span class="c1">// the GPU finished with this memory three frames ago</span>
+<span class="n">commandBuffer</span><span class="p">.</span><span class="n">beginCommandBuffer</span><span class="p">(</span><span class="n">allocator</span><span class="p">:</span><span class="w"> </span><span class="n">allocator</span><span class="p">)</span>
+
+<span class="k">guard</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">encoder</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">commandBuffer</span><span class="p">.</span><span class="n">makeRenderCommandEncoder</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">passDescriptor</span><span class="p">)</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="p">}</span>
+<span class="c1">// ... encode draws ...</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">endEncoding</span><span class="p">()</span>
+
+<span class="n">commandBuffer</span><span class="p">.</span><span class="n">endCommandBuffer</span><span class="p">()</span>
+<span class="n">commandQueue</span><span class="p">.</span><span class="n">waitForDrawable</span><span class="p">(</span><span class="n">drawable</span><span class="p">)</span>
+<span class="n">commandQueue</span><span class="p">.</span><span class="n">commit</span><span class="p">([</span><span class="n">commandBuffer</span><span class="p">])</span>
+<span class="n">commandQueue</span><span class="p">.</span><span class="n">signalDrawable</span><span class="p">(</span><span class="n">drawable</span><span class="p">)</span>
+<span class="n">drawable</span><span class="p">.</span><span class="n">present</span><span class="p">()</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">MTL4</span><span class="o">::</span><span class="n">CommandAllocator</span><span class="o">*</span><span class="w"> </span><span class="n">allocator</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">allocators</span><span class="p">[</span><span class="n">frameNumber</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">3</span><span class="p">];</span>
+<span class="n">allocator</span><span class="o">-&gt;</span><span class="n">reset</span><span class="p">();</span><span class="w">                                     </span><span class="c1">// the GPU finished with this memory three frames ago</span>
+<span class="n">commandBuffer</span><span class="o">-&gt;</span><span class="n">beginCommandBuffer</span><span class="p">(</span><span class="n">allocator</span><span class="p">);</span>
+
+<span class="n">MTL4</span><span class="o">::</span><span class="n">RenderCommandEncoder</span><span class="o">*</span><span class="w"> </span><span class="n">encoder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">commandBuffer</span><span class="o">-&gt;</span><span class="n">renderCommandEncoder</span><span class="p">(</span><span class="n">passDescriptor</span><span class="p">);</span>
+<span class="c1">// ... encode draws ...</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">endEncoding</span><span class="p">();</span>
+
+<span class="n">commandBuffer</span><span class="o">-&gt;</span><span class="n">endCommandBuffer</span><span class="p">();</span>
+<span class="n">commandQueue</span><span class="o">-&gt;</span><span class="n">waitForDrawable</span><span class="p">(</span><span class="n">drawable</span><span class="p">);</span>
+<span class="n">commandQueue</span><span class="o">-&gt;</span><span class="n">commit</span><span class="p">(</span><span class="o">&amp;</span><span class="n">commandBuffer</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="n">commandQueue</span><span class="o">-&gt;</span><span class="n">signalDrawable</span><span class="p">(</span><span class="n">drawable</span><span class="p">);</span>
+<span class="n">drawable</span><span class="o">-&gt;</span><span class="n">present</span><span class="p">();</span>
+</code></pre></div>
+</div>
+
+<p>The pass descriptor is an <code>MTL4RenderPassDescriptor</code>; <code>MTKView</code> offers one through <code>currentMTL4RenderPassDescriptor</code>. Because committing takes an array, several threads can each encode into their own command buffer, with their own allocator, and the buffers are submitted together. A render pass can even be suspended at the end of one encoder and resumed in the next, which replaces the parallel render encoder.</p>
+<h2 id="argument-tables">Argument tables<a class="headerlink" href="#argument-tables" title="Permanent link">#</a></h2>
+<p>In classic Metal every encoder keeps a table of bindings for every stage, and you fill it with <code>setVertexBuffer</code>, <code>setFragmentTexture</code> and their relatives. In Metal 4 the table is an object of its own. You size it for what your shaders use, fill it, and attach it to the stages that need it. The same table can serve many encoders and many frames.</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">tableDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MTL4ArgumentTableDescriptor</span><span class="p">()</span>
+<span class="n">tableDescriptor</span><span class="p">.</span><span class="n">maxBufferBindCount</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">2</span>
+<span class="n">tableDescriptor</span><span class="p">.</span><span class="n">maxTextureBindCount</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">1</span>
+<span class="n">tableDescriptor</span><span class="p">.</span><span class="n">maxSamplerStateBindCount</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">1</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">arguments</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeArgumentTable</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">tableDescriptor</span><span class="p">)</span>
+
+<span class="n">arguments</span><span class="p">.</span><span class="n">setAddress</span><span class="p">(</span><span class="n">vertexBuffer</span><span class="p">.</span><span class="n">gpuAddress</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w">            </span><span class="c1">// [[buffer(0)]]</span>
+<span class="n">arguments</span><span class="p">.</span><span class="n">setAddress</span><span class="p">(</span><span class="n">uniformBuffer</span><span class="p">.</span><span class="n">gpuAddress</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nb">UInt64</span><span class="p">(</span><span class="n">offset</span><span class="p">),</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+<span class="n">arguments</span><span class="p">.</span><span class="n">setTexture</span><span class="p">(</span><span class="n">colorTexture</span><span class="p">.</span><span class="n">gpuResourceID</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w">         </span><span class="c1">// [[texture(0)]]</span>
+<span class="n">arguments</span><span class="p">.</span><span class="n">setSamplerState</span><span class="p">(</span><span class="n">sampler</span><span class="p">.</span><span class="n">gpuResourceID</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">MTL4</span><span class="o">::</span><span class="n">ArgumentTableDescriptor</span><span class="o">*</span><span class="w"> </span><span class="n">tableDescriptor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MTL4</span><span class="o">::</span><span class="n">ArgumentTableDescriptor</span><span class="o">::</span><span class="n">alloc</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">();</span>
+<span class="n">tableDescriptor</span><span class="o">-&gt;</span><span class="n">setMaxBufferBindCount</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+<span class="n">tableDescriptor</span><span class="o">-&gt;</span><span class="n">setMaxTextureBindCount</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="n">tableDescriptor</span><span class="o">-&gt;</span><span class="n">setMaxSamplerStateBindCount</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="n">NS</span><span class="o">::</span><span class="n">Error</span><span class="o">*</span><span class="w"> </span><span class="n">error</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">nullptr</span><span class="p">;</span>
+<span class="n">MTL4</span><span class="o">::</span><span class="n">ArgumentTable</span><span class="o">*</span><span class="w"> </span><span class="n">arguments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">device</span><span class="o">-&gt;</span><span class="n">newArgumentTable</span><span class="p">(</span><span class="n">tableDescriptor</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">error</span><span class="p">);</span>
+
+<span class="n">arguments</span><span class="o">-&gt;</span><span class="n">setAddress</span><span class="p">(</span><span class="n">vertexBuffer</span><span class="o">-&gt;</span><span class="n">gpuAddress</span><span class="p">(),</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w">                   </span><span class="c1">// [[buffer(0)]]</span>
+<span class="n">arguments</span><span class="o">-&gt;</span><span class="n">setAddress</span><span class="p">(</span><span class="n">uniformBuffer</span><span class="o">-&gt;</span><span class="n">gpuAddress</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">offset</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="n">arguments</span><span class="o">-&gt;</span><span class="n">setTexture</span><span class="p">(</span><span class="n">colorTexture</span><span class="o">-&gt;</span><span class="n">gpuResourceID</span><span class="p">(),</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w">                </span><span class="c1">// [[texture(0)]]</span>
+<span class="n">arguments</span><span class="o">-&gt;</span><span class="n">setSamplerState</span><span class="p">(</span><span class="n">sampler</span><span class="o">-&gt;</span><span class="n">gpuResourceID</span><span class="p">(),</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+</code></pre></div>
+</div>
+
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="n">encoder</span><span class="p">.</span><span class="n">setRenderPipelineState</span><span class="p">(</span><span class="n">pipelineState</span><span class="p">)</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setArgumentTable</span><span class="p">(</span><span class="n">arguments</span><span class="p">,</span><span class="w"> </span><span class="n">stages</span><span class="p">:</span><span class="w"> </span><span class="p">[.</span><span class="n">vertex</span><span class="p">,</span><span class="w"> </span><span class="p">.</span><span class="n">fragment</span><span class="p">])</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">drawPrimitives</span><span class="p">(</span><span class="n">primitiveType</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">triangle</span><span class="p">,</span><span class="w"> </span><span class="n">vertexStart</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">vertexCount</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setRenderPipelineState</span><span class="p">(</span><span class="n">pipelineState</span><span class="p">);</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setArgumentTable</span><span class="p">(</span><span class="n">arguments</span><span class="p">,</span><span class="w"> </span><span class="n">MTL</span><span class="o">::</span><span class="n">RenderStageVertex</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">MTL</span><span class="o">::</span><span class="n">RenderStageFragment</span><span class="p">);</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">drawPrimitives</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">PrimitiveTypeTriangle</span><span class="p">,</span><span class="w"> </span><span class="n">NS</span><span class="o">::</span><span class="n">UInteger</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="n">NS</span><span class="o">::</span><span class="n">UInteger</span><span class="p">(</span><span class="mi">3</span><span class="p">));</span>
+</code></pre></div>
+</div>
+
+<p>A binding is an address or a resource ID, not an object, and an offset is plain arithmetic on the address. The shader does not change: <code>[[buffer(1)]]</code> still means slot 1. This pairs naturally with the argument buffers of the <a href="../advanced-metal/advanced-msl.html">Advanced MSL</a> chapter: put a whole scene's textures in one buffer, and bind that single buffer.</p>
+<h2 id="residency-sets">Residency sets<a class="headerlink" href="#residency-sets" title="Permanent link">#</a></h2>
+<p>Classic command buffers retain every resource they use and make sure it is available to the GPU. Metal 4 does neither. You keep your resources alive yourself, and you tell Metal which ones the GPU needs with a <strong>residency set</strong>.</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">residencyDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MTLResidencySetDescriptor</span><span class="p">()</span>
+<span class="n">residencyDescriptor</span><span class="p">.</span><span class="n">initialCapacity</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">64</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">residencySet</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeResidencySet</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">residencyDescriptor</span><span class="p">)</span>
+
+<span class="n">residencySet</span><span class="p">.</span><span class="n">addAllocations</span><span class="p">([</span><span class="n">vertexBuffer</span><span class="p">,</span><span class="w"> </span><span class="n">uniformBuffer</span><span class="p">,</span><span class="w"> </span><span class="n">colorTexture</span><span class="p">])</span>
+<span class="n">residencySet</span><span class="p">.</span><span class="n">commit</span><span class="p">()</span><span class="w">                                    </span><span class="c1">// apply the additions</span>
+
+<span class="n">commandQueue</span><span class="p">.</span><span class="n">addResidencySet</span><span class="p">(</span><span class="n">residencySet</span><span class="p">)</span><span class="w">               </span><span class="c1">// every command buffer on this queue can use them</span>
+<span class="n">commandQueue</span><span class="p">.</span><span class="n">addResidencySet</span><span class="p">(</span><span class="n">metalLayer</span><span class="p">.</span><span class="n">residencySet</span><span class="p">)</span><span class="w">    </span><span class="c1">// the drawables' textures</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">MTL</span><span class="o">::</span><span class="n">ResidencySetDescriptor</span><span class="o">*</span><span class="w"> </span><span class="n">residencyDescriptor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MTL</span><span class="o">::</span><span class="n">ResidencySetDescriptor</span><span class="o">::</span><span class="n">alloc</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">();</span>
+<span class="n">residencyDescriptor</span><span class="o">-&gt;</span><span class="n">setInitialCapacity</span><span class="p">(</span><span class="mi">64</span><span class="p">);</span>
+<span class="n">MTL</span><span class="o">::</span><span class="n">ResidencySet</span><span class="o">*</span><span class="w"> </span><span class="n">residencySet</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">device</span><span class="o">-&gt;</span><span class="n">newResidencySet</span><span class="p">(</span><span class="n">residencyDescriptor</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">error</span><span class="p">);</span>
+
+<span class="n">residencySet</span><span class="o">-&gt;</span><span class="n">addAllocation</span><span class="p">(</span><span class="n">vertexBuffer</span><span class="p">);</span>
+<span class="n">residencySet</span><span class="o">-&gt;</span><span class="n">addAllocation</span><span class="p">(</span><span class="n">uniformBuffer</span><span class="p">);</span>
+<span class="n">residencySet</span><span class="o">-&gt;</span><span class="n">addAllocation</span><span class="p">(</span><span class="n">colorTexture</span><span class="p">);</span>
+<span class="n">residencySet</span><span class="o">-&gt;</span><span class="n">commit</span><span class="p">();</span><span class="w">                                 </span><span class="c1">// apply the additions</span>
+
+<span class="n">commandQueue</span><span class="o">-&gt;</span><span class="n">addResidencySet</span><span class="p">(</span><span class="n">residencySet</span><span class="p">);</span><span class="w">            </span><span class="c1">// every command buffer on this queue can use them</span>
+<span class="n">commandQueue</span><span class="o">-&gt;</span><span class="n">addResidencySet</span><span class="p">(</span><span class="n">metalLayer</span><span class="o">-&gt;</span><span class="n">residencySet</span><span class="p">());</span><span class="w">   </span><span class="c1">// the drawables' textures</span>
+</code></pre></div>
+</div>
+
+<p>Build the set when you load a level, not every frame. A resource missing from every set is the classic Metal 4 mistake, and the result is undefined: a black object, or garbage.</p>
+<h2 id="barriers">Barriers<a class="headerlink" href="#barriers" title="Permanent link">#</a></h2>
+<p>Metal 4 does not track which pass writes a resource and which reads it. Inside one command buffer, stages of different passes may overlap. Where a later stage reads what an earlier one wrote, for example a fragment function sampling a texture a compute pass just filled, you add a <strong>barrier</strong> on the consuming encoder: it names the stages that must finish and the stages that must wait. Rendering to a texture in one pass and sampling it in the next is the everyday case. Metal's validation layer reports missing barriers, so keep it on while porting.</p>
+<h2 id="compiling-pipelines">Compiling pipelines<a class="headerlink" href="#compiling-pipelines" title="Permanent link">#</a></h2>
+<p>Pipeline states are created by a compiler object that you own, from descriptors that name functions without loading them first.</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">compiler</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeCompiler</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">MTL4CompilerDescriptor</span><span class="p">())</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nv">vertexFunction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MTL4LibraryFunctionDescriptor</span><span class="p">()</span>
+<span class="n">vertexFunction</span><span class="p">.</span><span class="n">library</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">library</span>
+<span class="n">vertexFunction</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">"vertex_main"</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">fragmentFunction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MTL4LibraryFunctionDescriptor</span><span class="p">()</span>
+<span class="n">fragmentFunction</span><span class="p">.</span><span class="n">library</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">library</span>
+<span class="n">fragmentFunction</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">"fragment_main"</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nv">descriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MTL4RenderPipelineDescriptor</span><span class="p">()</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">vertexFunctionDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">vertexFunction</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">fragmentFunctionDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">fragmentFunction</span>
+<span class="n">descriptor</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">pixelFormat</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">bgra8Unorm</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nv">pipelineState</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="w"> </span><span class="n">compiler</span><span class="p">.</span><span class="n">makeRenderPipelineState</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">descriptor</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">MTL4</span><span class="o">::</span><span class="n">CompilerDescriptor</span><span class="o">*</span><span class="w"> </span><span class="n">compilerDescriptor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MTL4</span><span class="o">::</span><span class="n">CompilerDescriptor</span><span class="o">::</span><span class="n">alloc</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">();</span>
+<span class="n">MTL4</span><span class="o">::</span><span class="n">Compiler</span><span class="o">*</span><span class="w"> </span><span class="n">compiler</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">device</span><span class="o">-&gt;</span><span class="n">newCompiler</span><span class="p">(</span><span class="n">compilerDescriptor</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">error</span><span class="p">);</span>
+
+<span class="n">MTL4</span><span class="o">::</span><span class="n">LibraryFunctionDescriptor</span><span class="o">*</span><span class="w"> </span><span class="n">vertexFunction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MTL4</span><span class="o">::</span><span class="n">LibraryFunctionDescriptor</span><span class="o">::</span><span class="n">alloc</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">();</span>
+<span class="n">vertexFunction</span><span class="o">-&gt;</span><span class="n">setLibrary</span><span class="p">(</span><span class="n">library</span><span class="p">);</span>
+<span class="n">vertexFunction</span><span class="o">-&gt;</span><span class="n">setName</span><span class="p">(</span><span class="n">MTLSTR</span><span class="p">(</span><span class="s">"vertex_main"</span><span class="p">));</span>
+<span class="n">MTL4</span><span class="o">::</span><span class="n">LibraryFunctionDescriptor</span><span class="o">*</span><span class="w"> </span><span class="n">fragmentFunction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MTL4</span><span class="o">::</span><span class="n">LibraryFunctionDescriptor</span><span class="o">::</span><span class="n">alloc</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">();</span>
+<span class="n">fragmentFunction</span><span class="o">-&gt;</span><span class="n">setLibrary</span><span class="p">(</span><span class="n">library</span><span class="p">);</span>
+<span class="n">fragmentFunction</span><span class="o">-&gt;</span><span class="n">setName</span><span class="p">(</span><span class="n">MTLSTR</span><span class="p">(</span><span class="s">"fragment_main"</span><span class="p">));</span>
+
+<span class="n">MTL4</span><span class="o">::</span><span class="n">RenderPipelineDescriptor</span><span class="o">*</span><span class="w"> </span><span class="n">descriptor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MTL4</span><span class="o">::</span><span class="n">RenderPipelineDescriptor</span><span class="o">::</span><span class="n">alloc</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">();</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setVertexFunctionDescriptor</span><span class="p">(</span><span class="n">vertexFunction</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">setFragmentFunctionDescriptor</span><span class="p">(</span><span class="n">fragmentFunction</span><span class="p">);</span>
+<span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">colorAttachments</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">object</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">setPixelFormat</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">PixelFormatBGRA8Unorm</span><span class="p">);</span>
+
+<span class="n">MTL</span><span class="o">::</span><span class="n">RenderPipelineState</span><span class="o">*</span><span class="w"> </span><span class="n">pipelineState</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">compiler</span><span class="o">-&gt;</span><span class="n">newRenderPipelineState</span><span class="p">(</span><span class="n">descriptor</span><span class="p">,</span><span class="w"> </span><span class="nb">nullptr</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">error</span><span class="p">);</span>
+</code></pre></div>
+</div>
+
+<p>The result is an ordinary <code>MTLRenderPipelineState</code>. Three additions make shader compilation easier to control: asynchronous variants that return a task you can prioritize; <strong>flexible pipeline states</strong>, where one compiled pipeline is specialized cheaply for different blend and attachment settings; and ahead-of-time compilation, where pipelines harvested from a play session are compiled at build time into an archive, so players never wait for a shader.</p>
+<h2 id="what-else-arrived-with-it">What else arrived with it<a class="headerlink" href="#what-else-arrived-with-it" title="Permanent link">#</a></h2>
+<ul>
+<li><strong>One compute encoder</strong> for kernels, blits and acceleration structure builds.</li>
+<li><strong>Machine learning in the frame</strong>: an <code>MTL4MachineLearningCommandEncoder</code> runs a Core ML network on the GPU timeline, and the Shader ML API evaluates small networks inside a fragment function, for neural materials or learned upscaling.</li>
+<li><strong>Texture view pools</strong> and <strong>placement sparse</strong> resources for streaming large worlds.</li>
+<li><strong>MetalFX frame interpolation and denoising</strong>, described in the previous chapter.</li>
+<li>Tessellation is not part of the Metal 4 encoder; use <a href="../beyond/mesh-shaders.html">mesh shaders</a>.</li>
+</ul>
+<h2 id="should-you-use-it">Should you use it?<a class="headerlink" href="#should-you-use-it" title="Permanent link">#</a></h2>
+<p>For learning, and for an app with a few hundred draw calls, classic Metal is simpler and exactly as fast on the GPU. Its automatic retains, tracking and residency cost little at that scale and prevent a whole class of bugs. Metal 4 pays off when the CPU cost of encoding matters: thousands of draws, many threads, large streaming scenes, or an engine that already thinks in descriptor tables and barriers. Every concept in this book carries over unchanged, which is the reason to learn them first.</p>
+<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<ul>
+<li>List what <code>setFragmentTexture</code> did for you that an argument table does not.<details class="solution"><summary>Mostra la soluzione</summary><p>Four things. It stored the binding in the encoder's own table, which Metal 4 replaces with a table you size and own. It retained the texture until the command buffer completed; now you must keep it alive. It made the texture resident for the GPU; now a residency set does. And through hazard tracking it made sure an earlier pass that wrote the texture finished first; now you add a barrier. Each is a small cost per call that Metal 4 lets you pay once, or not at all.</p></details></li>
+<li>Port the Hello Triangle renderer to Metal 4, starting from Apple's sample project.<details class="solution"><summary>Mostra la soluzione</summary><p>The order that works: create the <code>MTL4CommandQueue</code>, the command buffer and three allocators; build the pipeline with an <code>MTL4Compiler</code>; create an argument table with one buffer binding and set the vertex buffer's address; create a residency set with the vertex buffer and add it, and the layer's own set, to the queue. In the draw method take <code>currentMTL4RenderPassDescriptor</code>, begin the command buffer, encode, end, and commit between <code>waitForDrawable</code> and <code>signalDrawable</code>. If the triangle is missing, check the residency set first.</p></details></li>
+</ul></article><nav class="pager" id="pager"><a class="prev" href="../apple-platforms/metalfx.html"><small>Precedente</small>Upscaling con MetalFX</a><a class="next" href="../apple-platforms/visionos.html"><small>Successivo</small>visionOS</a></nav>
+<footer class="site-footer">
+  <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
+  <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
+</footer>
+</main>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#side-by-side-with-the-metal-you-know">Side by side with the Metal you know</a></li><li><a href="#command-buffers-and-allocators">Command buffers and allocators</a></li><li><a href="#argument-tables">Argument tables</a></li><li><a href="#residency-sets">Residency sets</a></li><li><a href="#barriers">Barriers</a></li><li><a href="#compiling-pipelines">Compiling pipelines</a></li><li><a href="#what-else-arrived-with-it">What else arrived with it</a></li><li><a href="#should-you-use-it">Should you use it?</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+</div>
+<script defer src="../../assets/textures.js"></script>
+<script defer src="../../assets/live.js"></script>
+<script defer src="../../assets/demos.js"></script>
+<script defer src="../../assets/site.js"></script>
+</body>
+</html>

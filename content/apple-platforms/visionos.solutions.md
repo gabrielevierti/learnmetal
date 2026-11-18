@@ -1,0 +1,5 @@
+Units are meters and the origin is on the floor, with -z ahead of the starting direction. Scale the cube positions down, since the original scene spans several units, and move them to eye height: a model matrix of translation (0, 1.4, -2) times a scale of 0.25 applied before each cube's own transform. Use the per-eye view and projection matrices in place of the camera's.
+---
+With one pass and a layered texture you cannot clear slices to different colors, so tint in the fragment function: pass the amplification index from the vertex function as a flat value and multiply the color by red for 0 and blue for 1. If both eyes show the same tint, the view mappings are wrong, usually a `renderTargetArrayIndexOffset` left at 0.
+---
+Set `configuration.layout = .dedicated`. Each eye then has its own texture: `drawable.colorTextures[i]` and `drawable.depthTextures[i]`. Create two render pass descriptors without `renderTargetArrayLength`, and encode the whole scene twice, with one eye's matrices each and no vertex amplification. The image is identical, and the encoding time on the CPU roughly doubles, which is what the layered layout saves.

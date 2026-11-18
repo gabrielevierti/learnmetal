@@ -197,6 +197,7 @@ th { font-weight: 700; border-bottom-width: 2px; }
 .lm-controls input[type="color"] { width: 34px; height: 26px; padding: 0; border: 1px solid #44525f; border-radius: 6px; background: none; }
 .lm-controls select { background: #26323e; color: #e7ebf0; border: 1px solid #44525f; border-radius: 7px; padding: 4px 8px; font: inherit; }
 .lm-controls output { font: 0.8rem var(--mono); color: #fe8b3c; min-width: 3.4em; }
+.lm-controls[hidden] { display: none; }
 .lm-check { flex-direction: row-reverse; }
 .lm-auto::before { content: "Added in the shader"; flex-basis: 100%; font: 650 0.78rem var(--sans); color: #fe8b3c; }
 .lm-controls input[type="number"] {
@@ -303,3 +304,54 @@ th { font-weight: 700; border-bottom-width: 2px; }
   .topbar { gap: 7px; padding: 0 10px; }
 }
 @media (prefers-reduced-motion: reduce) { .sidebar { transition: none; } }
+
+/* ---------------------------------------------------------------- site language, search, progress, solutions */
+.site-lang a { color: #c5ced8; font: 600 0.84rem var(--sans); padding: 5px 9px; border-radius: 7px; }
+.site-lang a:hover { text-decoration: none; color: #fff; }
+.site-lang a[aria-current] { background: rgba(255, 255, 255, 0.16); color: #fff; }
+
+.search { position: relative; width: min(280px, 26vw); }
+.search input {
+  width: 100%; height: 38px; padding: 0 12px; border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.16); background: rgba(0, 0, 0, 0.28); color: #fff; font: 0.92rem var(--sans);
+}
+.search input::placeholder { color: #9fb0c0; }
+.search input:focus { outline: 2px solid var(--orange); outline-offset: 1px; }
+.search-results {
+  position: absolute; top: 46px; right: 0; width: min(520px, 92vw); max-height: 70vh; overflow: auto;
+  background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 12px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35); padding: 6px;
+}
+.search-results a { display: block; padding: 9px 11px; border-radius: 8px; color: inherit; }
+.search-results a:hover, .search-results a.picked { background: var(--bg); text-decoration: none; }
+.search-results strong { display: block; font-size: 0.95rem; }
+.search-results strong span { color: var(--muted); font-weight: 500; }
+.search-results strong span::before { content: "› "; }
+.search-results small { display: block; color: var(--muted); font-size: 0.84rem; line-height: 1.4; margin-top: 2px; }
+.search-results mark { background: rgba(254, 139, 60, 0.32); color: inherit; border-radius: 3px; padding: 0 1px; }
+.search-empty { margin: 0; padding: 12px; color: var(--muted); font-size: 0.92rem; }
+#search-toggle { display: none; }
+
+.sidebar a.read::after, .syllabus ul a.read::after { content: "✓"; color: var(--orange); font-weight: 700; margin-left: 6px; }
+.syl-top { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.progress { margin: 0; color: var(--muted); font-size: 0.92rem; }
+.progress button { border: 0; background: none; color: var(--accent); cursor: pointer; font: inherit; padding: 0; text-decoration: underline; }
+
+details.solution { margin: 8px 0 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+details.solution > summary { cursor: pointer; padding: 8px 12px; font: 600 0.9rem var(--sans); color: var(--accent); }
+details.solution[open] > summary { border-bottom: 1px solid var(--line); }
+details.solution > :not(summary) { margin-left: 12px; margin-right: 12px; }
+details.solution > p { font-size: 0.97rem; }
+
+@media (max-width: 900px) {
+  #search-toggle { display: inline-grid; }
+  .search { display: none; position: absolute; left: 0; right: 0; top: var(--bar); width: auto; padding: 8px 10px; background: var(--navy); }
+  body.search-open .search { display: block; }
+  .search-results { left: 10px; right: 10px; width: auto; top: 54px; }
+}
+@media (max-width: 480px) {
+  .site-lang a { padding: 5px 6px; }
+  .lang-switch button { padding: 5px 7px; }
+  .icon-btn { width: 34px; height: 34px; }
+  .topbar a.icon-btn { display: none; }      /* the GitHub link is also in the footer */
+}

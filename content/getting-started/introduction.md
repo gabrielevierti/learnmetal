@@ -59,7 +59,7 @@ Every current Apple device uses Apple silicon, whose GPUs are **tile-based defer
 
 ## Versions
 
-The Metal API has grown through numbered generations. Everything in this series uses the long-established core API (`MTLCommandQueue`, `MTLRenderCommandEncoder`, and friends), which runs on all Metal-capable devices and is what almost all existing code, samples and answers online use. Apple has also introduced a newer set of interfaces under the name Metal 4, with types prefixed `MTL4`, aimed at engines that need explicit control. The concepts carry over directly, so learn the core API first.
+The Metal API has grown through numbered generations. Everything in this series uses the long-established core API (`MTLCommandQueue`, `MTLRenderCommandEncoder`, and friends), which runs on all Metal-capable devices and is what almost all existing code, samples and answers online use. Apple has also introduced a newer set of interfaces under the name Metal 4, with types prefixed `MTL4`, aimed at engines that need explicit control. The concepts carry over directly, so learn the core API first; the [Metal 4](../apple-platforms/metal-4.html) chapter shows what changes.
 
 ## How to read this series
 

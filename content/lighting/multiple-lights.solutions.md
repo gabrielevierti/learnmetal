@@ -1,0 +1,3 @@
+Desert: a strong warm directional light (1.0, 0.95, 0.8), a bright sandy clear color, and point lights nearly off. Factory: a weak cold directional light, bluish point lights with short range, a dark gray-blue clear color. Horror: clear color black, directional light at about 0.02, point lights off or deep red, and only the spotlight at full strength.
+---
+Get a typed pointer to the buffer's memory and write the new values before encoding the frame. In Swift: `let lights = lightBuffer.contents().bindMemory(to: PointLight.self, capacity: count)` then `lights[i].position = ...`. In C++: `auto* lights = static_cast<PointLight*>(lightBuffer->contents());`. When the GPU might still be reading the previous frame, use the ring of buffers from Advanced Data.

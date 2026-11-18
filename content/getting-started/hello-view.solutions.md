@@ -1,0 +1,3 @@
+Compute the color in the draw method, before asking for the render pass descriptor, because the descriptor copies the clear color when you read it. In Swift: `let t = sin(CACurrentMediaTime()) * 0.5 + 0.5` then `view.clearColor = MTLClearColor(red: 0.2 * t, green: 0.3, blue: 0.3 * t, alpha: 1)`. In C++ do the same arithmetic with `glfwGetTime()` and pass the result to `setClearColor`.
+---
+The callback receives the size in pixels. A window that is 800 × 600 points on a Retina display reports 1600 × 1200. Everything in Metal (viewports, texture sizes, `in.position.xy` in a fragment function) is in pixels, so always derive aspect ratios and offscreen texture sizes from this value and never from the window's point size.

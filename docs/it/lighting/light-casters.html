@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="it" data-root="../../" data-site="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tipi di luce | learnmetal</title>
+<meta name="description" content="Illuminazione: Tipi di luce. Impara la grafica 3D con Metal di Apple, dal primo triangolo al rendering fisicamente corretto, in Swift o C++.">
+<meta name="author" content="Gabriele Vierti">
+<link rel="icon" href="../../assets/favicon.png">
+<script>
+(function () {
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem("theme"); l = localStorage.getItem("lang"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  d.dataset.theme = t;
+  var q = /[?&]lang=(swift|cpp)/.exec(location.search);      // links can pick a language: page.html?lang=cpp
+  if (q) l = q[1];
+  d.dataset.lang = l === "cpp" ? "cpp" : "swift";
+})();
+</script>
+<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../../assets/code.css">
+</head>
+<body class="" data-key="lighting/light-casters">
+<a class="skip" href="#main">Vai al contenuto</a>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Apri l'elenco dei capitoli">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a class="brand" href="../index.html"><img src="../../assets/logo.png" alt="LearnMetal" width="136" height="32"></a>
+  <div class="search" role="search">
+    <input id="search" type="search" placeholder="Cerca" aria-label="Cerca" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results" hidden></div>
+  </div>
+  <button id="search-toggle" class="icon-btn" aria-label="Cerca">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <div class="lang-switch site-lang" role="group" aria-label="Lingua del testo">
+    <a href="../../lighting/light-casters.html">EN</a>
+    <a href="../../it/lighting/light-casters.html" aria-current="true">IT</a>
+  </div>
+  <div class="lang-switch" role="group" aria-label="Linguaggio del codice">
+    <button type="button" data-set-lang="swift">Swift</button>
+    <button type="button" data-set-lang="cpp">C++</button>
+  </div>
+  <a class="icon-btn" href="https://github.com/gabrielevierti" aria-label="Gabriele Vierti on GitHub"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Passa dal tema chiaro a quello scuro">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"/></svg>
+  </button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Capitoli">
+<div class="nav-section"><h4>Per iniziare</h4><ul>
+<li><a data-key="getting-started/introduction" href="../getting-started/introduction.html">Introduzione</a></li>
+<li><a data-key="getting-started/project-setup" href="../getting-started/project-setup.html">Preparare il progetto</a></li>
+<li><a data-key="getting-started/hello-view" href="../getting-started/hello-view.html">La prima vista</a></li>
+<li><a data-key="getting-started/hello-triangle" href="../getting-started/hello-triangle.html">Il primo triangolo</a></li>
+<li><a data-key="getting-started/shaders" href="../getting-started/shaders.html">Shader</a></li>
+<li><a data-key="getting-started/textures" href="../getting-started/textures.html">Texture</a></li>
+<li><a data-key="getting-started/transformations" href="../getting-started/transformations.html">Trasformazioni</a></li>
+<li><a data-key="getting-started/coordinate-systems" href="../getting-started/coordinate-systems.html">Sistemi di coordinate</a></li>
+<li><a data-key="getting-started/camera" href="../getting-started/camera.html">Camera</a></li>
+<li><a data-key="getting-started/review" href="../getting-started/review.html">Riepilogo</a></li>
+</ul></div>
+<div class="nav-section"><h4>Illuminazione</h4><ul>
+<li><a data-key="lighting/colors" href="../lighting/colors.html">Colori</a></li>
+<li><a data-key="lighting/basic-lighting" href="../lighting/basic-lighting.html">Illuminazione di base</a></li>
+<li><a data-key="lighting/materials" href="../lighting/materials.html">Materiali</a></li>
+<li><a data-key="lighting/lighting-maps" href="../lighting/lighting-maps.html">Mappe di illuminazione</a></li>
+<li><a class="active" aria-current="page" data-key="lighting/light-casters" href="../lighting/light-casters.html">Tipi di luce</a></li>
+<li><a data-key="lighting/multiple-lights" href="../lighting/multiple-lights.html">Più luci</a></li>
+<li><a data-key="lighting/review" href="../lighting/review.html">Riepilogo</a></li>
+</ul></div>
+<div class="nav-section"><h4>Caricare i modelli</h4><ul>
+<li><a data-key="model-loading/model-io" href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a data-key="model-loading/mesh" href="../model-loading/mesh.html">Mesh</a></li>
+<li><a data-key="model-loading/model" href="../model-loading/model.html">Modello</a></li>
+</ul></div>
+<div class="nav-section"><h4>Metal avanzato</h4><ul>
+<li><a data-key="advanced-metal/depth-testing" href="../advanced-metal/depth-testing.html">Test di profondità</a></li>
+<li><a data-key="advanced-metal/stencil-testing" href="../advanced-metal/stencil-testing.html">Test di stencil</a></li>
+<li><a data-key="advanced-metal/blending" href="../advanced-metal/blending.html">Blending</a></li>
+<li><a data-key="advanced-metal/face-culling" href="../advanced-metal/face-culling.html">Face culling</a></li>
+<li><a data-key="advanced-metal/render-targets" href="../advanced-metal/render-targets.html">Render target</a></li>
+<li><a data-key="advanced-metal/cubemaps" href="../advanced-metal/cubemaps.html">Cubemap</a></li>
+<li><a data-key="advanced-metal/advanced-data" href="../advanced-metal/advanced-data.html">Dati avanzati</a></li>
+<li><a data-key="advanced-metal/advanced-msl" href="../advanced-metal/advanced-msl.html">MSL avanzato</a></li>
+<li><a data-key="advanced-metal/no-geometry-shaders" href="../advanced-metal/no-geometry-shaders.html">Vivere senza geometry shader</a></li>
+<li><a data-key="advanced-metal/instancing" href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a data-key="advanced-metal/anti-aliasing" href="../advanced-metal/anti-aliasing.html">Anti-aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Illuminazione avanzata</h4><ul>
+<li><a data-key="advanced-lighting/blinn-phong" href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a data-key="advanced-lighting/gamma-correction" href="../advanced-lighting/gamma-correction.html">Correzione gamma</a></li>
+<li><a data-key="advanced-lighting/shadow-mapping" href="../advanced-lighting/shadow-mapping.html">Shadow mapping</a></li>
+<li><a data-key="advanced-lighting/point-shadows" href="../advanced-lighting/point-shadows.html">Ombre da luci puntiformi</a></li>
+<li><a data-key="advanced-lighting/normal-mapping" href="../advanced-lighting/normal-mapping.html">Normal mapping</a></li>
+<li><a data-key="advanced-lighting/parallax-mapping" href="../advanced-lighting/parallax-mapping.html">Parallax mapping</a></li>
+<li><a data-key="advanced-lighting/hdr" href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a data-key="advanced-lighting/bloom" href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a data-key="advanced-lighting/deferred-shading" href="../advanced-lighting/deferred-shading.html">Deferred shading</a></li>
+<li><a data-key="advanced-lighting/ssao" href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a data-key="pbr/theory" href="../pbr/theory.html">Teoria</a></li>
+<li><a data-key="pbr/lighting" href="../pbr/lighting.html">Illuminazione</a></li>
+<li><a data-key="pbr/diffuse-irradiance" href="../pbr/diffuse-irradiance.html">Irradianza diffusa</a></li>
+<li><a data-key="pbr/specular-ibl" href="../pbr/specular-ibl.html">IBL speculare</a></li>
+</ul></div>
+<div class="nav-section"><h4>In pratica</h4><ul>
+<li><a data-key="in-practice/debugging" href="../in-practice/debugging.html">Debug</a></li>
+<li><a data-key="in-practice/text-rendering" href="../in-practice/text-rendering.html">Rendering del testo</a></li>
+<li><a data-key="in-practice/2d-game" href="../in-practice/2d-game.html">Un gioco 2D</a></li>
+</ul></div>
+<div class="nav-section"><h4>Oltre</h4><ul>
+<li><a data-key="beyond/compute-shaders" href="../beyond/compute-shaders.html">Compute shader</a></li>
+<li><a data-key="beyond/tessellation" href="../beyond/tessellation.html">Tassellazione</a></li>
+<li><a data-key="beyond/ray-tracing" href="../beyond/ray-tracing.html">Ray tracing</a></li>
+<li><a data-key="beyond/mesh-shaders" href="../beyond/mesh-shaders.html">Mesh shader</a></li>
+</ul></div>
+<div class="nav-section"><h4>Piattaforme Apple</h4><ul>
+<li><a data-key="apple-platforms/tile-based-gpus" href="../apple-platforms/tile-based-gpus.html">GPU tile-based</a></li>
+<li><a data-key="apple-platforms/metalfx" href="../apple-platforms/metalfx.html">Upscaling con MetalFX</a></li>
+<li><a data-key="apple-platforms/metal-4" href="../apple-platforms/metal-4.html">Metal 4</a></li>
+<li><a data-key="apple-platforms/visionos" href="../apple-platforms/visionos.html">visionOS</a></li>
+</ul></div>
+<div class="nav-section"><h4>Risorse</h4><ul>
+<li><a data-key="resources/examples" href="../resources/examples.html">Codice di esempio</a></li>
+</ul></div>
+</nav>
+<main class="content" id="main">
+<article><p class="crumb">Illuminazione</p><h1 id="light-casters">Light Casters<a class="headerlink" href="#light-casters" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
+<div class="example-box lang-swift"><strong>Progetto di esempio</strong> <code>examples/Sources/10-MultipleLights</code>, si esegue con <code>swift run MultipleLights</code>. <a href="../../downloads/learnmetal-examples.zip">Scarica tutti gli esempi</a> oppure guarda <a href="../resources/examples.html">come eseguirli</a>.</div>
+
+<p>Until now the light has been a single point shining equally in all directions forever. Real scenes have three common kinds of light source: directional lights, point lights and spotlights.</p>
+<h2 id="directional-light">Directional light<a class="headerlink" href="#directional-light" title="Permanent link">#</a></h2>
+<p>A light that is extremely far away, like the sun, has rays that are effectively parallel. Its position is irrelevant; only its <strong>direction</strong> matters, and it is the same for every fragment.</p>
+<div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">DirectionalLight</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">direction</span><span class="p">;</span><span class="w">   </span><span class="c1">// the direction the light travels</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">ambient</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">diffuse</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">specular</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div>
+
+<p>The lighting math wants a vector from the fragment <em>toward</em> the light, so negate it:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">lightDir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="o">-</span><span class="n">light</span><span class="p">.</span><span class="n">direction</span><span class="p">);</span>
+</code></pre></div>
+
+<p>Everything else stays the same. With <code>direction = (-0.2, -1.0, -0.3)</code> all ten cubes are lit from above at the same angle.</p>
+<h2 id="point-light">Point light<a class="headerlink" href="#point-light" title="Permanent link">#</a></h2>
+<p>A point light has a position and shines in all directions, but it fades with distance. That fading is called <strong>attenuation</strong>. A formula that looks good and is cheap:</p>
+<div class="codehilite"><pre><span></span><code>attenuation = 1 / (constant + linear * d + quadratic * d²)
+</code></pre></div>
+
+<p>where <code>d</code> is the distance from the light. The constant term is normally 1 so the result never exceeds 1. The linear and quadratic terms set how fast the light dies off.</p>
+<table>
+<thead>
+<tr>
+<th>Range</th>
+<th>Constant</th>
+<th>Linear</th>
+<th>Quadratic</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>13</td>
+<td>1.0</td>
+<td>0.35</td>
+<td>0.44</td>
+</tr>
+<tr>
+<td>50</td>
+<td>1.0</td>
+<td>0.09</td>
+<td>0.032</td>
+</tr>
+<tr>
+<td>100</td>
+<td>1.0</td>
+<td>0.045</td>
+<td>0.0075</td>
+</tr>
+<tr>
+<td>325</td>
+<td>1.0</td>
+<td>0.014</td>
+<td>0.0007</td>
+</tr>
+</tbody>
+</table>
+<div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">PointLight</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">position</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">ambient</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">diffuse</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">specular</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">constantTerm</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">linearTerm</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">quadraticTerm</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="kt">float</span><span class="w"> </span><span class="n">distance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">length</span><span class="p">(</span><span class="n">light</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">worldPosition</span><span class="p">);</span>
+<span class="kt">float</span><span class="w"> </span><span class="n">attenuation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">light</span><span class="p">.</span><span class="n">constantTerm</span>
+<span class="w">                         </span><span class="o">+</span><span class="w"> </span><span class="n">light</span><span class="p">.</span><span class="n">linearTerm</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">distance</span>
+<span class="w">                         </span><span class="o">+</span><span class="w"> </span><span class="n">light</span><span class="p">.</span><span class="n">quadraticTerm</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">distance</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">distance</span><span class="p">);</span>
+
+<span class="n">ambient</span><span class="w">  </span><span class="o">*=</span><span class="w"> </span><span class="n">attenuation</span><span class="p">;</span>
+<span class="n">diffuse</span><span class="w">  </span><span class="o">*=</span><span class="w"> </span><span class="n">attenuation</span><span class="p">;</span>
+<span class="n">specular</span><span class="w"> </span><span class="o">*=</span><span class="w"> </span><span class="n">attenuation</span><span class="p">;</span>
+</code></pre></div>
+
+<h2 id="spotlight">Spotlight<a class="headerlink" href="#spotlight" title="Permanent link">#</a></h2>
+<p>A spotlight is a point light that only shines inside a cone. It needs a position, a direction, and a <strong>cutoff</strong> angle. For each fragment, compare the angle between the spotlight's direction and the direction from the light to the fragment against the cutoff.</p>
+<p>Comparing angles would require an expensive inverse cosine, so we compare cosines instead. Pass the cosine of the cutoff from Swift:</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="n">light</span><span class="p">.</span><span class="n">cutOff</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">cos</span><span class="p">(</span><span class="nb">Float</span><span class="p">(</span><span class="mf">12.5</span><span class="p">).</span><span class="n">radians</span><span class="p">)</span>
+<span class="n">light</span><span class="p">.</span><span class="n">outerCutOff</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">cos</span><span class="p">(</span><span class="nb">Float</span><span class="p">(</span><span class="mf">17.5</span><span class="p">).</span><span class="n">radians</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">light</span><span class="p">.</span><span class="n">cutOff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cos</span><span class="p">(</span><span class="n">radians</span><span class="p">(</span><span class="mf">12.5f</span><span class="p">));</span>
+<span class="n">light</span><span class="p">.</span><span class="n">outerCutOff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cos</span><span class="p">(</span><span class="n">radians</span><span class="p">(</span><span class="mf">17.5f</span><span class="p">));</span>
+</code></pre></div>
+</div>
+
+<p>A hard cutoff gives an ugly sharp circle. Two cones, an inner and a slightly larger outer one, give a soft edge: full brightness inside the inner cone, none outside the outer cone, and a smooth blend between.</p>
+<div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">SpotLight</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">position</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">direction</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">ambient</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">diffuse</span><span class="p">;</span>
+<span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">specular</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">cutOff</span><span class="p">;</span><span class="w">        </span><span class="c1">// cosine of the inner angle</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">outerCutOff</span><span class="p">;</span><span class="w">   </span><span class="c1">// cosine of the outer angle</span>
+<span class="p">};</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">lightDir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">light</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">worldPosition</span><span class="p">);</span>
+<span class="kt">float</span><span class="w"> </span><span class="n">theta</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dot</span><span class="p">(</span><span class="n">lightDir</span><span class="p">,</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="o">-</span><span class="n">light</span><span class="p">.</span><span class="n">direction</span><span class="p">));</span>
+<span class="kt">float</span><span class="w"> </span><span class="n">epsilon</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">light</span><span class="p">.</span><span class="n">cutOff</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">light</span><span class="p">.</span><span class="n">outerCutOff</span><span class="p">;</span>
+<span class="kt">float</span><span class="w"> </span><span class="n">intensity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">saturate</span><span class="p">((</span><span class="n">theta</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">light</span><span class="p">.</span><span class="n">outerCutOff</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">epsilon</span><span class="p">);</span>
+
+<span class="n">diffuse</span><span class="w">  </span><span class="o">*=</span><span class="w"> </span><span class="n">intensity</span><span class="p">;</span>
+<span class="n">specular</span><span class="w"> </span><span class="o">*=</span><span class="w"> </span><span class="n">intensity</span><span class="p">;</span>
+</code></pre></div>
+
+<p><code>saturate(x)</code> clamps to the 0 to 1 range. Ambient is left alone so that the scene outside the cone is not pitch black. Remember that a <em>larger</em> cosine means a <em>smaller</em> angle, which is why the comparison looks reversed.</p>
+<h2 id="a-flashlight">A flashlight<a class="headerlink" href="#a-flashlight" title="Permanent link">#</a></h2>
+<p>A flashlight is a spotlight attached to the camera:</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="n">light</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">camera</span><span class="p">.</span><span class="n">position</span>
+<span class="n">light</span><span class="p">.</span><span class="n">direction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">camera</span><span class="p">.</span><span class="n">front</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">light</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">camera</span><span class="p">.</span><span class="n">position</span><span class="p">;</span>
+<span class="n">light</span><span class="p">.</span><span class="n">direction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">camera</span><span class="p">.</span><span class="n">front</span><span class="p">();</span>
+</code></pre></div>
+</div>
+
+<p>Add attenuation as well and walk around the cubes in the dark.</p>
+<div class="lm-demo" data-demo="light-casters" data-fallback="../../assets/img/lighting/light-casters.webp"></div>
+
+<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<ul>
+<li>Give the directional light a warm color and a low angle for a sunset.<details class="solution"><summary>Mostra la soluzione</summary><p>Use a direction close to horizontal, such as (-1.0, -0.15, -0.3), and a diffuse color like (1.0, 0.55, 0.25) with a dim bluish ambient such as (0.05, 0.06, 0.1). Long shading gradients and warm highlights do the rest.</p></details></li>
+<li>Experiment with the attenuation terms until a point light reaches exactly the nearest cubes.<details class="solution"><summary>Mostra la soluzione</summary><p>Start from the table: for a range of about 13 units use linear 0.35 and quadratic 0.44. Raise the quadratic term to make the light die sooner without darkening what is close; raise the linear term to darken everything more evenly.</p></details></li>
+<li>Project a texture from the spotlight, like a slide projector: use the fragment's position within the cone as a texture coordinate.<details class="solution"><summary>Mostra la soluzione</summary><p>Build a view-projection matrix for the spotlight, as for a camera at the light looking along its direction. Transform the fragment's world position with it, divide by w, and map from -1...1 to 0...1 to get a texture coordinate. Multiply the light's color by the sampled image.</p>
+<div class="codehilite"><pre><span></span><code><span class="n">float4</span><span class="w"> </span><span class="n">lightClip</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">lightViewProjection</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">worldPosition</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<span class="n">float2</span><span class="w"> </span><span class="n">slideUV</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lightClip</span><span class="p">.</span><span class="n">xy</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">lightClip</span><span class="p">.</span><span class="n">w</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">float2</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.5</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.5</span><span class="p">;</span>
+<span class="n">float3</span><span class="w"> </span><span class="n">slide</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">slideTexture</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">clampSampler</span><span class="p">,</span><span class="w"> </span><span class="n">slideUV</span><span class="p">).</span><span class="n">rgb</span><span class="p">;</span>
+<span class="n">diffuse</span><span class="w"> </span><span class="o">*=</span><span class="w"> </span><span class="n">slide</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">intensity</span><span class="p">;</span>
+</code></pre></div>
+
+<p>This is the first half of shadow mapping: the same projection later looks up a depth instead of a color.</p></details></li>
+</ul></article><nav class="pager" id="pager"><a class="prev" href="../lighting/lighting-maps.html"><small>Precedente</small>Mappe di illuminazione</a><a class="next" href="../lighting/multiple-lights.html"><small>Successivo</small>Più luci</a></nav>
+<footer class="site-footer">
+  <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
+  <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
+</footer>
+</main>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#directional-light">Directional light</a></li><li><a href="#point-light">Point light</a></li><li><a href="#spotlight">Spotlight</a></li><li><a href="#a-flashlight">A flashlight</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+</div>
+<script defer src="../../assets/textures.js"></script>
+<script defer src="../../assets/live.js"></script>
+<script defer src="../../assets/demos.js"></script>
+<script defer src="../../assets/site.js"></script>
+</body>
+</html>

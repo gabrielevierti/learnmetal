@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="it" data-root="../../" data-site="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Correzione gamma | learnmetal</title>
+<meta name="description" content="Illuminazione avanzata: Correzione gamma. Impara la grafica 3D con Metal di Apple, dal primo triangolo al rendering fisicamente corretto, in Swift o C++.">
+<meta name="author" content="Gabriele Vierti">
+<link rel="icon" href="../../assets/favicon.png">
+<script>
+(function () {
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem("theme"); l = localStorage.getItem("lang"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  d.dataset.theme = t;
+  var q = /[?&]lang=(swift|cpp)/.exec(location.search);      // links can pick a language: page.html?lang=cpp
+  if (q) l = q[1];
+  d.dataset.lang = l === "cpp" ? "cpp" : "swift";
+})();
+</script>
+<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../../assets/code.css">
+</head>
+<body class="" data-key="advanced-lighting/gamma-correction">
+<a class="skip" href="#main">Vai al contenuto</a>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Apri l'elenco dei capitoli">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a class="brand" href="../index.html"><img src="../../assets/logo.png" alt="LearnMetal" width="136" height="32"></a>
+  <div class="search" role="search">
+    <input id="search" type="search" placeholder="Cerca" aria-label="Cerca" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results" hidden></div>
+  </div>
+  <button id="search-toggle" class="icon-btn" aria-label="Cerca">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <div class="lang-switch site-lang" role="group" aria-label="Lingua del testo">
+    <a href="../../advanced-lighting/gamma-correction.html">EN</a>
+    <a href="../../it/advanced-lighting/gamma-correction.html" aria-current="true">IT</a>
+  </div>
+  <div class="lang-switch" role="group" aria-label="Linguaggio del codice">
+    <button type="button" data-set-lang="swift">Swift</button>
+    <button type="button" data-set-lang="cpp">C++</button>
+  </div>
+  <a class="icon-btn" href="https://github.com/gabrielevierti" aria-label="Gabriele Vierti on GitHub"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Passa dal tema chiaro a quello scuro">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"/></svg>
+  </button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Capitoli">
+<div class="nav-section"><h4>Per iniziare</h4><ul>
+<li><a data-key="getting-started/introduction" href="../getting-started/introduction.html">Introduzione</a></li>
+<li><a data-key="getting-started/project-setup" href="../getting-started/project-setup.html">Preparare il progetto</a></li>
+<li><a data-key="getting-started/hello-view" href="../getting-started/hello-view.html">La prima vista</a></li>
+<li><a data-key="getting-started/hello-triangle" href="../getting-started/hello-triangle.html">Il primo triangolo</a></li>
+<li><a data-key="getting-started/shaders" href="../getting-started/shaders.html">Shader</a></li>
+<li><a data-key="getting-started/textures" href="../getting-started/textures.html">Texture</a></li>
+<li><a data-key="getting-started/transformations" href="../getting-started/transformations.html">Trasformazioni</a></li>
+<li><a data-key="getting-started/coordinate-systems" href="../getting-started/coordinate-systems.html">Sistemi di coordinate</a></li>
+<li><a data-key="getting-started/camera" href="../getting-started/camera.html">Camera</a></li>
+<li><a data-key="getting-started/review" href="../getting-started/review.html">Riepilogo</a></li>
+</ul></div>
+<div class="nav-section"><h4>Illuminazione</h4><ul>
+<li><a data-key="lighting/colors" href="../lighting/colors.html">Colori</a></li>
+<li><a data-key="lighting/basic-lighting" href="../lighting/basic-lighting.html">Illuminazione di base</a></li>
+<li><a data-key="lighting/materials" href="../lighting/materials.html">Materiali</a></li>
+<li><a data-key="lighting/lighting-maps" href="../lighting/lighting-maps.html">Mappe di illuminazione</a></li>
+<li><a data-key="lighting/light-casters" href="../lighting/light-casters.html">Tipi di luce</a></li>
+<li><a data-key="lighting/multiple-lights" href="../lighting/multiple-lights.html">Più luci</a></li>
+<li><a data-key="lighting/review" href="../lighting/review.html">Riepilogo</a></li>
+</ul></div>
+<div class="nav-section"><h4>Caricare i modelli</h4><ul>
+<li><a data-key="model-loading/model-io" href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a data-key="model-loading/mesh" href="../model-loading/mesh.html">Mesh</a></li>
+<li><a data-key="model-loading/model" href="../model-loading/model.html">Modello</a></li>
+</ul></div>
+<div class="nav-section"><h4>Metal avanzato</h4><ul>
+<li><a data-key="advanced-metal/depth-testing" href="../advanced-metal/depth-testing.html">Test di profondità</a></li>
+<li><a data-key="advanced-metal/stencil-testing" href="../advanced-metal/stencil-testing.html">Test di stencil</a></li>
+<li><a data-key="advanced-metal/blending" href="../advanced-metal/blending.html">Blending</a></li>
+<li><a data-key="advanced-metal/face-culling" href="../advanced-metal/face-culling.html">Face culling</a></li>
+<li><a data-key="advanced-metal/render-targets" href="../advanced-metal/render-targets.html">Render target</a></li>
+<li><a data-key="advanced-metal/cubemaps" href="../advanced-metal/cubemaps.html">Cubemap</a></li>
+<li><a data-key="advanced-metal/advanced-data" href="../advanced-metal/advanced-data.html">Dati avanzati</a></li>
+<li><a data-key="advanced-metal/advanced-msl" href="../advanced-metal/advanced-msl.html">MSL avanzato</a></li>
+<li><a data-key="advanced-metal/no-geometry-shaders" href="../advanced-metal/no-geometry-shaders.html">Vivere senza geometry shader</a></li>
+<li><a data-key="advanced-metal/instancing" href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a data-key="advanced-metal/anti-aliasing" href="../advanced-metal/anti-aliasing.html">Anti-aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Illuminazione avanzata</h4><ul>
+<li><a data-key="advanced-lighting/blinn-phong" href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a class="active" aria-current="page" data-key="advanced-lighting/gamma-correction" href="../advanced-lighting/gamma-correction.html">Correzione gamma</a></li>
+<li><a data-key="advanced-lighting/shadow-mapping" href="../advanced-lighting/shadow-mapping.html">Shadow mapping</a></li>
+<li><a data-key="advanced-lighting/point-shadows" href="../advanced-lighting/point-shadows.html">Ombre da luci puntiformi</a></li>
+<li><a data-key="advanced-lighting/normal-mapping" href="../advanced-lighting/normal-mapping.html">Normal mapping</a></li>
+<li><a data-key="advanced-lighting/parallax-mapping" href="../advanced-lighting/parallax-mapping.html">Parallax mapping</a></li>
+<li><a data-key="advanced-lighting/hdr" href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a data-key="advanced-lighting/bloom" href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a data-key="advanced-lighting/deferred-shading" href="../advanced-lighting/deferred-shading.html">Deferred shading</a></li>
+<li><a data-key="advanced-lighting/ssao" href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a data-key="pbr/theory" href="../pbr/theory.html">Teoria</a></li>
+<li><a data-key="pbr/lighting" href="../pbr/lighting.html">Illuminazione</a></li>
+<li><a data-key="pbr/diffuse-irradiance" href="../pbr/diffuse-irradiance.html">Irradianza diffusa</a></li>
+<li><a data-key="pbr/specular-ibl" href="../pbr/specular-ibl.html">IBL speculare</a></li>
+</ul></div>
+<div class="nav-section"><h4>In pratica</h4><ul>
+<li><a data-key="in-practice/debugging" href="../in-practice/debugging.html">Debug</a></li>
+<li><a data-key="in-practice/text-rendering" href="../in-practice/text-rendering.html">Rendering del testo</a></li>
+<li><a data-key="in-practice/2d-game" href="../in-practice/2d-game.html">Un gioco 2D</a></li>
+</ul></div>
+<div class="nav-section"><h4>Oltre</h4><ul>
+<li><a data-key="beyond/compute-shaders" href="../beyond/compute-shaders.html">Compute shader</a></li>
+<li><a data-key="beyond/tessellation" href="../beyond/tessellation.html">Tassellazione</a></li>
+<li><a data-key="beyond/ray-tracing" href="../beyond/ray-tracing.html">Ray tracing</a></li>
+<li><a data-key="beyond/mesh-shaders" href="../beyond/mesh-shaders.html">Mesh shader</a></li>
+</ul></div>
+<div class="nav-section"><h4>Piattaforme Apple</h4><ul>
+<li><a data-key="apple-platforms/tile-based-gpus" href="../apple-platforms/tile-based-gpus.html">GPU tile-based</a></li>
+<li><a data-key="apple-platforms/metalfx" href="../apple-platforms/metalfx.html">Upscaling con MetalFX</a></li>
+<li><a data-key="apple-platforms/metal-4" href="../apple-platforms/metal-4.html">Metal 4</a></li>
+<li><a data-key="apple-platforms/visionos" href="../apple-platforms/visionos.html">visionOS</a></li>
+</ul></div>
+<div class="nav-section"><h4>Risorse</h4><ul>
+<li><a data-key="resources/examples" href="../resources/examples.html">Codice di esempio</a></li>
+</ul></div>
+</nav>
+<main class="content" id="main">
+<article><p class="crumb">Illuminazione avanzata</p><h1 id="gamma-correction">Gamma Correction<a class="headerlink" href="#gamma-correction" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
+<p>There is a mistake in every image we have rendered so far. Lighting math assumes that a value of 0.5 is half as bright as 1.0. On a display, it is not.</p>
+<h2 id="displays-are-not-linear">Displays are not linear<a class="headerlink" href="#displays-are-not-linear" title="Permanent link">#</a></h2>
+<p>Displays follow the <strong>sRGB</strong> standard, which is close to a power curve with an exponent of 2.2, called <strong>gamma</strong>. A pixel value of 0.5 is shown at about 0.5^2.2 ≈ 0.22 of full brightness. This is not a defect. Human vision is more sensitive to differences between dark tones than between bright ones, and the curve spends more of the 256 available steps on the dark end, where we notice them.</p>
+<p>The consequence: image files are stored already <strong>encoded</strong> for this curve, and whatever we write to the screen is treated as encoded too.</p>
+<h2 id="what-goes-wrong">What goes wrong<a class="headerlink" href="#what-goes-wrong" title="Permanent link">#</a></h2>
+<p>If we do lighting directly on encoded values:</p>
+<ul>
+<li>Adding two lights does not double the brightness on screen.</li>
+<li>Gradients from light to dark fall off too fast, so shading has harsh, dark terminators.</li>
+<li>Colors shift toward oversaturation, and attenuation looks wrong.</li>
+</ul>
+<p>The fix is a <strong>linear workflow</strong>: convert inputs to linear space, do all math there, and convert the result back to sRGB at the very end.</p>
+<h2 id="metal-does-both-conversions-for-you">Metal does both conversions for you<a class="headerlink" href="#metal-does-both-conversions-for-you" title="Permanent link">#</a></h2>
+<p>Pixel formats ending in <code>_srgb</code> tell Metal that a texture holds sRGB-encoded data:</p>
+<ul>
+<li><strong>Sampling</strong> an sRGB texture returns <strong>linear</strong> values. The conversion happens before filtering, which is the correct order.</li>
+<li><strong>Writing</strong> to an sRGB render target converts <strong>linear</strong> shader output to sRGB. Blending is also performed in linear space.</li>
+</ul>
+<p>So gamma correction is two configuration changes and zero shader code.</p>
+<p><strong>1. Make the view's drawable sRGB:</strong></p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="n">view</span><span class="p">.</span><span class="n">colorPixelFormat</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">bgra8Unorm_srgb</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">layer</span><span class="o">-&gt;</span><span class="n">setPixelFormat</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">PixelFormatBGRA8Unorm_sRGB</span><span class="p">);</span>
+</code></pre></div>
+</div>
+
+<p>and use the same format in the pipeline descriptors that render to it.</p>
+<p><strong>2. Load color textures as sRGB:</strong></p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">colorOptions</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="bp">MTKTextureLoader</span><span class="p">.</span><span class="n">Option</span><span class="p">:</span><span class="w"> </span><span class="nb">Any</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[.</span><span class="n">generateMipmaps</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="p">.</span><span class="n">SRGB</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">]</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">dataOptions</span><span class="p">:</span><span class="w">  </span><span class="p">[</span><span class="bp">MTKTextureLoader</span><span class="p">.</span><span class="n">Option</span><span class="p">:</span><span class="w"> </span><span class="nb">Any</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[.</span><span class="n">generateMipmaps</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="p">.</span><span class="n">SRGB</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">]</span>
+
+<span class="n">diffuseMap</span><span class="w">  </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="w"> </span><span class="n">loader</span><span class="p">.</span><span class="n">newTexture</span><span class="p">(</span><span class="n">URL</span><span class="p">:</span><span class="w"> </span><span class="n">diffuseURL</span><span class="p">,</span><span class="w"> </span><span class="n">options</span><span class="p">:</span><span class="w"> </span><span class="n">colorOptions</span><span class="p">)</span>
+<span class="n">specularMap</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="w"> </span><span class="n">loader</span><span class="p">.</span><span class="n">newTexture</span><span class="p">(</span><span class="n">URL</span><span class="p">:</span><span class="w"> </span><span class="n">specularURL</span><span class="p">,</span><span class="w"> </span><span class="n">options</span><span class="p">:</span><span class="w"> </span><span class="n">dataOptions</span><span class="p">)</span>
+<span class="n">normalMap</span><span class="w">   </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="w"> </span><span class="n">loader</span><span class="p">.</span><span class="n">newTexture</span><span class="p">(</span><span class="n">URL</span><span class="p">:</span><span class="w"> </span><span class="n">normalURL</span><span class="p">,</span><span class="w"> </span><span class="n">options</span><span class="p">:</span><span class="w"> </span><span class="n">dataOptions</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="c1">// Give loadTexture() a flag that picks the pixel format:</span>
+<span class="c1">//   sRGB ? MTL::PixelFormatRGBA8Unorm_sRGB : MTL::PixelFormatRGBA8Unorm</span>
+<span class="n">diffuseMap</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">loadTexture</span><span class="p">(</span><span class="n">device</span><span class="p">,</span><span class="w"> </span><span class="n">commandQueue</span><span class="p">,</span><span class="w"> </span><span class="s">"diffuse.png"</span><span class="p">,</span><span class="w">  </span><span class="cm">/* sRGB */</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span>
+<span class="n">specularMap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">loadTexture</span><span class="p">(</span><span class="n">device</span><span class="p">,</span><span class="w"> </span><span class="n">commandQueue</span><span class="p">,</span><span class="w"> </span><span class="s">"specular.png"</span><span class="p">,</span><span class="w"> </span><span class="cm">/* sRGB */</span><span class="w"> </span><span class="nb">false</span><span class="p">);</span>
+<span class="n">normalMap</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="n">loadTexture</span><span class="p">(</span><span class="n">device</span><span class="p">,</span><span class="w"> </span><span class="n">commandQueue</span><span class="p">,</span><span class="w"> </span><span class="s">"normal.png"</span><span class="p">,</span><span class="w">   </span><span class="cm">/* sRGB */</span><span class="w"> </span><span class="nb">false</span><span class="p">);</span>
+</code></pre></div>
+</div>
+
+<div class="admonition warning">
+<p class="admonition-title">Only colors are sRGB</p>
+<p>Textures that hold <strong>colors</strong> made by an artist looking at a screen are sRGB: diffuse, albedo, emissive. Textures that hold <strong>data</strong> are linear: normal maps, specular, roughness, metalness, height, ambient occlusion. Decoding a normal map as sRGB bends every normal and produces subtly wrong lighting that is hard to diagnose.</p>
+</div>
+<p>If you leave out the <code>.SRGB</code> option, the loader decides from the image file's metadata, which may or may not be what you want. Being explicit avoids surprises.</p>
+<h2 id="doing-it-by-hand">Doing it by hand<a class="headerlink" href="#doing-it-by-hand" title="Permanent link">#</a></h2>
+<p>If you cannot use an sRGB target, apply the curve at the end of the fragment function:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">encoded</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pow</span><span class="p">(</span><span class="n">color</span><span class="p">,</span><span class="w"> </span><span class="n">float3</span><span class="p">(</span><span class="mf">1.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">2.2</span><span class="p">));</span>
+</code></pre></div>
+
+<p>and decode textures on read with <code>pow(texel, float3(2.2))</code>. The automatic route is more accurate, since the true sRGB curve is not a pure power function, and it filters and blends correctly. Do one or the other, never both, or the image comes out washed out.</p>
+<h2 id="constant-colors">Constant colors<a class="headerlink" href="#constant-colors" title="Permanent link">#</a></h2>
+<p>Colors typed into code or picked in a color picker are sRGB values. In a linear workflow they should be converted before use:</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">linear</span><span class="p">(</span><span class="kc">_</span><span class="w"> </span><span class="n">srgb</span><span class="p">:</span><span class="w"> </span><span class="n">Float3</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="n">Float3</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Float3</span><span class="p">(</span><span class="n">pow</span><span class="p">(</span><span class="n">srgb</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mf">2.2</span><span class="p">),</span><span class="w"> </span><span class="n">pow</span><span class="p">(</span><span class="n">srgb</span><span class="p">.</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="mf">2.2</span><span class="p">),</span><span class="w"> </span><span class="n">pow</span><span class="p">(</span><span class="n">srgb</span><span class="p">.</span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="mf">2.2</span><span class="p">))</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">simd</span><span class="o">::</span><span class="n">float3</span><span class="w"> </span><span class="nf">linear</span><span class="p">(</span><span class="n">simd</span><span class="o">::</span><span class="n">float3</span><span class="w"> </span><span class="n">srgb</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">{</span><span class="n">std</span><span class="o">::</span><span class="n">pow</span><span class="p">(</span><span class="n">srgb</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mf">2.2f</span><span class="p">),</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">pow</span><span class="p">(</span><span class="n">srgb</span><span class="p">.</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="mf">2.2f</span><span class="p">),</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">pow</span><span class="p">(</span><span class="n">srgb</span><span class="p">.</span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="mf">2.2f</span><span class="p">)};</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+
+<p>The view's <code>clearColor</code> is given in linear space when the drawable format is sRGB, so the same numbers now look brighter than before.</p>
+<h2 id="attenuation">Attenuation<a class="headerlink" href="#attenuation" title="Permanent link">#</a></h2>
+<p>Physically, light intensity falls with the <strong>square</strong> of the distance:</p>
+<div class="codehilite"><pre><span></span><code><span class="kt">float</span><span class="w"> </span><span class="n">attenuation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">distance</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">distance</span><span class="p">);</span>
+</code></pre></div>
+
+<p>Without gamma correction this looks far too harsh, because the display's curve squares the falloff once more. That is why older tutorials use linear falloff or the three-term formula from <a href="../lighting/light-casters.html">Light Casters</a>, which were tuned by eye on uncorrected output. With a linear workflow, inverse-square falloff looks right, and from here on we use it.</p>
+<h2 id="what-to-expect">What to expect<a class="headerlink" href="#what-to-expect" title="Permanent link">#</a></h2>
+<p>After the switch, the scene looks brighter and flatter in the mid-tones, and light and material values tuned earlier will need adjusting. This is normal. What you gain is lighting that adds up correctly, which every chapter from here to the end of the PBR section depends on.</p>
+<figure><img src="../../assets/img/advanced-lighting/gamma-correction.webp" alt="The same lights with inverse-square falloff. Without gamma correction the falloff is far too harsh." width="880" height="246" loading="lazy"><figcaption>The same lights with inverse-square falloff. Without gamma correction the falloff is far too harsh.</figcaption></figure>
+
+<h2 id="wide-color">Wide color<a class="headerlink" href="#wide-color" title="Permanent link">#</a></h2>
+<p>Apple displays cover the Display P3 gamut, which is larger than sRGB. <code>MTKView</code> has a <code>colorspace</code> property (through its layer on iOS) and extended-range pixel formats such as <code>.bgra10_xr_srgb</code> for rendering colors outside sRGB. It is an advanced topic and unnecessary for learning, but good to know it exists when a designer asks why a red looks duller in your renderer than in Photos.</p></article><nav class="pager" id="pager"><a class="prev" href="../advanced-lighting/blinn-phong.html"><small>Precedente</small>Blinn-Phong</a><a class="next" href="../advanced-lighting/shadow-mapping.html"><small>Successivo</small>Shadow mapping</a></nav>
+<footer class="site-footer">
+  <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
+  <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
+</footer>
+</main>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#displays-are-not-linear">Displays are not linear</a></li><li><a href="#what-goes-wrong">What goes wrong</a></li><li><a href="#metal-does-both-conversions-for-you">Metal does both conversions for you</a></li><li><a href="#doing-it-by-hand">Doing it by hand</a></li><li><a href="#constant-colors">Constant colors</a></li><li><a href="#attenuation">Attenuation</a></li><li><a href="#what-to-expect">What to expect</a></li><li><a href="#wide-color">Wide color</a></li></ul></aside>
+</div>
+<script defer src="../../assets/textures.js"></script>
+<script defer src="../../assets/live.js"></script>
+<script defer src="../../assets/demos.js"></script>
+<script defer src="../../assets/site.js"></script>
+</body>
+</html>

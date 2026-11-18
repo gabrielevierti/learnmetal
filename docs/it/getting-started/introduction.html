@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="it" data-root="../../" data-site="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Introduzione | learnmetal</title>
+<meta name="description" content="Per iniziare: Introduzione. Impara la grafica 3D con Metal di Apple, dal primo triangolo al rendering fisicamente corretto, in Swift o C++.">
+<meta name="author" content="Gabriele Vierti">
+<link rel="icon" href="../../assets/favicon.png">
+<script>
+(function () {
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem("theme"); l = localStorage.getItem("lang"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  d.dataset.theme = t;
+  var q = /[?&]lang=(swift|cpp)/.exec(location.search);      // links can pick a language: page.html?lang=cpp
+  if (q) l = q[1];
+  d.dataset.lang = l === "cpp" ? "cpp" : "swift";
+})();
+</script>
+<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../../assets/code.css">
+</head>
+<body class="" data-key="getting-started/introduction">
+<a class="skip" href="#main">Vai al contenuto</a>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Apri l'elenco dei capitoli">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a class="brand" href="../index.html"><img src="../../assets/logo.png" alt="LearnMetal" width="136" height="32"></a>
+  <div class="search" role="search">
+    <input id="search" type="search" placeholder="Cerca" aria-label="Cerca" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results" hidden></div>
+  </div>
+  <button id="search-toggle" class="icon-btn" aria-label="Cerca">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <div class="lang-switch site-lang" role="group" aria-label="Lingua del testo">
+    <a href="../../getting-started/introduction.html">EN</a>
+    <a href="../../it/getting-started/introduction.html" aria-current="true">IT</a>
+  </div>
+  <div class="lang-switch" role="group" aria-label="Linguaggio del codice">
+    <button type="button" data-set-lang="swift">Swift</button>
+    <button type="button" data-set-lang="cpp">C++</button>
+  </div>
+  <a class="icon-btn" href="https://github.com/gabrielevierti" aria-label="Gabriele Vierti on GitHub"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Passa dal tema chiaro a quello scuro">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"/></svg>
+  </button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Capitoli">
+<div class="nav-section"><h4>Per iniziare</h4><ul>
+<li><a class="active" aria-current="page" data-key="getting-started/introduction" href="../getting-started/introduction.html">Introduzione</a></li>
+<li><a data-key="getting-started/project-setup" href="../getting-started/project-setup.html">Preparare il progetto</a></li>
+<li><a data-key="getting-started/hello-view" href="../getting-started/hello-view.html">La prima vista</a></li>
+<li><a data-key="getting-started/hello-triangle" href="../getting-started/hello-triangle.html">Il primo triangolo</a></li>
+<li><a data-key="getting-started/shaders" href="../getting-started/shaders.html">Shader</a></li>
+<li><a data-key="getting-started/textures" href="../getting-started/textures.html">Texture</a></li>
+<li><a data-key="getting-started/transformations" href="../getting-started/transformations.html">Trasformazioni</a></li>
+<li><a data-key="getting-started/coordinate-systems" href="../getting-started/coordinate-systems.html">Sistemi di coordinate</a></li>
+<li><a data-key="getting-started/camera" href="../getting-started/camera.html">Camera</a></li>
+<li><a data-key="getting-started/review" href="../getting-started/review.html">Riepilogo</a></li>
+</ul></div>
+<div class="nav-section"><h4>Illuminazione</h4><ul>
+<li><a data-key="lighting/colors" href="../lighting/colors.html">Colori</a></li>
+<li><a data-key="lighting/basic-lighting" href="../lighting/basic-lighting.html">Illuminazione di base</a></li>
+<li><a data-key="lighting/materials" href="../lighting/materials.html">Materiali</a></li>
+<li><a data-key="lighting/lighting-maps" href="../lighting/lighting-maps.html">Mappe di illuminazione</a></li>
+<li><a data-key="lighting/light-casters" href="../lighting/light-casters.html">Tipi di luce</a></li>
+<li><a data-key="lighting/multiple-lights" href="../lighting/multiple-lights.html">Più luci</a></li>
+<li><a data-key="lighting/review" href="../lighting/review.html">Riepilogo</a></li>
+</ul></div>
+<div class="nav-section"><h4>Caricare i modelli</h4><ul>
+<li><a data-key="model-loading/model-io" href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a data-key="model-loading/mesh" href="../model-loading/mesh.html">Mesh</a></li>
+<li><a data-key="model-loading/model" href="../model-loading/model.html">Modello</a></li>
+</ul></div>
+<div class="nav-section"><h4>Metal avanzato</h4><ul>
+<li><a data-key="advanced-metal/depth-testing" href="../advanced-metal/depth-testing.html">Test di profondità</a></li>
+<li><a data-key="advanced-metal/stencil-testing" href="../advanced-metal/stencil-testing.html">Test di stencil</a></li>
+<li><a data-key="advanced-metal/blending" href="../advanced-metal/blending.html">Blending</a></li>
+<li><a data-key="advanced-metal/face-culling" href="../advanced-metal/face-culling.html">Face culling</a></li>
+<li><a data-key="advanced-metal/render-targets" href="../advanced-metal/render-targets.html">Render target</a></li>
+<li><a data-key="advanced-metal/cubemaps" href="../advanced-metal/cubemaps.html">Cubemap</a></li>
+<li><a data-key="advanced-metal/advanced-data" href="../advanced-metal/advanced-data.html">Dati avanzati</a></li>
+<li><a data-key="advanced-metal/advanced-msl" href="../advanced-metal/advanced-msl.html">MSL avanzato</a></li>
+<li><a data-key="advanced-metal/no-geometry-shaders" href="../advanced-metal/no-geometry-shaders.html">Vivere senza geometry shader</a></li>
+<li><a data-key="advanced-metal/instancing" href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a data-key="advanced-metal/anti-aliasing" href="../advanced-metal/anti-aliasing.html">Anti-aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Illuminazione avanzata</h4><ul>
+<li><a data-key="advanced-lighting/blinn-phong" href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a data-key="advanced-lighting/gamma-correction" href="../advanced-lighting/gamma-correction.html">Correzione gamma</a></li>
+<li><a data-key="advanced-lighting/shadow-mapping" href="../advanced-lighting/shadow-mapping.html">Shadow mapping</a></li>
+<li><a data-key="advanced-lighting/point-shadows" href="../advanced-lighting/point-shadows.html">Ombre da luci puntiformi</a></li>
+<li><a data-key="advanced-lighting/normal-mapping" href="../advanced-lighting/normal-mapping.html">Normal mapping</a></li>
+<li><a data-key="advanced-lighting/parallax-mapping" href="../advanced-lighting/parallax-mapping.html">Parallax mapping</a></li>
+<li><a data-key="advanced-lighting/hdr" href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a data-key="advanced-lighting/bloom" href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a data-key="advanced-lighting/deferred-shading" href="../advanced-lighting/deferred-shading.html">Deferred shading</a></li>
+<li><a data-key="advanced-lighting/ssao" href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a data-key="pbr/theory" href="../pbr/theory.html">Teoria</a></li>
+<li><a data-key="pbr/lighting" href="../pbr/lighting.html">Illuminazione</a></li>
+<li><a data-key="pbr/diffuse-irradiance" href="../pbr/diffuse-irradiance.html">Irradianza diffusa</a></li>
+<li><a data-key="pbr/specular-ibl" href="../pbr/specular-ibl.html">IBL speculare</a></li>
+</ul></div>
+<div class="nav-section"><h4>In pratica</h4><ul>
+<li><a data-key="in-practice/debugging" href="../in-practice/debugging.html">Debug</a></li>
+<li><a data-key="in-practice/text-rendering" href="../in-practice/text-rendering.html">Rendering del testo</a></li>
+<li><a data-key="in-practice/2d-game" href="../in-practice/2d-game.html">Un gioco 2D</a></li>
+</ul></div>
+<div class="nav-section"><h4>Oltre</h4><ul>
+<li><a data-key="beyond/compute-shaders" href="../beyond/compute-shaders.html">Compute shader</a></li>
+<li><a data-key="beyond/tessellation" href="../beyond/tessellation.html">Tassellazione</a></li>
+<li><a data-key="beyond/ray-tracing" href="../beyond/ray-tracing.html">Ray tracing</a></li>
+<li><a data-key="beyond/mesh-shaders" href="../beyond/mesh-shaders.html">Mesh shader</a></li>
+</ul></div>
+<div class="nav-section"><h4>Piattaforme Apple</h4><ul>
+<li><a data-key="apple-platforms/tile-based-gpus" href="../apple-platforms/tile-based-gpus.html">GPU tile-based</a></li>
+<li><a data-key="apple-platforms/metalfx" href="../apple-platforms/metalfx.html">Upscaling con MetalFX</a></li>
+<li><a data-key="apple-platforms/metal-4" href="../apple-platforms/metal-4.html">Metal 4</a></li>
+<li><a data-key="apple-platforms/visionos" href="../apple-platforms/visionos.html">visionOS</a></li>
+</ul></div>
+<div class="nav-section"><h4>Risorse</h4><ul>
+<li><a data-key="resources/examples" href="../resources/examples.html">Codice di esempio</a></li>
+</ul></div>
+</nav>
+<main class="content" id="main">
+<article><p class="crumb">Per iniziare</p><h1 id="introduzione">Introduzione<a class="headerlink" href="#introduzione" title="Permanent link">#</a></h1>
+<p>Prima di disegnare qualcosa conviene sapere che cos'è Metal, che cosa non è e come si incastrano i suoi pezzi. Questo capitolo è fatto solo di concetti, senza codice. Il prossimo apre Xcode.</p>
+<h2 id="che-cose-metal">Che cos'è Metal<a class="headerlink" href="#che-cose-metal" title="Permanent link">#</a></h2>
+<p>Metal è l'API di basso livello di Apple per parlare con la GPU. Fa due lavori:</p>
+<ul>
+<li><strong>Rendering</strong>: trasformare triangoli in pixel, l'argomento di quasi tutto questo sito.</li>
+<li><strong>Calcolo</strong>: eseguire sulla GPU codice parallelo di uso generale, a cui arriviamo nella sezione <a href="../beyond/compute-shaders.html">Oltre</a>.</li>
+</ul>
+<p>Gira su macOS, iOS, iPadOS, tvOS e visionOS, ed è l'unica API grafica di prima classe su queste piattaforme. OpenGL e OpenCL lì sono deprecate dal 2018. SceneKit, RealityKit, SpriteKit, Core Animation e i motori di gioco come Unity e Unreal poggiano tutti su Metal quando girano su hardware Apple.</p>
+<p>Metal è di <em>basso livello</em> nel senso che mostra come lavora davvero una GPU: sei tu ad allocare i buffer, descrivere le pipeline e registrare i comandi. È anche molto più amichevole di Vulkan o Direct3D 12. C'è molto meno codice di contorno, esistono valori predefiniti sensati e gli strumenti di debug di Xcode sono eccellenti.</p>
+<h2 id="gli-oggetti-che-incontrerai">Gli oggetti che incontrerai<a class="headerlink" href="#gli-oggetti-che-incontrerai" title="Permanent link">#</a></h2>
+<p>In Metal quasi tutto viene creato a partire da un solo oggetto, il <strong>device</strong>, e quasi tutti i nomi dei tipi iniziano con <code>MTL</code>. Il cast è ridotto:</p>
+<table>
+<thead>
+<tr>
+<th>Oggetto</th>
+<th>Ruolo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MTLDevice</code></td>
+<td>La GPU. Fabbrica di tutto il resto.</td>
+</tr>
+<tr>
+<td><code>MTLCommandQueue</code></td>
+<td>Una fila ordinata di lavoro in attesa della GPU.</td>
+</tr>
+<tr>
+<td><code>MTLCommandBuffer</code></td>
+<td>Un blocco di lavoro, di solito un frame.</td>
+</tr>
+<tr>
+<td><code>MTLRenderCommandEncoder</code></td>
+<td>Scrive in un command buffer i comandi di disegno di un render pass.</td>
+</tr>
+<tr>
+<td><code>MTLRenderPassDescriptor</code></td>
+<td>Dice in quali texture disegna un pass e come iniziano e finiscono.</td>
+</tr>
+<tr>
+<td><code>MTLRenderPipelineState</code></td>
+<td>Una coppia compilata di vertex e fragment shader, più la configurazione fissa.</td>
+</tr>
+<tr>
+<td><code>MTLBuffer</code></td>
+<td>Un blocco di memoria che la GPU può leggere: vertici, indici, uniform.</td>
+</tr>
+<tr>
+<td><code>MTLTexture</code></td>
+<td>Un'immagine da cui la GPU può leggere o in cui può disegnare.</td>
+</tr>
+<tr>
+<td><code>MTLSamplerState</code></td>
+<td>Come viene filtrata e ripetuta una texture quando la si legge.</td>
+</tr>
+<tr>
+<td><code>MTLDepthStencilState</code></td>
+<td>Come si comportano i test di profondità e di stencil.</td>
+</tr>
+<tr>
+<td><code>MTLLibrary</code> / <code>MTLFunction</code></td>
+<td>Codice shader compilato e una funzione al suo interno.</td>
+</tr>
+</tbody>
+</table>
+<p>Un frame ha sempre la stessa forma:</p>
+<ol>
+<li>Chiedi un command buffer alla command queue.</li>
+<li>Crea un render command encoder per un render pass.</li>
+<li>Imposta lo stato (pipeline, buffer, texture) ed emetti le chiamate di disegno.</li>
+<li>Chiudi l'encoding, chiedi di presentare il risultato a schermo e fai il commit del command buffer.</li>
+</ol>
+<p>Niente arriva alla GPU finché non fai il commit. Fare encoding significa soltanto scrivere una lista di cose da fare.</p>
+<figure><img src="../../assets/img/getting-started/introduction.webp" alt="Everything is created from the device, and nothing reaches the GPU until the command buffer is committed." width="880" height="300" loading="lazy"><figcaption>Everything is created from the device, and nothing reaches the GPU until the command buffer is committed.</figcaption></figure>
+
+<h2 id="oggetti-di-stato-al-posto-di-una-macchina-a-stati">Oggetti di stato al posto di una macchina a stati<a class="headerlink" href="#oggetti-di-stato-al-posto-di-una-macchina-a-stati" title="Permanent link">#</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Coming from OpenGL</p>
+<p>OpenGL è una grande macchina a stati globale: leghi le cose a un contesto e azioni interruttori con <code>glEnable</code>. Metal non ha alcuno stato globale. La configurazione costosa viene fissata in anticipo dentro oggetti immutabili (pipeline state, depth-stencil state, sampler state), mentre lo stato leggero di ogni disegno si imposta su un encoder che vive per un solo pass. Quando un encoder finisce, il suo stato sparisce.</p>
+</div>
+<p>Questa scelta è la ragione principale per cui Metal è veloce e prevedibile. La compilazione degli shader e la validazione della configurazione avvengono una volta sola, quando crei un oggetto di stato, e non a sorpresa nel mezzo di un frame.</p>
+<h2 id="shader">Shader<a class="headerlink" href="#shader" title="Permanent link">#</a></h2>
+<p>Gli shader sono piccoli programmi che girano sulla GPU. In Metal si scrivono in <strong>Metal Shading Language</strong> (MSL), cioè C++14 con alcune funzionalità tolte e con l'aggiunta dei tipi per vettori, matrici e texture. Se hai scritto GLSL o HLSL, leggi MSL da subito.</p>
+<p>Xcode compila ogni file <code>.metal</code> del progetto durante la build in un unico <code>default.metallib</code>, quindi gli errori di sintassi degli shader compaiono come normali errori di compilazione.</p>
+<h2 id="le-gpu-apple">Le GPU Apple<a class="headerlink" href="#le-gpu-apple" title="Permanent link">#</a></h2>
+<p>Tutti i dispositivi Apple attuali usano Apple silicon, le cui GPU sono <strong>renderer tile-based differiti</strong> con <strong>memoria unificata</strong>, condivisa tra CPU e GPU. Non serve capire subito né l'una né l'altra cosa, ma spiegano alcune caratteristiche di Metal che incontrerai più avanti: le load e store action, le texture memoryless e la modalità di storage condivisa. Anche i vecchi Mac Intel con GPU AMD o Intel eseguono Metal, con qualche differenza segnalata dove conta.</p>
+<h2 id="versioni">Versioni<a class="headerlink" href="#versioni" title="Permanent link">#</a></h2>
+<p>L'API di Metal è cresciuta per generazioni numerate. Tutta questa serie usa l'API di base consolidata (<code>MTLCommandQueue</code>, <code>MTLRenderCommandEncoder</code> e compagnia), che gira su tutti i dispositivi compatibili con Metal ed è quella usata da quasi tutto il codice, gli esempi e le risposte che trovi online. Apple ha introdotto anche un insieme più recente di interfacce con il nome Metal 4, con tipi che iniziano per <code>MTL4</code>, pensato per i motori che vogliono un controllo esplicito. I concetti restano gli stessi, quindi impara prima l'API di base; il capitolo <a href="../apple-platforms/metal-4.html">Metal 4</a> mostra che cosa cambia.</p>
+<h2 id="come-leggere-questa-serie">Come leggere questa serie<a class="headerlink" href="#come-leggere-questa-serie" title="Permanent link">#</a></h2>
+<p>Vai in ordine. Ogni capitolo dà per scontato il codice del precedente. Scrivi il codice a mano invece di incollarlo. Cambia i numeri e rompi le cose apposta, poi leggi che cosa ti dice Xcode. La <a href="https://developer.apple.com/documentation/metal">documentazione ufficiale di Metal</a> e la <a href="https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf">specifica del Metal Shading Language</a> sono i riferimenti da tenere aperti in un'altra scheda.</p></article><nav class="pager" id="pager"><span></span><a class="next" href="../getting-started/project-setup.html"><small>Successivo</small>Preparare il progetto</a></nav>
+<footer class="site-footer">
+  <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
+  <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
+</footer>
+</main>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#che-cose-metal">Che cos&#x27;è Metal</a></li><li><a href="#gli-oggetti-che-incontrerai">Gli oggetti che incontrerai</a></li><li><a href="#oggetti-di-stato-al-posto-di-una-macchina-a-stati">Oggetti di stato al posto di una macchina a stati</a></li><li><a href="#shader">Shader</a></li><li><a href="#le-gpu-apple">Le GPU Apple</a></li><li><a href="#versioni">Versioni</a></li><li><a href="#come-leggere-questa-serie">Come leggere questa serie</a></li></ul></aside>
+</div>
+<script defer src="../../assets/textures.js"></script>
+<script defer src="../../assets/live.js"></script>
+<script defer src="../../assets/demos.js"></script>
+<script defer src="../../assets/site.js"></script>
+</body>
+</html>

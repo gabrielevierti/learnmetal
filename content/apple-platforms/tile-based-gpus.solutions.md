@@ -1,0 +1,5 @@
+Any depth or multisample texture whose load action is `.clear` or `.dontCare` and whose store action is `.dontCare` (or `.multisampleResolve` for the multisampled color) qualifies. Set `storageMode = .memoryless` on its descriptor. If Metal's validation layer complains, some pass still loads or stores it. A shadow map does not qualify: the main pass samples it later.
+---
+The pass renders correctly inside tile memory and the result is thrown away, so the texture keeps undefined contents: usually garbage, a previous frame, or black. Nothing is displayed, yet the GPU did all the shading. It is the mirror image of a needless `.store`: there you pay bandwidth for pixels nobody reads.
+---
+The uniform is false, so the image is identical. But the compiler cannot know that, and the pipeline is no longer treated as opaque: every fragment of every overlapping layer now runs its fragment function, where before only the visible one did. In a scene with five layers of overdraw the fragment time grows several times over.

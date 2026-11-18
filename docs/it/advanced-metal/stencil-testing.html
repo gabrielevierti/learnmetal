@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="it" data-root="../../" data-site="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test di stencil | learnmetal</title>
+<meta name="description" content="Metal avanzato: Test di stencil. Impara la grafica 3D con Metal di Apple, dal primo triangolo al rendering fisicamente corretto, in Swift o C++.">
+<meta name="author" content="Gabriele Vierti">
+<link rel="icon" href="../../assets/favicon.png">
+<script>
+(function () {
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem("theme"); l = localStorage.getItem("lang"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  d.dataset.theme = t;
+  var q = /[?&]lang=(swift|cpp)/.exec(location.search);      // links can pick a language: page.html?lang=cpp
+  if (q) l = q[1];
+  d.dataset.lang = l === "cpp" ? "cpp" : "swift";
+})();
+</script>
+<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../../assets/code.css">
+</head>
+<body class="" data-key="advanced-metal/stencil-testing">
+<a class="skip" href="#main">Vai al contenuto</a>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Apri l'elenco dei capitoli">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a class="brand" href="../index.html"><img src="../../assets/logo.png" alt="LearnMetal" width="136" height="32"></a>
+  <div class="search" role="search">
+    <input id="search" type="search" placeholder="Cerca" aria-label="Cerca" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results" hidden></div>
+  </div>
+  <button id="search-toggle" class="icon-btn" aria-label="Cerca">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <div class="lang-switch site-lang" role="group" aria-label="Lingua del testo">
+    <a href="../../advanced-metal/stencil-testing.html">EN</a>
+    <a href="../../it/advanced-metal/stencil-testing.html" aria-current="true">IT</a>
+  </div>
+  <div class="lang-switch" role="group" aria-label="Linguaggio del codice">
+    <button type="button" data-set-lang="swift">Swift</button>
+    <button type="button" data-set-lang="cpp">C++</button>
+  </div>
+  <a class="icon-btn" href="https://github.com/gabrielevierti" aria-label="Gabriele Vierti on GitHub"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Passa dal tema chiaro a quello scuro">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"/></svg>
+  </button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Capitoli">
+<div class="nav-section"><h4>Per iniziare</h4><ul>
+<li><a data-key="getting-started/introduction" href="../getting-started/introduction.html">Introduzione</a></li>
+<li><a data-key="getting-started/project-setup" href="../getting-started/project-setup.html">Preparare il progetto</a></li>
+<li><a data-key="getting-started/hello-view" href="../getting-started/hello-view.html">La prima vista</a></li>
+<li><a data-key="getting-started/hello-triangle" href="../getting-started/hello-triangle.html">Il primo triangolo</a></li>
+<li><a data-key="getting-started/shaders" href="../getting-started/shaders.html">Shader</a></li>
+<li><a data-key="getting-started/textures" href="../getting-started/textures.html">Texture</a></li>
+<li><a data-key="getting-started/transformations" href="../getting-started/transformations.html">Trasformazioni</a></li>
+<li><a data-key="getting-started/coordinate-systems" href="../getting-started/coordinate-systems.html">Sistemi di coordinate</a></li>
+<li><a data-key="getting-started/camera" href="../getting-started/camera.html">Camera</a></li>
+<li><a data-key="getting-started/review" href="../getting-started/review.html">Riepilogo</a></li>
+</ul></div>
+<div class="nav-section"><h4>Illuminazione</h4><ul>
+<li><a data-key="lighting/colors" href="../lighting/colors.html">Colori</a></li>
+<li><a data-key="lighting/basic-lighting" href="../lighting/basic-lighting.html">Illuminazione di base</a></li>
+<li><a data-key="lighting/materials" href="../lighting/materials.html">Materiali</a></li>
+<li><a data-key="lighting/lighting-maps" href="../lighting/lighting-maps.html">Mappe di illuminazione</a></li>
+<li><a data-key="lighting/light-casters" href="../lighting/light-casters.html">Tipi di luce</a></li>
+<li><a data-key="lighting/multiple-lights" href="../lighting/multiple-lights.html">Più luci</a></li>
+<li><a data-key="lighting/review" href="../lighting/review.html">Riepilogo</a></li>
+</ul></div>
+<div class="nav-section"><h4>Caricare i modelli</h4><ul>
+<li><a data-key="model-loading/model-io" href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a data-key="model-loading/mesh" href="../model-loading/mesh.html">Mesh</a></li>
+<li><a data-key="model-loading/model" href="../model-loading/model.html">Modello</a></li>
+</ul></div>
+<div class="nav-section"><h4>Metal avanzato</h4><ul>
+<li><a data-key="advanced-metal/depth-testing" href="../advanced-metal/depth-testing.html">Test di profondità</a></li>
+<li><a class="active" aria-current="page" data-key="advanced-metal/stencil-testing" href="../advanced-metal/stencil-testing.html">Test di stencil</a></li>
+<li><a data-key="advanced-metal/blending" href="../advanced-metal/blending.html">Blending</a></li>
+<li><a data-key="advanced-metal/face-culling" href="../advanced-metal/face-culling.html">Face culling</a></li>
+<li><a data-key="advanced-metal/render-targets" href="../advanced-metal/render-targets.html">Render target</a></li>
+<li><a data-key="advanced-metal/cubemaps" href="../advanced-metal/cubemaps.html">Cubemap</a></li>
+<li><a data-key="advanced-metal/advanced-data" href="../advanced-metal/advanced-data.html">Dati avanzati</a></li>
+<li><a data-key="advanced-metal/advanced-msl" href="../advanced-metal/advanced-msl.html">MSL avanzato</a></li>
+<li><a data-key="advanced-metal/no-geometry-shaders" href="../advanced-metal/no-geometry-shaders.html">Vivere senza geometry shader</a></li>
+<li><a data-key="advanced-metal/instancing" href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a data-key="advanced-metal/anti-aliasing" href="../advanced-metal/anti-aliasing.html">Anti-aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Illuminazione avanzata</h4><ul>
+<li><a data-key="advanced-lighting/blinn-phong" href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a data-key="advanced-lighting/gamma-correction" href="../advanced-lighting/gamma-correction.html">Correzione gamma</a></li>
+<li><a data-key="advanced-lighting/shadow-mapping" href="../advanced-lighting/shadow-mapping.html">Shadow mapping</a></li>
+<li><a data-key="advanced-lighting/point-shadows" href="../advanced-lighting/point-shadows.html">Ombre da luci puntiformi</a></li>
+<li><a data-key="advanced-lighting/normal-mapping" href="../advanced-lighting/normal-mapping.html">Normal mapping</a></li>
+<li><a data-key="advanced-lighting/parallax-mapping" href="../advanced-lighting/parallax-mapping.html">Parallax mapping</a></li>
+<li><a data-key="advanced-lighting/hdr" href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a data-key="advanced-lighting/bloom" href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a data-key="advanced-lighting/deferred-shading" href="../advanced-lighting/deferred-shading.html">Deferred shading</a></li>
+<li><a data-key="advanced-lighting/ssao" href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a data-key="pbr/theory" href="../pbr/theory.html">Teoria</a></li>
+<li><a data-key="pbr/lighting" href="../pbr/lighting.html">Illuminazione</a></li>
+<li><a data-key="pbr/diffuse-irradiance" href="../pbr/diffuse-irradiance.html">Irradianza diffusa</a></li>
+<li><a data-key="pbr/specular-ibl" href="../pbr/specular-ibl.html">IBL speculare</a></li>
+</ul></div>
+<div class="nav-section"><h4>In pratica</h4><ul>
+<li><a data-key="in-practice/debugging" href="../in-practice/debugging.html">Debug</a></li>
+<li><a data-key="in-practice/text-rendering" href="../in-practice/text-rendering.html">Rendering del testo</a></li>
+<li><a data-key="in-practice/2d-game" href="../in-practice/2d-game.html">Un gioco 2D</a></li>
+</ul></div>
+<div class="nav-section"><h4>Oltre</h4><ul>
+<li><a data-key="beyond/compute-shaders" href="../beyond/compute-shaders.html">Compute shader</a></li>
+<li><a data-key="beyond/tessellation" href="../beyond/tessellation.html">Tassellazione</a></li>
+<li><a data-key="beyond/ray-tracing" href="../beyond/ray-tracing.html">Ray tracing</a></li>
+<li><a data-key="beyond/mesh-shaders" href="../beyond/mesh-shaders.html">Mesh shader</a></li>
+</ul></div>
+<div class="nav-section"><h4>Piattaforme Apple</h4><ul>
+<li><a data-key="apple-platforms/tile-based-gpus" href="../apple-platforms/tile-based-gpus.html">GPU tile-based</a></li>
+<li><a data-key="apple-platforms/metalfx" href="../apple-platforms/metalfx.html">Upscaling con MetalFX</a></li>
+<li><a data-key="apple-platforms/metal-4" href="../apple-platforms/metal-4.html">Metal 4</a></li>
+<li><a data-key="apple-platforms/visionos" href="../apple-platforms/visionos.html">visionOS</a></li>
+</ul></div>
+<div class="nav-section"><h4>Risorse</h4><ul>
+<li><a data-key="resources/examples" href="../resources/examples.html">Codice di esempio</a></li>
+</ul></div>
+</nav>
+<main class="content" id="main">
+<article><p class="crumb">Metal avanzato</p><h1 id="stencil-testing">Stencil Testing<a class="headerlink" href="#stencil-testing" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
+<p>Next to the depth buffer lives the <strong>stencil buffer</strong>: 8 bits per pixel that you can write freely while drawing and test against later. It lets you mark regions of the screen and then restrict drawing to them. Outlines, portals, mirrors and masking UI are classic uses.</p>
+<h2 id="enabling-a-stencil-buffer">Enabling a stencil buffer<a class="headerlink" href="#enabling-a-stencil-buffer" title="Permanent link">#</a></h2>
+<p>Depth and stencil normally share one texture with a combined format:</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="n">view</span><span class="p">.</span><span class="n">depthStencilPixelFormat</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">depth32Float_stencil8</span>
+<span class="n">view</span><span class="p">.</span><span class="n">clearStencil</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span>
+
+<span class="n">pipelineDescriptor</span><span class="p">.</span><span class="n">depthAttachmentPixelFormat</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">depth32Float_stencil8</span>
+<span class="n">pipelineDescriptor</span><span class="p">.</span><span class="n">stencilAttachmentPixelFormat</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">depth32Float_stencil8</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="c1">// The depth texture you create gets the combined format...</span>
+<span class="n">depthTextureDescriptor</span><span class="o">-&gt;</span><span class="n">setPixelFormat</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">PixelFormatDepth32Float_Stencil8</span><span class="p">);</span>
+
+<span class="c1">// ...and is attached to the pass as both depth and stencil.</span>
+<span class="n">passDescriptor</span><span class="o">-&gt;</span><span class="n">depthAttachment</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">setTexture</span><span class="p">(</span><span class="n">depthStencilTexture</span><span class="p">);</span>
+<span class="n">passDescriptor</span><span class="o">-&gt;</span><span class="n">stencilAttachment</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">setTexture</span><span class="p">(</span><span class="n">depthStencilTexture</span><span class="p">);</span>
+<span class="n">passDescriptor</span><span class="o">-&gt;</span><span class="n">stencilAttachment</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">setLoadAction</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">LoadActionClear</span><span class="p">);</span>
+<span class="n">passDescriptor</span><span class="o">-&gt;</span><span class="n">stencilAttachment</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">setClearStencil</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+
+<span class="n">pipelineDescriptor</span><span class="o">-&gt;</span><span class="n">setDepthAttachmentPixelFormat</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">PixelFormatDepth32Float_Stencil8</span><span class="p">);</span>
+<span class="n">pipelineDescriptor</span><span class="o">-&gt;</span><span class="n">setStencilAttachmentPixelFormat</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">PixelFormatDepth32Float_Stencil8</span><span class="p">);</span>
+</code></pre></div>
+</div>
+
+<p>Every pipeline state used in the pass must declare both formats.</p>
+<h2 id="the-stencil-test">The stencil test<a class="headerlink" href="#the-stencil-test" title="Permanent link">#</a></h2>
+<p>For each fragment the GPU compares a <strong>reference value</strong>, which you set on the encoder, with the value in the buffer. The comparison and the reaction are described by an <code>MTLStencilDescriptor</code> inside the depth-stencil descriptor:</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stencilCompareFunction</code></td>
+<td>How reference and stored value are compared.</td>
+</tr>
+<tr>
+<td><code>stencilFailureOperation</code></td>
+<td>What to do with the stored value if the stencil test fails.</td>
+</tr>
+<tr>
+<td><code>depthFailureOperation</code></td>
+<td>If the stencil test passes but the depth test fails.</td>
+</tr>
+<tr>
+<td><code>depthStencilPassOperation</code></td>
+<td>If both pass.</td>
+</tr>
+<tr>
+<td><code>readMask</code>, <code>writeMask</code></td>
+<td>Bit masks applied when comparing and when writing.</td>
+</tr>
+</tbody>
+</table>
+<p>The operations are <code>.keep</code>, <code>.zero</code>, <code>.replace</code> (store the reference value), <code>.incrementClamp</code>, <code>.decrementClamp</code>, <code>.invert</code>, <code>.incrementWrap</code> and <code>.decrementWrap</code>.</p>
+<p>There are separate descriptors for front-facing and back-facing triangles, <code>frontFaceStencil</code> and <code>backFaceStencil</code>.</p>
+<h2 id="object-outlines">Object outlines<a class="headerlink" href="#object-outlines" title="Permanent link">#</a></h2>
+<p>A selection outline is drawn in two steps:</p>
+<ol>
+<li>Draw the object normally and write 1 into the stencil buffer wherever it is visible.</li>
+<li>Draw the object again, slightly enlarged and in a flat color, only where the stencil is <strong>not</strong> 1.</li>
+</ol>
+<p>The enlarged copy is rejected over the object itself, and survives only in a thin border around it.</p>
+<p><strong>State 1: write 1 wherever the object is drawn.</strong></p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">writeStencil</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLStencilDescriptor</span><span class="p">()</span>
+<span class="n">writeStencil</span><span class="p">.</span><span class="n">stencilCompareFunction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">always</span>
+<span class="n">writeStencil</span><span class="p">.</span><span class="n">depthStencilPassOperation</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">replace</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nv">writeDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLDepthStencilDescriptor</span><span class="p">()</span>
+<span class="n">writeDescriptor</span><span class="p">.</span><span class="n">depthCompareFunction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">less</span>
+<span class="n">writeDescriptor</span><span class="p">.</span><span class="n">isDepthWriteEnabled</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">writeDescriptor</span><span class="p">.</span><span class="n">frontFaceStencil</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">writeStencil</span>
+<span class="n">writeDescriptor</span><span class="p">.</span><span class="n">backFaceStencil</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">writeStencil</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">writeState</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeDepthStencilState</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">writeDescriptor</span><span class="p">)</span><span class="o">!</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">MTL</span><span class="o">::</span><span class="n">StencilDescriptor</span><span class="o">*</span><span class="w"> </span><span class="n">writeStencil</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MTL</span><span class="o">::</span><span class="n">StencilDescriptor</span><span class="o">::</span><span class="n">alloc</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">();</span>
+<span class="n">writeStencil</span><span class="o">-&gt;</span><span class="n">setStencilCompareFunction</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">CompareFunctionAlways</span><span class="p">);</span>
+<span class="n">writeStencil</span><span class="o">-&gt;</span><span class="n">setDepthStencilPassOperation</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">StencilOperationReplace</span><span class="p">);</span>
+
+<span class="n">MTL</span><span class="o">::</span><span class="n">DepthStencilDescriptor</span><span class="o">*</span><span class="w"> </span><span class="n">writeDescriptor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MTL</span><span class="o">::</span><span class="n">DepthStencilDescriptor</span><span class="o">::</span><span class="n">alloc</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">();</span>
+<span class="n">writeDescriptor</span><span class="o">-&gt;</span><span class="n">setDepthCompareFunction</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">CompareFunctionLess</span><span class="p">);</span>
+<span class="n">writeDescriptor</span><span class="o">-&gt;</span><span class="n">setDepthWriteEnabled</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span>
+<span class="n">writeDescriptor</span><span class="o">-&gt;</span><span class="n">setFrontFaceStencil</span><span class="p">(</span><span class="n">writeStencil</span><span class="p">);</span>
+<span class="n">writeDescriptor</span><span class="o">-&gt;</span><span class="n">setBackFaceStencil</span><span class="p">(</span><span class="n">writeStencil</span><span class="p">);</span>
+<span class="n">MTL</span><span class="o">::</span><span class="n">DepthStencilState</span><span class="o">*</span><span class="w"> </span><span class="n">writeState</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">device</span><span class="o">-&gt;</span><span class="n">newDepthStencilState</span><span class="p">(</span><span class="n">writeDescriptor</span><span class="p">);</span>
+</code></pre></div>
+</div>
+
+<p><strong>State 2: draw only where the stencil is not 1, ignoring depth.</strong></p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">testStencil</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLStencilDescriptor</span><span class="p">()</span>
+<span class="n">testStencil</span><span class="p">.</span><span class="n">stencilCompareFunction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">notEqual</span>
+<span class="n">testStencil</span><span class="p">.</span><span class="n">depthStencilPassOperation</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">keep</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nv">outlineDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLDepthStencilDescriptor</span><span class="p">()</span>
+<span class="n">outlineDescriptor</span><span class="p">.</span><span class="n">depthCompareFunction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">always</span>
+<span class="n">outlineDescriptor</span><span class="p">.</span><span class="n">isDepthWriteEnabled</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kc">false</span>
+<span class="n">outlineDescriptor</span><span class="p">.</span><span class="n">frontFaceStencil</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">testStencil</span>
+<span class="n">outlineDescriptor</span><span class="p">.</span><span class="n">backFaceStencil</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">testStencil</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">outlineState</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeDepthStencilState</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">outlineDescriptor</span><span class="p">)</span><span class="o">!</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">MTL</span><span class="o">::</span><span class="n">StencilDescriptor</span><span class="o">*</span><span class="w"> </span><span class="n">testStencil</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MTL</span><span class="o">::</span><span class="n">StencilDescriptor</span><span class="o">::</span><span class="n">alloc</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">();</span>
+<span class="n">testStencil</span><span class="o">-&gt;</span><span class="n">setStencilCompareFunction</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">CompareFunctionNotEqual</span><span class="p">);</span>
+<span class="n">testStencil</span><span class="o">-&gt;</span><span class="n">setDepthStencilPassOperation</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">StencilOperationKeep</span><span class="p">);</span>
+
+<span class="n">MTL</span><span class="o">::</span><span class="n">DepthStencilDescriptor</span><span class="o">*</span><span class="w"> </span><span class="n">outlineDescriptor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MTL</span><span class="o">::</span><span class="n">DepthStencilDescriptor</span><span class="o">::</span><span class="n">alloc</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">();</span>
+<span class="n">outlineDescriptor</span><span class="o">-&gt;</span><span class="n">setDepthCompareFunction</span><span class="p">(</span><span class="n">MTL</span><span class="o">::</span><span class="n">CompareFunctionAlways</span><span class="p">);</span>
+<span class="n">outlineDescriptor</span><span class="o">-&gt;</span><span class="n">setDepthWriteEnabled</span><span class="p">(</span><span class="nb">false</span><span class="p">);</span>
+<span class="n">outlineDescriptor</span><span class="o">-&gt;</span><span class="n">setFrontFaceStencil</span><span class="p">(</span><span class="n">testStencil</span><span class="p">);</span>
+<span class="n">outlineDescriptor</span><span class="o">-&gt;</span><span class="n">setBackFaceStencil</span><span class="p">(</span><span class="n">testStencil</span><span class="p">);</span>
+<span class="n">MTL</span><span class="o">::</span><span class="n">DepthStencilState</span><span class="o">*</span><span class="w"> </span><span class="n">outlineState</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">device</span><span class="o">-&gt;</span><span class="n">newDepthStencilState</span><span class="p">(</span><span class="n">outlineDescriptor</span><span class="p">);</span>
+</code></pre></div>
+</div>
+
+<p><strong>Drawing:</strong></p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="c1">// Floor and anything else that should not be outlined: the ordinary depth state.</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setDepthStencilState</span><span class="p">(</span><span class="n">depthState</span><span class="p">)</span>
+<span class="n">drawFloor</span><span class="p">(</span><span class="n">encoder</span><span class="p">)</span>
+
+<span class="c1">// 1. The cubes, marking the stencil buffer.</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setDepthStencilState</span><span class="p">(</span><span class="n">writeState</span><span class="p">)</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setStencilReferenceValue</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setRenderPipelineState</span><span class="p">(</span><span class="n">pipelineState</span><span class="p">)</span>
+<span class="n">drawCubes</span><span class="p">(</span><span class="n">encoder</span><span class="p">,</span><span class="w"> </span><span class="n">scale</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">)</span>
+
+<span class="c1">// 2. The outlines.</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setDepthStencilState</span><span class="p">(</span><span class="n">outlineState</span><span class="p">)</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setRenderPipelineState</span><span class="p">(</span><span class="n">solidColorPipelineState</span><span class="p">)</span>
+<span class="n">drawCubes</span><span class="p">(</span><span class="n">encoder</span><span class="p">,</span><span class="w"> </span><span class="n">scale</span><span class="p">:</span><span class="w"> </span><span class="mf">1.05</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="c1">// Floor and anything else that should not be outlined: the ordinary depth state.</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setDepthStencilState</span><span class="p">(</span><span class="n">depthState</span><span class="p">);</span>
+<span class="n">drawFloor</span><span class="p">(</span><span class="n">encoder</span><span class="p">);</span>
+
+<span class="c1">// 1. The cubes, marking the stencil buffer.</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setDepthStencilState</span><span class="p">(</span><span class="n">writeState</span><span class="p">);</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setStencilReferenceValue</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setRenderPipelineState</span><span class="p">(</span><span class="n">pipelineState</span><span class="p">);</span>
+<span class="n">drawCubes</span><span class="p">(</span><span class="n">encoder</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0f</span><span class="p">);</span>
+
+<span class="c1">// 2. The outlines.</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setDepthStencilState</span><span class="p">(</span><span class="n">outlineState</span><span class="p">);</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setRenderPipelineState</span><span class="p">(</span><span class="n">solidColorPipelineState</span><span class="p">);</span>
+<span class="n">drawCubes</span><span class="p">(</span><span class="n">encoder</span><span class="p">,</span><span class="w"> </span><span class="mf">1.05f</span><span class="p">);</span>
+</code></pre></div>
+</div>
+
+<p>The <code>solidColorPipelineState</code> uses a fragment function that returns a single color. Because the outline state uses <code>.always</code> for depth, the border shows through other objects, which is what you want for a selection highlight.</p>
+<div class="admonition note">
+<p class="admonition-title">Better outlines</p>
+<p>Scaling works for convex shapes centered on their origin. For arbitrary models, move each vertex along its normal in the vertex function instead: <code>position + normal * thickness</code>.</p>
+</div>
+<div class="lm-demo" data-demo="stencil-testing" data-fallback="../../assets/img/advanced-metal/stencil-testing.webp"></div>
+
+<h2 id="reading-the-comparison-correctly">Reading the comparison correctly<a class="headerlink" href="#reading-the-comparison-correctly" title="Permanent link">#</a></h2>
+<p>The comparison is written as <em>reference</em> <strong>op</strong> <em>stored</em>. With <code>.less</code> and a reference of 1, a fragment passes where <code>1 &lt; stored</code>. It is easy to read this backwards.</p>
+<h2 id="other-uses">Other uses<a class="headerlink" href="#other-uses" title="Permanent link">#</a></h2>
+<ul>
+<li><strong>Portals and mirrors</strong>: draw the portal shape into the stencil buffer, then draw the world seen through it only where the stencil is set.</li>
+<li><strong>Masking</strong>: clip UI or 2D content to arbitrary shapes.</li>
+<li><strong>Deferred lighting volumes</strong>: mark the pixels a light can reach so the lighting shader runs only there.</li>
+</ul>
+<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<ul>
+<li>Make the outline respect depth, so it is hidden behind closer objects.<details class="solution"><summary>Mostra la soluzione</summary><p>Give the outline state a normal depth test: <code>depthCompareFunction = .less</code> instead of <code>.always</code>. The enlarged copy is then hidden by anything closer to the camera. In the live demo, untick "ignore depth".</p></details></li>
+<li>Outline only one of the cubes.<details class="solution"><summary>Mostra la soluzione</summary><p>Use the stencil-writing state only while drawing the cube you want outlined, and draw the others with the ordinary depth state. Then draw the enlarged copy of that one cube only. The reference value could also select between objects: write 1 for one cube and 2 for another, and test against the value you want.</p></details></li>
+</ul></article><nav class="pager" id="pager"><a class="prev" href="../advanced-metal/depth-testing.html"><small>Precedente</small>Test di profondità</a><a class="next" href="../advanced-metal/blending.html"><small>Successivo</small>Blending</a></nav>
+<footer class="site-footer">
+  <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
+  <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
+</footer>
+</main>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#enabling-a-stencil-buffer">Enabling a stencil buffer</a></li><li><a href="#the-stencil-test">The stencil test</a></li><li><a href="#object-outlines">Object outlines</a></li><li><a href="#reading-the-comparison-correctly">Reading the comparison correctly</a></li><li><a href="#other-uses">Other uses</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+</div>
+<script defer src="../../assets/textures.js"></script>
+<script defer src="../../assets/live.js"></script>
+<script defer src="../../assets/demos.js"></script>
+<script defer src="../../assets/site.js"></script>
+</body>
+</html>

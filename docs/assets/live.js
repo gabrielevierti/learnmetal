@@ -316,7 +316,10 @@
         /* Metal clip space has z from 0 to w; OpenGL's runs from -w to w. */
         main += "  gl_Position = vec4(p.x, p.y * lm_flipY, p.z * 2.0 - p.w, p.w);\n}\n";
       } else {
-        head += "out vec4 lm_fragColor; ";
+        /* A fragment function may return a struct with [[color(n)]] members: several render targets. */
+        const outputs = (structs[e.ret] || []).filter((f) => f.attr === "color");
+        if (outputs.length) for (const f of outputs) head += "layout(location=" + (f.arg || 0) + ") out vec4 lm_c_" + f.name + "; ";
+        else head += "out vec4 lm_fragColor; ";
         for (const f of varyings) head += "in " + mapTypes(f.type) + " lm_v_" + f.name + "; ";
         if (t.stageIn) {
           for (const f of structs[t.stageIn] || []) {
@@ -325,7 +328,13 @@
               : "  lm_in." + f.name + " = lm_v_" + f.name + ";\n";
           }
         }
-        main += "  lm_fragColor = " + e.name + "();\n}\n";
+        if (outputs.length) {
+          main += "  " + e.ret + " r = " + e.name + "();\n";
+          for (const f of outputs) main += "  lm_c_" + f.name + " = vec4(r." + f.name + ");\n";
+          main += "}\n";
+        } else {
+          main += "  lm_fragColor = " + e.name + "();\n}\n";
+        }
       }
       return head + "\n" + s + main;
     }
@@ -473,6 +482,29 @@ fragment float4 fragment_depth(Plain in [[stage_in]]) {
       });
   }
 
+  /* Shader text <-> URL fragment. Compressed when the browser can, plain base64 otherwise. */
+  const toB64 = (bytes) => {
+    let bin = "";
+    bytes.forEach((b) => { bin += String.fromCharCode(b); });
+    return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  };
+  const fromB64 = (str) => Uint8Array.from(atob(str.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
+  async function packText(text) {
+    if (window.CompressionStream) {
+      const stream = new Blob([text]).stream().pipeThrough(new CompressionStream("deflate-raw"));
+      return "z" + toB64(new Uint8Array(await new Response(stream).arrayBuffer()));
+    }
+    return "b" + toB64(new TextEncoder().encode(text));
+  }
+  async function unpackText(str) {
+    const bytes = fromB64(str.slice(1));
+    if (str[0] === "z") {
+      const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+      return new Response(stream).text();
+    }
+    return new TextDecoder().decode(bytes);
+  }
+
   function makeEditor(parent, text, onChange) {
     const wrap = document.createElement("div");
     wrap.className = "lm-editor";
@@ -492,7 +524,7 @@ fragment float4 fragment_depth(Plain in [[stage_in]]) {
       }
     });
     parent.appendChild(wrap);
-    return { set(v) { ta.value = v; paint(); onChange(v); } };
+    return { set(v) { ta.value = v; paint(); onChange(v); }, get() { return ta.value; } };
   }
 
   // ------------------------------------------------------------------ controls
@@ -582,7 +614,7 @@ fragment float4 fragment_depth(Plain in [[stage_in]]) {
     if (cfg.maxWidth) canvas.style.maxWidth = cfg.maxWidth + "px";
     canvas.tabIndex = 0;
     stage.appendChild(canvas);
-    const gl = canvas.getContext("webgl2", { antialias: true, alpha: false, powerPreference: "low-power" });
+    const gl = canvas.getContext("webgl2", { antialias: true, alpha: false, stencil: true, powerPreference: "low-power" });
     if (!gl) {
       stage.innerHTML = el.dataset.fallback
         ? '<img src="' + el.dataset.fallback + '" alt="">'
@@ -705,7 +737,9 @@ fragment float4 fragment_depth(Plain in [[stage_in]]) {
       img.src = (LM.textures || {})[id] || id;
     }
 
-    function target(w, h, depthOnly) {
+    const floatTargets = !!gl.getExtension("EXT_color_buffer_float");
+    function target(w, h, depthOnly, opts) {
+      opts = opts || {};
       const fb = gl.createFramebuffer();
       gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
       const out = { fb, w, h };
@@ -726,14 +760,23 @@ fragment float4 fragment_depth(Plain in [[stage_in]]) {
         gl.drawBuffers([gl.NONE]);
         gl.readBuffer(gl.NONE);
       } else {
-        const color = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, color);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, color, 0);
-        out.color = color;
+        const hdr = opts.hdr && floatTargets;
+        out.colors = [];
+        for (let i = 0; i < (opts.count || 1); i++) {
+          const color = gl.createTexture();
+          gl.bindTexture(gl.TEXTURE_2D, color);
+          if (hdr) gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16F, w, h, 0, gl.RGBA, gl.HALF_FLOAT, null);
+          else gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+          const filter = opts.nearest ? gl.NEAREST : gl.LINEAR;
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, opts.mips ? gl.LINEAR_MIPMAP_LINEAR : filter);
+          gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0 + i, gl.TEXTURE_2D, color, 0);
+          out.colors.push(color);
+        }
+        gl.drawBuffers(out.colors.map((_, i) => gl.COLOR_ATTACHMENT0 + i));
+        out.color = out.colors[0];
       }
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
       return out;
@@ -746,6 +789,8 @@ fragment float4 fragment_depth(Plain in [[stage_in]]) {
     const lampProgram = buildProgram(gl, HELPER_SRC, { vertex: "vertex_lamp", fragment: "fragment_lamp" });
     const depthProgram = cfg.shadow ? buildProgram(gl, HELPER_SRC, { vertex: "vertex_depth", fragment: "fragment_depth" }) : null;
     const sceneProgram = cfg.sceneSource ? buildProgram(gl, cfg.sceneSource) : null;
+    const finalProgram = cfg.finalSource ? buildProgram(gl, cfg.finalSource) : null;
+    let passTarget = null;
     const backProgram = cfg.backgroundSource ? buildProgram(gl, cfg.backgroundSource) : null;
     const shadowTarget = cfg.shadow ? target(1024, 1024, true) : null;
     let sceneTarget = null;
@@ -784,7 +829,10 @@ fragment float4 fragment_depth(Plain in [[stage_in]]) {
       status = document.createElement("span");
       const reset = document.createElement("button");
       reset.type = "button"; reset.textContent = "Reset";
-      bar.append(title, status, reset);
+      const share = document.createElement("button");
+      share.type = "button"; share.textContent = "Copy link";
+      share.title = "Copy a link to this page that opens with your version of the shader";
+      bar.append(title, status, share, reset);
       panel.appendChild(bar);
       let timer = 0;
       const editor = makeEditor(panel, cfg.code.replace(/^\n/, ""), (v) => {
@@ -792,6 +840,23 @@ fragment float4 fragment_depth(Plain in [[stage_in]]) {
         timer = setTimeout(() => rebuild(v), 200);
       });
       reset.addEventListener("click", () => editor.set(cfg.code.replace(/^\n/, "")));
+      const demoId = el.dataset.demo;
+      share.addEventListener("click", async () => {
+        const url = location.href.split("#")[0] + "#shader=" + demoId + ":" + (await packText(editor.get()));
+        try { history.replaceState(null, "", url); } catch (e) { /* file:// pages may refuse */ }
+        try { await navigator.clipboard.writeText(url); share.textContent = "Link copied"; }
+        catch (e) { window.prompt("Copy this link", url); }
+        setTimeout(() => { share.textContent = "Copy link"; }, 1600);
+      });
+      const shared = new RegExp("^#shader=" + demoId + ":(.+)$").exec(location.hash);
+      if (shared) {
+        unpackText(shared[1]).then((text) => {
+          editor.set(text);
+          const d = panel.closest("details");
+          if (d) d.open = true;
+          el.scrollIntoView({ block: "start" });
+        }).catch(() => {});
+      }
       panel.appendChild(errorBox);
       if (prelude) {
         const d = document.createElement("details");
@@ -874,8 +939,10 @@ fragment float4 fragment_depth(Plain in [[stage_in]]) {
     }
 
     // --- drawing
+    let depthOn = true;
     function setState(st) {
       st = st || {};
+      depthOn = st.depth !== false;
       if (st.depth === false) gl.disable(gl.DEPTH_TEST); else gl.enable(gl.DEPTH_TEST);
       gl.depthFunc(gl.LEQUAL);
       if (st.cull && st.cull !== "none") {
@@ -905,9 +972,22 @@ fragment float4 fragment_depth(Plain in [[stage_in]]) {
         applyUniforms(gl, p, vals, tex);
         const m = mesh(o.mesh);
         gl.bindVertexArray(m.vao);
+
+        /* Per-object state: blending, depth and stencil. */
+        if (o.blend) { gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); } else gl.disable(gl.BLEND);
+        gl.depthMask(o.depthWrite !== false);
+        if (o.depthTest === false || !depthOn) gl.disable(gl.DEPTH_TEST); else gl.enable(gl.DEPTH_TEST);
+        if (o.stencil) {
+          gl.enable(gl.STENCIL_TEST);
+          if (o.stencil === "write") { gl.stencilFunc(gl.ALWAYS, 1, 0xff); gl.stencilOp(gl.KEEP, gl.KEEP, gl.REPLACE); }
+          else { gl.stencilFunc(gl.NOTEQUAL, 1, 0xff); gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP); }
+        } else gl.disable(gl.STENCIL_TEST);
         if (o.instances) gl.drawArraysInstanced(gl.TRIANGLES, 0, m.count, o.instances);
         else gl.drawArrays(gl.TRIANGLES, 0, m.count);
       }
+      gl.disable(gl.BLEND);
+      gl.disable(gl.STENCIL_TEST);
+      gl.depthMask(true);
     }
 
     function fullscreen(prog, base, flip) {
@@ -928,7 +1008,7 @@ fragment float4 fragment_depth(Plain in [[stage_in]]) {
 
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const w = Math.max(1, Math.round(canvas.clientWidth * dpr)), h = Math.max(1, Math.round(canvas.clientHeight * dpr));
-      if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; dirty = true; sceneTarget = null; }
+      if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; dirty = true; sceneTarget = null; passTarget = null; }
       if (!dirty || !program) return;
       dirty = false;
 
@@ -944,7 +1024,8 @@ fragment float4 fragment_depth(Plain in [[stage_in]]) {
         tanHalfFov: Math.tan(fov / 2),
       };
       Object.assign(base, cfg.uniforms ? cfg.uniforms(state, time, base) : null);
-      const objects = cfg.objects ? cfg.objects(state, time) : [];
+      base.viewProjection = M.mul(base.projection, base.view);
+      const objects = cfg.objects ? cfg.objects(state, time, base) : [];
       if (autoPending) {
         const known = new Set(Object.keys(base));
         for (const o of objects) for (const k in o.uniforms || {}) known.add(k);
@@ -983,19 +1064,34 @@ fragment float4 fragment_depth(Plain in [[stage_in]]) {
 
       const clear = cfg.clear ? cfg.clear(state) : [0.1, 0.1, 0.12];
       if (sceneProgram) {                                 // scene into a texture, then a full-screen pass
-        if (!sceneTarget) sceneTarget = target(w, h, false);
+        const names = cfg.sceneTargets || ["scene"];
+        if (!sceneTarget) sceneTarget = target(w, h, false, { count: names.length, hdr: cfg.sceneHDR, mips: cfg.sceneMips, nearest: names.length > 1 });
         gl.bindFramebuffer(gl.FRAMEBUFFER, sceneTarget.fb);
         gl.viewport(0, 0, w, h);
-        gl.clearColor(clear[0], clear[1], clear[2], 1);
+        gl.clearColor(clear[0], clear[1], clear[2], names.length > 1 ? 0 : 1);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        drawObjects(sceneProgram, objects, base, -1, true, setState(st));
-        textures.scene = sceneTarget.color;
+        drawObjects(sceneProgram, objects, base, -1, names.length === 1, setState(st));
+        names.forEach((name, i) => { textures[name] = sceneTarget.colors[i]; });
+        if (cfg.sceneMips) { gl.bindTexture(gl.TEXTURE_2D, sceneTarget.color); gl.generateMipmap(gl.TEXTURE_2D); }
+      }
+
+      if (finalProgram) {                                 // the editable pass into a texture, then a hidden final pass
+        if (!passTarget) passTarget = target(w, h, false);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, passTarget.fb);
+        gl.viewport(0, 0, w, h);
+        setState({ depth: false });
+        fullscreen(program, base, -1);
+        textures.pass1 = passTarget.color;
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.viewport(0, 0, w, h);
+        fullscreen(finalProgram, base, 1);
+        return;
       }
 
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
       gl.viewport(0, 0, w, h);
       gl.clearColor(clear[0], clear[1], clear[2], 1);
-      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
       if (backProgram) { setState({ depth: false }); fullscreen(backProgram, base, 1); }
       if (cfg.fullscreen || sceneProgram) {
         setState({ depth: false });
