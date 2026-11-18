@@ -214,6 +214,7 @@
     const structs = parseStructs(code);
 
     const entries = [];
+    const buffers = [];          // every [[buffer(n)]] parameter, for the automatic controls
     const re = /\b(vertex|fragment)\s+(\w+)\s+(\w+)\s*\(/g;
     let m;
     while ((m = re.exec(code))) {
@@ -247,6 +248,7 @@
           if (!b) throw new Error("Unsupported buffer parameter: " + core);
           globals.push("uniform " + b[1] + " " + tag + b[3] + (b[2] === "*" ? "[" + (opts.arraySize || 8) + "]" : "") + ";");
           renames.push([b[3], tag + b[3]]);
+          buffers.push({ type: b[1], name: b[3], pointer: b[2] === "*" });
         } else if (attr === "texture") {
           const t = /^(\w+)\s*<[^>]*>\s+(\w+)$/.exec(core);
           const kind = t && { texture2d: "sampler2D", depth2d: "sampler2DShadow", texturecube: "samplerCube" }[t[1]];
@@ -328,7 +330,21 @@
       return head + "\n" + s + main;
     }
 
-    return { vs: stageSource(vs, fs), fs: stageSource(fs, vs), headLines: HEAD_LINES + 1 };
+    const out = { vs: stageSource(vs, fs), fs: stageSource(fs, vs), headLines: HEAD_LINES + 1 };
+
+    /* Plain values the shader receives: the members of each uniform struct, or a bare scalar. */
+    const SIMPLE = /^(?:float|half|int|uint|bool|(?:float|half)[234])$/;
+    const fields = {};
+    for (const b of buffers) {
+        if (b.pointer) continue;
+        if (structs[b.type]) {
+            for (const f of structs[b.type]) if (SIMPLE.test(f.type)) fields[f.name] = f.type.replace("half", "float");
+        } else if (SIMPLE.test(b.type)) {
+            fields[b.name] = b.type.replace("half", "float");
+        }
+    }
+    out.fields = fields;
+    return out;
   }
   LM.translate = translate;
 
@@ -394,7 +410,7 @@ fragment float4 fragment_depth(Plain in [[stage_in]]) {
       if (dot > 0 && key.slice(0, dot).indexOf("[") < 0 && name !== key) key = key.slice(dot + 1);
       uniforms.push({ key, type: info.type, size: info.size, loc: gl.getUniformLocation(p, info.name) });
     }
-    return { program: p, uniforms, headLines: t.headLines };
+    return { program: p, uniforms, headLines: t.headLines, fields: t.fields };
   }
 
   function applyUniforms(gl, prog, values, textures) {
@@ -579,6 +595,75 @@ fragment float4 fragment_depth(Plain in [[stage_in]]) {
     const touch = () => { dirty = true; };
     buildControls(el, cfg.controls, state, touch);
 
+    /* Controls for values the reader adds to a uniform struct in the editor. */
+    const autoBox = document.createElement("div");
+    autoBox.className = "lm-controls lm-auto";
+    autoBox.hidden = true;
+    el.appendChild(autoBox);
+    const autoValues = {}, autoRows = {};
+    let autoPending = null;
+
+    function autoControl(key, type) {
+      const row = document.createElement("label");
+      const name = document.createElement("span");
+      name.textContent = key;
+      row.appendChild(name);
+      const number = (value, step, onInput) => {
+        const input = document.createElement("input");
+        input.type = "number"; input.step = step; input.value = value;
+        input.addEventListener("input", () => { onInput(parseFloat(input.value) || 0); touch(); });
+        row.appendChild(input);
+        return input;
+      };
+      const n = +type.slice(-1);
+      if (type === "bool") {
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        autoValues[key] = false;
+        input.addEventListener("change", () => { autoValues[key] = input.checked; touch(); });
+        row.classList.add("lm-check");
+        row.appendChild(input);
+      } else if (type === "int" || type === "uint") {
+        autoValues[key] = 0;
+        number(0, 1, (v) => { autoValues[key] = Math.round(v); });
+      } else if (type === "float") {
+        autoValues[key] = 0.5;
+        const range = document.createElement("input");
+        range.type = "range"; range.min = 0; range.max = 1; range.step = 0.01; range.value = 0.5;
+        row.appendChild(range);
+        const box = number(0.5, 0.01, (v) => { autoValues[key] = v; range.value = v; });   // type any value here
+        range.addEventListener("input", () => { autoValues[key] = +range.value; box.value = range.value; touch(); });
+      } else if (n >= 3 && /colou?r|albedo|tint|emissi/i.test(key)) {
+        autoValues[key] = n === 4 ? [1, 1, 1, 1] : [1, 1, 1];
+        const input = document.createElement("input");
+        input.type = "color"; input.value = "#ffffff";
+        input.addEventListener("input", () => { autoValues[key] = hexToRgb(input.value).concat(n === 4 ? [1] : []); touch(); });
+        row.appendChild(input);
+      } else {
+        autoValues[key] = new Array(n).fill(0);
+        for (let i = 0; i < n; i++) number(0, 0.1, (v) => { autoValues[key][i] = v; });
+      }
+      row.dataset.type = type;
+      return row;
+    }
+
+    /* Show a control for every field that neither the demo nor the engine supplies. */
+    function syncAutoControls(fields, known) {
+      for (const key in autoRows) {
+        if (fields[key] !== autoRows[key].dataset.type || known.has(key)) {
+          autoRows[key].remove();
+          delete autoRows[key];
+          delete autoValues[key];
+        }
+      }
+      for (const key in fields) {
+        if (known.has(key) || autoRows[key]) continue;
+        autoRows[key] = autoControl(key, fields[key]);
+        autoBox.appendChild(autoRows[key]);
+      }
+      autoBox.hidden = !Object.keys(autoRows).length;
+    }
+
     // --- GPU resources
     const meshes = {};
     function mesh(name) {
@@ -677,6 +762,7 @@ fragment float4 fragment_depth(Plain in [[stage_in]]) {
         const next = buildProgram(gl, full(code), cfg.entry);
         if (program) gl.deleteProgram(program.program);
         program = next;
+        autoPending = next.fields;
         errorBox.hidden = true;
         if (status) { status.textContent = "Compiled"; status.className = "lm-status ok"; }
       } catch (err) {
@@ -859,6 +945,13 @@ fragment float4 fragment_depth(Plain in [[stage_in]]) {
       };
       Object.assign(base, cfg.uniforms ? cfg.uniforms(state, time, base) : null);
       const objects = cfg.objects ? cfg.objects(state, time) : [];
+      if (autoPending) {
+        const known = new Set(Object.keys(base));
+        for (const o of objects) for (const k in o.uniforms || {}) known.add(k);
+        syncAutoControls(autoPending, known);
+        autoPending = null;
+      }
+      Object.assign(base, autoValues);
       const st = cfg.state ? cfg.state(state) : {};
 
       if (cfg.sampler) {

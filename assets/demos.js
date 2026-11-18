@@ -1131,7 +1131,7 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
   // ---------------------------------------------------------------- PBR
 
   LM.define("pbr", {
-    caption: "A Cook-Torrance material lit by a point light and a procedural sky. Drag to orbit.",
+    caption: "A Cook-Torrance material lit by a point light and a procedural sky. Drag to orbit. Add a value to the Material struct and a control for it appears.",
     camera: { eye: [0, 0.3, 2.6], target: [0, 0, 0], fov: 40 },
     controls: [
       { id: "metallic", label: "metallic", min: 0, max: 1, value: 1 },

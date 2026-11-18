@@ -198,6 +198,11 @@ th { font-weight: 700; border-bottom-width: 2px; }
 .lm-controls select { background: #26323e; color: #e7ebf0; border: 1px solid #44525f; border-radius: 7px; padding: 4px 8px; font: inherit; }
 .lm-controls output { font: 0.8rem var(--mono); color: #fe8b3c; min-width: 3.4em; }
 .lm-check { flex-direction: row-reverse; }
+.lm-auto::before { content: "Added in the shader"; flex-basis: 100%; font: 650 0.78rem var(--sans); color: #fe8b3c; }
+.lm-controls input[type="number"] {
+  width: 4.6em; background: #26323e; color: #e7ebf0; border: 1px solid #44525f; border-radius: 7px;
+  padding: 3px 6px; font: 0.82rem var(--mono);
+}
 
 .lm-code { border-top: 1px solid #2a3643; }
 .lm-bar { display: flex; align-items: center; gap: 12px; padding: 8px 12px 8px 16px; background: #1c2630; font-size: 0.82rem; }
