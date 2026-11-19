@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,64 +134,77 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Caricare i modelli</p><h1 id="model-io">Model I/O<a class="headerlink" href="#model-io" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
+<article><p class="crumb">Caricare i modelli</p><h1 id="model-io">Model I/O<a class="headerlink" href="#model-io" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Progetto di esempio</strong> <code>examples/Sources/11-ModelLoading</code>, si esegue con <code>swift run ModelLoading</code>. <a href="../../downloads/learnmetal-examples.zip">Scarica tutti gli esempi</a> oppure guarda <a href="../resources/examples.html">come eseguirli</a>.</div>
 
-<p>Nobody types the vertices of a character by hand. Artists build models in tools such as Blender and export them to files, and our job is to turn those files into vertex buffers, index buffers and textures.</p>
-<p>On Apple platforms you do not need a third-party library for this. The system framework <strong>Model I/O</strong> reads common 3D formats, and <strong>MetalKit</strong> converts the result into Metal objects.</p>
+<p>Nessuno scrive a mano i vertici di un personaggio.<br>
+Gli artisti costruiscono i modelli in programmi come Blender e li esportano in file, e il nostro compito è trasformare quei file in vertex buffer, index buffer e texture.</p>
+<p>Sulle piattaforme Apple non serve una libreria di terze parti.<br>
+Il framework di sistema <strong>Model I/O</strong> legge i formati 3D più comuni, e <strong>MetalKit</strong> converte il risultato in oggetti Metal.</p>
 <div class="lang-cpp">
 <div class="admonition note">
-<p class="admonition-title">Model loading in C++</p>
-<p>Model I/O and MetalKit's mesh types are not part of metal-cpp. The C++ version of this section loads Wavefront OBJ files with the single-header library <a href="https://github.com/tinyobjloader/tinyobjloader">tinyobjloader</a> and builds the Metal buffers by hand. The ideas are the same: a model is meshes, a mesh has one vertex buffer and one index buffer per material, and a material is values plus textures. To load USD from C++, call Model I/O from a small Objective-C++ file, as the window code in <a href="../getting-started/project-setup.html">Project Setup</a> does for AppKit, or convert the model to OBJ or glTF.</p>
+<p class="admonition-title">Caricare i modelli in C++</p>
+<p>Model I/O e i tipi di mesh di MetalKit non fanno parte di metal-cpp.<br>
+La versione C++ di questa sezione carica file Wavefront OBJ con la libreria a singolo header <a href="https://github.com/tinyobjloader/tinyobjloader">tinyobjloader</a> e costruisce a mano i buffer di Metal.<br>
+Le idee sono le stesse: un modello è fatto di mesh, una mesh ha un vertex buffer e un index buffer per ogni materiale, e un materiale è fatto di valori e di texture.<br>
+Per caricare USD da C++ chiama Model I/O da un piccolo file Objective-C++, come fa per AppKit il codice della finestra in <a href="../getting-started/project-setup.html">Preparare il progetto</a>, oppure converti il modello in OBJ o glTF.</p>
 </div>
 </div>
 
-<h2 id="formats">Formats<a class="headerlink" href="#formats" title="Permanent link">#</a></h2>
-<p>Model I/O imports, among others:</p>
+<h2 id="i-formati">I formati<a class="headerlink" href="#i-formati" title="Permanent link">#</a></h2>
+<p>Model I/O importa, tra gli altri:</p>
 <table>
 <thead>
 <tr>
-<th>Format</th>
-<th>Notes</th>
+<th>Formato</th>
+<th>Note</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>USD, USDZ, USDA, USDC</td>
-<td>Pixar's Universal Scene Description, Apple's preferred format. Supports materials, hierarchy and animation.</td>
+<td>La Universal Scene Description di Pixar, il formato preferito da Apple. Supporta materiali, gerarchia e animazione.</td>
 </tr>
 <tr>
 <td>OBJ (+ MTL)</td>
-<td>Simple and everywhere. Geometry and basic materials only.</td>
+<td>Semplice e diffuso ovunque. Solo geometria e materiali di base.</td>
 </tr>
 <tr>
 <td>PLY, STL</td>
-<td>Geometry only, common for scans and 3D printing.</td>
+<td>Solo geometria, comuni per le scansioni e la stampa 3D.</td>
 </tr>
 <tr>
 <td>Alembic (ABC)</td>
-<td>Baked animation caches.</td>
+<td>Cache di animazioni già calcolate.</td>
 </tr>
 </tbody>
 </table>
 <div class="admonition note">
-<p class="admonition-title">What about glTF and FBX?</p>
-<p>Model I/O does not read glTF or FBX. Convert them to USDZ with Apple's Reality Converter or with Blender, or use an open-source loader. For learning, OBJ and USDZ are plenty.</p>
+<p class="admonition-title">E glTF e FBX?</p>
+<p>Model I/O non legge né glTF né FBX.<br>
+Convertili in USDZ con Reality Converter di Apple o con Blender, oppure usa un loader open source.<br>
+Per imparare, OBJ e USDZ bastano e avanzano.</p>
 </div>
-<h2 id="how-a-model-is-structured">How a model is structured<a class="headerlink" href="#how-a-model-is-structured" title="Permanent link">#</a></h2>
-<p>Model I/O represents a file as a tree:</p>
+<h2 id="come-e-strutturato-un-modello">Come è strutturato un modello<a class="headerlink" href="#come-e-strutturato-un-modello" title="Permanent link">#</a></h2>
+<p>Model I/O rappresenta un file come un albero:</p>
 <ul>
-<li><strong><code>MDLAsset</code></strong>: the whole file. A container of objects.</li>
-<li><strong><code>MDLObject</code></strong>: a node with a transform and children.</li>
-<li><strong><code>MDLMesh</code></strong>: a node that has geometry. It owns vertex buffers and a vertex descriptor.</li>
-<li><strong><code>MDLSubmesh</code></strong>: a part of a mesh drawn with one material. It owns an index buffer.</li>
-<li><strong><code>MDLMaterial</code></strong>: named properties such as base color, roughness and normal, each a value or a texture.</li>
+<li><strong><code>MDLAsset</code></strong>: il file intero.<br>
+Un contenitore di oggetti.</li>
+<li><strong><code>MDLObject</code></strong>: un nodo con una trasformazione e dei figli.</li>
+<li><strong><code>MDLMesh</code></strong>: un nodo che ha geometria.<br>
+Possiede i vertex buffer e un vertex descriptor.</li>
+<li><strong><code>MDLSubmesh</code></strong>: una parte di una mesh disegnata con un solo materiale.<br>
+Possiede un index buffer.</li>
+<li><strong><code>MDLMaterial</code></strong>: proprietà con un nome, come base color, roughness e normal, ognuna delle quali è un valore o una texture.</li>
 </ul>
-<p>One mesh shares its vertices among several submeshes. A car body might be one mesh with a submesh for paint, one for glass and one for chrome.</p>
+<p>Una mesh condivide i suoi vertici tra più submesh.<br>
+La carrozzeria di un'auto può essere una sola mesh con una submesh per la vernice, una per i vetri e una per le cromature.</p>
 <figure><img src="../../assets/img/model-loading/model-io.webp" alt="model io" width="880" height="355" loading="lazy"></figure>
 
-<h2 id="asking-for-the-layout-you-want">Asking for the layout you want<a class="headerlink" href="#asking-for-the-layout-you-want" title="Permanent link">#</a></h2>
-<p>Files store vertex data in whatever layout the exporter chose. Model I/O can rearrange it into the layout our shaders expect. Start from the Metal vertex descriptor, convert it, and name the attributes so Model I/O knows which data goes where:</p>
+<h2 id="chiedere-il-layout-che-vuoi">Chiedere il layout che vuoi<a class="headerlink" href="#chiedere-il-layout-che-vuoi" title="Permanent link">#</a></h2>
+<p>I file salvano i dati dei vertici nel layout scelto da chi li ha esportati.<br>
+Model I/O può riordinarli nel layout che i nostri shader si aspettano.<br>
+Parti dal vertex descriptor di Metal, convertilo e dai un nome agli attributi, così Model I/O sa quale dato va dove:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">import</span><span class="w"> </span><span class="nc">MetalKit</span>
 <span class="kd">import</span><span class="w"> </span><span class="nc">ModelIO</span>
@@ -230,8 +243,10 @@
 </code></pre></div>
 </div>
 
-<p>Since Model I/O writes the buffer for us, we are free to pack it tightly: <code>.float3</code> occupies 12 bytes in a vertex buffer, so a vertex is 32 bytes. This is the same vertex layout as our cube in spirit, only without Swift's padding. The shader's <code>VertexIn</code> does not change at all; <code>[[attribute(n)]]</code> hides the layout.</p>
-<h2 id="loading-the-asset">Loading the asset<a class="headerlink" href="#loading-the-asset" title="Permanent link">#</a></h2>
+<p>Dato che è Model I/O a scrivere il buffer per noi, siamo liberi di compattarlo: in un vertex buffer <code>.float3</code> occupa 12 byte, quindi un vertice ne occupa 32.<br>
+Nello spirito è lo stesso layout del nostro cubo, solo senza il padding di Swift.<br>
+Il <code>VertexIn</code> dello shader non cambia affatto; <code>[[attribute(n)]]</code> nasconde il layout.</p>
+<h2 id="caricare-lasset">Caricare l'asset<a class="headerlink" href="#caricare-lasset" title="Permanent link">#</a></h2>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">allocator</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTKMeshBufferAllocator</span><span class="p">(</span><span class="n">device</span><span class="p">:</span><span class="w"> </span><span class="n">device</span><span class="p">)</span>
 <span class="kd">let</span><span class="w"> </span><span class="nv">url</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Bundle</span><span class="p">.</span><span class="n">main</span><span class="p">.</span><span class="n">url</span><span class="p">(</span><span class="n">forResource</span><span class="p">:</span><span class="w"> </span><span class="s">"backpack"</span><span class="p">,</span><span class="w"> </span><span class="n">withExtension</span><span class="p">:</span><span class="w"> </span><span class="s">"usdz"</span><span class="p">)</span><span class="o">!</span>
@@ -259,8 +274,9 @@
 </code></pre></div>
 </div>
 
-<p>The <strong>buffer allocator</strong> is the key detail. With an <code>MTKMeshBufferAllocator</code>, Model I/O loads vertex and index data straight into <code>MTLBuffer</code>s, with no intermediate copy.</p>
-<p>Two optional steps are often useful right after loading:</p>
+<p>Il <strong>buffer allocator</strong> è il dettaglio chiave.<br>
+Con un <code>MTKMeshBufferAllocator</code> Model I/O carica i dati dei vertici e degli indici direttamente in <code>MTLBuffer</code>, senza copie intermedie.</p>
+<p>Subito dopo il caricamento tornano spesso utili due passi facoltativi:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">asset</span><span class="p">.</span><span class="n">loadTextures</span><span class="p">()</span><span class="w">   </span><span class="c1">// resolve texture references in materials</span>
 
@@ -280,8 +296,8 @@
 </code></pre></div>
 </div>
 
-<h2 id="from-model-io-to-metal">From Model I/O to Metal<a class="headerlink" href="#from-model-io-to-metal" title="Permanent link">#</a></h2>
-<p>MetalKit turns every <code>MDLMesh</code> in the asset into an <code>MTKMesh</code>:</p>
+<h2 id="da-model-io-a-metal">Da Model I/O a Metal<a class="headerlink" href="#da-model-io-a-metal" title="Permanent link">#</a></h2>
+<p>MetalKit trasforma ogni <code>MDLMesh</code> dell'asset in una <code>MTKMesh</code>:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">mdlMeshes</span><span class="p">,</span><span class="w"> </span><span class="n">mtkMeshes</span><span class="p">)</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="w"> </span><span class="bp">MTKMesh</span><span class="p">.</span><span class="n">newMeshes</span><span class="p">(</span><span class="n">asset</span><span class="p">:</span><span class="w"> </span><span class="n">asset</span><span class="p">,</span><span class="w"> </span><span class="n">device</span><span class="p">:</span><span class="w"> </span><span class="n">device</span><span class="p">)</span>
 </code></pre></div>
@@ -311,9 +327,12 @@
 </code></pre></div>
 </div>
 
-<p>You get two parallel arrays. The <code>MTKMesh</code> objects hold the Metal buffers for drawing. The <code>MDLMesh</code> objects still hold what Metal does not care about: materials and transforms. The next two chapters wrap these into types of our own.</p>
-<h2 id="built-in-shapes">Built-in shapes<a class="headerlink" href="#built-in-shapes" title="Permanent link">#</a></h2>
-<p>Model I/O can also generate geometry, which is handy for tests:</p>
+<p>Ottieni due array paralleli.<br>
+Gli oggetti <code>MTKMesh</code> contengono i buffer di Metal per disegnare.<br>
+Gli oggetti <code>MDLMesh</code> contengono ancora ciò che a Metal non interessa: materiali e trasformazioni.<br>
+I prossimi due capitoli li racchiudono in tipi nostri.</p>
+<h2 id="forme-gia-pronte">Forme già pronte<a class="headerlink" href="#forme-gia-pronte" title="Permanent link">#</a></h2>
+<p>Model I/O sa anche generare geometria, cosa comoda per le prove:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">sphere</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MDLMesh</span><span class="p">(</span><span class="n">sphereWithExtent</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">],</span>
 <span class="w">                     </span><span class="n">segments</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">48</span><span class="p">,</span><span class="w"> </span><span class="mi">48</span><span class="p">],</span>
@@ -346,17 +365,18 @@
 </code></pre></div>
 </div>
 
-<p>There are similar initializers for boxes, planes, cylinders, capsules, cones and icosahedra.</p>
+<p>Esistono inizializzatori simili per scatole, piani, cilindri, capsule, coni e icosaedri.</p>
 <div class="admonition warning">
-<p class="admonition-title">Texture coordinates again</p>
-<p>Many files follow the OpenGL convention with v pointing up. If a model's textures look scrambled or mirrored, flip v when loading: <code>mesh.flipTextureCoordinates(inAttributeNamed: MDLVertexAttributeTextureCoordinate)</code>.</p>
+<p class="admonition-title">Ancora le coordinate di texture</p>
+<p>Molti file seguono la convenzione di OpenGL, con v verso l'alto.<br>
+Se le texture di un modello appaiono scombinate o specchiate, ribalta v al caricamento: <code>mesh.flipTextureCoordinates(inAttributeNamed: MDLVertexAttributeTextureCoordinate)</code>.</p>
 </div></article><nav class="pager" id="pager"><a class="prev" href="../lighting/review.html"><small>Precedente</small>Riepilogo</a><a class="next" href="../model-loading/mesh.html"><small>Successivo</small>Mesh</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#formats">Formats</a></li><li><a href="#how-a-model-is-structured">How a model is structured</a></li><li><a href="#asking-for-the-layout-you-want">Asking for the layout you want</a></li><li><a href="#loading-the-asset">Loading the asset</a></li><li><a href="#from-model-io-to-metal">From Model I/O to Metal</a></li><li><a href="#built-in-shapes">Built-in shapes</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#i-formati">I formati</a></li><li><a href="#come-e-strutturato-un-modello">Come è strutturato un modello</a></li><li><a href="#chiedere-il-layout-che-vuoi">Chiedere il layout che vuoi</a></li><li><a href="#caricare-lasset">Caricare l&#x27;asset</a></li><li><a href="#da-model-io-a-metal">Da Model I/O a Metal</a></li><li><a href="#forme-gia-pronte">Forme già pronte</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

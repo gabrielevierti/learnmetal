@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,16 +134,22 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Metal avanzato</p><h1 id="render-targets">Render Targets<a class="headerlink" href="#render-targets" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
+<article><p class="crumb">Metal avanzato</p><h1 id="render-target">Render target<a class="headerlink" href="#render-target" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Progetto di esempio</strong> <code>examples/Sources/12-RenderTargets</code>, si esegue con <code>swift run RenderTargets</code>. <a href="../../downloads/learnmetal-examples.zip">Scarica tutti gli esempi</a> oppure guarda <a href="../resources/examples.html">come eseguirli</a>.</div>
 
-<p>Every frame so far has been drawn straight into the view's drawable. A render pass can draw into any texture instead, and that texture can then be read by a later pass. Rendering to a texture is the basis of post-processing, shadows, reflections, bloom and deferred shading. Nearly every chapter after this one uses it.</p>
+<p>Finora ogni frame è stato disegnato direttamente nel drawable della vista.<br>
+Un render pass può invece disegnare in una texture qualsiasi, e quella texture può poi essere letta da un pass successivo.<br>
+Il rendering su texture è la base del post-processing, delle ombre, dei riflessi, del bloom e del deferred shading.<br>
+Quasi tutti i capitoli dopo questo lo usano.</p>
 <div class="admonition note">
-<p class="admonition-title">Coming from OpenGL</p>
-<p>Metal has no framebuffer object. Its role is played by the <code>MTLRenderPassDescriptor</code>: a lightweight description of which textures are the color, depth and stencil attachments for one pass. There is nothing to bind or unbind and no "completeness" check.</p>
+<p class="admonition-title">Se vieni da OpenGL</p>
+<p>Metal non ha framebuffer object.<br>
+Il loro ruolo lo svolge l'<code>MTLRenderPassDescriptor</code>: una descrizione leggera di quali texture sono gli attachment di colore, profondità e stencil di un pass.<br>
+Non c'è niente da collegare o scollegare, e non c'è alcun controllo di "completezza".</p>
 </div>
-<h2 id="creating-the-textures">Creating the textures<a class="headerlink" href="#creating-the-textures" title="Permanent link">#</a></h2>
-<p>A texture you render into needs the <code>.renderTarget</code> usage. To sample it afterward it also needs <code>.shaderRead</code>:</p>
+<h2 id="creare-le-texture">Creare le texture<a class="headerlink" href="#creare-le-texture" title="Permanent link">#</a></h2>
+<p>Una texture in cui disegni ha bisogno dell'uso <code>.renderTarget</code>.<br>
+Per leggerla in seguito le serve anche <code>.shaderRead</code>:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">makeOffscreenTextures</span><span class="p">(</span><span class="n">size</span><span class="p">:</span><span class="w"> </span><span class="n">CGSize</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">width</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">max</span><span class="p">(</span><span class="nb">Int</span><span class="p">(</span><span class="n">size</span><span class="p">.</span><span class="n">width</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="n">height</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">max</span><span class="p">(</span><span class="nb">Int</span><span class="p">(</span><span class="n">size</span><span class="p">.</span><span class="n">height</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
@@ -184,8 +190,9 @@
 </code></pre></div>
 </div>
 
-<p><code>.private</code> storage means only the GPU touches the texture. Call this function from <code>mtkView(_:drawableSizeWillChange:)</code> so the textures follow the window size.</p>
-<h2 id="describing-the-pass">Describing the pass<a class="headerlink" href="#describing-the-pass" title="Permanent link">#</a></h2>
+<p>Lo storage <code>.private</code> significa che solo la GPU tocca la texture.<br>
+Chiama questa funzione da <code>mtkView(_:drawableSizeWillChange:)</code>, così le texture seguono la dimensione della finestra.</p>
+<h2 id="descrivere-il-pass">Descrivere il pass<a class="headerlink" href="#descrivere-il-pass" title="Permanent link">#</a></h2>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">scenePass</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLRenderPassDescriptor</span><span class="p">()</span>
 <span class="n">scenePass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">texture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">sceneColor</span>
@@ -211,13 +218,14 @@
 </code></pre></div>
 </div>
 
-<p>The load and store actions deserve thought:</p>
+<p>Le load e store action meritano un momento di riflessione:</p>
 <ul>
-<li>The color result is needed later, so it is <strong>stored</strong>.</li>
-<li>The depth buffer is only needed <em>during</em> the pass, so <code>.dontCare</code> lets the GPU throw it away.</li>
+<li>Il risultato di colore serve dopo, quindi viene <strong>salvato</strong>.</li>
+<li>Il depth buffer serve solo <em>durante</em> il pass, quindi <code>.dontCare</code> permette alla GPU di buttarlo via.</li>
 </ul>
-<p>On Apple GPUs, a depth texture that is never stored can even be created with <code>storageMode = .memoryless</code>. It then occupies no memory at all, living only in the GPU's tile memory while the pass runs.</p>
-<h2 id="two-passes-in-one-frame">Two passes in one frame<a class="headerlink" href="#two-passes-in-one-frame" title="Permanent link">#</a></h2>
+<p>Sulle GPU Apple una texture di profondità che non viene mai salvata si può perfino creare con <code>storageMode = .memoryless</code>.<br>
+Allora non occupa alcuna memoria, e vive soltanto nella memoria dei tile della GPU mentre il pass è in esecuzione.</p>
+<h2 id="due-pass-in-un-frame">Due pass in un frame<a class="headerlink" href="#due-pass-in-un-frame" title="Permanent link">#</a></h2>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">draw</span><span class="p">(</span><span class="k">in</span><span class="w"> </span><span class="n">view</span><span class="p">:</span><span class="w"> </span><span class="bp">MTKView</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">guard</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">commandBuffer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">commandQueue</span><span class="p">.</span><span class="n">makeCommandBuffer</span><span class="p">()</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="p">}</span>
@@ -276,9 +284,12 @@
 </code></pre></div>
 </div>
 
-<p>The pipeline states used in pass 1 must declare the formats of <em>that</em> pass's attachments. The post-processing pass has no depth attachment needs, so its pipeline leaves <code>depthAttachmentPixelFormat</code> unset; if the view still has a depth format, set it to match or set <code>view.depthStencilPixelFormat = .invalid</code>.</p>
-<h2 id="the-full-screen-triangle">The full-screen triangle<a class="headerlink" href="#the-full-screen-triangle" title="Permanent link">#</a></h2>
-<p>To run a fragment function over every pixel we need geometry that covers the screen. A single oversized triangle does it, with no vertex buffer at all. The vertex function builds positions from the built-in vertex index:</p>
+<p>I pipeline state usati nel pass 1 devono dichiarare i formati degli attachment di <em>quel</em> pass.<br>
+Il pass di post-processing non ha bisogno di un attachment di profondità, quindi la sua pipeline lascia <code>depthAttachmentPixelFormat</code> non impostato; se la vista ha ancora un formato di profondità, impostalo perché coincida oppure metti <code>view.depthStencilPixelFormat = .invalid</code>.</p>
+<h2 id="il-triangolo-a-tutto-schermo">Il triangolo a tutto schermo<a class="headerlink" href="#il-triangolo-a-tutto-schermo" title="Permanent link">#</a></h2>
+<p>Per eseguire una fragment function su ogni pixel serve una geometria che copra lo schermo.<br>
+Basta un solo triangolo sovradimensionato, senza alcun vertex buffer.<br>
+La vertex function costruisce le posizioni dall'indice del vertice, che è un input predefinito:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">ScreenOut</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="p">[[</span><span class="na">position</span><span class="p">]];</span>
 <span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">uv</span><span class="p">;</span>
@@ -299,17 +310,20 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>The triangle extends past the screen and is clipped to it. The y flip makes uv (0, 0) land on the top-left corner, matching Metal's texture origin, so a texture rendered by one pass is displayed upright by the next without any further fuss. The post pipeline has no vertex descriptor.</p>
-<p>Run it and the scene looks exactly as before. That is the point: it now passes through a texture that we can manipulate.</p>
+<p>Il triangolo sporge oltre lo schermo e viene ritagliato su di esso.<br>
+Il ribaltamento di y fa cadere la uv (0, 0) sull'angolo in alto a sinistra, come l'origine delle texture di Metal, così una texture disegnata da un pass viene mostrata dritta dal successivo senza altre complicazioni.<br>
+La pipeline di post-processing non ha un vertex descriptor.</p>
+<p>Eseguilo e la scena appare esattamente come prima.<br>
+Il punto è proprio questo: adesso passa attraverso una texture che possiamo manipolare.</p>
 <h2 id="post-processing">Post-processing<a class="headerlink" href="#post-processing" title="Permanent link">#</a></h2>
-<p><strong>Inversion and grayscale</strong> change one pixel at a time:</p>
+<p><strong>Inversione e scala di grigi</strong> cambiano un pixel alla volta:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">scene</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">rgb</span><span class="p">;</span>
 <span class="n">float3</span><span class="w"> </span><span class="n">inverted</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">color</span><span class="p">;</span>
 <span class="kt">float</span><span class="w"> </span><span class="n">gray</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dot</span><span class="p">(</span><span class="n">color</span><span class="p">,</span><span class="w"> </span><span class="n">float3</span><span class="p">(</span><span class="mf">0.2126</span><span class="p">,</span><span class="w"> </span><span class="mf">0.7152</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0722</span><span class="p">));</span>
 </code></pre></div>
 
-<p>The weights reflect how sensitive the eye is to each channel.</p>
-<p><strong>Kernel effects</strong> combine each pixel with its neighbors using a small grid of weights, a <strong>convolution kernel</strong>:</p>
+<p>I pesi rispecchiano la sensibilità dell'occhio a ciascun canale.</p>
+<p>Gli <strong>effetti a kernel</strong> combinano ogni pixel con i suoi vicini usando una piccola griglia di pesi, un <strong>kernel di convoluzione</strong>:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="nf">applyKernel</span><span class="p">(</span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">tex</span><span class="p">,</span><span class="w"> </span><span class="n">sampler</span><span class="w"> </span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">float2</span><span class="w"> </span><span class="n">uv</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">kernel</span><span class="p">[</span><span class="mi">9</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">texel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">float2</span><span class="p">(</span><span class="n">tex</span><span class="p">.</span><span class="n">get_width</span><span class="p">(),</span><span class="w"> </span><span class="n">tex</span><span class="p">.</span><span class="n">get_height</span><span class="p">());</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float3</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
@@ -328,13 +342,18 @@
 <span class="k">const</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">edges</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">   </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">-8</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">   </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">};</span>
 </code></pre></div>
 
-<p>Use a sampler with <code>.clampToEdge</code> so the kernel does not wrap around at the borders.</p>
+<p>Usa un sampler con <code>.clampToEdge</code>, così ai bordi il kernel non rientra dal lato opposto.</p>
 <div class="lm-demo" data-demo="render-targets" data-fallback="../../assets/img/advanced-metal/render-targets.webp"></div>
 
-<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<h2 id="esercizi">Esercizi<a class="headerlink" href="#esercizi" title="Permanent link">#</a></h2>
 <ul>
-<li>Render the scene at half resolution and stretch it to the screen. Compare <code>.nearest</code> and <code>.linear</code> filtering.<details class="solution"><summary>Mostra la soluzione</summary><p>Create the offscreen textures at half the drawable size; the full-screen pass stretches them. With <code>.nearest</code> you see blocky doubled pixels, with <code>.linear</code> a soft blur. Rendering at reduced resolution and upscaling is a standard way to save GPU time, and MetalFX does the upscaling far better than a linear filter.</p></details></li>
-<li>Build a rear-view mirror: render the scene a second time with the camera turned 180 degrees into a small texture, and show it on a quad at the top of the screen.<details class="solution"><summary>Mostra la soluzione</summary><p>Add a second small color texture and render the scene into it with a view matrix that looks along <code>-camera.front</code>. Then, in the main pass, draw a small quad near the top of the screen that samples it. Mirror the image horizontally by flipping u, as a real mirror does.</p>
+<li>Disegna la scena a metà risoluzione e stirala sullo schermo.<br>
+Confronta i filtri <code>.nearest</code> e <code>.linear</code>.<details class="solution"><summary>Mostra la soluzione</summary><p>Crea le texture offscreen a metà della dimensione del drawable; il pass a tutto schermo le stira.<br>
+Con <code>.nearest</code> vedi pixel raddoppiati e a blocchi, con <code>.linear</code> una sfocatura morbida.<br>
+Disegnare a risoluzione ridotta e poi ingrandire è un modo consueto di risparmiare tempo di GPU, e MetalFX fa l'ingrandimento molto meglio di un filtro lineare.</p></details></li>
+<li>Costruisci uno specchietto retrovisore: disegna la scena una seconda volta in una piccola texture, con la camera girata di 180 gradi, e mostrala su un rettangolo in alto sullo schermo.<details class="solution"><summary>Mostra la soluzione</summary><p>Aggiungi una seconda piccola texture di colore e disegnaci la scena con una matrice view che guarda lungo <code>-camera.front</code>.<br>
+Poi, nel pass principale, disegna vicino al bordo alto dello schermo un piccolo rettangolo che la legge.<br>
+Specchia l'immagine in orizzontale ribaltando u, come fa uno specchio vero.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float2</span><span class="w"> </span><span class="n">uv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float2</span><span class="p">(</span><span class="mf">1.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">.</span><span class="n">y</span><span class="p">);</span>
 <span class="k">return</span><span class="w"> </span><span class="n">mirrorTexture</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">uv</span><span class="p">);</span>
 </code></pre></div></details></li>
@@ -344,7 +363,7 @@
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#creating-the-textures">Creating the textures</a></li><li><a href="#describing-the-pass">Describing the pass</a></li><li><a href="#two-passes-in-one-frame">Two passes in one frame</a></li><li><a href="#the-full-screen-triangle">The full-screen triangle</a></li><li><a href="#post-processing">Post-processing</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#creare-le-texture">Creare le texture</a></li><li><a href="#descrivere-il-pass">Descrivere il pass</a></li><li><a href="#due-pass-in-un-frame">Due pass in un frame</a></li><li><a href="#il-triangolo-a-tutto-schermo">Il triangolo a tutto schermo</a></li><li><a href="#post-processing">Post-processing</a></li><li><a href="#esercizi">Esercizi</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

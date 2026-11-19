@@ -135,7 +135,10 @@
 </nav>
 <main class="content" id="main">
 <article><p class="crumb">In Practice</p><h1 id="a-2d-game">A 2D Game<a class="headerlink" href="#a-2d-game" title="Permanent link">#</a></h1>
-<p>Everything so far has been technique. This chapter puts a handful of those techniques to work in something playable: a small brick-breaking game. A paddle, a ball, a wall of bricks. It is deliberately tiny, so that the whole structure fits in one chapter and you can see how a renderer and game logic meet.</p>
+<p>Everything so far has been technique.<br>
+This chapter puts a handful of those techniques to work in something playable: a small brick-breaking game.<br>
+A paddle, a ball, a wall of bricks.<br>
+It is deliberately tiny, so that the whole structure fits in one chapter and you can see how a renderer and game logic meet.</p>
 <h2 id="what-we-need">What we need<a class="headerlink" href="#what-we-need" title="Permanent link">#</a></h2>
 <ul>
 <li>A <strong>sprite renderer</strong> that draws many colored, textured rectangles in one draw call.</li>
@@ -144,7 +147,8 @@
 <li><strong>Collision detection</strong> between a circle and rectangles.</li>
 </ul>
 <h2 id="the-sprite-renderer">The sprite renderer<a class="headerlink" href="#the-sprite-renderer" title="Permanent link">#</a></h2>
-<p>A sprite is a quad with a position, size, color and texture region. We use <a href="../advanced-metal/instancing.html">instancing</a>: one unit quad generated in the vertex function, and one instance per sprite.</p>
+<p>A sprite is a quad with a position, size, color and texture region.<br>
+We use <a href="../advanced-metal/instancing.html">instancing</a>: one unit quad generated in the vertex function, and one instance per sprite.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">SpriteInstance</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">position</span><span class="p">;</span><span class="w">     </span><span class="c1">// top-left corner, in game units</span>
 <span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">size</span><span class="p">;</span>
@@ -251,7 +255,9 @@
 </code></pre></div>
 </div>
 
-<p>Use a pipeline with alpha blending. Put all the game's images in one texture, an <strong>atlas</strong>, and select regions with <code>uvRect</code>, so that the whole game is a single draw call. For solid-colored rectangles, bind a 1 × 1 white texture.</p>
+<p>Use a pipeline with alpha blending.<br>
+Put all the game's images in one texture, an <strong>atlas</strong>, and select regions with <code>uvRect</code>, so that the whole game is a single draw call.<br>
+For solid-colored rectangles, bind a 1 × 1 white texture.</p>
 <h2 id="the-playing-field">The playing field<a class="headerlink" href="#the-playing-field" title="Permanent link">#</a></h2>
 <p>Give the game a fixed logical size, independent of the window, with the origin at the top left and y pointing down, which is convenient for 2D:</p>
 <div class="lang-swift">
@@ -350,7 +356,8 @@
 </code></pre></div>
 </div>
 
-<p>A level is just data. Loading levels from a text file where each digit is a brick type is an easy extension.</p>
+<p>A level is just data.<br>
+Loading levels from a text file where each digit is a brick type is an easy extension.</p>
 <h2 id="update">Update<a class="headerlink" href="#update" title="Permanent link">#</a></h2>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">extension</span><span class="w"> </span><span class="nc">Game</span><span class="w"> </span><span class="p">{</span>
@@ -457,9 +464,12 @@
 </code></pre></div>
 </div>
 
-<p>Steering the ball by where it meets the paddle is what makes the game controllable. A purely physical reflection would feel lifeless.</p>
+<p>Steering the ball by where it meets the paddle is what makes the game controllable.<br>
+A purely physical reflection would feel lifeless.</p>
 <h2 id="circle-against-rectangle">Circle against rectangle<a class="headerlink" href="#circle-against-rectangle" title="Permanent link">#</a></h2>
-<p>Find the point of the rectangle closest to the circle's center by clamping. If that point is within one radius, they overlap. The direction from the closest point to the center tells us which side was hit:</p>
+<p>Find the point of the rectangle closest to the circle's center by clamping.<br>
+If that point is within one radius, they overlap.<br>
+The direction from the closest point to the center tells us which side was hit:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">collide</span><span class="p">(</span><span class="kc">_</span><span class="w"> </span><span class="n">ball</span><span class="p">:</span><span class="w"> </span><span class="n">Ball</span><span class="p">,</span><span class="w"> </span><span class="n">rectPosition</span><span class="p">:</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;,</span><span class="w"> </span><span class="n">rectSize</span><span class="p">:</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;?</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">closest</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">simd_clamp</span><span class="p">(</span><span class="n">ball</span><span class="p">.</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="n">rectPosition</span><span class="p">,</span><span class="w"> </span><span class="n">rectPosition</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">rectSize</span><span class="p">)</span>
@@ -493,7 +503,8 @@
 </code></pre></div>
 </div>
 
-<p>At high speeds a ball can pass through a thin brick between two frames. Running the update in several small sub-steps per frame is the simplest protection.</p>
+<p>At high speeds a ball can pass through a thin brick between two frames.<br>
+Running the update in several small sub-steps per frame is the simplest protection.</p>
 <h2 id="render">Render<a class="headerlink" href="#render" title="Permanent link">#</a></h2>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="n">game</span><span class="p">:</span><span class="w"> </span><span class="n">Game</span><span class="p">,</span><span class="w"> </span><span class="n">batch</span><span class="p">:</span><span class="w"> </span><span class="n">SpriteBatch</span><span class="p">,</span><span class="w"> </span><span class="n">encoder</span><span class="p">:</span><span class="w"> </span><span class="bp">MTLRenderCommandEncoder</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -532,11 +543,13 @@
 </code></pre></div>
 </div>
 
-<p>The renderer knows nothing about the rules, and the game knows nothing about Metal. Keeping that separation is the most valuable habit in this chapter.</p>
+<p>The renderer knows nothing about the rules, and the game knows nothing about Metal.<br>
+Keeping that separation is the most valuable habit in this chapter.</p>
 <div class="lm-demo" data-demo="breakout" data-fallback="../assets/img/in-practice/2d-game.webp"></div>
 
 <h2 id="making-it-feel-good">Making it feel good<a class="headerlink" href="#making-it-feel-good" title="Permanent link">#</a></h2>
-<p>The game works. What makes it fun is polish, and each item below reuses a technique from this series:</p>
+<p>The game works.<br>
+What makes it fun is polish, and each item below reuses a technique from this series:</p>
 <ul>
 <li><strong>Particles</strong>: an additive-blended trail behind the ball, drawn with the same sprite batch.</li>
 <li><strong>Screen shake and flashes</strong>: render the game to a texture and distort it in a <a href="../advanced-metal/render-targets.html">post-processing pass</a> for a few frames after a hit.</li>
@@ -546,7 +559,9 @@
 <li><strong>Sound</strong>: <code>AVAudioEngine</code> or <code>AVAudioPlayer</code> for hit effects.</li>
 </ul>
 <h2 id="where-to-go-from-here">Where to go from here<a class="headerlink" href="#where-to-go-from-here" title="Permanent link">#</a></h2>
-<p>Add a state machine for menu, playing, won and lost. Add levels. Then try a different game with the same sprite batch: the renderer you wrote here is enough for a great many 2D games.</p></article><nav class="pager" id="pager"><a class="prev" href="../in-practice/text-rendering.html"><small>Previous</small>Text Rendering</a><a class="next" href="../in-practice/game-engine.html"><small>Next</small>A Game Engine</a></nav>
+<p>Add a state machine for menu, playing, won and lost.<br>
+Add levels.<br>
+Then try a different game with the same sprite batch: the renderer you wrote here is enough for a great many 2D games.</p></article><nav class="pager" id="pager"><a class="prev" href="../in-practice/text-rendering.html"><small>Previous</small>Text Rendering</a><a class="next" href="../in-practice/game-engine.html"><small>Next</small>A Game Engine</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>

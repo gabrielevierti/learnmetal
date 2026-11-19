@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,24 +134,29 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Per iniziare</p><h1 id="coordinate-systems">Coordinate Systems<a class="headerlink" href="#coordinate-systems" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
+<article><p class="crumb">Per iniziare</p><h1 id="sistemi-di-coordinate">Sistemi di coordinate<a class="headerlink" href="#sistemi-di-coordinate" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Progetto di esempio</strong> <code>examples/Sources/06-CoordinateSystems</code>, si esegue con <code>swift run CoordinateSystems</code>. <a href="../../downloads/learnmetal-examples.zip">Scarica tutti gli esempi</a> oppure guarda <a href="../resources/examples.html">come eseguirli</a>.</div>
 
-<p>A vertex travels through several coordinate systems on its way to the screen. Splitting the journey into steps makes each one simple, and three matrices carry the vertex from one step to the next. At the end of this chapter we have real 3D: a perspective view of textured cubes with correct depth.</p>
-<h2 id="the-spaces">The spaces<a class="headerlink" href="#the-spaces" title="Permanent link">#</a></h2>
+<p>Nel suo viaggio verso lo schermo un vertice attraversa diversi sistemi di coordinate.<br>
+Dividere il viaggio in tappe rende semplice ognuna di esse, e tre matrici portano il vertice da una tappa alla successiva.<br>
+Alla fine di questo capitolo avremo un vero 3D: una vista prospettica di cubi con texture e con la profondità corretta.</p>
+<h2 id="gli-spazi">Gli spazi<a class="headerlink" href="#gli-spazi" title="Permanent link">#</a></h2>
 <ol>
-<li><strong>Local space</strong> (object space): coordinates relative to the object's own origin, as stored in the vertex buffer.</li>
-<li><strong>World space</strong>: where the object sits in the scene. The <strong>model matrix</strong> takes local to world.</li>
-<li><strong>View space</strong> (camera space): the world as seen from the camera, with the camera at the origin. The <strong>view matrix</strong> takes world to view.</li>
-<li><strong>Clip space</strong>: the output of the vertex function. The <strong>projection matrix</strong> takes view to clip.</li>
-<li><strong>Normalized device coordinates</strong>: the GPU divides clip-space x, y, z by w (the <strong>perspective divide</strong>).</li>
-<li><strong>Viewport coordinates</strong>: NDC mapped to pixels.</li>
+<li><strong>Spazio locale</strong> (object space): coordinate relative all'origine dell'oggetto stesso, così come sono salvate nel vertex buffer.</li>
+<li><strong>Spazio mondo</strong> (world space): dove l'oggetto si trova nella scena.<br>
+La <strong>matrice model</strong> porta dal locale al mondo.</li>
+<li><strong>Spazio vista</strong> (view space, o spazio camera): il mondo visto dalla camera, con la camera nell'origine.<br>
+La <strong>matrice view</strong> porta dal mondo alla vista.</li>
+<li><strong>Clip space</strong>: l'uscita della vertex function.<br>
+La <strong>matrice di proiezione</strong> porta dalla vista al clip space.</li>
+<li><strong>Normalized device coordinates</strong> (NDC): la GPU divide x, y e z del clip space per w (la <strong>divisione prospettica</strong>).</li>
+<li><strong>Coordinate di viewport</strong>: le NDC trasformate in pixel.</li>
 </ol>
-<p>You write steps 2 to 4 as one line in the shader:</p>
+<p>Le tappe da 2 a 4 le scrivi tu, in una sola riga dello shader:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">out</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">projection</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">view</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">model</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
 </code></pre></div>
 
-<h2 id="metals-conventions">Metal's conventions<a class="headerlink" href="#metals-conventions" title="Permanent link">#</a></h2>
+<h2 id="le-convenzioni-di-metal">Le convenzioni di Metal<a class="headerlink" href="#le-convenzioni-di-metal" title="Permanent link">#</a></h2>
 <figure>
 <svg viewBox="0 0 640 210" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="13" role="img" aria-label="Normalized device coordinates have y up and range -1 to 1; texture and viewport coordinates have their origin at the top left with y down">
   <g fill="none" stroke="currentColor" stroke-width="1.5">
@@ -170,20 +175,26 @@
     <text x="140" y="130" text-anchor="middle">z: 0 near, 1 far</text>
   </g>
 </svg>
-<figcaption>NDC has y up. Textures and pixels have y down.</figcaption>
+<figcaption>Le NDC hanno y verso l'alto. Texture e pixel hanno y verso il basso.</figcaption>
 </figure>
 
 <ul>
-<li>NDC x and y run from -1 to 1 with <strong>y up</strong>. NDC <strong>z runs from 0 to 1</strong>.</li>
-<li>Pixel coordinates and texture coordinates start at the <strong>top left</strong> with y down.</li>
+<li>In NDC x e y vanno da -1 a 1 con <strong>y verso l'alto</strong>.<br>
+La <strong>z va da 0 a 1</strong>.</li>
+<li>Le coordinate in pixel e le coordinate di texture partono <strong>in alto a sinistra</strong>, con y verso il basso.</li>
 </ul>
 <div class="admonition note">
-<p class="admonition-title">Coming from OpenGL</p>
-<p>OpenGL's NDC z runs from -1 to 1. A projection matrix copied from an OpenGL tutorial puts half of your depth range in front of the near plane, so geometry near the camera disappears. Always use a projection matrix built for a 0 to 1 depth range, like the one below.</p>
+<p class="admonition-title">Se vieni da OpenGL</p>
+<p>In OpenGL la z delle NDC va da -1 a 1.<br>
+Una matrice di proiezione copiata da un tutorial di OpenGL mette metà del tuo intervallo di profondità davanti al near plane, e la geometria vicina alla camera sparisce.<br>
+Usa sempre una matrice di proiezione costruita per una profondità da 0 a 1, come quella qui sotto.</p>
 </div>
-<p>Metal does not care whether your world is left-handed or right-handed; that is decided entirely by your matrices. This series uses a <strong>right-handed</strong> world, the same as most tutorials and modeling tools: +x right, +y up, and the camera looks down <strong>-z</strong>.</p>
-<h2 id="perspective-projection">Perspective projection<a class="headerlink" href="#perspective-projection" title="Permanent link">#</a></h2>
-<p>A perspective projection makes distant things smaller. It is defined by a vertical field of view, the aspect ratio of the view, and a near and far plane; together they bound a truncated pyramid called the <strong>frustum</strong>. Add to <code>Math.swift</code>:</p>
+<p>A Metal non importa se il tuo mondo è sinistrorso o destrorso: lo decidono soltanto le tue matrici.<br>
+Questa serie usa un mondo <strong>destrorso</strong>, come la maggior parte dei tutorial e dei programmi di modellazione: +x a destra, +y in alto, e la camera guarda lungo <strong>-z</strong>.</p>
+<h2 id="proiezione-prospettica">Proiezione prospettica<a class="headerlink" href="#proiezione-prospettica" title="Permanent link">#</a></h2>
+<p>Una proiezione prospettica rende più piccole le cose lontane.<br>
+È definita da un campo visivo verticale, dal rapporto d'aspetto della vista e da un near plane e un far plane; insieme delimitano un tronco di piramide chiamato <strong>frustum</strong>.<br>
+Aggiungi a <code>Math.swift</code>:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">extension</span><span class="w"> </span><span class="nc">float4x4</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="c1">/// Right-handed perspective projection with a 0...1 depth range.</span>
@@ -214,8 +225,10 @@
 </code></pre></div>
 </div>
 
-<p>The <code>-1</code> copies the negated view-space z into w. After the perspective divide, everything is divided by its distance from the camera, which is exactly what perspective is. Keep the near plane as far out as you can (0.1 is typical). Depth precision is concentrated close to the near plane, and a tiny value such as 0.0001 wastes almost all of it.</p>
-<p>An <strong>orthographic</strong> projection, which has no perspective, appears in the <a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a> chapter.</p>
+<p>Il <code>-1</code> copia in w la z dello spazio vista cambiata di segno.<br>
+Dopo la divisione prospettica tutto risulta diviso per la propria distanza dalla camera, che è esattamente ciò che la prospettiva è. Tieni il near plane il più lontano possibile (0.1 è un valore tipico).<br>
+La precisione della profondità si concentra vicino al near plane, e un valore minuscolo come 0.0001 la spreca quasi tutta.</p>
+<p>Una proiezione <strong>ortografica</strong>, che non ha prospettiva, compare nel capitolo <a href="../advanced-lighting/shadow-mapping.html">Shadow mapping</a>.</p>
 <h2 id="model-view-projection">Model, view, projection<a class="headerlink" href="#model-view-projection" title="Permanent link">#</a></h2>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">Uniforms</span><span class="w"> </span><span class="p">{</span>
@@ -266,9 +279,12 @@
 </code></pre></div>
 </div>
 
-<p>The view matrix moves the whole world 3 units away along -z. Moving the world backward and moving the camera forward are the same thing.</p>
-<h2 id="a-cube">A cube<a class="headerlink" href="#a-cube" title="Permanent link">#</a></h2>
-<p>A flat rectangle makes a poor 3D demo. From now on we use a proper vertex struct and generate a cube in code. Each vertex has a position, a <strong>normal</strong> (the direction the surface faces, needed for lighting soon), and a texture coordinate:</p>
+<p>La matrice view allontana tutto il mondo di 3 unità lungo -z.<br>
+Spostare indietro il mondo e spostare avanti la camera sono la stessa cosa.</p>
+<h2 id="un-cubo">Un cubo<a class="headerlink" href="#un-cubo" title="Permanent link">#</a></h2>
+<p>Un rettangolo piatto è una povera demo 3D.<br>
+Da adesso usiamo una vera struct per i vertici e generiamo un cubo nel codice.<br>
+Ogni vertice ha una posizione, una <strong>normale</strong> (la direzione verso cui guarda la superficie, che servirà presto per l'illuminazione) e una coordinata di texture:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">Vertex</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">position</span><span class="p">:</span><span class="w"> </span><span class="n">Float3</span>
@@ -334,7 +350,8 @@
 </code></pre></div>
 </div>
 
-<p>That is 36 vertices for a cube one unit wide, wound counter-clockwise when seen from outside. Build the vertex descriptor from the struct itself so offsets can never be wrong:</p>
+<p>Sono 36 vertici per un cubo largo un'unità, ordinati in senso antiorario se visti da fuori.<br>
+Costruisci il vertex descriptor a partire dalla struct stessa, così gli offset non possono mai essere sbagliati:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">format</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">float3</span>
 <span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">offset</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="n">Vertex</span><span class="p">&gt;.</span><span class="n">offset</span><span class="p">(</span><span class="n">of</span><span class="p">:</span><span class="w"> </span><span class="err">\</span><span class="p">.</span><span class="n">position</span><span class="p">)</span><span class="o">!</span>
@@ -356,7 +373,9 @@
 </code></pre></div>
 </div>
 
-<p>All three attributes use <code>bufferIndex</code> 0, the default. Because <code>SIMD3&lt;Float&gt;</code> occupies 16 bytes, the offsets are 0, 16 and 32 and the stride is 48. In the shader:</p>
+<p>Tutti e tre gli attributi usano <code>bufferIndex</code> 0, il valore predefinito.<br>
+Poiché <code>SIMD3&lt;Float&gt;</code> occupa 16 byte, gli offset sono 0, 16 e 32 e lo stride è 48.<br>
+Nello shader:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">VertexIn</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="p">[[</span><span class="na">attribute</span><span class="p">(</span><span class="mi">0</span><span class="p">)]];</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">normal</span><span class="w">   </span><span class="p">[[</span><span class="na">attribute</span><span class="p">(</span><span class="mi">1</span><span class="p">)]];</span>
@@ -364,10 +383,12 @@
 <span class="p">};</span>
 </code></pre></div>
 
-<p>Draw with <code>vertexCount: 36</code>.</p>
-<h2 id="the-depth-buffer">The depth buffer<a class="headerlink" href="#the-depth-buffer" title="Permanent link">#</a></h2>
-<p>Run it and the cube looks inside out: faces drawn later cover faces drawn earlier, whichever is closer. The fix is a <strong>depth buffer</strong>, a texture that stores the depth of the closest fragment drawn so far at each pixel. A new fragment is kept only if it is closer.</p>
-<p>Three steps enable it.</p>
+<p>Disegna con <code>vertexCount: 36</code>.</p>
+<h2 id="il-depth-buffer">Il depth buffer<a class="headerlink" href="#il-depth-buffer" title="Permanent link">#</a></h2>
+<p>Eseguilo e il cubo sembra rivoltato: le facce disegnate dopo coprono quelle disegnate prima, a prescindere da quale sia più vicina.<br>
+La soluzione è un <strong>depth buffer</strong>, una texture che per ogni pixel conserva la profondità del fragment più vicino disegnato fino a quel momento.<br>
+Un nuovo fragment viene tenuto solo se è più vicino.</p>
+<p>Per attivarlo servono tre passi.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// 1. Ask the view for a depth texture.</span>
 <span class="n">view</span><span class="p">.</span><span class="n">depthStencilPixelFormat</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">depth32Float</span>
@@ -421,11 +442,11 @@
 </code></pre></div>
 </div>
 
-<p>The depth texture is cleared to 1 (the far plane) at the start of each pass, and <code>.less</code> keeps fragments with a smaller depth than what is stored.</p>
-<figure><img src="../../assets/img/getting-started/coordinate-systems.webp" alt="Without a depth test, faces drawn later cover faces that are closer to the camera." width="880" height="246" loading="lazy"><figcaption>Without a depth test, faces drawn later cover faces that are closer to the camera.</figcaption></figure>
+<p>La texture di profondità viene pulita a 1 (il far plane) all'inizio di ogni pass, e <code>.less</code> tiene i fragment con una profondità minore di quella salvata.</p>
+<figure><img src="../../assets/img/getting-started/coordinate-systems.webp" alt="Senza test di profondità le facce disegnate dopo coprono quelle più vicine alla camera." width="880" height="246" loading="lazy"><figcaption>Senza test di profondità le facce disegnate dopo coprono quelle più vicine alla camera.</figcaption></figure>
 
-<h2 id="more-cubes">More cubes<a class="headerlink" href="#more-cubes" title="Permanent link">#</a></h2>
-<p>Drawing the same cube in ten places needs only ten model matrices:</p>
+<h2 id="altri-cubi">Altri cubi<a class="headerlink" href="#altri-cubi" title="Permanent link">#</a></h2>
+<p>Per disegnare lo stesso cubo in dieci posti bastano dieci matrici model:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">cubePositions</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="n">Float3</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">[</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w">  </span><span class="mf">0.0</span><span class="p">,</span><span class="w">   </span><span class="mf">0.0</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="mf">2.0</span><span class="p">,</span><span class="w">  </span><span class="mf">5.0</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">15.0</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="o">-</span><span class="mf">1.5</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">2.2</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">2.5</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="o">-</span><span class="mf">3.8</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">12.3</span><span class="p">],</span>
@@ -459,18 +480,24 @@
 
 <div class="lm-demo" data-demo="coordinate-systems" data-fallback="../../assets/img/getting-started/ten-cubes.webp"></div>
 
-<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<h2 id="esercizi">Esercizi<a class="headerlink" href="#esercizi" title="Permanent link">#</a></h2>
 <ul>
-<li>Change the field of view and the aspect ratio by hand and describe what each does.<details class="solution"><summary>Mostra la soluzione</summary><p>A larger field of view fits more of the scene into the view, so objects look smaller and perspective gets stronger near the edges; a small one acts like a telephoto lens. An aspect ratio that does not match the view stretches the image: too large squeezes everything horizontally, too small widens it. That is why the aspect ratio must be recomputed when the view is resized.</p></details></li>
-<li>Make every third cube rotate over time.<details class="solution"><summary>Mostra la soluzione</summary><p>Add the time to the angle of every third cube when building its model matrix: in Swift, <code>var angle = (20 * Float(i)).radians; if i % 3 == 0 { angle += time }</code>. Nothing else changes, because each cube already gets its own matrix.</p></details></li>
-<li>Set <code>depthCompareFunction</code> to <code>.always</code> and to <code>.greater</code> and explain what you see.<details class="solution"><summary>Mostra la soluzione</summary><p>With <code>.always</code> every fragment passes, so the result depends on draw order: later cubes cover earlier ones even when they are farther away. With <code>.greater</code> a fragment passes only if it is farther than what is stored. The depth buffer is cleared to 1, the farthest value, so nothing passes and the view stays empty, unless you also clear the depth to 0.</p></details></li>
+<li>Cambia a mano il campo visivo e il rapporto d'aspetto e descrivi l'effetto di ciascuno.<details class="solution"><summary>Mostra la soluzione</summary><p>Un campo visivo più ampio fa entrare nella vista una parte maggiore della scena: gli oggetti appaiono più piccoli e la prospettiva si accentua verso i bordi.<br>
+Uno stretto si comporta come un teleobiettivo.<br>
+Un rapporto d'aspetto che non coincide con quello della vista deforma l'immagine: troppo grande schiaccia tutto in orizzontale, troppo piccolo lo allarga.<br>
+Per questo il rapporto d'aspetto va ricalcolato quando la vista cambia dimensione.</p></details></li>
+<li>Fai ruotare nel tempo un cubo ogni tre.<details class="solution"><summary>Mostra la soluzione</summary><p>Quando costruisci la matrice model di un cubo ogni tre, somma il tempo al suo angolo: in Swift, <code>var angle = (20 * Float(i)).radians; if i % 3 == 0 { angle += time }</code>.<br>
+Non cambia nient'altro, perché ogni cubo riceve già la propria matrice.</p></details></li>
+<li>Imposta <code>depthCompareFunction</code> a <code>.always</code> e a <code>.greater</code> e spiega ciò che vedi.<details class="solution"><summary>Mostra la soluzione</summary><p>Con <code>.always</code> ogni fragment passa, quindi il risultato dipende dall'ordine di disegno: i cubi disegnati dopo coprono quelli di prima anche quando sono più lontani.<br>
+Con <code>.greater</code> un fragment passa solo se è più lontano di ciò che è salvato.<br>
+Il depth buffer viene pulito a 1, il valore più lontano, quindi non passa niente e la vista resta vuota, a meno di pulire anche la profondità a 0.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../getting-started/transformations.html"><small>Precedente</small>Trasformazioni</a><a class="next" href="../getting-started/camera.html"><small>Successivo</small>Camera</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#the-spaces">The spaces</a></li><li><a href="#metals-conventions">Metal&#x27;s conventions</a></li><li><a href="#perspective-projection">Perspective projection</a></li><li><a href="#model-view-projection">Model, view, projection</a></li><li><a href="#a-cube">A cube</a></li><li><a href="#the-depth-buffer">The depth buffer</a></li><li><a href="#more-cubes">More cubes</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#gli-spazi">Gli spazi</a></li><li><a href="#le-convenzioni-di-metal">Le convenzioni di Metal</a></li><li><a href="#proiezione-prospettica">Proiezione prospettica</a></li><li><a href="#model-view-projection">Model, view, projection</a></li><li><a href="#un-cubo">Un cubo</a></li><li><a href="#il-depth-buffer">Il depth buffer</a></li><li><a href="#altri-cubi">Altri cubi</a></li><li><a href="#esercizi">Esercizi</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

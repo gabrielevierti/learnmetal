@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,18 +134,21 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Illuminazione avanzata</p><h1 id="bloom">Bloom<a class="headerlink" href="#bloom" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
+<article><p class="crumb">Illuminazione avanzata</p><h1 id="bloom">Bloom<a class="headerlink" href="#bloom" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Progetto di esempio</strong> <code>examples/Sources/15-HDRBloom</code>, si esegue con <code>swift run HDRBloom</code>. <a href="../../downloads/learnmetal-examples.zip">Scarica tutti gli esempi</a> oppure guarda <a href="../resources/examples.html">come eseguirli</a>.</div>
 
-<p>A monitor cannot show a light as blindingly bright as it would be in reality. What we can do is imitate what bright lights do in a camera or in the eye: their glow bleeds over the surrounding image. This effect is <strong>bloom</strong>, and it is one of the cheapest ways to make a scene feel luminous.</p>
-<p>The recipe has three steps:</p>
+<p>Un monitor non può mostrare una luce abbagliante quanto lo sarebbe nella realtà.<br>
+Quello che possiamo fare è imitare ciò che le luci forti fanno in una fotocamera o nell'occhio: il loro bagliore sconfina sull'immagine intorno.<br>
+Questo effetto è il <strong>bloom</strong>, ed è uno dei modi più economici di far sembrare luminosa una scena.</p>
+<p>La ricetta ha tre passi:</p>
 <ol>
-<li>Extract the bright parts of the HDR scene into a separate texture.</li>
-<li>Blur that texture.</li>
-<li>Add the blurred result on top of the scene, then tone map.</li>
+<li>Estrarre in una texture separata le parti luminose della scena HDR.</li>
+<li>Sfocare quella texture.</li>
+<li>Sommare il risultato sfocato alla scena, e poi fare il tone mapping.</li>
 </ol>
-<h2 id="extracting-bright-areas">Extracting bright areas<a class="headerlink" href="#extracting-bright-areas" title="Permanent link">#</a></h2>
-<p>We could run a pass over the scene texture to pick out bright pixels. A neater way is to let the scene's fragment function write to <strong>two color attachments</strong> at once, which is called multiple render targets (MRT):</p>
+<h2 id="estrarre-le-zone-luminose">Estrarre le zone luminose<a class="headerlink" href="#estrarre-le-zone-luminose" title="Permanent link">#</a></h2>
+<p>Potremmo eseguire un pass sulla texture della scena per scegliere i pixel luminosi.<br>
+Un modo più pulito è far scrivere alla fragment function della scena <strong>due attachment di colore</strong> insieme, cosa che si chiama multiple render target (MRT):</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">SceneOut</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">color</span><span class="w">  </span><span class="p">[[</span><span class="na">color</span><span class="p">(</span><span class="mi">0</span><span class="p">)]];</span>
 <span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">bright</span><span class="w"> </span><span class="p">[[</span><span class="na">color</span><span class="p">(</span><span class="mi">1</span><span class="p">)]];</span>
@@ -163,7 +166,8 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>A threshold of 1.0 only makes sense because the scene is rendered in HDR: only pixels brighter than display white glow. Give the render pass and the pipeline a second attachment:</p>
+<p>Una soglia di 1.0 ha senso solo perché la scena è disegnata in HDR: brillano soltanto i pixel più luminosi del bianco dello schermo.<br>
+Dai al render pass e alla pipeline un secondo attachment:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">scenePass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">texture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">brightTexture</span>
 <span class="n">scenePass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">loadAction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">clear</span>
@@ -181,9 +185,12 @@
 </code></pre></div>
 </div>
 
-<p>Every pipeline used in that pass must declare both attachments. A fragment function that should not write to one of them, such as the lamp shader, can leave it out of its output struct; with <code>writeMask = []</code> on the attachment you can also disable writes explicitly.</p>
-<h2 id="gaussian-blur">Gaussian blur<a class="headerlink" href="#gaussian-blur" title="Permanent link">#</a></h2>
-<p>A <strong>Gaussian blur</strong> averages each pixel with its neighbors, weighted by a bell curve. A two-dimensional kernel of 9 × 9 would cost 81 samples per pixel. The Gaussian is <strong>separable</strong>: blurring horizontally and then vertically gives the identical result with 9 + 9 samples.</p>
+<p>Ogni pipeline usata in quel pass deve dichiarare entrambi gli attachment.<br>
+Una fragment function che non deve scrivere in uno dei due, come lo shader della lampada, può lasciarlo fuori dalla sua struct di output; con <code>writeMask = []</code> sull'attachment puoi anche disattivare le scritture in modo esplicito.</p>
+<h2 id="sfocatura-gaussiana">Sfocatura gaussiana<a class="headerlink" href="#sfocatura-gaussiana" title="Permanent link">#</a></h2>
+<p>Una <strong>sfocatura gaussiana</strong> fa la media di ogni pixel con i suoi vicini, pesati con una curva a campana.<br>
+Un kernel bidimensionale da 9 × 9 costerebbe 81 letture per pixel.<br>
+La gaussiana è <strong>separabile</strong>: sfocare in orizzontale e poi in verticale dà lo stesso identico risultato con 9 + 9 letture.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">BlurUniforms</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">direction</span><span class="p">;</span><span class="w">    </span><span class="c1">// (1, 0) or (0, 1)</span>
 <span class="p">};</span>
@@ -205,7 +212,7 @@
 </code></pre></div>
 
 <h2 id="ping-pong">Ping-pong<a class="headerlink" href="#ping-pong" title="Permanent link">#</a></h2>
-<p>A pass cannot read from the texture it is writing to, so the blur alternates between two textures: A to B horizontally, B to A vertically, and again for a stronger blur.</p>
+<p>Un pass non può leggere dalla texture in cui sta scrivendo, quindi la sfocatura alterna due texture: da A a B in orizzontale, da B ad A in verticale, e di nuovo per una sfocatura più forte.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="nv">source</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">brightTexture</span><span class="p">!</span>
 <span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mf">0.</span><span class="p">.&lt;</span><span class="mi">10</span><span class="w"> </span><span class="p">{</span>
@@ -256,9 +263,10 @@
 </code></pre></div>
 </div>
 
-<p>The load action is <code>.dontCare</code> because the full-screen triangle overwrites every pixel anyway. Skipping the load is free performance on a tile-based GPU.</p>
-<h2 id="combining">Combining<a class="headerlink" href="#combining" title="Permanent link">#</a></h2>
-<p>The final pass adds the blurred glow to the scene and then tone maps:</p>
+<p>La load action è <code>.dontCare</code> perché il triangolo a tutto schermo sovrascrive comunque ogni pixel.<br>
+Su una GPU tile-based saltare il caricamento è prestazione gratis.</p>
+<h2 id="combinare">Combinare<a class="headerlink" href="#combinare" title="Permanent link">#</a></h2>
+<p>Il pass finale somma alla scena il bagliore sfocato e poi fa il tone mapping:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_composite</span><span class="p">(</span><span class="n">ScreenOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
 <span class="w">                                   </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">scene</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
 <span class="w">                                   </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">bloom</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
@@ -269,35 +277,44 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>Bloom is added <strong>before</strong> tone mapping, so the glow is compressed together with everything else.</p>
-<figure><img src="../../assets/img/advanced-lighting/bloom.webp" alt="Pixels brighter than white bleed into their surroundings." width="880" height="246" loading="lazy"><figcaption>Pixels brighter than white bleed into their surroundings.</figcaption></figure>
+<p>Il bloom viene sommato <strong>prima</strong> del tone mapping, così il bagliore viene compresso insieme a tutto il resto.</p>
+<figure><img src="../../assets/img/advanced-lighting/bloom.webp" alt="I pixel più luminosi del bianco sconfinano su ciò che li circonda." width="880" height="246" loading="lazy"><figcaption>I pixel più luminosi del bianco sconfinano su ciò che li circonda.</figcaption></figure>
 
 <div class="lm-demo" data-demo="bloom"></div>
 
-<h2 id="doing-it-better">Doing it better<a class="headerlink" href="#doing-it-better" title="Permanent link">#</a></h2>
-<p>Ten full-resolution passes with a small kernel give a tight glow at a high cost. Modern bloom works on a <strong>mip chain</strong> instead:</p>
+<h2 id="farlo-meglio">Farlo meglio<a class="headerlink" href="#farlo-meglio" title="Permanent link">#</a></h2>
+<p>Dieci pass a piena risoluzione con un kernel piccolo danno un bagliore stretto a un costo alto.<br>
+Il bloom moderno lavora invece su una <strong>catena di mip</strong>:</p>
 <ol>
-<li>Downsample the bright texture repeatedly, halving the size each time, for five or six levels.</li>
-<li>Walk back up, upsampling each level with a small blur and adding it to the next larger one.</li>
+<li>Riduci ripetutamente la texture luminosa, dimezzandone ogni volta la dimensione, per cinque o sei livelli.</li>
+<li>Risali, ingrandendo ogni livello con una piccola sfocatura e sommandolo a quello più grande successivo.</li>
 </ol>
-<p>Each level contributes a wider glow, the total cost is around one and a third full-resolution passes, and the result is a broad, smooth halo. This is the approach used in most current engines, and it also removes the need for a hard threshold: blending a small fraction of the blurred chain with the scene looks more natural.</p>
-<p>Two Metal-specific shortcuts are worth knowing:</p>
+<p>Ogni livello contribuisce con un bagliore più ampio, il costo totale è circa un pass e un terzo a piena risoluzione, e il risultato è un alone largo e morbido.<br>
+È l'approccio usato dalla maggior parte dei motori attuali, e toglie anche la necessità di una soglia netta: mescolare alla scena una piccola frazione della catena sfocata risulta più naturale.</p>
+<p>Vale la pena conoscere due scorciatoie specifiche di Metal:</p>
 <ul>
-<li><strong>Metal Performance Shaders</strong> ships tuned image filters. <code>MPSImageGaussianBlur(device:sigma:)</code> blurs a texture with one call: <code>blur.encode(commandBuffer:sourceTexture:destinationTexture:)</code>.</li>
-<li>A blur can also run as a <a href="../beyond/compute-shaders.html">compute function</a>, which avoids setting up render passes for image processing.</li>
+<li><strong>Metal Performance Shaders</strong> include filtri di immagine già ottimizzati.<br>
+<code>MPSImageGaussianBlur(device:sigma:)</code> sfoca una texture con una chiamata: <code>blur.encode(commandBuffer:sourceTexture:destinationTexture:)</code>.</li>
+<li>Una sfocatura può anche girare come <a href="../beyond/compute-shaders.html">compute function</a>, evitando di preparare dei render pass per elaborare immagini.</li>
 </ul>
-<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<h2 id="esercizi">Esercizi<a class="headerlink" href="#esercizi" title="Permanent link">#</a></h2>
 <ul>
-<li>Change the number of blur iterations and watch the glow widen.<details class="solution"><summary>Mostra la soluzione</summary><p>Each pair of passes widens the blur a little, since repeated Gaussian blurs add up. Two iterations give a tight glow around the lamps; twenty give a wide haze, at twenty times the cost. That cost is the reason for the mip chain approach.</p></details></li>
-<li>Run the blur at half resolution and compare the quality and the GPU time.<details class="solution"><summary>Mostra la soluzione</summary><p>Make the two blur textures half the size of the scene. The blur then costs a quarter as much and covers twice the screen distance per pass. Because the glow is smooth, the lower resolution is not visible after the final upsample.</p></details></li>
-<li>Implement the downsample and upsample chain.<details class="solution"><summary>Mostra la soluzione</summary><p>Create a chain of textures, each half the size of the previous. Downsample the bright texture into each level with a small filter, then go back up: upsample level n, add it to level n - 1, and repeat to the top. The live demo above uses the texture's own mipmaps as the downsample chain and sums five levels in one pass.</p></details></li>
+<li>Cambia il numero di iterazioni della sfocatura e guarda il bagliore allargarsi.<details class="solution"><summary>Mostra la soluzione</summary><p>Ogni coppia di pass allarga un po' la sfocatura, perché le sfocature gaussiane ripetute si sommano.<br>
+Due iterazioni danno un bagliore stretto intorno alle lampade; venti danno una foschia ampia, a un costo venti volte maggiore.<br>
+Quel costo è la ragione dell'approccio con la catena di mip.</p></details></li>
+<li>Esegui la sfocatura a metà risoluzione e confronta la qualità e il tempo di GPU.<details class="solution"><summary>Mostra la soluzione</summary><p>Fai le due texture della sfocatura grandi la metà della scena.<br>
+La sfocatura costa allora un quarto e copre a ogni pass il doppio della distanza sullo schermo.<br>
+Poiché il bagliore è morbido, la risoluzione più bassa non si nota dopo l'ingrandimento finale.</p></details></li>
+<li>Implementa la catena di riduzione e di ingrandimento.<details class="solution"><summary>Mostra la soluzione</summary><p>Crea una catena di texture, ognuna grande la metà della precedente.<br>
+Riduci la texture luminosa in ogni livello con un piccolo filtro, poi risali: ingrandisci il livello n, sommalo al livello n - 1 e ripeti fino in cima.<br>
+La demo interattiva qui sopra usa come catena di riduzione le mipmap della texture stessa e somma cinque livelli in un solo pass.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../advanced-lighting/hdr.html"><small>Precedente</small>HDR</a><a class="next" href="../advanced-lighting/deferred-shading.html"><small>Successivo</small>Deferred shading</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#extracting-bright-areas">Extracting bright areas</a></li><li><a href="#gaussian-blur">Gaussian blur</a></li><li><a href="#ping-pong">Ping-pong</a></li><li><a href="#combining">Combining</a></li><li><a href="#doing-it-better">Doing it better</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#estrarre-le-zone-luminose">Estrarre le zone luminose</a></li><li><a href="#sfocatura-gaussiana">Sfocatura gaussiana</a></li><li><a href="#ping-pong">Ping-pong</a></li><li><a href="#combinare">Combinare</a></li><li><a href="#farlo-meglio">Farlo meglio</a></li><li><a href="#esercizi">Esercizi</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

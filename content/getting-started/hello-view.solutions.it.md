@@ -1,0 +1,3 @@
+Calcola il colore nel metodo di disegno, prima di chiedere il render pass descriptor, perché il descriptor copia il colore di sfondo nel momento in cui lo leggi. In Swift: `let t = sin(CACurrentMediaTime()) * 0.5 + 0.5` e poi `view.clearColor = MTLClearColor(red: 0.2 * t, green: 0.3, blue: 0.3 * t, alpha: 1)`. In C++ fai lo stesso calcolo con `glfwGetTime()` e passa il risultato a `setClearColor`.
+---
+La callback riceve la dimensione in pixel. Una finestra di 800 × 600 punti su uno schermo Retina riporta 1600 × 1200. In Metal tutto (viewport, dimensioni delle texture, `in.position.xy` in una fragment function) è in pixel, quindi ricava sempre i rapporti d'aspetto e le dimensioni delle texture offscreen da questo valore e mai dalla dimensione in punti della finestra.

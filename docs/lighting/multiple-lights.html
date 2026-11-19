@@ -137,9 +137,13 @@
 <article><p class="crumb">Lighting</p><h1 id="multiple-lights">Multiple Lights<a class="headerlink" href="#multiple-lights" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Example project</strong> <code>examples/Sources/10-MultipleLights</code>, run with <code>swift run MultipleLights</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
 
-<p>A scene rarely has one light. This chapter combines everything from the lighting section: one directional light, four point lights and a flashlight, all in a single fragment function. The trick is organization: one function per light type, and their results added together.</p>
+<p>A scene rarely has one light.<br>
+This chapter combines everything from the lighting section: one directional light, four point lights and a flashlight, all in a single fragment function.<br>
+The trick is organization: one function per light type, and their results added together.</p>
 <h2 id="shader-functions">Shader functions<a class="headerlink" href="#shader-functions" title="Permanent link">#</a></h2>
-<p>MSL is C++, so ordinary helper functions work. Anything not marked <code>vertex</code>, <code>fragment</code> or <code>kernel</code> is a plain function you can call. Mark helpers <code>static</code> so they stay private to the file.</p>
+<p>MSL is C++, so ordinary helper functions work.<br>
+Anything not marked <code>vertex</code>, <code>fragment</code> or <code>kernel</code> is a plain function you can call.<br>
+Mark helpers <code>static</code> so they stay private to the file.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">Surface</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">position</span><span class="p">;</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">normal</span><span class="p">;</span>
@@ -238,7 +242,8 @@
 </code></pre></div>
 </div>
 
-<p>That gets clumsy for larger counts. The scalable alternative is to put the lights in their own <code>MTLBuffer</code> and pass a pointer plus a count:</p>
+<p>That gets clumsy for larger counts.<br>
+The scalable alternative is to put the lights in their own <code>MTLBuffer</code> and pass a pointer plus a count:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_main</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
 <span class="w">                              </span><span class="n">constant</span><span class="w"> </span><span class="n">FragmentUniforms</span><span class="w"> </span><span class="o">&amp;</span><span class="n">uniforms</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
 <span class="w">                              </span><span class="n">constant</span><span class="w"> </span><span class="n">PointLight</span><span class="w"> </span><span class="o">*</span><span class="n">pointLights</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">2</span><span class="p">)]],</span>
@@ -264,7 +269,8 @@
 </code></pre></div>
 </div>
 
-<p>A buffer bound to a shader is just memory, and a pointer parameter lets the shader index it as an array of any length. This is far more flexible than uniform arrays in older APIs, and it is the form we use from now on.</p>
+<p>A buffer bound to a shader is just memory, and a pointer parameter lets the shader index it as an array of any length.<br>
+This is far more flexible than uniform arrays in older APIs, and it is the form we use from now on.</p>
 <h2 id="setting-the-scene">Setting the scene<a class="headerlink" href="#setting-the-scene" title="Permanent link">#</a></h2>
 <p>Four point lights at different positions, each drawn as a small lamp cube with the unlit pipeline from the <a href="colors.html">Colors</a> chapter:</p>
 <div class="lang-swift">
@@ -289,11 +295,18 @@
 <div class="lm-demo" data-demo="multiple-lights" data-fallback="../assets/img/lighting/multiple-lights.webp"></div>
 
 <h2 id="the-cost-of-many-lights">The cost of many lights<a class="headerlink" href="#the-cost-of-many-lights" title="Permanent link">#</a></h2>
-<p>Every fragment evaluates every light, so the cost is fragments × lights. A handful is fine. Hundreds are not, and solving that is the purpose of <a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a> later on.</p>
+<p>Every fragment evaluates every light, so the cost is fragments × lights.<br>
+A handful is fine.<br>
+Hundreds are not, and solving that is the purpose of <a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a> later on.</p>
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
-<li>Recreate different atmospheres only by changing light colors and the clear color: a desert at noon, a dim factory, a horror corridor lit by the flashlight alone.<details class="solution"><summary>Show solution</summary><p>Desert: a strong warm directional light (1.0, 0.95, 0.8), a bright sandy clear color, and point lights nearly off. Factory: a weak cold directional light, bluish point lights with short range, a dark gray-blue clear color. Horror: clear color black, directional light at about 0.02, point lights off or deep red, and only the spotlight at full strength.</p></details></li>
-<li>Move the lights over time by rewriting the buffer contents each frame through <code>lightBuffer.contents()</code>.<details class="solution"><summary>Show solution</summary><p>Get a typed pointer to the buffer's memory and write the new values before encoding the frame. In Swift: <code>let lights = lightBuffer.contents().bindMemory(to: PointLight.self, capacity: count)</code> then <code>lights[i].position = ...</code>. In C++: <code>auto* lights = static_cast&lt;PointLight*&gt;(lightBuffer-&gt;contents());</code>. When the GPU might still be reading the previous frame, use the ring of buffers from Advanced Data.</p></details></li>
+<li>Recreate different atmospheres only by changing light colors and the clear color: a desert at noon, a dim factory, a horror corridor lit by the flashlight alone.<details class="solution"><summary>Show solution</summary><p>Desert: a strong warm directional light (1.0, 0.95, 0.8), a bright sandy clear color, and point lights nearly off.<br>
+Factory: a weak cold directional light, bluish point lights with short range, a dark gray-blue clear color.<br>
+Horror: clear color black, directional light at about 0.02, point lights off or deep red, and only the spotlight at full strength.</p></details></li>
+<li>Move the lights over time by rewriting the buffer contents each frame through <code>lightBuffer.contents()</code>.<details class="solution"><summary>Show solution</summary><p>Get a typed pointer to the buffer's memory and write the new values before encoding the frame.<br>
+In Swift: <code>let lights = lightBuffer.contents().bindMemory(to: PointLight.self, capacity: count)</code> then <code>lights[i].position = ...</code>.<br>
+In C++: <code>auto* lights = static_cast&lt;PointLight*&gt;(lightBuffer-&gt;contents());</code>.<br>
+When the GPU might still be reading the previous frame, use the ring of buffers from Advanced Data.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../lighting/light-casters.html"><small>Previous</small>Light Casters</a><a class="next" href="../lighting/review.html"><small>Next</small>Review</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>

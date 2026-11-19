@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,12 +134,15 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Per iniziare</p><h1 id="camera">Camera<a class="headerlink" href="#camera" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
+<article><p class="crumb">Per iniziare</p><h1 id="camera">Camera<a class="headerlink" href="#camera" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Progetto di esempio</strong> <code>examples/Sources/07-Camera</code>, si esegue con <code>swift run Camera</code>. <a href="../../downloads/learnmetal-examples.zip">Scarica tutti gli esempi</a> oppure guarda <a href="../resources/examples.html">come eseguirli</a>.</div>
 
-<p>A fixed view matrix shows a scene from one spot. A camera you can fly through the scene is a view matrix that is rebuilt every frame from a position and a direction, both driven by input.</p>
-<h2 id="the-look-at-matrix">The look-at matrix<a class="headerlink" href="#the-look-at-matrix" title="Permanent link">#</a></h2>
-<p>A camera is defined by where it is, what it looks at, and which way is up. From those three we derive three perpendicular axes and build a matrix that moves the world into the camera's frame. Add to <code>Math.swift</code>:</p>
+<p>Una matrice view fissa mostra la scena da un punto solo.<br>
+Una camera con cui volare dentro la scena è una matrice view ricostruita a ogni frame a partire da una posizione e da una direzione, entrambe guidate dall'input.</p>
+<h2 id="la-matrice-look-at">La matrice look-at<a class="headerlink" href="#la-matrice-look-at" title="Permanent link">#</a></h2>
+<p>Una camera è definita da dove si trova, da che cosa guarda e da qual è il suo alto.<br>
+Da questi tre dati ricaviamo tre assi perpendicolari e costruiamo una matrice che porta il mondo nel sistema di riferimento della camera.<br>
+Aggiungi a <code>Math.swift</code>:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">extension</span><span class="w"> </span><span class="nc">float4x4</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="c1">/// Right-handed view matrix.</span>
@@ -170,7 +173,8 @@
 </code></pre></div>
 </div>
 
-<p>The rotation part lines the world up with the camera's axes, and the last column moves the camera to the origin. Try it by orbiting the scene:</p>
+<p>La parte di rotazione allinea il mondo agli assi della camera, e l'ultima colonna porta la camera nell'origine.<br>
+Provala facendo orbitare la camera intorno alla scena:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">radius</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">10</span>
 <span class="kd">let</span><span class="w"> </span><span class="nv">eye</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Float3</span><span class="p">(</span><span class="n">sin</span><span class="p">(</span><span class="n">time</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">radius</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">cos</span><span class="p">(</span><span class="n">time</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">radius</span><span class="p">)</span>
@@ -184,8 +188,9 @@
 </code></pre></div>
 </div>
 
-<h2 id="a-fly-camera">A fly camera<a class="headerlink" href="#a-fly-camera" title="Permanent link">#</a></h2>
-<p>For free movement, store a position and two angles. <strong>Yaw</strong> turns left and right, <strong>pitch</strong> looks up and down.</p>
+<h2 id="una-camera-libera">Una camera libera<a class="headerlink" href="#una-camera-libera" title="Permanent link">#</a></h2>
+<p>Per muoversi liberamente conserva una posizione e due angoli.<br>
+Lo <strong>yaw</strong> gira a sinistra e a destra, il <strong>pitch</strong> guarda in alto e in basso.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">import</span><span class="w"> </span><span class="nc">simd</span>
 
@@ -266,9 +271,11 @@
 </code></pre></div>
 </div>
 
-<p><code>front</code> turns the two angles into a direction with basic trigonometry. Pitch is clamped just short of 90 degrees because looking straight up makes <code>front</code> parallel to the up vector, and the cross product in <code>lookAt</code> collapses.</p>
+<p><code>front</code> trasforma i due angoli in una direzione con un po' di trigonometria.<br>
+Il pitch è limitato poco prima dei 90 gradi perché guardando dritto in alto <code>front</code> diventa parallelo al vettore up, e il prodotto vettoriale dentro <code>lookAt</code> si annulla.</p>
 <h2 id="delta-time">Delta time<a class="headerlink" href="#delta-time" title="Permanent link">#</a></h2>
-<p>Frames do not take equal time. Movement must be scaled by the time since the last frame, the <strong>delta time</strong>, or the camera speed would depend on the frame rate:</p>
+<p>I frame non durano tutti lo stesso tempo.<br>
+Il movimento va moltiplicato per il tempo trascorso dall'ultimo frame, il <strong>delta time</strong>, altrimenti la velocità della camera dipenderebbe dal frame rate:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="nv">lastFrameTime</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">CACurrentMediaTime</span><span class="p">()</span>
 
@@ -289,7 +296,8 @@
 </div>
 
 <h2 id="input">Input<a class="headerlink" href="#input" title="Permanent link">#</a></h2>
-<p>AppKit and UIKit deliver input as events, which is awkward for a game loop that wants to ask "is W down right now?". The <strong>GameController</strong> framework lets you poll the keyboard and mouse on both macOS and iPadOS:</p>
+<p>AppKit e UIKit consegnano l'input sotto forma di eventi, cosa scomoda per un game loop che vuole chiedere "W è premuto in questo momento?".<br>
+Il framework <strong>GameController</strong> permette di interrogare tastiera e mouse sia su macOS sia su iPadOS:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">import</span><span class="w"> </span><span class="nc">GameController</span>
 
@@ -319,7 +327,8 @@
 </code></pre></div>
 </div>
 
-<p>Mouse movement arrives through a handler that reports deltas. Register it once, for example in the renderer's <code>init</code>:</p>
+<p>Il movimento del mouse arriva attraverso un handler che riporta gli spostamenti.<br>
+Registralo una volta sola, per esempio nell'<code>init</code> del renderer:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">NotificationCenter</span><span class="p">.</span><span class="k">default</span><span class="p">.</span><span class="n">addObserver</span><span class="p">(</span><span class="n">forName</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">GCMouseDidConnect</span><span class="p">,</span><span class="w"> </span><span class="n">object</span><span class="p">:</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="n">queue</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">main</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">[</span><span class="kr">weak</span><span class="w"> </span><span class="kc">self</span><span class="p">]</span><span class="w"> </span><span class="n">note</span><span class="w"> </span><span class="k">in</span>
 <span class="w">    </span><span class="k">guard</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">mouse</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">note</span><span class="p">.</span><span class="n">object</span><span class="w"> </span><span class="k">as</span><span class="p">?</span><span class="w"> </span><span class="bp">GCMouse</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="p">}</span>
@@ -350,15 +359,19 @@
 </code></pre></div>
 </div>
 
-<p><code>deltaY</code> is positive when the mouse moves up, so pitch increases and the camera looks up. On macOS the window must be key for keyboard polling to work; click it once after launch. The same framework reads game controllers through <code>GCController</code>, which is the natural choice on iPhone.</p>
+<p><code>deltaY</code> è positivo quando il mouse sale, quindi il pitch aumenta e la camera guarda in alto.<br>
+Su macOS la finestra deve essere quella attiva perché l'interrogazione della tastiera funzioni; cliccala una volta dopo l'avvio.<br>
+Lo stesso framework legge i controller di gioco attraverso <code>GCController</code>, che su iPhone è la scelta naturale.</p>
 <div class="lang-cpp">
 <div class="admonition note">
-<p class="admonition-title">Input in C++</p>
-<p>The C++ version uses GLFW, which the window already comes from, in place of the GameController framework. <code>glfwGetKey</code> polls the keyboard, and cursor and scroll callbacks deliver mouse movement. GLFW reports the cursor position with y growing downward, so the callback subtracts in the other order to make pitch increase when the mouse moves up.</p>
+<p class="admonition-title">L'input in C++</p>
+<p>La versione C++ usa GLFW, da cui arriva già la finestra, al posto del framework GameController.<br>
+<code>glfwGetKey</code> interroga la tastiera, e le callback del cursore e dello scroll consegnano il movimento del mouse.<br>
+GLFW riporta la posizione del cursore con y che cresce verso il basso, quindi la callback sottrae nell'ordine inverso per far aumentare il pitch quando il mouse sale.</p>
 </div>
 </div>
 
-<h2 id="putting-it-together">Putting it together<a class="headerlink" href="#putting-it-together" title="Permanent link">#</a></h2>
+<h2 id="mettere-tutto-insieme">Mettere tutto insieme<a class="headerlink" href="#mettere-tutto-insieme" title="Permanent link">#</a></h2>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">camera</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Camera</span><span class="p">()</span>
 
@@ -379,21 +392,26 @@
 </code></pre></div>
 </div>
 
-<p>Zoom is nothing more than narrowing the field of view. You can now fly around the ten cubes from the previous chapter.</p>
+<p>Lo zoom non è altro che un campo visivo più stretto.<br>
+Ora puoi volare intorno ai dieci cubi del capitolo precedente.</p>
 <div class="lm-demo" data-demo="camera" data-fallback="../../assets/img/getting-started/camera.webp"></div>
 
-<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<h2 id="esercizi">Esercizi<a class="headerlink" href="#esercizi" title="Permanent link">#</a></h2>
 <ul>
-<li>Turn the fly camera into a first-person camera that cannot leave the ground plane (keep <code>position.y</code> fixed).<details class="solution"><summary>Mostra la soluzione</summary><p>Move along a flattened front vector, so looking up or down does not change your height: normalize <code>(front.x, 0, front.z)</code> and use that in <code>move</code>. Leave <code>viewMatrix</code> unchanged so you can still look around freely.</p></details></li>
-<li>Add Q and E to move straight up and down.<details class="solution"><summary>Mostra la soluzione</summary><p>Add a vertical input to <code>move</code> and apply it along the world up axis: <code>position.y += vertical * speed * deltaTime</code>. Read the two keys the same way as W and S (<code>.keyQ</code> and <code>.keyE</code> with GameController, <code>GLFW_KEY_Q</code> and <code>GLFW_KEY_E</code> with GLFW).</p></details></li>
-<li>Hold Shift to triple the movement speed.<details class="solution"><summary>Mostra la soluzione</summary><p>Multiply the speed while Shift is down. With GameController check <code>keyboard.button(forKeyCode: .leftShift)?.isPressed</code>; with GLFW check <code>glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS</code>. Then pass <code>deltaTime * 3</code> to <code>move</code>, or scale <code>speed</code> for that frame.</p></details></li>
+<li>Trasforma la camera libera in una camera in prima persona che non può lasciare il piano del terreno (tieni fisso <code>position.y</code>).<details class="solution"><summary>Mostra la soluzione</summary><p>Muoviti lungo un vettore front appiattito, così guardare in alto o in basso non cambia la tua altezza: normalizza <code>(front.x, 0, front.z)</code> e usa quello in <code>move</code>.<br>
+Lascia invariata <code>viewMatrix</code>, così puoi ancora guardarti intorno liberamente.</p></details></li>
+<li>Aggiungi Q ed E per salire e scendere in verticale.<details class="solution"><summary>Mostra la soluzione</summary><p>Aggiungi a <code>move</code> un input verticale e applicalo lungo l'asse up del mondo: <code>position.y += vertical * speed * deltaTime</code>.<br>
+Leggi i due tasti come fai con W e S (<code>.keyQ</code> e <code>.keyE</code> con GameController, <code>GLFW_KEY_Q</code> e <code>GLFW_KEY_E</code> con GLFW).</p></details></li>
+<li>Tieni premuto Shift per triplicare la velocità di movimento.<details class="solution"><summary>Mostra la soluzione</summary><p>Moltiplica la velocità finché Shift è premuto.<br>
+Con GameController controlla <code>keyboard.button(forKeyCode: .leftShift)?.isPressed</code>; con GLFW controlla <code>glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS</code>.<br>
+Poi passa <code>deltaTime * 3</code> a <code>move</code>, oppure scala <code>speed</code> per quel frame.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../getting-started/coordinate-systems.html"><small>Precedente</small>Sistemi di coordinate</a><a class="next" href="../getting-started/review.html"><small>Successivo</small>Riepilogo</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#the-look-at-matrix">The look-at matrix</a></li><li><a href="#a-fly-camera">A fly camera</a></li><li><a href="#delta-time">Delta time</a></li><li><a href="#input">Input</a></li><li><a href="#putting-it-together">Putting it together</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#la-matrice-look-at">La matrice look-at</a></li><li><a href="#una-camera-libera">Una camera libera</a></li><li><a href="#delta-time">Delta time</a></li><li><a href="#input">Input</a></li><li><a href="#mettere-tutto-insieme">Mettere tutto insieme</a></li><li><a href="#esercizi">Esercizi</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

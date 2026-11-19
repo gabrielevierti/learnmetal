@@ -1,0 +1,3 @@
+Dai allo state del contorno un normale test di profondità: `depthCompareFunction = .less` al posto di `.always`. La copia ingrandita viene allora nascosta da tutto ciò che è più vicino alla camera. Nella demo interattiva togli la spunta a "ignore depth".
+---
+Usa lo state che scrive nello stencil solo mentre disegni il cubo a cui vuoi dare il contorno, e disegna gli altri con il normale state di profondità. Poi disegna la copia ingrandita di quel solo cubo. Il valore di riferimento potrebbe anche distinguere gli oggetti: scrivi 1 per un cubo e 2 per un altro, e fai il test contro il valore che ti interessa.

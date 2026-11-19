@@ -135,7 +135,9 @@
 </nav>
 <main class="content" id="main">
 <article><p class="crumb">Advanced Metal</p><h1 id="cubemaps">Cubemaps<a class="headerlink" href="#cubemaps" title="Permanent link">#</a></h1>
-<p>A <strong>cubemap</strong> is a texture made of six square images arranged as the faces of a cube. It is sampled with a 3D direction instead of a 2D coordinate: imagine standing at the center of the cube and looking along the direction, and you get the color that you see. Cubemaps are used for skies, reflections, and, later, for omnidirectional shadows and image-based lighting.</p>
+<p>A <strong>cubemap</strong> is a texture made of six square images arranged as the faces of a cube.<br>
+It is sampled with a 3D direction instead of a 2D coordinate: imagine standing at the center of the cube and looking along the direction, and you get the color that you see.<br>
+Cubemaps are used for skies, reflections, and, later, for omnidirectional shadows and image-based lighting.</p>
 <h2 id="creating-a-cubemap">Creating a cubemap<a class="headerlink" href="#creating-a-cubemap" title="Permanent link">#</a></h2>
 <p>The six faces are stored as six <strong>slices</strong> of one texture of type <code>.typeCube</code>, in the order +X, -X, +Y, -Y, +Z, -Z (right, left, top, bottom, front, back).</p>
 <p><strong>From six image files</strong>, the shortest route is through Model I/O:</p>
@@ -218,7 +220,8 @@
 </div>
 
 <h2 id="a-skybox">A skybox<a class="headerlink" href="#a-skybox" title="Permanent link">#</a></h2>
-<p>A skybox is a cube drawn around the camera and textured with a cubemap, giving the illusion of a vast environment. Its texture coordinate is simply the cube's local position, used as a direction.</p>
+<p>A skybox is a cube drawn around the camera and textured with a cubemap, giving the illusion of a vast environment.<br>
+Its texture coordinate is simply the cube's local position, used as a direction.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">SkyOut</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="p">[[</span><span class="na">position</span><span class="p">]];</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">direction</span><span class="p">;</span>
@@ -242,8 +245,11 @@
 
 <p>Two tricks are packed into the vertex function:</p>
 <ul>
-<li>The position is multiplied with <strong>w = 0</strong>, which removes the translation of the view matrix. The sky rotates with the camera but never gets closer.</li>
-<li>The output is <code>clip.xyww</code>. After the perspective divide, z becomes w / w = <strong>1</strong>, the far plane. The sky ends up behind everything.</li>
+<li>The position is multiplied with <strong>w = 0</strong>, which removes the translation of the view matrix.<br>
+The sky rotates with the camera but never gets closer.</li>
+<li>The output is <code>clip.xyww</code>.<br>
+After the perspective divide, z becomes w / w = <strong>1</strong>, the far plane.<br>
+The sky ends up behind everything.</li>
 </ul>
 <p>Draw the sky <strong>last</strong>, after all opaque objects, with a depth state that uses <code>.lessEqual</code> and does not write depth:</p>
 <div class="lang-swift">
@@ -259,10 +265,13 @@
 </code></pre></div>
 </div>
 
-<p>Drawn last, the sky's fragments are rejected wherever something else was drawn, so the sky costs only the pixels where it is visible. <code>.lessEqual</code> is needed because the sky's depth equals the cleared value of 1. The camera is inside the cube, so disable culling for this draw.</p>
+<p>Drawn last, the sky's fragments are rejected wherever something else was drawn, so the sky costs only the pixels where it is visible.<br>
+<code>.lessEqual</code> is needed because the sky's depth equals the cleared value of 1.<br>
+The camera is inside the cube, so disable culling for this draw.</p>
 <div class="admonition note">
 <p class="admonition-title">Handedness</p>
-<p>Cubemaps use a left-handed convention, a historical quirk shared by all graphics APIs. If a skybox looks mirrored in your right-handed world, negate the x or z component of the direction in the shader.</p>
+<p>Cubemaps use a left-handed convention, a historical quirk shared by all graphics APIs.<br>
+If a skybox looks mirrored in your right-handed world, negate the x or z component of the direction in the shader.</p>
 </div>
 <h2 id="reflection">Reflection<a class="headerlink" href="#reflection" title="Permanent link">#</a></h2>
 <p>With the environment in a cubemap, a mirror-like surface is easy: reflect the view direction around the normal and use the result to sample the sky.</p>
@@ -278,7 +287,8 @@
 
 <p>Combine it with a specular map to make only parts of a model reflective.</p>
 <h2 id="refraction">Refraction<a class="headerlink" href="#refraction" title="Permanent link">#</a></h2>
-<p>Light bends when it passes from one medium into another. <code>refract</code> computes the bent direction from the ratio of the two <strong>refractive indices</strong>:</p>
+<p>Light bends when it passes from one medium into another.<br>
+<code>refract</code> computes the bent direction from the ratio of the two <strong>refractive indices</strong>:</p>
 <table>
 <thead>
 <tr>
@@ -310,11 +320,14 @@
 <span class="k">return</span><span class="w"> </span><span class="n">sky</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">refracted</span><span class="p">);</span>
 </code></pre></div>
 
-<p>This is a single refraction at the surface. It is physically incomplete, but it looks convincingly glassy.</p>
+<p>This is a single refraction at the surface.<br>
+It is physically incomplete, but it looks convincingly glassy.</p>
 <div class="lm-demo" data-demo="cubemaps" data-fallback="../assets/img/advanced-metal/cubemaps.webp"></div>
 
 <h2 id="rendering-into-a-cubemap">Rendering into a cubemap<a class="headerlink" href="#rendering-into-a-cubemap" title="Permanent link">#</a></h2>
-<p>A static sky cannot reflect moving objects. For dynamic reflections, render the scene six times from the object's position, once into each face, with a 90 degree field of view and an aspect ratio of 1. Select the face with the attachment's <code>slice</code>:</p>
+<p>A static sky cannot reflect moving objects.<br>
+For dynamic reflections, render the scene six times from the object's position, once into each face, with a 90 degree field of view and an aspect ratio of 1.<br>
+Select the face with the attachment's <code>slice</code>:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">pass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">texture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">environmentCube</span>
 <span class="n">pass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">slice</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">face</span>
@@ -417,10 +430,14 @@
 </code></pre></div>
 </div>
 
-<p>A left-handed view mirrors the scene, which reverses triangle winding, so use <code>setFrontFacing(.clockwise)</code> while rendering the faces. We reuse these helpers for <a href="../advanced-lighting/point-shadows.html">Point Shadows</a> and for image-based lighting. Six scene renders per frame are expensive; engines update such probes rarely or one face per frame.</p>
+<p>A left-handed view mirrors the scene, which reverses triangle winding, so use <code>setFrontFacing(.clockwise)</code> while rendering the faces.<br>
+We reuse these helpers for <a href="../advanced-lighting/point-shadows.html">Point Shadows</a> and for image-based lighting.<br>
+Six scene renders per frame are expensive; engines update such probes rarely or one face per frame.</p>
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
-<li>Draw the skybox first instead of last, with depth writes off, and measure the difference in the Xcode GPU report on a heavy scene.<details class="solution"><summary>Show solution</summary><p>Drawn first, the sky's fragment function runs for every pixel of the screen, and most of those pixels are then overdrawn by the scene. Drawn last with <code>.lessEqual</code>, it runs only where nothing else was drawn. On Apple GPUs hidden surface removal narrows the gap for opaque draws, but drawing the sky last is never slower.</p></details></li>
+<li>Draw the skybox first instead of last, with depth writes off, and measure the difference in the Xcode GPU report on a heavy scene.<details class="solution"><summary>Show solution</summary><p>Drawn first, the sky's fragment function runs for every pixel of the screen, and most of those pixels are then overdrawn by the scene.<br>
+Drawn last with <code>.lessEqual</code>, it runs only where nothing else was drawn.<br>
+On Apple GPUs hidden surface removal narrows the gap for opaque draws, but drawing the sky last is never slower.</p></details></li>
 <li>Blend reflection and refraction by a factor that depends on the viewing angle.<details class="solution"><summary>Show solution</summary><p>Use the Fresnel effect: more reflection at grazing angles.</p>
 <div class="codehilite"><pre><span></span><code><span class="kt">float</span><span class="w"> </span><span class="n">fresnel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pow</span><span class="p">(</span><span class="mf">1.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">max</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="o">-</span><span class="n">incident</span><span class="p">,</span><span class="w"> </span><span class="n">normal</span><span class="p">),</span><span class="w"> </span><span class="mf">0.0</span><span class="p">),</span><span class="w"> </span><span class="mf">5.0</span><span class="p">);</span>
 <span class="n">float3</span><span class="w"> </span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mix</span><span class="p">(</span><span class="n">refracted</span><span class="p">,</span><span class="w"> </span><span class="n">reflected</span><span class="p">,</span><span class="w"> </span><span class="n">saturate</span><span class="p">(</span><span class="mf">0.04</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.96</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fresnel</span><span class="p">));</span>

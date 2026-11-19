@@ -1,0 +1,3 @@
+Con `.always` non viene mai scartato niente, quindi ogni pixel mostra ciò che è stato disegnato per ultimo. Gli oggetti disegnati dopo appaiono davanti a quelli disegnati prima anche quando stanno dietro, e in un singolo cubo le facce in fondo al vertex buffer coprono le altre.
+---
+Da vicino i due rettangoli hanno profondità distinte. Man mano che la camera si allontana entrambe le profondità si avvicinano a 1 e si arrotondano allo stesso numero, e compaiono le strisce tremolanti. Ogni rimedio funziona: uno scarto maggiore, un near plane più lontano (prova 1.0 invece di 0.1), un depth bias sul secondo rettangolo con `setDepthBias`, oppure il reverse-Z.

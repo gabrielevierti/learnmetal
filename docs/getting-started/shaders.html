@@ -137,9 +137,11 @@
 <article><p class="crumb">Getting Started</p><h1 id="shaders">Shaders<a class="headerlink" href="#shaders" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Example project</strong> <code>examples/Sources/03-Shaders</code>, run with <code>swift run Shaders</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
 
-<p>Shaders are where graphics programming happens. This chapter looks at the Metal Shading Language more closely, and shows the two ways data reaches a shader: per-vertex attributes that are interpolated across a triangle, and uniforms that are the same for a whole draw call.</p>
+<p>Shaders are where graphics programming happens.<br>
+This chapter looks at the Metal Shading Language more closely, and shows the two ways data reaches a shader: per-vertex attributes that are interpolated across a triangle, and uniforms that are the same for a whole draw call.</p>
 <h2 id="the-language-in-brief">The language in brief<a class="headerlink" href="#the-language-in-brief" title="Permanent link">#</a></h2>
-<p>MSL is based on C++14. The types you will use all the time:</p>
+<p>MSL is based on C++14.<br>
+The types you will use all the time:</p>
 <table>
 <thead>
 <tr>
@@ -170,10 +172,12 @@
 </tr>
 </tbody>
 </table>
-<p>Vectors support <strong>swizzling</strong>: <code>v.xyz</code>, <code>v.rg</code>, <code>v.zyx</code>, <code>color.rgb * color.a</code>. The standard library has the functions you expect: <code>dot</code>, <code>cross</code>, <code>normalize</code>, <code>length</code>, <code>reflect</code>, <code>mix</code>, <code>clamp</code>, <code>saturate</code>, <code>pow</code>, <code>smoothstep</code>, <code>max</code>, <code>min</code>.</p>
+<p>Vectors support <strong>swizzling</strong>: <code>v.xyz</code>, <code>v.rg</code>, <code>v.zyx</code>, <code>color.rgb * color.a</code>.<br>
+The standard library has the functions you expect: <code>dot</code>, <code>cross</code>, <code>normalize</code>, <code>length</code>, <code>reflect</code>, <code>mix</code>, <code>clamp</code>, <code>saturate</code>, <code>pow</code>, <code>smoothstep</code>, <code>max</code>, <code>min</code>.</p>
 <p>Things MSL does not allow: recursion, lambdas, virtual functions, exceptions, <code>new</code>, and the C++ standard library.</p>
 <h2 id="passing-data-between-stages">Passing data between stages<a class="headerlink" href="#passing-data-between-stages" title="Permanent link">#</a></h2>
-<p>Whatever the vertex function returns is interpolated across the triangle and handed to the fragment function. Add a color to the output struct:</p>
+<p>Whatever the vertex function returns is interpolated across the triangle and handed to the fragment function.<br>
+Add a color to the output struct:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">VertexOut</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="p">[[</span><span class="na">position</span><span class="p">]];</span>
 <span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">color</span><span class="p">;</span>
@@ -191,9 +195,11 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>Each vertex computes a color from its own position, and every fragment in between receives a blend of the three. This interpolation is automatic for every member of the struct.</p>
+<p>Each vertex computes a color from its own position, and every fragment in between receives a blend of the three.<br>
+This interpolation is automatic for every member of the struct.</p>
 <h2 id="more-vertex-attributes">More vertex attributes<a class="headerlink" href="#more-vertex-attributes" title="Permanent link">#</a></h2>
-<p>Colors can also come from the vertex buffer. Interleave them with the positions:</p>
+<p>Colors can also come from the vertex buffer.<br>
+Interleave them with the positions:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">vertices</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="nb">Float</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="c1">// position         // color</span>
@@ -255,7 +261,8 @@
 <div class="lm-demo" data-demo="shaders" data-fallback="../assets/img/getting-started/shaders.webp"></div>
 
 <h2 id="uniforms">Uniforms<a class="headerlink" href="#uniforms" title="Permanent link">#</a></h2>
-<p>A <strong>uniform</strong> is data that stays constant during a draw call: a time value, a transformation matrix, a light position. In Metal a uniform is simply a struct in a buffer that the shader receives by reference.</p>
+<p>A <strong>uniform</strong> is data that stays constant during a draw call: a time value, a transformation matrix, a light position.<br>
+In Metal a uniform is simply a struct in a buffer that the shader receives by reference.</p>
 <p>Declare the struct in the shader and add it as a parameter:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">Uniforms</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">time</span><span class="p">;</span>
@@ -269,7 +276,9 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p><code>constant</code> is the address space for read-only buffer data. <code>[[buffer(0)]]</code> is slot 0 of the <strong>fragment</strong> buffer table. Vertex and fragment functions have separate tables, so vertex buffer 0 and fragment buffer 0 are unrelated.</p>
+<p><code>constant</code> is the address space for read-only buffer data.<br>
+<code>[[buffer(0)]]</code> is slot 0 of the <strong>fragment</strong> buffer table.<br>
+Vertex and fragment functions have separate tables, so vertex buffer 0 and fragment buffer 0 are unrelated.</p>
 <p>Declare a matching struct in Swift:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">Uniforms</span><span class="w"> </span><span class="p">{</span>
@@ -303,25 +312,36 @@
 </code></pre></div>
 </div>
 
-<p>Store <code>startTime = CACurrentMediaTime()</code> in <code>init</code>; a <code>Float</code> cannot hold the raw value precisely enough. There is a matching <code>setVertexBytes</code> for the vertex stage. For data larger than 4 KB, or data shared by many draws, create an <code>MTLBuffer</code> yourself and bind it with <code>setFragmentBuffer</code>.</p>
+<p>Store <code>startTime = CACurrentMediaTime()</code> in <code>init</code>; a <code>Float</code> cannot hold the raw value precisely enough.<br>
+There is a matching <code>setVertexBytes</code> for the vertex stage.<br>
+For data larger than 4 KB, or data shared by many draws, create an <code>MTLBuffer</code> yourself and bind it with <code>setFragmentBuffer</code>.</p>
 <h2 id="keeping-swift-and-msl-layouts-in-sync">Keeping Swift and MSL layouts in sync<a class="headerlink" href="#keeping-swift-and-msl-layouts-in-sync" title="Permanent link">#</a></h2>
-<p>The Swift struct and the MSL struct must have identical memory layouts. Nothing checks this for you, and a mismatch produces garbage values, not an error. Three rules prevent nearly all problems:</p>
+<p>The Swift struct and the MSL struct must have identical memory layouts.<br>
+Nothing checks this for you, and a mismatch produces garbage values, not an error.<br>
+Three rules prevent nearly all problems:</p>
 <ol>
-<li>Use <code>SIMD</code> types in Swift for vectors and <code>simd_float4x4</code> (<code>float4x4</code>) for matrices. <code>SIMD4&lt;Float&gt;</code> matches <code>float4</code>, <code>SIMD2&lt;Float&gt;</code> matches <code>float2</code>.</li>
-<li><code>SIMD3&lt;Float&gt;</code> and MSL <code>float3</code> both occupy <strong>16 bytes</strong>, not 12. They match each other, but they do not match three loose floats. When you need a tightly packed 12-byte vector in a buffer, MSL has <code>packed_float3</code>.</li>
+<li>Use <code>SIMD</code> types in Swift for vectors and <code>simd_float4x4</code> (<code>float4x4</code>) for matrices.<br>
+<code>SIMD4&lt;Float&gt;</code> matches <code>float4</code>, <code>SIMD2&lt;Float&gt;</code> matches <code>float2</code>.</li>
+<li><code>SIMD3&lt;Float&gt;</code> and MSL <code>float3</code> both occupy <strong>16 bytes</strong>, not 12.<br>
+They match each other, but they do not match three loose floats.<br>
+When you need a tightly packed 12-byte vector in a buffer, MSL has <code>packed_float3</code>.</li>
 <li>Always use <code>MemoryLayout&lt;T&gt;.stride</code>, not <code>.size</code>, for buffer lengths.</li>
 </ol>
 <p>In our struct, <code>time</code> is 4 bytes followed by 12 bytes of padding so that <code>tint</code> starts at offset 16, in both languages.</p>
 <div class="admonition note">
 <p class="admonition-title">One definition for both languages</p>
-<p>Larger projects put shared structs in a C header that is included by the <code>.metal</code> file and exposed to Swift through a bridging header. Then there is only one definition and the layouts cannot drift. This series repeats the structs on both sides to keep each chapter readable on its own.</p>
+<p>Larger projects put shared structs in a C header that is included by the <code>.metal</code> file and exposed to Swift through a bridging header.<br>
+Then there is only one definition and the layouts cannot drift.<br>
+This series repeats the structs on both sides to keep each chapter readable on its own.</p>
 </div>
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
-<li>Flip the triangle upside down in the vertex function only.<details class="solution"><summary>Show solution</summary><p>Negate y when writing the position. Only the vertex function changes.</p>
+<li>Flip the triangle upside down in the vertex function only.<details class="solution"><summary>Show solution</summary><p>Negate y when writing the position.<br>
+Only the vertex function changes.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">out</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">in</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
 </code></pre></div></details></li>
-<li>Add a <code>float2 offset</code> uniform for the vertex stage and move the triangle in a circle over time.<details class="solution"><summary>Show solution</summary><p>Give the vertex function its own uniform struct at a free buffer index and add the offset. On the CPU set <code>offset = (cos(time), sin(time)) * 0.3</code> each frame and send it with <code>setVertexBytes</code> at index 1.</p>
+<li>Add a <code>float2 offset</code> uniform for the vertex stage and move the triangle in a circle over time.<details class="solution"><summary>Show solution</summary><p>Give the vertex function its own uniform struct at a free buffer index and add the offset.<br>
+On the CPU set <code>offset = (cos(time), sin(time)) * 0.3</code> each frame and send it with <code>setVertexBytes</code> at index 1.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">VertexUniforms</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">offset</span><span class="p">;</span>
 <span class="p">};</span>
@@ -334,7 +354,10 @@
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div></details></li>
-<li>Output the position as the color (<code>out.color = out.position</code>). Why is the bottom-left corner black?<details class="solution"><summary>Show solution</summary><p>The bottom-left vertex is at (-0.5, -0.5, 0). Used as a color that is negative red and green and zero blue, and the color attachment clamps negative values to 0, so that corner is black. The interpolated values only become positive, and visible, toward the right and top of the triangle.</p></details></li>
+<li>Output the position as the color (<code>out.color = out.position</code>).<br>
+Why is the bottom-left corner black?<details class="solution"><summary>Show solution</summary><p>The bottom-left vertex is at (-0.5, -0.5, 0).<br>
+Used as a color that is negative red and green and zero blue, and the color attachment clamps negative values to 0, so that corner is black.<br>
+The interpolated values only become positive, and visible, toward the right and top of the triangle.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../getting-started/hello-triangle.html"><small>Previous</small>Hello Triangle</a><a class="next" href="../getting-started/textures.html"><small>Next</small>Textures</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>

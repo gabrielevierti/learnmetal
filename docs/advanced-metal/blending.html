@@ -135,9 +135,13 @@
 </nav>
 <main class="content" id="main">
 <article><p class="crumb">Advanced Metal</p><h1 id="blending">Blending<a class="headerlink" href="#blending" title="Permanent link">#</a></h1>
-<p>Blending is how transparency is done. Instead of replacing the color already in the texture, a new fragment's color is <em>combined</em> with it. The fourth color component, <strong>alpha</strong>, usually controls how: 1 is fully opaque, 0 is fully transparent.</p>
+<p>Blending is how transparency is done.<br>
+Instead of replacing the color already in the texture, a new fragment's color is <em>combined</em> with it.<br>
+The fourth color component, <strong>alpha</strong>, usually controls how: 1 is fully opaque, 0 is fully transparent.</p>
 <h2 id="discarding-fragments">Discarding fragments<a class="headerlink" href="#discarding-fragments" title="Permanent link">#</a></h2>
-<p>Some images are either fully opaque or fully transparent, like a grass or leaf texture with a cut-out shape. They need no blending. The fragment function can simply throw the transparent fragments away:</p>
+<p>Some images are either fully opaque or fully transparent, like a grass or leaf texture with a cut-out shape.<br>
+They need no blending.<br>
+The fragment function can simply throw the transparent fragments away:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_cutout</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
 <span class="w">                                </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">colorTexture</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
 <span class="w">                                </span><span class="n">sampler</span><span class="w"> </span><span class="n">textureSampler</span><span class="w"> </span><span class="p">[[</span><span class="na">sampler</span><span class="p">(</span><span class="mi">0</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
@@ -149,14 +153,16 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>A discarded fragment writes neither color nor depth. Load such textures with a sampler that uses <code>.clampToEdge</code>; with <code>.repeat</code>, linear filtering blends the top row with the bottom row and leaves a faint line at the edge.</p>
+<p>A discarded fragment writes neither color nor depth.<br>
+Load such textures with a sampler that uses <code>.clampToEdge</code>; with <code>.repeat</code>, linear filtering blends the top row with the bottom row and leaves a faint line at the edge.</p>
 <p>On tile-based GPUs, <code>discard_fragment</code> prevents some hidden-surface optimizations, so use it only in the pipelines that need it.</p>
 <h2 id="the-blend-equation">The blend equation<a class="headerlink" href="#the-blend-equation" title="Permanent link">#</a></h2>
 <p>For semi-transparent surfaces such as glass, the pipeline computes</p>
 <div class="codehilite"><pre><span></span><code>result = source * sourceFactor  (op)  destination * destinationFactor
 </code></pre></div>
 
-<p>where <strong>source</strong> is the fragment function's output and <strong>destination</strong> is the color already stored. In Metal, blending is part of the <strong>render pipeline state</strong>, configured per color attachment:</p>
+<p>where <strong>source</strong> is the fragment function's output and <strong>destination</strong> is the color already stored.<br>
+In Metal, blending is part of the <strong>render pipeline state</strong>, configured per color attachment:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">attachment</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">pipelineDescriptor</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">!</span>
 <span class="n">attachment</span><span class="p">.</span><span class="n">isBlendingEnabled</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kc">true</span>
@@ -180,7 +186,8 @@
 </code></pre></div>
 </div>
 
-<p>This is classic alpha blending: <code>result = source * alpha + destination * (1 - alpha)</code>. A red window with alpha 0.5 in front of a green wall gives an even mix of both.</p>
+<p>This is classic alpha blending: <code>result = source * alpha + destination * (1 - alpha)</code>.<br>
+A red window with alpha 0.5 in front of a green wall gives an even mix of both.</p>
 <p>Some other useful setups:</p>
 <table>
 <thead>
@@ -215,14 +222,19 @@
 </table>
 <div class="admonition note">
 <p class="admonition-title">Coming from OpenGL</p>
-<p>There is no <code>glEnable(GL_BLEND)</code> to toggle between draws. You create one pipeline state for opaque drawing and another for blended drawing, and switch pipeline states.</p>
+<p>There is no <code>glEnable(GL_BLEND)</code> to toggle between draws.<br>
+You create one pipeline state for opaque drawing and another for blended drawing, and switch pipeline states.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Premultiplied alpha</p>
-<p>Many image loaders, Core Graphics included, deliver colors already multiplied by their alpha. Blending such a texture with <code>.sourceAlpha</code> darkens the edges. Use <code>.one</code> as the source factor for premultiplied content.</p>
+<p>Many image loaders, Core Graphics included, deliver colors already multiplied by their alpha.<br>
+Blending such a texture with <code>.sourceAlpha</code> darkens the edges.<br>
+Use <code>.one</code> as the source factor for premultiplied content.</p>
 </div>
 <h2 id="order-matters">Order matters<a class="headerlink" href="#order-matters" title="Permanent link">#</a></h2>
-<p>Blending and the depth buffer do not cooperate. If a window is drawn first, it writes its depth, and anything drawn later behind it is rejected by the depth test, even though it should be visible through the glass. The rule for a correct image:</p>
+<p>Blending and the depth buffer do not cooperate.<br>
+If a window is drawn first, it writes its depth, and anything drawn later behind it is rejected by the depth test, even though it should be visible through the glass.<br>
+The rule for a correct image:</p>
 <ol>
 <li>Draw all <strong>opaque</strong> objects first.</li>
 <li><strong>Sort</strong> the transparent objects by distance from the camera.</li>
@@ -258,14 +270,23 @@
 </code></pre></div>
 </div>
 
-<p>Sorting by object distance is not perfect. Intersecting or very large transparent surfaces can still blend in the wrong order. Techniques that remove the need for sorting are grouped under the name <strong>order-independent transparency</strong>. Apple GPUs make one family of them practical through programmable blending, where a fragment function can read the current color of the pixel it is writing; you will meet that feature in <a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a>.</p>
+<p>Sorting by object distance is not perfect.<br>
+Intersecting or very large transparent surfaces can still blend in the wrong order.<br>
+Techniques that remove the need for sorting are grouped under the name <strong>order-independent transparency</strong>.<br>
+Apple GPUs make one family of them practical through programmable blending, where a fragment function can read the current color of the pixel it is writing; you will meet that feature in <a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a>.</p>
 <div class="lm-demo" data-demo="blending" data-fallback="../assets/img/advanced-metal/blending.webp"></div>
 
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
-<li>Render grass quads with <code>discard_fragment</code>, then with blending but no sorting, and compare the edges.<details class="solution"><summary>Show solution</summary><p>With <code>discard_fragment</code> the edges are hard: a pixel is in or out, and you see stair steps where the texture's alpha is partial. With blending the edges are smooth, but without sorting a nearer quad drawn first writes depth and cuts rectangular holes into the grass behind it. Cut-outs want discard (or alpha-to-coverage); real transparency wants blending with sorting.</p></details></li>
-<li>Draw the windows front to back to see the artifact that sorting prevents.<details class="solution"><summary>Show solution</summary><p>The nearest window is drawn first and writes its depth. Every window behind it then fails the depth test, so it is missing where the near one covers it, even though you should see it through the glass. In the live demo, untick "sort back to front" and tick "windows write depth".</p></details></li>
-<li>Make an additive particle pipeline and draw a few overlapping quads.<details class="solution"><summary>Show solution</summary><p>Enable blending with source factor <code>.one</code> (or <code>.sourceAlpha</code>) and destination factor <code>.one</code>, and turn depth writes off. Colors add up, so overlapping quads get brighter, and the order no longer matters, since addition is commutative. That is why additive particles need no sorting.</p></details></li>
+<li>Render grass quads with <code>discard_fragment</code>, then with blending but no sorting, and compare the edges.<details class="solution"><summary>Show solution</summary><p>With <code>discard_fragment</code> the edges are hard: a pixel is in or out, and you see stair steps where the texture's alpha is partial.<br>
+With blending the edges are smooth, but without sorting a nearer quad drawn first writes depth and cuts rectangular holes into the grass behind it.<br>
+Cut-outs want discard (or alpha-to-coverage); real transparency wants blending with sorting.</p></details></li>
+<li>Draw the windows front to back to see the artifact that sorting prevents.<details class="solution"><summary>Show solution</summary><p>The nearest window is drawn first and writes its depth.<br>
+Every window behind it then fails the depth test, so it is missing where the near one covers it, even though you should see it through the glass.<br>
+In the live demo, untick "sort back to front" and tick "windows write depth".</p></details></li>
+<li>Make an additive particle pipeline and draw a few overlapping quads.<details class="solution"><summary>Show solution</summary><p>Enable blending with source factor <code>.one</code> (or <code>.sourceAlpha</code>) and destination factor <code>.one</code>, and turn depth writes off.<br>
+Colors add up, so overlapping quads get brighter, and the order no longer matters, since addition is commutative.<br>
+That is why additive particles need no sorting.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../advanced-metal/stencil-testing.html"><small>Previous</small>Stencil Testing</a><a class="next" href="../advanced-metal/face-culling.html"><small>Next</small>Face Culling</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>

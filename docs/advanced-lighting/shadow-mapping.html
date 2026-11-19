@@ -137,10 +137,14 @@
 <article><p class="crumb">Advanced Lighting</p><h1 id="shadow-mapping">Shadow Mapping<a class="headerlink" href="#shadow-mapping" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Example project</strong> <code>examples/Sources/14-ShadowMapping</code>, run with <code>swift run ShadowMapping</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
 
-<p>Shadows anchor objects to the ground and reveal how things are arranged in space. The standard real-time technique is <strong>shadow mapping</strong>, and it is built from parts you already know: a depth buffer and render-to-texture.</p>
+<p>Shadows anchor objects to the ground and reveal how things are arranged in space.<br>
+The standard real-time technique is <strong>shadow mapping</strong>, and it is built from parts you already know: a depth buffer and render-to-texture.</p>
 <h2 id="the-idea">The idea<a class="headerlink" href="#the-idea" title="Permanent link">#</a></h2>
-<p>A point is in shadow if something sits between it and the light. Put a camera at the light and render the scene's <strong>depth</strong> into a texture. That texture, the <strong>shadow map</strong>, records for every direction how far the light reaches before hitting something.</p>
-<p>When shading a fragment in the main pass, transform it into the light's view and compare its depth with the shadow map. If the fragment is farther from the light than the stored value, something closer is blocking the light.</p>
+<p>A point is in shadow if something sits between it and the light.<br>
+Put a camera at the light and render the scene's <strong>depth</strong> into a texture.<br>
+That texture, the <strong>shadow map</strong>, records for every direction how far the light reaches before hitting something.</p>
+<p>When shading a fragment in the main pass, transform it into the light's view and compare its depth with the shadow map.<br>
+If the fragment is farther from the light than the stored value, something closer is blocking the light.</p>
 <h2 id="the-shadow-map-texture">The shadow map texture<a class="headerlink" href="#the-shadow-map-texture" title="Permanent link">#</a></h2>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">shadowSize</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">2048</span>
@@ -173,9 +177,11 @@
 </code></pre></div>
 </div>
 
-<p>The pass has <strong>no color attachment</strong> at all. This time the depth must be stored, since reading it is the whole point.</p>
+<p>The pass has <strong>no color attachment</strong> at all.<br>
+This time the depth must be stored, since reading it is the whole point.</p>
 <h2 id="the-lights-matrices">The light's matrices<a class="headerlink" href="#the-lights-matrices" title="Permanent link">#</a></h2>
-<p>A directional light has parallel rays, so its projection is <strong>orthographic</strong>: a box with no perspective. Add to <code>Math.swift</code>:</p>
+<p>A directional light has parallel rays, so its projection is <strong>orthographic</strong>: a box with no perspective.<br>
+Add to <code>Math.swift</code>:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">extension</span><span class="w"> </span><span class="nc">float4x4</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="c1">/// Right-handed orthographic projection with a 0...1 depth range.</span>
@@ -217,7 +223,8 @@
 </code></pre></div>
 </div>
 
-<p>The box must contain everything that casts or receives shadows in the area you care about. Keep it as tight as you can: the shadow map's resolution is spread over the box.</p>
+<p>The box must contain everything that casts or receives shadows in the area you care about.<br>
+Keep it as tight as you can: the shadow map's resolution is spread over the box.</p>
 <h2 id="the-depth-pass">The depth pass<a class="headerlink" href="#the-depth-pass" title="Permanent link">#</a></h2>
 <p>The pipeline for this pass has a vertex function, no fragment function, and no color format:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">vertex</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">vertex_shadow</span><span class="p">(</span><span class="n">VertexIn</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
@@ -245,7 +252,8 @@
 </code></pre></div>
 </div>
 
-<p>A vertex function may return a bare <code>float4</code>; it is taken as the position. Each frame, render the scene with this pipeline into <code>shadowPass</code> before the main pass, using the same command buffer.</p>
+<p>A vertex function may return a bare <code>float4</code>; it is taken as the position.<br>
+Each frame, render the scene with this pipeline into <code>shadowPass</code> before the main pass, using the same command buffer.</p>
 <h2 id="using-the-shadow-map">Using the shadow map<a class="headerlink" href="#using-the-shadow-map" title="Permanent link">#</a></h2>
 <p>In the main pass, the vertex function also outputs the position in the light's clip space:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">out</span><span class="p">.</span><span class="n">shadowPosition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">lightViewProjection</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">world</span><span class="p">;</span>
@@ -265,10 +273,13 @@
 
 <ul>
 <li>Dividing by w is unnecessary for an orthographic projection but makes the function work for perspective lights as well.</li>
-<li>NDC x and y run from -1 to 1 with y up, and texture coordinates run from 0 to 1 with y down. Hence the scale of <code>(0.5, -0.5)</code>. Depth is already in the 0 to 1 range and needs no conversion.</li>
+<li>NDC x and y run from -1 to 1 with y up, and texture coordinates run from 0 to 1 with y down.<br>
+Hence the scale of <code>(0.5, -0.5)</code>.<br>
+Depth is already in the 0 to 1 range and needs no conversion.</li>
 <li>Depth textures have their own shader type, <code>depth2d&lt;float&gt;</code>.</li>
 </ul>
-<p><code>sample_compare</code> compares the reference depth against the texture and returns 1 if the test passes and 0 if not. The test is configured on the sampler:</p>
+<p><code>sample_compare</code> compares the reference depth against the texture and returns 1 if the test passes and 0 if not.<br>
+The test is configured on the sampler:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">shadowSamplerDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLSamplerDescriptor</span><span class="p">()</span>
 <span class="n">shadowSamplerDescriptor</span><span class="p">.</span><span class="n">minFilter</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">linear</span>
@@ -290,14 +301,18 @@
 </code></pre></div>
 </div>
 
-<p>With <code>.lessEqual</code>, the result is 1 where the fragment is at or in front of the stored depth, meaning lit. Apply it to the diffuse and specular terms and leave ambient alone:</p>
+<p>With <code>.lessEqual</code>, the result is 1 where the fragment is at or in front of the stored depth, meaning lit.<br>
+Apply it to the diffuse and specular terms and leave ambient alone:</p>
 <div class="codehilite"><pre><span></span><code><span class="kt">float</span><span class="w"> </span><span class="n">lit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">calcShadow</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">shadowPosition</span><span class="p">,</span><span class="w"> </span><span class="n">shadowMap</span><span class="p">,</span><span class="w"> </span><span class="n">shadowSampler</span><span class="p">);</span>
 <span class="n">float3</span><span class="w"> </span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ambient</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">lit</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">diffuse</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">specular</span><span class="p">);</span>
 </code></pre></div>
 
 <h2 id="shadow-acne">Shadow acne<a class="headerlink" href="#shadow-acne" title="Permanent link">#</a></h2>
-<p>The first result is covered in dark stripes. The shadow map has limited resolution, so many fragments share one texel, and across a slanted surface half of them come out slightly behind the stored depth. This is <strong>shadow acne</strong>.</p>
-<p>The cure is a <strong>depth bias</strong>: push the stored depth a little away from the light. Metal applies it during rasterization of the shadow pass:</p>
+<p>The first result is covered in dark stripes.<br>
+The shadow map has limited resolution, so many fragments share one texel, and across a slanted surface half of them come out slightly behind the stored depth.<br>
+This is <strong>shadow acne</strong>.</p>
+<p>The cure is a <strong>depth bias</strong>: push the stored depth a little away from the light.<br>
+Metal applies it during rasterization of the shadow pass:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">shadowEncoder</span><span class="p">.</span><span class="n">setDepthBias</span><span class="p">(</span><span class="mf">0.015</span><span class="p">,</span><span class="w"> </span><span class="n">slopeScale</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="n">clamp</span><span class="p">:</span><span class="w"> </span><span class="mf">0.02</span><span class="p">)</span>
 </code></pre></div>
@@ -307,11 +322,17 @@
 </code></pre></div>
 </div>
 
-<p>The constant part is measured in units that depend on the depth format, so treat these numbers as a starting point. The slope-scaled part automatically increases the bias on surfaces at a steep angle to the light, which need it most. Too much bias detaches the shadow from its caster, an artifact known as <strong>peter panning</strong>. Tune until both disappear. Rendering only back faces into the shadow map (<code>setCullMode(.front)</code>) also helps for closed meshes.</p>
+<p>The constant part is measured in units that depend on the depth format, so treat these numbers as a starting point.<br>
+The slope-scaled part automatically increases the bias on surfaces at a steep angle to the light, which need it most.<br>
+Too much bias detaches the shadow from its caster, an artifact known as <strong>peter panning</strong>.<br>
+Tune until both disappear.<br>
+Rendering only back faces into the shadow map (<code>setCullMode(.front)</code>) also helps for closed meshes.</p>
 <div class="lm-demo" data-demo="shadow-mapping"></div>
 
 <h2 id="softer-edges">Softer edges<a class="headerlink" href="#softer-edges" title="Permanent link">#</a></h2>
-<p>Because the comparison sampler uses linear filtering, the GPU compares the four nearest texels and blends the <em>results</em>. That is hardware <strong>percentage-closer filtering</strong> (PCF), and it softens edges for free. Averaging a few more taps softens them further:</p>
+<p>Because the comparison sampler uses linear filtering, the GPU compares the four nearest texels and blends the <em>results</em>.<br>
+That is hardware <strong>percentage-closer filtering</strong> (PCF), and it softens edges for free.<br>
+Averaging a few more taps softens them further:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float2</span><span class="w"> </span><span class="n">texel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">float2</span><span class="p">(</span><span class="n">shadowMap</span><span class="p">.</span><span class="n">get_width</span><span class="p">(),</span><span class="w"> </span><span class="n">shadowMap</span><span class="p">.</span><span class="n">get_height</span><span class="p">());</span>
 <span class="kt">float</span><span class="w"> </span><span class="n">lit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
 <span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -325,19 +346,28 @@
 <figure><img src="../assets/img/advanced-lighting/shadow-mapping.webp" alt="Left: the scene&#x27;s depth as seen from the light. Right: the scene shaded with that shadow map." width="880" height="246" loading="lazy"><figcaption>Left: the scene&#x27;s depth as seen from the light. Right: the scene shaded with that shadow map.</figcaption></figure>
 
 <h2 id="outside-the-map">Outside the map<a class="headerlink" href="#outside-the-map" title="Permanent link">#</a></h2>
-<p>Fragments outside the light's box sample beyond the texture. With <code>.clampToEdge</code> they repeat the border texel, which can smear shadows across the scene. Either return "lit" when <code>uv</code> is outside 0 to 1, or use <code>.clampToBorderColor</code> with an opaque white border where it is supported.</p>
+<p>Fragments outside the light's box sample beyond the texture.<br>
+With <code>.clampToEdge</code> they repeat the border texel, which can smear shadows across the scene.<br>
+Either return "lit" when <code>uv</code> is outside 0 to 1, or use <code>.clampToBorderColor</code> with an opaque white border where it is supported.</p>
 <h2 id="beyond-one-map">Beyond one map<a class="headerlink" href="#beyond-one-map" title="Permanent link">#</a></h2>
-<p>A single map cannot cover a large outdoor scene with enough resolution. <strong>Cascaded shadow maps</strong> split the view frustum into several ranges, each with its own map, stored in the layers of a <code>depth2d_array</code> texture. For spotlights, use a perspective projection for the light and the same code.</p>
+<p>A single map cannot cover a large outdoor scene with enough resolution.<br>
+<strong>Cascaded shadow maps</strong> split the view frustum into several ranges, each with its own map, stored in the layers of a <code>depth2d_array</code> texture.<br>
+For spotlights, use a perspective projection for the light and the same code.</p>
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
-<li>Display the shadow map on a full-screen triangle to check what the light sees.<details class="solution"><summary>Show solution</summary><p>Bind the shadow map to a post-processing pass and output its value. Declare it as a normal depth texture and sample it with an ordinary sampler, not a comparison one.</p>
+<li>Display the shadow map on a full-screen triangle to check what the light sees.<details class="solution"><summary>Show solution</summary><p>Bind the shadow map to a post-processing pass and output its value.<br>
+Declare it as a normal depth texture and sample it with an ordinary sampler, not a comparison one.</p>
 <div class="codehilite"><pre><span></span><code><span class="kt">float</span><span class="w"> </span><span class="n">depth</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">shadowMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">plainSampler</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">);</span>
 <span class="k">return</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">float3</span><span class="p">(</span><span class="n">depth</span><span class="p">),</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
 </code></pre></div>
 
-<p>You should see the scene from the light's position in shades of gray. If it is all white or all black, the light's near and far planes do not enclose the scene.</p></details></li>
-<li>Set the bias to zero, then to a large value, and identify acne and peter panning.<details class="solution"><summary>Show solution</summary><p>At zero, lit surfaces are covered with dark stripes or dots: acne, from fragments that land just behind the depth stored in their texel. With a large bias the stripes go away but shadows detach from the base of the objects and thin objects stop casting shadows: peter panning. The live demo has a bias slider.</p></details></li>
-<li>Move the light over time and watch the shadows follow.<details class="solution"><summary>Show solution</summary><p>Compute the light's position from the time and rebuild its view matrix every frame; the shadow pass and the main pass must use the same matrix. Keep the orthographic box centered on the scene, not on the light.</p></details></li>
+<p>You should see the scene from the light's position in shades of gray.<br>
+If it is all white or all black, the light's near and far planes do not enclose the scene.</p></details></li>
+<li>Set the bias to zero, then to a large value, and identify acne and peter panning.<details class="solution"><summary>Show solution</summary><p>At zero, lit surfaces are covered with dark stripes or dots: acne, from fragments that land just behind the depth stored in their texel.<br>
+With a large bias the stripes go away but shadows detach from the base of the objects and thin objects stop casting shadows: peter panning.<br>
+The live demo has a bias slider.</p></details></li>
+<li>Move the light over time and watch the shadows follow.<details class="solution"><summary>Show solution</summary><p>Compute the light's position from the time and rebuild its view matrix every frame; the shadow pass and the main pass must use the same matrix.<br>
+Keep the orthographic box centered on the scene, not on the light.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../advanced-lighting/gamma-correction.html"><small>Previous</small>Gamma Correction</a><a class="next" href="../advanced-lighting/point-shadows.html"><small>Next</small>Point Shadows</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>

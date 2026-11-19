@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,52 +134,57 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Piattaforme Apple</p><h1 id="metalfx-upscaling">MetalFX Upscaling<a class="headerlink" href="#metalfx-upscaling" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
-<p>The cost of a frame grows with the number of pixels. <strong>MetalFX</strong> lets you render the scene at a lower resolution and produces a full-resolution image that looks close to one rendered natively. A game that renders 1280 × 720 and upscales to 2560 × 1440 shades a quarter of the pixels.</p>
-<p>MetalFX offers two upscalers, and since 2025 a denoising upscaler for ray tracing and a frame interpolator.</p>
+<article><p class="crumb">Piattaforme Apple</p><h1 id="upscaling-con-metalfx">Upscaling con MetalFX<a class="headerlink" href="#upscaling-con-metalfx" title="Permanent link">#</a></h1>
+<p>Il costo di un frame cresce con il numero di pixel.<br>
+<strong>MetalFX</strong> ti permette di disegnare la scena a una risoluzione più bassa e produce un'immagine a piena risoluzione che somiglia molto a una disegnata in modo nativo.<br>
+Un gioco che disegna a 1280 × 720 e porta a 2560 × 1440 calcola un quarto dei pixel.</p>
+<p>MetalFX offre due upscaler e, dal 2025, un upscaler con denoising per il ray tracing e un interpolatore di frame.</p>
 <table>
 <thead>
 <tr>
-<th>Effect</th>
-<th>Needs</th>
-<th>Use it when</th>
+<th>Effetto</th>
+<th>Che cosa richiede</th>
+<th>Usalo quando</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Spatial scaler</td>
-<td>The color image</td>
-<td>You want the simplest integration, or have no motion vectors</td>
+<td>Scaler spaziale</td>
+<td>L'immagine di colore</td>
+<td>Vuoi l'integrazione più semplice, o non hai i motion vector</td>
 </tr>
 <tr>
-<td>Temporal scaler</td>
-<td>Color, depth, motion vectors, camera jitter</td>
-<td>You want the best quality, and anti-aliasing with it</td>
+<td>Scaler temporale</td>
+<td>Colore, profondità, motion vector, jitter della camera</td>
+<td>Vuoi la qualità migliore, e con essa l'anti-aliasing</td>
 </tr>
 <tr>
-<td>Temporal denoised scaler</td>
-<td>The above plus normals, albedo, roughness</td>
-<td>The image is ray traced with few rays per pixel</td>
+<td>Scaler temporale con denoising</td>
+<td>Quanto sopra più normali, albedo, roughness</td>
+<td>L'immagine è in ray tracing con pochi raggi per pixel</td>
 </tr>
 <tr>
-<td>Frame interpolator</td>
-<td>Two frames, depth, motion vectors</td>
-<td>You want a higher frame rate than you can render</td>
+<td>Interpolatore di frame</td>
+<td>Due frame, profondità, motion vector</td>
+<td>Vuoi un frame rate più alto di quello che riesci a disegnare</td>
 </tr>
 </tbody>
 </table>
-<p>The scalers are available from macOS 13 and iOS 16 on devices with Apple silicon. The denoised scaler and the frame interpolator need the 2025 systems (macOS 26, iOS 26).</p>
-<h2 id="where-it-goes-in-the-frame">Where it goes in the frame<a class="headerlink" href="#where-it-goes-in-the-frame" title="Permanent link">#</a></h2>
-<p>Upscaling replaces nothing in your renderer. It is one more step, and its place matters.</p>
+<p>Gli scaler sono disponibili da macOS 13 e iOS 16 sui dispositivi con Apple silicon.<br>
+Lo scaler con denoising e l'interpolatore di frame richiedono i sistemi del 2025 (macOS 26, iOS 26).</p>
+<h2 id="dove-va-nel-frame">Dove va nel frame<a class="headerlink" href="#dove-va-nel-frame" title="Permanent link">#</a></h2>
+<p>L'upscaling non sostituisce niente nel tuo renderer.<br>
+È un passo in più, e la sua posizione conta.</p>
 <ol>
-<li>Render the scene at low resolution into an HDR texture.</li>
-<li><strong>Upscale</strong> to the output resolution.</li>
-<li>Post-process at full resolution: bloom, tone mapping.</li>
-<li>Draw the user interface at full resolution, on top.</li>
+<li>Disegna la scena a bassa risoluzione in una texture HDR.</li>
+<li>Fai l'<strong>upscaling</strong> alla risoluzione di uscita.</li>
+<li>Fai il post-processing a piena risoluzione: bloom, tone mapping.</li>
+<li>Disegna sopra l'interfaccia utente, a piena risoluzione.</li>
 </ol>
-<p>Text and interface elements must never go through the upscaler: draw them afterwards, at native resolution.</p>
-<h2 id="the-spatial-scaler">The spatial scaler<a class="headerlink" href="#the-spatial-scaler" title="Permanent link">#</a></h2>
-<p>It works on a single image, with no history. Create it once, and again whenever a size changes.</p>
+<p>Il testo e gli elementi dell'interfaccia non devono mai passare per l'upscaler: disegnali dopo, a risoluzione nativa.</p>
+<h2 id="lo-scaler-spaziale">Lo scaler spaziale<a class="headerlink" href="#lo-scaler-spaziale" title="Permanent link">#</a></h2>
+<p>Lavora su una sola immagine, senza storia.<br>
+Crealo una volta, e di nuovo ogni volta che cambia una dimensione.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">import</span><span class="w"> </span><span class="nc">MetalFX</span>
 
@@ -217,7 +222,8 @@
 </code></pre></div>
 </div>
 
-<p>Each frame, hand it the textures and encode it into the command buffer, between your passes. It is not part of a render pass.</p>
+<p>A ogni frame passagli le texture e codificalo nel command buffer, tra un pass e l'altro.<br>
+Non fa parte di un render pass.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">scaler</span><span class="p">.</span><span class="n">colorTexture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">sceneTexture</span>
 <span class="n">scaler</span><span class="p">.</span><span class="n">outputTexture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">upscaledTexture</span>
@@ -231,14 +237,18 @@
 </code></pre></div>
 </div>
 
-<p>The output texture must be created with the usage the scaler asks for in <code>outputTextureUsage</code>, and with <code>storageMode = .private</code>.</p>
-<h2 id="the-temporal-scaler">The temporal scaler<a class="headerlink" href="#the-temporal-scaler" title="Permanent link">#</a></h2>
-<p>The temporal scaler gathers detail from previous frames. Each frame you shift the whole image by a fraction of a pixel, the <strong>jitter</strong>, so that over several frames every pixel is sampled at many positions. The scaler lines up the old frames with the new one using <strong>motion vectors</strong>, and blends them. The result has more real detail than any single frame, and it is anti-aliased, so MSAA becomes unnecessary.</p>
-<p>It needs three inputs beyond the color.</p>
+<p>La texture di uscita va creata con l'uso che lo scaler chiede in <code>outputTextureUsage</code>, e con <code>storageMode = .private</code>.</p>
+<h2 id="lo-scaler-temporale">Lo scaler temporale<a class="headerlink" href="#lo-scaler-temporale" title="Permanent link">#</a></h2>
+<p>Lo scaler temporale raccoglie dettaglio dai frame precedenti.<br>
+A ogni frame sposti l'intera immagine di una frazione di pixel, il <strong>jitter</strong>, così che nel giro di alcuni frame ogni pixel venga campionato in molte posizioni.<br>
+Lo scaler allinea i vecchi frame a quello nuovo usando i <strong>motion vector</strong>, e li mescola.<br>
+Il risultato ha più dettaglio reale di qualsiasi singolo frame, ed è senza aliasing, quindi l'MSAA diventa superfluo.</p>
+<p>Oltre al colore ha bisogno di tre ingressi.</p>
 <ul>
-<li><strong>Depth</strong>, from the same low-resolution pass.</li>
-<li><strong>Motion vectors</strong>: for each pixel, how far the surface moved on screen since the last frame. Render them as an extra color attachment (<code>rg16Float</code>).</li>
-<li><strong>The jitter offset</strong> you applied to the projection this frame.</li>
+<li><strong>La profondità</strong>, dallo stesso pass a bassa risoluzione.</li>
+<li><strong>I motion vector</strong>: per ogni pixel, di quanto la superficie si è spostata sullo schermo dall'ultimo frame.<br>
+Disegnali come un attachment di colore in più (<code>rg16Float</code>).</li>
+<li><strong>L'offset di jitter</strong> che in questo frame hai applicato alla proiezione.</li>
 </ul>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">descriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MTLFXTemporalScalerDescriptor</span><span class="p">()</span>
@@ -281,7 +291,7 @@
 </div>
 
 <h3 id="jitter">Jitter<a class="headerlink" href="#jitter" title="Permanent link">#</a></h3>
-<p>Use a low-discrepancy sequence, such as Halton with bases 2 and 3, and move the projection by that sub-pixel amount.</p>
+<p>Usa una sequenza a bassa discrepanza, come Halton con basi 2 e 3, e sposta la proiezione di quella frazione di pixel.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">halton</span><span class="p">(</span><span class="kc">_</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">,</span><span class="w"> </span><span class="kc">_</span><span class="w"> </span><span class="n">base</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Float</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">f</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">result</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">index</span>
@@ -322,9 +332,11 @@
 </code></pre></div>
 </div>
 
-<p>Whether the sign of each term is right depends on your projection convention. If the image shimmers or blurs when the camera is still, flip one sign at a time: with the correct signs a static scene converges to a sharp image in a few frames.</p>
-<h3 id="motion-vectors">Motion vectors<a class="headerlink" href="#motion-vectors" title="Permanent link">#</a></h3>
-<p>In the vertex function compute the clip-space position of the vertex in this frame and in the previous one, both <strong>without</strong> jitter, and pass them on. The fragment function turns them into a uv-space difference.</p>
+<p>Se il segno di ciascun termine sia giusto dipende dalla convenzione della tua proiezione.<br>
+Se l'immagine tremola o si sfoca a camera ferma, inverti un segno alla volta: con i segni corretti una scena statica converge in pochi frame a un'immagine nitida.</p>
+<h3 id="motion-vector">Motion vector<a class="headerlink" href="#motion-vector" title="Permanent link">#</a></h3>
+<p>Nella vertex function calcola la posizione in clip space del vertice in questo frame e in quello precedente, entrambe <strong>senza</strong> jitter, e passale avanti.<br>
+La fragment function le trasforma in una differenza in spazio uv.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">SceneOut</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">color</span><span class="w">  </span><span class="p">[[</span><span class="na">color</span><span class="p">(</span><span class="mi">0</span><span class="p">)]];</span>
 <span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">motion</span><span class="w"> </span><span class="p">[[</span><span class="na">color</span><span class="p">(</span><span class="mi">1</span><span class="p">)]];</span>
@@ -342,8 +354,8 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>Every moving object needs its previous model matrix, and the camera its previous view-projection matrix.</p>
-<h3 id="encoding">Encoding<a class="headerlink" href="#encoding" title="Permanent link">#</a></h3>
+<p>Ogni oggetto in movimento ha bisogno della sua matrice model precedente, e la camera della sua matrice view-projection precedente.</p>
+<h3 id="codifica">Codifica<a class="headerlink" href="#codifica" title="Permanent link">#</a></h3>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">scaler</span><span class="p">.</span><span class="n">colorTexture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">sceneTexture</span>
 <span class="n">scaler</span><span class="p">.</span><span class="n">depthTexture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">depthTexture</span>
@@ -367,32 +379,45 @@
 </code></pre></div>
 </div>
 
-<p>Set <code>isDepthReversed</code> if you use reverse-Z. Set <code>reset</code> whenever the history is useless, or ghosts of the old scene will linger.</p>
-<h2 id="getting-the-quality-right">Getting the quality right<a class="headerlink" href="#getting-the-quality-right" title="Permanent link">#</a></h2>
+<p>Imposta <code>isDepthReversed</code> se usi il reverse-Z.<br>
+Imposta <code>reset</code> ogni volta che la storia è inutilizzabile, altrimenti resteranno i fantasmi della vecchia scena.</p>
+<h2 id="ottenere-la-qualita-giusta">Ottenere la qualità giusta<a class="headerlink" href="#ottenere-la-qualita-giusta" title="Permanent link">#</a></h2>
 <ul>
-<li><strong>Texture detail.</strong> A low-resolution render picks blurrier mip levels. Give your samplers a negative LOD bias of <code>log2(renderWidth / outputWidth)</code>, for example -1 when upscaling 2×, so textures keep their full-resolution sharpness.</li>
-<li><strong>Ghosting</strong> behind moving objects means wrong or missing motion vectors. Check animated, skinned and instanced objects first.</li>
-<li><strong>Transparent and particle effects</strong> have no motion vectors of their own. Mark them in the scaler's <strong>reactive mask</strong> so it trusts the new frame more there.</li>
-<li><strong>Exposure.</strong> The scaler works in linear HDR and needs to know roughly how bright the image will be shown. Either enable <code>isAutoExposureEnabled</code> on the descriptor, or supply your own exposure texture.</li>
-<li><strong>Dynamic resolution.</strong> Create the scaler for the largest input size and set <code>inputContentWidth</code> and <code>inputContentHeight</code> each frame to the region actually rendered.</li>
+<li><strong>Dettaglio delle texture.</strong><br>
+Un rendering a bassa risoluzione sceglie livelli di mip più sfocati.<br>
+Dai ai tuoi sampler un LOD bias negativo pari a <code>log2(renderWidth / outputWidth)</code>, per esempio -1 con un upscaling 2×, così le texture conservano la nitidezza della piena risoluzione.</li>
+<li><strong>Il ghosting</strong> dietro gli oggetti in movimento significa motion vector sbagliati o mancanti.<br>
+Controlla per primi gli oggetti animati, con skinning e con instancing.</li>
+<li><strong>Gli effetti trasparenti e le particelle</strong> non hanno motion vector propri.<br>
+Segnali nella <strong>reactive mask</strong> dello scaler, così lì si fida di più del nuovo frame.</li>
+<li><strong>L'esposizione.</strong><br>
+Lo scaler lavora in HDR lineare e ha bisogno di sapere più o meno quanto luminosa verrà mostrata l'immagine.<br>
+Attiva <code>isAutoExposureEnabled</code> nel descriptor, oppure fornisci una tua texture di esposizione.</li>
+<li><strong>Risoluzione dinamica.</strong><br>
+Crea lo scaler per la dimensione di ingresso più grande e imposta a ogni frame <code>inputContentWidth</code> e <code>inputContentHeight</code> sulla regione effettivamente disegnata.</li>
 </ul>
-<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<h2 id="esercizi">Esercizi<a class="headerlink" href="#esercizi" title="Permanent link">#</a></h2>
 <ul>
-<li>Add the spatial scaler to the render-target example: render at half size and compare with the <code>.linear</code> stretch.<details class="solution"><summary>Mostra la soluzione</summary><p>Create the scaler with the half-size input and the drawable-size output, encode it after the scene pass, and let the final pass sample the upscaled texture. Edges and texture detail are visibly crisper than with the linear filter, which only blurs. Thin lines still flicker, because a spatial scaler cannot invent samples it never had; that is what the temporal scaler fixes.</p></details></li>
-<li>Visualize the motion texture while moving the camera.<details class="solution"><summary>Mostra la soluzione</summary><p>Return the motion from a debug pass, scaled up so it is visible.</p>
+<li>Aggiungi lo scaler spaziale all'esempio dei render target: disegna a metà dimensione e confronta con lo stiramento <code>.linear</code>.<details class="solution"><summary>Mostra la soluzione</summary><p>Crea lo scaler con l'ingresso a metà dimensione e l'uscita alla dimensione del drawable, codificalo dopo il pass della scena e fai leggere al pass finale la texture ingrandita.<br>
+Bordi e dettaglio delle texture sono visibilmente più netti che con il filtro lineare, che si limita a sfocare.<br>
+Le linee sottili sfarfallano ancora, perché uno scaler spaziale non può inventare campioni che non ha mai avuto; è ciò che lo scaler temporale sistema.</p></details></li>
+<li>Visualizza la texture del movimento mentre sposti la camera.<details class="solution"><summary>Mostra la soluzione</summary><p>Restituisci il movimento da un pass di debug, amplificato perché sia visibile.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float2</span><span class="w"> </span><span class="n">motion</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">motionTexture</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">rg</span><span class="p">;</span>
 <span class="k">return</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">abs</span><span class="p">(</span><span class="n">motion</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">20.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
 </code></pre></div>
 
-<p>With a still camera the image is black except for moving objects. Panning right tints everything red, tilting tints it green, and nearer surfaces are brighter than far ones, because they move farther on screen.</p></details></li>
-<li>With the temporal scaler running, stop sending the jitter offset and describe what happens.<details class="solution"><summary>Mostra la soluzione</summary><p>The scaler assumes the samples sit at pixel centers while they are in fact shifted every frame. It lines the history up wrongly, and the image shakes by a fraction of a pixel or turns soft. The opposite mistake, sending offsets without jittering the projection, gives a stable image with no extra detail and no anti-aliasing.</p></details></li>
+<p>A camera ferma l'immagine è nera tranne gli oggetti in movimento.<br>
+Una panoramica verso destra tinge tutto di rosso, un'inclinazione lo tinge di verde, e le superfici vicine sono più luminose di quelle lontane, perché sullo schermo si spostano di più.</p></details></li>
+<li>Con lo scaler temporale in funzione, smetti di inviare l'offset di jitter e descrivi che cosa succede.<details class="solution"><summary>Mostra la soluzione</summary><p>Lo scaler presume che i campioni stiano al centro dei pixel, mentre in realtà vengono spostati a ogni frame.<br>
+Allinea la storia nel modo sbagliato, e l'immagine trema di una frazione di pixel o diventa morbida.<br>
+L'errore opposto, cioè inviare gli offset senza applicare il jitter alla proiezione, dà un'immagine stabile senza dettaglio in più e senza anti-aliasing.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../apple-platforms/tile-based-gpus.html"><small>Precedente</small>GPU tile-based</a><a class="next" href="../apple-platforms/metal-4.html"><small>Successivo</small>Metal 4</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#where-it-goes-in-the-frame">Where it goes in the frame</a></li><li><a href="#the-spatial-scaler">The spatial scaler</a></li><li><a href="#the-temporal-scaler">The temporal scaler</a></li><li><a href="#getting-the-quality-right">Getting the quality right</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#dove-va-nel-frame">Dove va nel frame</a></li><li><a href="#lo-scaler-spaziale">Lo scaler spaziale</a></li><li><a href="#lo-scaler-temporale">Lo scaler temporale</a></li><li><a href="#ottenere-la-qualita-giusta">Ottenere la qualità giusta</a></li><li><a href="#esercizi">Esercizi</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

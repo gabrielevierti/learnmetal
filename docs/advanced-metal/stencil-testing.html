@@ -135,7 +135,9 @@
 </nav>
 <main class="content" id="main">
 <article><p class="crumb">Advanced Metal</p><h1 id="stencil-testing">Stencil Testing<a class="headerlink" href="#stencil-testing" title="Permanent link">#</a></h1>
-<p>Next to the depth buffer lives the <strong>stencil buffer</strong>: 8 bits per pixel that you can write freely while drawing and test against later. It lets you mark regions of the screen and then restrict drawing to them. Outlines, portals, mirrors and masking UI are classic uses.</p>
+<p>Next to the depth buffer lives the <strong>stencil buffer</strong>: 8 bits per pixel that you can write freely while drawing and test against later.<br>
+It lets you mark regions of the screen and then restrict drawing to them.<br>
+Outlines, portals, mirrors and masking UI are classic uses.</p>
 <h2 id="enabling-a-stencil-buffer">Enabling a stencil buffer<a class="headerlink" href="#enabling-a-stencil-buffer" title="Permanent link">#</a></h2>
 <p>Depth and stencil normally share one texture with a combined format:</p>
 <div class="lang-swift">
@@ -163,7 +165,8 @@
 
 <p>Every pipeline state used in the pass must declare both formats.</p>
 <h2 id="the-stencil-test">The stencil test<a class="headerlink" href="#the-stencil-test" title="Permanent link">#</a></h2>
-<p>For each fragment the GPU compares a <strong>reference value</strong>, which you set on the encoder, with the value in the buffer. The comparison and the reaction are described by an <code>MTLStencilDescriptor</code> inside the depth-stencil descriptor:</p>
+<p>For each fragment the GPU compares a <strong>reference value</strong>, which you set on the encoder, with the value in the buffer.<br>
+The comparison and the reaction are described by an <code>MTLStencilDescriptor</code> inside the depth-stencil descriptor:</p>
 <table>
 <thead>
 <tr>
@@ -295,15 +298,19 @@
 </code></pre></div>
 </div>
 
-<p>The <code>solidColorPipelineState</code> uses a fragment function that returns a single color. Because the outline state uses <code>.always</code> for depth, the border shows through other objects, which is what you want for a selection highlight.</p>
+<p>The <code>solidColorPipelineState</code> uses a fragment function that returns a single color.<br>
+Because the outline state uses <code>.always</code> for depth, the border shows through other objects, which is what you want for a selection highlight.</p>
 <div class="admonition note">
 <p class="admonition-title">Better outlines</p>
-<p>Scaling works for convex shapes centered on their origin. For arbitrary models, move each vertex along its normal in the vertex function instead: <code>position + normal * thickness</code>.</p>
+<p>Scaling works for convex shapes centered on their origin.<br>
+For arbitrary models, move each vertex along its normal in the vertex function instead: <code>position + normal * thickness</code>.</p>
 </div>
 <div class="lm-demo" data-demo="stencil-testing" data-fallback="../assets/img/advanced-metal/stencil-testing.webp"></div>
 
 <h2 id="reading-the-comparison-correctly">Reading the comparison correctly<a class="headerlink" href="#reading-the-comparison-correctly" title="Permanent link">#</a></h2>
-<p>The comparison is written as <em>reference</em> <strong>op</strong> <em>stored</em>. With <code>.less</code> and a reference of 1, a fragment passes where <code>1 &lt; stored</code>. It is easy to read this backwards.</p>
+<p>The comparison is written as <em>reference</em> <strong>op</strong> <em>stored</em>.<br>
+With <code>.less</code> and a reference of 1, a fragment passes where <code>1 &lt; stored</code>.<br>
+It is easy to read this backwards.</p>
 <h2 id="other-uses">Other uses<a class="headerlink" href="#other-uses" title="Permanent link">#</a></h2>
 <ul>
 <li><strong>Portals and mirrors</strong>: draw the portal shape into the stencil buffer, then draw the world seen through it only where the stencil is set.</li>
@@ -312,8 +319,12 @@
 </ul>
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
-<li>Make the outline respect depth, so it is hidden behind closer objects.<details class="solution"><summary>Show solution</summary><p>Give the outline state a normal depth test: <code>depthCompareFunction = .less</code> instead of <code>.always</code>. The enlarged copy is then hidden by anything closer to the camera. In the live demo, untick "ignore depth".</p></details></li>
-<li>Outline only one of the cubes.<details class="solution"><summary>Show solution</summary><p>Use the stencil-writing state only while drawing the cube you want outlined, and draw the others with the ordinary depth state. Then draw the enlarged copy of that one cube only. The reference value could also select between objects: write 1 for one cube and 2 for another, and test against the value you want.</p></details></li>
+<li>Make the outline respect depth, so it is hidden behind closer objects.<details class="solution"><summary>Show solution</summary><p>Give the outline state a normal depth test: <code>depthCompareFunction = .less</code> instead of <code>.always</code>.<br>
+The enlarged copy is then hidden by anything closer to the camera.<br>
+In the live demo, untick "ignore depth".</p></details></li>
+<li>Outline only one of the cubes.<details class="solution"><summary>Show solution</summary><p>Use the stencil-writing state only while drawing the cube you want outlined, and draw the others with the ordinary depth state.<br>
+Then draw the enlarged copy of that one cube only.<br>
+The reference value could also select between objects: write 1 for one cube and 2 for another, and test against the value you want.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../advanced-metal/depth-testing.html"><small>Previous</small>Depth Testing</a><a class="next" href="../advanced-metal/blending.html"><small>Next</small>Blending</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>

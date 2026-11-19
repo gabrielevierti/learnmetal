@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,30 +134,36 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Illuminazione</p><h1 id="colors">Colors<a class="headerlink" href="#colors" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
+<article><p class="crumb">Illuminazione</p><h1 id="colori">Colori<a class="headerlink" href="#colori" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Progetto di esempio</strong> <code>examples/Sources/08-BasicLighting</code>, si esegue con <code>swift run BasicLighting</code>. <a href="../../downloads/learnmetal-examples.zip">Scarica tutti gli esempi</a> oppure guarda <a href="../resources/examples.html">come eseguirli</a>.</div>
 
-<p>Lighting is the art of computing what color a surface should appear. Before any real lighting math, we need a model of color and a scene to light.</p>
-<h2 id="color-as-numbers">Color as numbers<a class="headerlink" href="#color-as-numbers" title="Permanent link">#</a></h2>
-<p>A color is three numbers: how much red, green and blue. In shaders each channel is a float where 0 is none and 1 is full intensity.</p>
+<p>L'illuminazione è l'arte di calcolare di che colore deve apparire una superficie.<br>
+Prima di qualsiasi vero calcolo di luce ci servono un modello del colore e una scena da illuminare.</p>
+<h2 id="il-colore-come-numeri">Il colore come numeri<a class="headerlink" href="#il-colore-come-numeri" title="Permanent link">#</a></h2>
+<p>Un colore è fatto di tre numeri: quanto rosso, quanto verde e quanto blu.<br>
+Negli shader ogni canale è un float in cui 0 è niente e 1 è la piena intensità.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">coral</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float3</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.31</span><span class="p">);</span>
 </code></pre></div>
 
-<p>The color we see on an object is the part of the incoming light that the object <strong>reflects</strong>. A coral-colored object lit by white light reflects all of the red, half of the green and about a third of the blue, and absorbs the rest. In code, reflection is a component-wise multiplication:</p>
+<p>Il colore che vediamo su un oggetto è la parte della luce in arrivo che l'oggetto <strong>riflette</strong>.<br>
+Un oggetto color corallo illuminato da luce bianca riflette tutto il rosso, metà del verde e circa un terzo del blu, e assorbe il resto.<br>
+Nel codice la riflessione è una moltiplicazione componente per componente:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">lightColor</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">float3</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
 <span class="n">float3</span><span class="w"> </span><span class="n">objectColor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float3</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.31</span><span class="p">);</span>
 <span class="n">float3</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lightColor</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">objectColor</span><span class="p">;</span><span class="w">   </span><span class="c1">// (1.0, 0.5, 0.31)</span>
 </code></pre></div>
 
-<p>With a green light the same object looks very different:</p>
+<p>Con una luce verde lo stesso oggetto appare molto diverso:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">lightColor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float3</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span>
 <span class="n">float3</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lightColor</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">objectColor</span><span class="p">;</span><span class="w">   </span><span class="c1">// (0.0, 0.5, 0.0)</span>
 </code></pre></div>
 
-<p>There is no red or blue light to reflect, so only a dark green remains. That single multiplication is the core of every lighting model in this series.</p>
-<h2 id="a-scene-to-light">A scene to light<a class="headerlink" href="#a-scene-to-light" title="Permanent link">#</a></h2>
-<p>We need two things: an object, and something that shows where the light is. Both are cubes, drawn with two different pipeline states.</p>
-<p>The object's fragment function multiplies the two colors:</p>
+<p>Non c'è luce rossa o blu da riflettere, quindi resta solo un verde scuro.<br>
+Quella singola moltiplicazione è il cuore di ogni modello di illuminazione di questa serie.</p>
+<h2 id="una-scena-da-illuminare">Una scena da illuminare<a class="headerlink" href="#una-scena-da-illuminare" title="Permanent link">#</a></h2>
+<p>Ci servono due cose: un oggetto, e qualcosa che mostri dov'è la luce.<br>
+Sono entrambi cubi, disegnati con due pipeline state diversi.</p>
+<p>La fragment function dell'oggetto moltiplica i due colori:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">FragmentUniforms</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">objectColor</span><span class="p">;</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">lightColor</span><span class="p">;</span>
@@ -193,13 +199,13 @@
 </code></pre></div>
 </div>
 
-<p>The lamp cube should not be affected by lighting at all, so it gets its own trivial fragment function:</p>
+<p>Il cubo della lampada non deve risentire affatto dell'illuminazione, quindi riceve una sua fragment function banale:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_light</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]])</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="mf">1.0</span><span class="p">);</span>
 <span class="p">}</span>
 </code></pre></div>
 
-<p>Create a second pipeline state that uses the same vertex function and <code>fragment_light</code>:</p>
+<p>Crea un secondo pipeline state che usa la stessa vertex function e <code>fragment_light</code>:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">pipelineDescriptor</span><span class="p">.</span><span class="n">fragmentFunction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">library</span><span class="p">.</span><span class="n">makeFunction</span><span class="p">(</span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="s">"fragment_light"</span><span class="p">)</span>
 <span class="n">lightPipelineState</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeRenderPipelineState</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">pipelineDescriptor</span><span class="p">)</span>
@@ -211,8 +217,9 @@
 </code></pre></div>
 </div>
 
-<p>A descriptor is only a recipe. You can change one property and create another state from it.</p>
-<h2 id="drawing-both">Drawing both<a class="headerlink" href="#drawing-both" title="Permanent link">#</a></h2>
+<p>Un descriptor è solo una ricetta.<br>
+Puoi cambiare una proprietà e crearne un altro state.</p>
+<h2 id="disegnarli-entrambi">Disegnarli entrambi<a class="headerlink" href="#disegnarli-entrambi" title="Permanent link">#</a></h2>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">lightPosition</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Float3</span><span class="p">(</span><span class="mf">1.2</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="p">)</span>
 
@@ -248,20 +255,27 @@
 </code></pre></div>
 </div>
 
-<p>Set the view's clear color to something dark such as (0.1, 0.1, 0.1) so the lamp stands out. You now have a flat coral cube and a small white cube. The coral one has no shading yet, so its faces are indistinguishable. The next chapter fixes that.</p>
+<p>Imposta il colore di sfondo della vista a qualcosa di scuro, per esempio (0.1, 0.1, 0.1), così la lampada risalta.<br>
+Adesso hai un cubo corallo piatto e un piccolo cubo bianco.<br>
+Quello corallo non ha ancora ombreggiatura, quindi le sue facce non si distinguono.<br>
+Il prossimo capitolo lo sistema.</p>
 <div class="lm-demo" data-demo="colors" data-fallback="../../assets/img/lighting/colors.webp"></div>
 
-<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<h2 id="esercizi">Esercizi<a class="headerlink" href="#esercizi" title="Permanent link">#</a></h2>
 <ul>
-<li>Change the light color and predict the object's color before running.<details class="solution"><summary>Mostra la soluzione</summary><p>Multiply channel by channel. A light of (0.33, 0.42, 0.18) on the coral object (1.0, 0.5, 0.31) gives (0.33, 0.21, 0.06), a dark olive. A pure blue light gives (0, 0, 0.31): the object looks dark blue, because blue is the only light it can reflect.</p></details></li>
-<li>Animate the light color with <code>sin(time)</code> on each channel at different speeds.<details class="solution"><summary>Mostra la soluzione</summary><p>Set the light color each frame, for example in Swift <code>Float3(sin(time * 2.0), sin(time * 0.7), sin(time * 1.3)) * 0.5 + 0.5</code>. The <code>* 0.5 + 0.5</code> keeps each channel between 0 and 1. Use the same value for the lamp cube's color so the lamp matches the light it casts.</p></details></li>
+<li>Cambia il colore della luce e prova a prevedere il colore dell'oggetto prima di eseguire.<details class="solution"><summary>Mostra la soluzione</summary><p>Moltiplica canale per canale.<br>
+Una luce (0.33, 0.42, 0.18) sull'oggetto corallo (1.0, 0.5, 0.31) dà (0.33, 0.21, 0.06), un verde oliva scuro.<br>
+Una luce blu pura dà (0, 0, 0.31): l'oggetto appare blu scuro, perché il blu è l'unica luce che può riflettere.</p></details></li>
+<li>Anima il colore della luce con <code>sin(time)</code> su ogni canale, a velocità diverse.<details class="solution"><summary>Mostra la soluzione</summary><p>Imposta il colore della luce a ogni frame, per esempio in Swift <code>Float3(sin(time * 2.0), sin(time * 0.7), sin(time * 1.3)) * 0.5 + 0.5</code>.<br>
+Il <code>* 0.5 + 0.5</code> tiene ogni canale tra 0 e 1.<br>
+Usa lo stesso valore per il colore del cubo della lampada, così la lampada corrisponde alla luce che emette.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../getting-started/review.html"><small>Precedente</small>Riepilogo</a><a class="next" href="../lighting/basic-lighting.html"><small>Successivo</small>Illuminazione di base</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#color-as-numbers">Color as numbers</a></li><li><a href="#a-scene-to-light">A scene to light</a></li><li><a href="#drawing-both">Drawing both</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#il-colore-come-numeri">Il colore come numeri</a></li><li><a href="#una-scena-da-illuminare">Una scena da illuminare</a></li><li><a href="#disegnarli-entrambi">Disegnarli entrambi</a></li><li><a href="#esercizi">Esercizi</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

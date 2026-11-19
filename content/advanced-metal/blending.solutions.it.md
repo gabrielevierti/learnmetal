@@ -1,0 +1,5 @@
+Con `discard_fragment` i bordi sono netti: un pixel è dentro o fuori, e dove l'alpha della texture è parziale si vedono i gradini. Con il blending i bordi sono morbidi, ma senza ordinamento un rettangolo più vicino disegnato per primo scrive la profondità e ritaglia buchi rettangolari nell'erba che gli sta dietro. Le sagome ritagliate vogliono il discard (o l'alpha-to-coverage); la vera trasparenza vuole il blending con l'ordinamento.
+---
+La finestra più vicina viene disegnata per prima e scrive la sua profondità. Ogni finestra dietro di lei fallisce allora il test di profondità, e quindi manca dove quella vicina la copre, anche se dovresti vederla attraverso il vetro. Nella demo interattiva togli la spunta a "sort back to front" e mettila a "windows write depth".
+---
+Attiva il blending con fattore source `.one` (o `.sourceAlpha`) e fattore destination `.one`, e spegni la scrittura della profondità. I colori si sommano, quindi i rettangoli sovrapposti diventano più luminosi, e l'ordine non conta più, perché la somma è commutativa. Ecco perché le particelle additive non hanno bisogno di ordinamento.

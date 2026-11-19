@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,21 +134,31 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">In pratica</p><h1 id="debugging">Debugging<a class="headerlink" href="#debugging" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
-<p>Graphics bugs are different from ordinary bugs. There is no stack trace for a black screen, and you cannot print from a fragment function. The good news is that Metal's tooling is among the best of any graphics API, and all of it is built into Xcode. Learning these tools early will save you days.</p>
-<h2 id="layer-1-api-validation">Layer 1: API validation<a class="headerlink" href="#layer-1-api-validation" title="Permanent link">#</a></h2>
-<p><strong>Metal API Validation</strong> checks every call you make: mismatched pixel formats, missing buffers, wrong load actions, encoders left open. When something is wrong, the app stops at the offending call with a message that usually names the exact property:</p>
+<article><p class="crumb">In pratica</p><h1 id="debug">Debug<a class="headerlink" href="#debug" title="Permanent link">#</a></h1>
+<p>I bug grafici sono diversi dai bug normali.<br>
+Per uno schermo nero non c'è uno stack trace, e da una fragment function non puoi stampare.<br>
+La buona notizia è che gli strumenti di Metal sono tra i migliori di qualsiasi API grafica, e stanno tutti dentro Xcode.<br>
+Imparare presto a usarli ti farà risparmiare giorni.</p>
+<h2 id="livello-1-la-validazione-dellapi">Livello 1: la validazione dell'API<a class="headerlink" href="#livello-1-la-validazione-dellapi" title="Permanent link">#</a></h2>
+<p>La <strong>Metal API Validation</strong> controlla ogni chiamata che fai: formati dei pixel che non coincidono, buffer mancanti, load action sbagliate, encoder lasciati aperti.<br>
+Quando qualcosa non va, l'app si ferma sulla chiamata incriminata con un messaggio che di solito nomina l'esatta proprietà:</p>
 <div class="codehilite"><pre><span></span><code>-[MTLDebugRenderCommandEncoder setRenderPipelineState:]: failed assertion
 `Set Render Pipeline State Validation
 For color attachment 0, the render pipeline's pixelFormat (MTLPixelFormatBGRA8Unorm)
 does not match the framebuffer's pixelFormat (MTLPixelFormatRGBA16Float).'
 </code></pre></div>
 
-<p>It is enabled by default when you run from Xcode (<strong>Edit Scheme → Run → Diagnostics</strong>). Never turn it off during development. It is disabled automatically in release builds, so it costs your users nothing.</p>
-<h2 id="layer-2-shader-validation">Layer 2: shader validation<a class="headerlink" href="#layer-2-shader-validation" title="Permanent link">#</a></h2>
-<p>In the same scheme panel, <strong>Shader Validation</strong> instruments your shaders to catch what API validation cannot see: reading past the end of a buffer, sampling a texture that was never bound, accessing an array out of bounds. Bad accesses are reported in the console with the function name and line. It slows rendering down, so enable it when a shader behaves strangely.</p>
-<h2 id="label-everything">Label everything<a class="headerlink" href="#label-everything" title="Permanent link">#</a></h2>
-<p>Every Metal object has a <code>label</code> property. Labels appear in validation messages, in the debugger and in Instruments. A message about "Scene HDR Color" is a lot more useful than one about <code>&lt;AGXG14GFamilyTexture: 0x12f80a400&gt;</code>.</p>
+<p>È attiva in modo predefinito quando esegui da Xcode (<strong>Edit Scheme → Run → Diagnostics</strong>).<br>
+Non spegnerla mai durante lo sviluppo.<br>
+Nelle build di release viene disattivata in automatico, quindi ai tuoi utenti non costa nulla.</p>
+<h2 id="livello-2-la-validazione-degli-shader">Livello 2: la validazione degli shader<a class="headerlink" href="#livello-2-la-validazione-degli-shader" title="Permanent link">#</a></h2>
+<p>Nello stesso pannello dello scheme, <strong>Shader Validation</strong> strumenta i tuoi shader per intercettare ciò che la validazione dell'API non può vedere: leggere oltre la fine di un buffer, leggere una texture mai collegata, accedere a un array fuori dai limiti.<br>
+Gli accessi sbagliati vengono riportati in console con il nome della funzione e la riga.<br>
+Rallenta il rendering, quindi attivala quando uno shader si comporta in modo strano.</p>
+<h2 id="dai-unetichetta-a-tutto">Dai un'etichetta a tutto<a class="headerlink" href="#dai-unetichetta-a-tutto" title="Permanent link">#</a></h2>
+<p>Ogni oggetto Metal ha una proprietà <code>label</code>.<br>
+Le etichette compaiono nei messaggi di validazione, nel debugger e in Instruments.<br>
+Un messaggio che parla di "Scene HDR Color" è molto più utile di uno che parla di <code>&lt;AGXG14GFamilyTexture: 0x12f80a400&gt;</code>.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">sceneColor</span><span class="p">.</span><span class="n">label</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">"Scene HDR Color"</span>
 <span class="n">pipelineDescriptor</span><span class="p">.</span><span class="n">label</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">"PBR Opaque Pipeline"</span>
@@ -166,7 +176,7 @@ does not match the framebuffer's pixelFormat (MTLPixelFormatRGBA16Float).'
 </code></pre></div>
 </div>
 
-<p>Inside an encoder, group related commands so they show up as a collapsible tree in the debugger:</p>
+<p>Dentro un encoder raggruppa i comandi collegati, così nel debugger compaiono come un albero richiudibile:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">encoder</span><span class="p">.</span><span class="n">pushDebugGroup</span><span class="p">(</span><span class="s">"Draw Opaque Models"</span><span class="p">)</span>
 <span class="k">for</span><span class="w"> </span><span class="n">model</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">models</span><span class="w"> </span><span class="p">{</span>
@@ -192,19 +202,28 @@ does not match the framebuffer's pixelFormat (MTLPixelFormatRGBA16Float).'
 </code></pre></div>
 </div>
 
-<h2 id="the-gpu-frame-debugger">The GPU frame debugger<a class="headerlink" href="#the-gpu-frame-debugger" title="Permanent link">#</a></h2>
-<p>While your app runs, click the <strong>camera</strong> icon (Capture GPU Workload) in Xcode's debug bar. Xcode freezes one frame and lets you take it apart:</p>
+<h2 id="il-gpu-frame-debugger">Il GPU frame debugger<a class="headerlink" href="#il-gpu-frame-debugger" title="Permanent link">#</a></h2>
+<p>Mentre l'app è in esecuzione, clicca l'icona della <strong>fotocamera</strong> (Capture GPU Workload) nella barra di debug di Xcode.<br>
+Xcode congela un frame e te lo fa smontare:</p>
 <ul>
-<li><strong>The navigator</strong> lists every command buffer, pass and draw call, organized by your debug groups. Step through draws and watch the frame being built up one call at a time.</li>
-<li><strong>Attachments</strong> shows the color, depth and stencil textures as they are after the selected draw. The current draw's geometry is outlined.</li>
-<li><strong>Bound resources</strong> shows every buffer, texture and sampler bound for the selected draw. You can open a buffer and view its bytes laid out as your struct. This is the fastest way to find a uniform layout mismatch.</li>
-<li><strong>Geometry viewer</strong> shows the mesh after the vertex function, in clip space, with each vertex's outputs. When an object is missing, look here first: you will see at once whether it is behind the camera, clipped, or collapsed to a point.</li>
-<li><strong>Shader debugger</strong>: select a pixel, click <strong>Debug</strong>, and step through the fragment function's execution for that exact pixel, with the value of every variable on every line. The same works for a vertex. It is the closest thing to a breakpoint inside a shader.</li>
-<li><strong>Shader editing</strong>: change shader code in the debugger and reload it to see the effect on the captured frame without rebuilding the app.</li>
-<li><strong>Dependency viewer</strong> draws a graph of all passes and the textures flowing between them, with load and store actions. It makes redundant passes and unnecessary stores obvious.</li>
-<li><strong>Performance and memory</strong>: per-pass and per-draw GPU time, and a list of every resource with its size.</li>
+<li><strong>Il navigator</strong> elenca ogni command buffer, pass e draw call, organizzati secondo i tuoi gruppi di debug.<br>
+Scorri le draw call e guarda il frame costruirsi una chiamata alla volta.</li>
+<li><strong>Attachments</strong> mostra le texture di colore, profondità e stencil così come sono dopo la draw call selezionata.<br>
+La geometria della draw call corrente è evidenziata con un contorno.</li>
+<li><strong>Bound resources</strong> mostra ogni buffer, texture e sampler collegato per la draw call selezionata.<br>
+Puoi aprire un buffer e vederne i byte disposti secondo la tua struct.<br>
+È il modo più rapido di trovare una discordanza nel layout degli uniform.</li>
+<li><strong>Geometry viewer</strong> mostra la mesh dopo la vertex function, in clip space, con gli output di ogni vertice.<br>
+Quando manca un oggetto guarda prima qui: vedrai subito se è dietro la camera, ritagliato o collassato in un punto.</li>
+<li><strong>Shader debugger</strong>: seleziona un pixel, clicca <strong>Debug</strong> e segui passo passo l'esecuzione della fragment function per quel preciso pixel, con il valore di ogni variabile a ogni riga.<br>
+Lo stesso vale per un vertice.<br>
+È la cosa più vicina a un breakpoint dentro uno shader.</li>
+<li><strong>Shader editing</strong>: cambia il codice dello shader nel debugger e ricaricalo per vedere l'effetto sul frame catturato senza ricompilare l'app.</li>
+<li><strong>Dependency viewer</strong> disegna un grafo di tutti i pass e delle texture che scorrono tra loro, con le load e store action.<br>
+Rende evidenti i pass ridondanti e i salvataggi inutili.</li>
+<li><strong>Prestazioni e memoria</strong>: il tempo di GPU per pass e per draw call, e un elenco di ogni risorsa con la sua dimensione.</li>
 </ul>
-<p>You can also capture from code, to grab one specific frame:</p>
+<p>Puoi catturare anche dal codice, per prendere un frame preciso:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">captureDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLCaptureDescriptor</span><span class="p">()</span>
 <span class="n">captureDescriptor</span><span class="p">.</span><span class="n">captureObject</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span>
@@ -223,22 +242,27 @@ does not match the framebuffer's pixelFormat (MTLPixelFormatRGBA16Float).'
 </code></pre></div>
 </div>
 
-<p>Programmatic capture needs the <code>MetalCaptureEnabled</code> key set to <code>YES</code> in Info.plist.</p>
-<h2 id="the-performance-hud">The performance HUD<a class="headerlink" href="#the-performance-hud" title="Permanent link">#</a></h2>
-<p>Metal can overlay a live graph of frame rate, frame time, GPU time and memory on any Metal app. Enable it in the scheme's options (<strong>Show Graphics HUD</strong>), or with the environment variable <code>MTL_HUD_ENABLED=1</code>. Keep it on while you work so that a sudden slowdown is noticed when it is introduced.</p>
-<h2 id="debugging-by-color">Debugging by color<a class="headerlink" href="#debugging-by-color" title="Permanent link">#</a></h2>
-<p>The oldest technique still works. When a value is in doubt, output it as a color:</p>
+<p>La cattura da codice richiede la chiave <code>MetalCaptureEnabled</code> impostata a <code>YES</code> in Info.plist.</p>
+<h2 id="lhud-delle-prestazioni">L'HUD delle prestazioni<a class="headerlink" href="#lhud-delle-prestazioni" title="Permanent link">#</a></h2>
+<p>Metal può sovrapporre a qualsiasi app Metal un grafico in tempo reale di frame rate, tempo di frame, tempo di GPU e memoria.<br>
+Attivalo nelle opzioni dello scheme (<strong>Show Graphics HUD</strong>) o con la variabile d'ambiente <code>MTL_HUD_ENABLED=1</code>.<br>
+Tienilo acceso mentre lavori, così un rallentamento improvviso lo noti nel momento in cui viene introdotto.</p>
+<h2 id="il-debug-con-i-colori">Il debug con i colori<a class="headerlink" href="#il-debug-con-i-colori" title="Permanent link">#</a></h2>
+<p>La tecnica più vecchia funziona ancora.<br>
+Quando hai un dubbio su un valore, mandalo in uscita come colore:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">return</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">normal</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.5</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span><span class="w">        </span><span class="c1">// normals</span>
 <span class="k">return</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span><span class="w">                 </span><span class="c1">// texture coordinates</span>
 <span class="k">return</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">float3</span><span class="p">(</span><span class="n">shadow</span><span class="p">),</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span><span class="w">             </span><span class="c1">// a scalar</span>
 <span class="k">return</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">fract</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">worldPosition</span><span class="p">),</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span><span class="w">    </span><span class="c1">// positions, as a repeating pattern</span>
 </code></pre></div>
 
-<p>Remap values outside the 0 to 1 range first, or you only see black and white. Magenta is the traditional "this should never happen" color: <code>return float4(1, 0, 1, 1);</code> inside a branch tells you instantly whether it is taken.</p>
+<p>Riporta prima nell'intervallo da 0 a 1 i valori che ne escono, altrimenti vedi solo bianco e nero.<br>
+Il magenta è per tradizione il colore del "questo non dovrebbe mai succedere": <code>return float4(1, 0, 1, 1);</code> dentro un ramo ti dice all'istante se viene eseguito.</p>
 <div class="lm-demo" data-demo="debugging" data-fallback="../../assets/img/in-practice/debugging.webp"></div>
 
-<h2 id="command-buffer-errors">Command buffer errors<a class="headerlink" href="#command-buffer-errors" title="Permanent link">#</a></h2>
-<p>A command buffer can fail on the GPU, for example by running out of memory or timing out. Check in the completion handler:</p>
+<h2 id="errori-dei-command-buffer">Errori dei command buffer<a class="headerlink" href="#errori-dei-command-buffer" title="Permanent link">#</a></h2>
+<p>Un command buffer può fallire sulla GPU, per esempio perché finisce la memoria o scade il tempo.<br>
+Controllalo nel completion handler:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">commandBuffer</span><span class="p">.</span><span class="n">addCompletedHandler</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">buffer</span><span class="w"> </span><span class="k">in</span>
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">error</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">buffer</span><span class="p">.</span><span class="n">error</span><span class="w"> </span><span class="p">{</span>
@@ -256,27 +280,37 @@ does not match the framebuffer's pixelFormat (MTLPixelFormatRGBA16Float).'
 </code></pre></div>
 </div>
 
-<p>For more detail, create the buffer with <code>MTLCommandBufferDescriptor</code> and <code>errorOptions = .encoderExecutionStatus</code>. The error then reports which encoder, by label, was executing when the failure happened.</p>
+<p>Per avere più dettagli crea il buffer con <code>MTLCommandBufferDescriptor</code> ed <code>errorOptions = .encoderExecutionStatus</code>.<br>
+L'errore riporta allora quale encoder, per etichetta, era in esecuzione quando è avvenuto il guasto.</p>
 <h2 id="instruments">Instruments<a class="headerlink" href="#instruments" title="Permanent link">#</a></h2>
-<p>For performance questions that span many frames, such as stutters, CPU-GPU synchronization, and shader compilation hitches, profile with the <strong>Metal System Trace</strong> and <strong>Game Performance</strong> templates in Instruments. They show the CPU encoding, the GPU execution and the display's presentation of each frame on one timeline.</p>
-<h2 id="a-checklist-for-nothing-is-drawn">A checklist for "nothing is drawn"<a class="headerlink" href="#a-checklist-for-nothing-is-drawn" title="Permanent link">#</a></h2>
+<p>Per le domande sulle prestazioni che riguardano molti frame, come scatti, sincronizzazione tra CPU e GPU e intoppi dovuti alla compilazione degli shader, usa in Instruments i template <strong>Metal System Trace</strong> e <strong>Game Performance</strong>.<br>
+Mostrano su un'unica linea del tempo la codifica sulla CPU, l'esecuzione sulla GPU e la presentazione a schermo di ogni frame.</p>
+<h2 id="una-checklist-per-non-viene-disegnato-niente">Una checklist per "non viene disegnato niente"<a class="headerlink" href="#una-checklist-per-non-viene-disegnato-niente" title="Permanent link">#</a></h2>
 <ol>
-<li>Is there a validation message in the console? Read it.</li>
-<li>Capture a frame. Is the draw call there? If not, your code never issued it.</li>
-<li>Open the geometry viewer. Are the vertices inside the clip volume?</li>
-<li>Check the depth attachment and compare function. Is everything failing the depth test?</li>
-<li>Check culling and winding. Try <code>setCullMode(.none)</code>.</li>
-<li>Look at the bound buffers. Are the matrices sensible, or is the layout off?</li>
-<li>Return a solid color from the fragment function. If that appears, the problem is in the shading.</li>
-<li>Is the alpha zero with blending enabled?</li>
+<li>C'è un messaggio di validazione in console?<br>
+Leggilo.</li>
+<li>Cattura un frame.<br>
+La draw call c'è?<br>
+Se no, il tuo codice non l'ha mai emessa.</li>
+<li>Apri il geometry viewer.<br>
+I vertici sono dentro il volume di clip?</li>
+<li>Controlla l'attachment di profondità e la compare function.<br>
+Sta fallendo tutto il test di profondità?</li>
+<li>Controlla culling e winding.<br>
+Prova <code>setCullMode(.none)</code>.</li>
+<li>Guarda i buffer collegati.<br>
+Le matrici sono sensate o il layout è sfasato?</li>
+<li>Restituisci un colore pieno dalla fragment function.<br>
+Se compare, il problema è nello shading.</li>
+<li>L'alpha è zero con il blending attivo?</li>
 </ol>
-<p>Work from the outside in and the cause is usually found in minutes.</p></article><nav class="pager" id="pager"><a class="prev" href="../pbr/specular-ibl.html"><small>Precedente</small>IBL speculare</a><a class="next" href="../in-practice/text-rendering.html"><small>Successivo</small>Rendering del testo</a></nav>
+<p>Procedi dall'esterno verso l'interno e di solito la causa si trova in pochi minuti.</p></article><nav class="pager" id="pager"><a class="prev" href="../pbr/specular-ibl.html"><small>Precedente</small>IBL speculare</a><a class="next" href="../in-practice/text-rendering.html"><small>Successivo</small>Rendering del testo</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#layer-1-api-validation">Layer 1: API validation</a></li><li><a href="#layer-2-shader-validation">Layer 2: shader validation</a></li><li><a href="#label-everything">Label everything</a></li><li><a href="#the-gpu-frame-debugger">The GPU frame debugger</a></li><li><a href="#the-performance-hud">The performance HUD</a></li><li><a href="#debugging-by-color">Debugging by color</a></li><li><a href="#command-buffer-errors">Command buffer errors</a></li><li><a href="#instruments">Instruments</a></li><li><a href="#a-checklist-for-nothing-is-drawn">A checklist for &quot;nothing is drawn&quot;</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#livello-1-la-validazione-dellapi">Livello 1: la validazione dell&#x27;API</a></li><li><a href="#livello-2-la-validazione-degli-shader">Livello 2: la validazione degli shader</a></li><li><a href="#dai-unetichetta-a-tutto">Dai un&#x27;etichetta a tutto</a></li><li><a href="#il-gpu-frame-debugger">Il GPU frame debugger</a></li><li><a href="#lhud-delle-prestazioni">L&#x27;HUD delle prestazioni</a></li><li><a href="#il-debug-con-i-colori">Il debug con i colori</a></li><li><a href="#errori-dei-command-buffer">Errori dei command buffer</a></li><li><a href="#instruments">Instruments</a></li><li><a href="#una-checklist-per-non-viene-disegnato-niente">Una checklist per &quot;non viene disegnato niente&quot;</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

@@ -289,8 +289,74 @@ STRINGS = {
                tagline="Impara la grafica 3D con Metal di Apple, dal primo triangolo al rendering fisicamente corretto, in Swift o C++.",
                untranslated=('<div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> '
                              'Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>'),
-               js=dict(copy="Copia", copied="Copiato", none="Nessun risultato per", loading="Carico l'indice",
+               js=dict(compiled="Compilato", error="Errore", resetshader="Ripristina", copylink="Copia link", linkcopied="Link copiato",
+                       editshader="Modifica lo shader",
+                       copy="Copia", copied="Copiato", none="Nessun risultato per", loading="Carico l'indice",
                        progress="{n} capitoli letti su {total}", reset="Azzera il progresso", read="letto")),
+}
+
+IT_CAPTIONS = {
+    "Everything is created from the device, and nothing reaches the GPU until the command buffer is committed.": "Tutto viene creato a partire dal device, e niente arriva alla GPU finché non si fa il commit del command buffer.",
+    "The pieces of the project. The renderer is where almost all code in this series lives.": "I pezzi del progetto. Il renderer è il posto in cui vive quasi tutto il codice di questa serie.",
+    "The result: a view cleared to one color, sixty or more times per second.": "Il risultato: una vista riempita di un solo colore, sessanta o più volte al secondo.",
+    "Left: the first triangle. Right: the indexed rectangle drawn with setTriangleFillMode(.lines), showing its two triangles.": "A sinistra: il primo triangolo. A destra: il rettangolo indicizzato disegnato con setTriangleFillMode(.lines), che mostra i suoi due triangoli.",
+    "Each vertex has its own color. Every fragment in between receives a blend of the three.": "Ogni vertice ha il suo colore. Ogni fragment in mezzo riceve una miscela dei tre.",
+    "Address modes decide what is sampled outside the 0 to 1 range. Here the coordinates run from -1 to 2.": "Gli address mode decidono che cosa viene letto fuori dall'intervallo da 0 a 1. Qui le coordinate vanno da -1 a 2.",
+    "A textured rectangle, and two textures blended with mix. It looks stretched because nothing corrects for the window's aspect ratio yet.": "Un rettangolo con texture, e due texture mescolate con mix. Appare deformato perché niente corregge ancora il rapporto d'aspetto della finestra.",
+    "Scaled to half size, rotated, then moved to the lower right corner.": "Scalato a metà dimensione, ruotato e poi spostato nell'angolo in basso a destra.",
+    "Without a depth test, faces drawn later cover faces that are closer to the camera.": "Senza test di profondità le facce disegnate dopo coprono quelle più vicine alla camera.",
+    "Ten cubes from one vertex buffer and ten model matrices.": "Dieci cubi da un solo vertex buffer e dieci matrici model.",
+    "The same ten cubes seen from a camera that has moved up and to the right.": "Gli stessi dieci cubi visti da una camera che si è spostata in alto e a destra.",
+    "The journey of a vertex.": "Il viaggio di un vertice.",
+    "A coral object and a white lamp cube. Without shading the faces are indistinguishable.": "Un oggetto corallo e un cubo lampada bianco. Senza ombreggiatura le facce non si distinguono.",
+    "The three terms of the Phong model, added one at a time.": "I tre termini del modello di Phong, aggiunti uno alla volta.",
+    "The same cube and the same light with four different materials.": "Lo stesso cubo e la stessa luce con quattro materiali diversi.",
+    "With a specular map only the steel frame shines, and the highlight breaks up over its scratches.": "Con una specular map luccica solo il telaio d'acciaio, e il riflesso si spezza sui suoi graffi.",
+    "The three kinds of light source on the same scene.": "I tre tipi di sorgente di luce sulla stessa scena.",
+    "One directional light and four colored point lights, each drawn as a small lamp cube.": "Una luce direzionale e quattro luci puntiformi colorate, ognuna disegnata come un piccolo cubo lampada.",
+    "The packed vertex layout requested from Model I/O, and the index buffer of a submesh.": "Il layout compatto dei vertici chiesto a Model I/O, e l'index buffer di una submesh.",
+    "Meshes with different materials and transforms drawn through one Model type.": "Mesh con materiali e trasformazioni diversi disegnate attraverso un unico tipo Model.",
+    "Left: raw depth values are almost all close to 1. Right: the same buffer converted back to linear distance.": "A sinistra: i valori grezzi di profondità sono quasi tutti vicini a 1. A destra: lo stesso buffer riconvertito in distanza lineare.",
+    "Outlines drawn where the stencil buffer was not marked by the crates.": "Contorni disegnati dove lo stencil buffer non era stato marcato dalle casse.",
+    "Semi-transparent windows drawn back to front after the opaque scene.": "Finestre semitrasparenti disegnate da dietro in avanti dopo la scena opaca.",
+    "The same triangle seen from the front and from behind.": "Lo stesso triangolo visto da davanti e da dietro.",
+    "The scene rendered to a texture, then processed by different fragment functions.": "La scena disegnata in una texture e poi elaborata da fragment function diverse.",
+    "A skybox, a sphere that reflects it and a block that refracts it.": "Uno skybox, una sfera che lo riflette e un blocco che lo rifrange.",
+    "A [[flat]] member takes the value of the first vertex for the whole triangle.": "Un membro [[flat]] prende il valore del primo vertice per tutto il triangolo.",
+    "Hundreds of camera-facing quads from one instanced draw call, with additive blending.": "Centinaia di rettangoli rivolti verso la camera da una sola draw call con instancing, con blending additivo.",
+    "Thousands of rocks around a planet in a single draw call.": "Migliaia di rocce intorno a un pianeta in una sola draw call.",
+    "A magnified triangle edge. With four samples per pixel, partially covered pixels get intermediate colors.": "Il bordo di un triangolo ingrandito. Con quattro campioni per pixel i pixel coperti in parte prendono colori intermedi.",
+    "A light close to a floor. The Phong highlight is cut off behind the light; the Blinn-Phong highlight is not.": "Una luce vicina a un pavimento. Il riflesso di Phong è troncato dietro la luce; quello di Blinn-Phong no.",
+    "The same lights with inverse-square falloff. Without gamma correction the falloff is far too harsh.": "Le stesse luci con il calo secondo l'inverso del quadrato. Senza correzione gamma il calo è fin troppo duro.",
+    "Left: the scene's depth as seen from the light. Right: the scene shaded with that shadow map.": "A sinistra: la profondità della scena vista dalla luce. A destra: la scena illuminata con quella shadow map.",
+    "A point light in the middle of a room casts shadows in every direction.": "Una luce puntiforme al centro di una stanza proietta ombre in ogni direzione.",
+    "The same flat quad. The normal map makes light react to bricks and mortar.": "Lo stesso rettangolo piatto. La normal map fa reagire la luce a mattoni e malta.",
+    "At a shallow angle, parallax occlusion mapping makes bricks hide the mortar behind them.": "Con un angolo radente il parallax occlusion mapping fa sì che i mattoni nascondano la malta dietro di loro.",
+    "The same HDR image clamped and with two tone mapping operators.": "La stessa immagine HDR tagliata e con due operatori di tone mapping.",
+    "Pixels brighter than white bleed into their surroundings.": "I pixel più luminosi del bianco sconfinano su ciò che li circonda.",
+    "The G-buffer and the result of the lighting pass.": "Il G-buffer e il risultato del lighting pass.",
+    "The occlusion buffer, and ambient light without and with it.": "Il buffer di occlusione, e la luce ambient senza e con esso.",
+    "One light on five dielectric spheres. Roughness alone changes the highlight from a sharp point to a broad sheen.": "Una luce su cinque sfere dielettriche. La sola roughness trasforma il riflesso da un punto netto a una lucentezza ampia.",
+    "Metalness increases from bottom to top, roughness from left to right. Direct lighting only.": "La metalness cresce dal basso verso l'alto, la roughness da sinistra a destra. Solo illuminazione diretta.",
+    "An HDR environment and its irradiance map: the cosine-weighted average of the light around every direction.": "Un ambiente HDR e la sua irradiance map: la media, pesata con il coseno, della luce intorno a ogni direzione.",
+    "With diffuse image-based lighting the spheres pick up the colors of the sky and the ground. Metals stay dark.": "Con l'illuminazione diffusa basata su immagini le sfere raccolgono i colori del cielo e del suolo. I metalli restano scuri.",
+    "The two precomputed halves of the split-sum approximation.": "Le due metà precalcolate della split-sum approximation.",
+    "Full image-based lighting: smooth metals mirror the environment, rough ones show a blurred version of it.": "Illuminazione basata su immagini completa: i metalli lisci rispecchiano l'ambiente, quelli ruvidi ne mostrano una versione sfocata.",
+    "Debugging by color: intermediate values written out as the fragment color.": "Il debug con i colori: valori intermedi mandati in uscita come colore del fragment.",
+    "The glyph atlas, and text composed from one textured quad per character.": "L'atlas di glifi, e il testo composto con un rettangolo con texture per carattere.",
+    "The whole game is one instanced draw call of colored rectangles.": "L'intero gioco è una sola draw call con instancing di rettangoli colorati.",
+    "Marble, the game that comes with the engine: physically based materials, light from the sky, cascaded shadows, bloom and an interface drawn on top.": "Marble, il gioco che accompagna l'engine: materiali fisicamente corretti, luce del cielo, ombre a cascata, bloom e un'interfaccia disegnata sopra.",
+    "One frame of Marble, pass by pass. Each picture is the texture that the pass draws into.": "Un frame di Marble, pass per pass. Ogni immagine è la texture in cui quel pass disegna.",
+    "The whole course. The marble starts in the foreground, crosses the gap on the orange platform and finishes on the far right.": "L'intero percorso. La biglia parte in primo piano, attraversa il vuoto sulla piattaforma arancione e finisce all'estrema destra.",
+    "The end of an unattended run: the autopilot has collected all eight gems and reached the goal.": "La fine di un'esecuzione senza nessuno ai comandi: l'autopilota ha raccolto tutte e otto le gemme e ha raggiunto il traguardo.",
+    "The editor with its sample scene. The golden ball is selected: its handles are in the view, its components in the inspector.": "L'editor con la sua scena di esempio. La sfera dorata è selezionata: le sue maniglie sono nella vista, i suoi componenti nell'inspector.",
+    "The Materials tab: the surface of the selected material and its texture slots.": "La scheda Materials: la superficie del materiale selezionato e i suoi slot di texture.",
+    "After pressing Play: seen through the scene's own camera, the ball has rolled onto the ramp and the fountain is running.": "Dopo aver premuto Play: vista dalla camera propria della scena, la sfera è rotolata sulla rampa e la fontana è in funzione.",
+    "A kernel reads one texture and writes another, one thread per pixel.": "Un kernel legge una texture e ne scrive un'altra, un thread per pixel.",
+    "The same 4 x 4 grid of quad patches at increasing tessellation factors, displaced by a height function.": "La stessa griglia 4 x 4 di patch quadrilatere con fattori di tassellazione crescenti, spostata da una funzione di altezza.",
+    "Left: what an intersection returns. Right: shadows from one ray per pixel toward the light.": "A sinistra: ciò che restituisce un'intersezione. A destra: ombre con un raggio per pixel verso la luce.",
+    "NDC has y up. Textures and pixels have y down.": "Le NDC hanno y verso l'alto. Texture e pixel hanno y verso il basso.",
+    "The two highlighted stages are the ones you program.": "I due stadi evidenziati sono quelli che programmi tu.",
 }
 
 IT_TITLES = {
@@ -471,7 +537,9 @@ def write_code_css():
     (OUT / "assets" / "code.css").write_text(text)
 
 
-def image_tag(name, caption):
+def image_tag(name, caption, lang="en"):
+    if lang == "it":
+        caption = IT_CAPTIONS.get(caption, caption)
     from PIL import Image
     path = ASSETS / "img" / f"{name}.webp"
     w, h = Image.open(path).size
@@ -527,6 +595,7 @@ def localized(folder, slug, lang):
     text = re.sub(r"^\{\{code\}\}[ \t]*$", lambda m: next(blocks), path.read_text(), flags=re.M)
     figures = iter(re.findall(r"^<figure>.*?^</figure>[ \t]*$", english, flags=re.S | re.M))   # {{figure}}: the next inline figure
     text = re.sub(r"^\{\{figure\}\}[ \t]*$", lambda m: next(figures), text, flags=re.M)
+    text = re.sub(r"<figcaption>(.*?)</figcaption>", lambda m: f"<figcaption>{IT_CAPTIONS.get(m.group(1), m.group(1))}</figcaption>", text)
     if next(blocks, None) is not None:
         print(f"warning: {folder}/{slug}.{lang}.md uses fewer code blocks than the English chapter")
     return text, english, True
@@ -539,7 +608,7 @@ def preprocess(text, key, folder, slug, ref_text=None, lang="en"):
     replaced = {fig for _, _, fig in DEMOS.get(key, []) if fig}
     for name, caption, anchor in FIGURES.get(key, []):
         if name not in replaced:
-            insert_before(lines, key, anchor, ["", image_tag(name, caption), ""], ref)
+            insert_before(lines, key, anchor, ["", image_tag(name, caption, lang), ""], ref)
     for demo, anchor, fallback in DEMOS.get(key, []):
         insert_before(lines, key, anchor, ["", demo_tag(demo, fallback), ""], ref)
 
@@ -591,6 +660,10 @@ def preprocess(text, key, folder, slug, ref_text=None, lang="en"):
         note = ('<div class="lang-note lang-cpp"><strong>C++ version in progress.</strong> The host code in this chapter is '
                 'shown in Swift for now. The shaders are identical in both languages, and the '
                 '<a href="../getting-started/project-setup.html">name mapping</a> to metal-cpp is mechanical.</div>')
+        if lang == "it":
+            note = ('<div class="lang-note lang-cpp"><strong>Versione C++ in preparazione.</strong> Per ora il codice host di questo '
+                    'capitolo è mostrato in Swift. Gli shader sono identici nei due linguaggi, e la '
+                    '<a href="../getting-started/project-setup.html">corrispondenza dei nomi</a> con metal-cpp è meccanica.</div>')
         lines = text.split("\n")
         i = next(k for k, line in enumerate(lines) if line.startswith("# "))
         lines[i + 1:i + 1] = ["", note, ""]
@@ -626,10 +699,15 @@ def page(lang="en", **kw):
 
 
 def attach_solutions(body, folder, slug, lang, label):
+    english = CONTENT / folder / f"{slug}.solutions.md"
     path = CONTENT / folder / f"{slug}.solutions.{lang}.md"
     if not path.exists():
-        path = CONTENT / folder / f"{slug}.solutions.md"
-    solutions = [x.strip() for x in re.split(r"^---[ \t]*$", path.read_text(), flags=re.M)] if path.exists() else []
+        path = english
+    text = path.read_text() if path.exists() else ""
+    if path != english:                             # {{code}} stands for the next code block of the English solutions
+        blocks = iter(FENCE.findall(english.read_text()))
+        text = re.sub(r"^\{\{code\}\}[ \t]*$", lambda m: next(blocks), text, flags=re.M)
+    solutions = [x.strip() for x in re.split(r"^---[ \t]*$", text, flags=re.M)] if text else []
     count = len(re.findall(r"LMSOL\d+LM", body))
     if solutions and count != len(solutions):
         print(f"warning: {folder}/{slug}: {count} exercises but {len(solutions)} solutions")
@@ -644,6 +722,47 @@ def attach_solutions(body, folder, slug, lang, label):
 
 
 TAG = re.compile(r"<[^>]+>")
+
+# Every sentence of the running text starts on a line of its own. The text is written as ordinary
+# paragraphs; this puts a line break after each full stop, question mark or exclamation mark.
+PIECE = re.compile(r"(<code>.*?</code>|<[^>]+>)", re.S)
+NOT_AN_END = {"e.g", "i.e", "vs", "cf", "es", "p.es", "fig", "ca", "approx", "ecc.)", "etc.)"}
+SENTENCE_END = re.compile("([.!?][)\"\u201d\u2019\u00bb]?(?:\ue002\\d+\ue003)*)[ \n]+"
+                          "(?=(?:\ue002\\d+\ue003)*(?:[A-Z\u00c0-\u00dd0-9(\u201c\"\u00ab]|\ue000))")
+
+
+def break_sentences(inner):
+    pieces = PIECE.split(inner)
+    plain = "".join(p if i % 2 == 0 else (f"\ue000{i}\ue001" if p.startswith("<code>") else f"\ue002{i}\ue003")
+                    for i, p in enumerate(pieces))
+
+    def one(m):
+        before = re.sub("\ue002\\d+\ue003", "", plain[:m.start()])
+        word = re.split(r"[\s(]", before)[-1] if before else ""
+        if word.lower() in NOT_AN_END or (len(word) == 1 and word.isalpha() and plain[m.start()] == "."):
+            return m.group(0)
+        if word.isdigit() and plain[m.start()] == "." and not before[:-len(word)].strip():
+            return m.group(0)                       # "1. First step" at the start of a paragraph
+        return m.group(1) + "<br>\n"
+
+    plain = SENTENCE_END.sub(one, plain)
+    return re.sub("[\ue000\ue002](\\d+)[\ue001\ue003]", lambda m: pieces[int(m.group(1))], plain)
+
+
+def one_sentence_per_line(body):
+    keep = []
+
+    def hide(m):
+        keep.append(m.group(0))
+        return f"\ue004{len(keep) - 1}\ue005"
+
+    body = re.sub(r"<pre.*?</pre>|<figure.*?</figure>|<table.*?</table>|<h[1-6].*?</h[1-6]>|<summary.*?</summary>"
+                  r"|<p class=\"(?:crumb|admonition-title)\">.*?</p>|<div class=\"(?:example-box|lm-demo|lang-note)[^>]*>.*?</div>",
+                  hide, body, flags=re.S)
+    body = re.sub(r"(<p>)(.*?)(</p>)", lambda m: m.group(1) + break_sentences(m.group(2)) + m.group(3), body, flags=re.S)
+    body = re.sub(r"(<li>)((?:(?!<li>|<p>|<ul>|<ol>|<div|<details|\ue004).)*?)(</li>|<ul>|<ol>|<details)",
+                  lambda m: m.group(1) + break_sentences(m.group(2)) + m.group(3), body, flags=re.S)
+    return re.sub("\ue004(\\d+)\ue005", lambda m: keep[int(m.group(1))], body)
 
 
 def index_entries(url, title, body):
@@ -680,6 +799,7 @@ def build_site(lang):
         m = md()
         body = m.convert(preprocess(text, key, folder, slug, english, lang))
         body = attach_solutions(body, folder, slug, lang, t["solution"])
+        body = one_sentence_per_line(body)
         if not is_translated:
             body = re.sub(r"(</h1>)", r"\1" + t["untranslated"], body, count=1)
         if lang != "en":
@@ -735,7 +855,7 @@ def build_site(lang):
                     f'<p>{html.escape(blurbs.get(folder, ""))}</p></div><ul>{links}</ul></li>')
     rows.append("</ol></section>")
     home = CONTENT / f"index.{lang}.md"
-    intro = md().convert((home if home.exists() else CONTENT / "index.md").read_text())
+    intro = one_sentence_per_line(md().convert((home if home.exists() else CONTENT / "index.md").read_text()))
     out.mkdir(parents=True, exist_ok=True)
     (out / "index.html").write_text(page(
         lang,

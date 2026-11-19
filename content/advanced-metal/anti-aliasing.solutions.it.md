@@ -1,0 +1,3 @@
+Con 1 campione il bordo lungo è una scaletta con gradini lunghi diversi pixel. Con 2 campioni ogni gradino guadagna una sfumatura intermedia; con 4 ce ne sono tre, e il bordo si legge come una linea liscia. I bordi quasi orizzontali e quasi verticali mostrano di più la differenza, perché i loro gradini sono i più lunghi.
+---
+Senza alpha-to-coverage `discard_fragment` decide pixel per pixel, quindi l'MSAA non può lisciare i bordi ritagliati all'interno del rettangolo. Con `isAlphaToCoverageEnabled` il valore di alpha diventa una maschera di copertura: un alpha di 0.5 copre due campioni su quattro, e il resolve li media in un bordo morbido, senza bisogno di ordinamento.

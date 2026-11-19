@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,13 +134,15 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Illuminazione avanzata</p><h1 id="hdr">HDR<a class="headerlink" href="#hdr" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
+<article><p class="crumb">Illuminazione avanzata</p><h1 id="hdr">HDR<a class="headerlink" href="#hdr" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Progetto di esempio</strong> <code>examples/Sources/15-HDRBloom</code>, si esegue con <code>swift run HDRBloom</code>. <a href="../../downloads/learnmetal-examples.zip">Scarica tutti gli esempi</a> oppure guarda <a href="../resources/examples.html">come eseguirli</a>.</div>
 
-<p>Color values written to an 8-bit texture are clamped to the 0 to 1 range. Put several bright lights in a scene and large areas add up to more than 1, get clamped, and turn into a featureless white patch. All the detail in the bright regions is lost.</p>
-<p><strong>High dynamic range</strong> rendering lets colors exceed 1 while the image is being built, and converts the result to a displayable range at the very end, in a step called <strong>tone mapping</strong>.</p>
-<h2 id="floating-point-render-targets">Floating-point render targets<a class="headerlink" href="#floating-point-render-targets" title="Permanent link">#</a></h2>
-<p>The scene is rendered into a texture with a floating-point format, which stores values far beyond 1 without clamping:</p>
+<p>I valori di colore scritti in una texture a 8 bit vengono limitati all'intervallo da 0 a 1.<br>
+Metti in una scena più luci forti e ampie zone superano 1 nella somma, vengono tagliate e diventano una macchia bianca senza dettagli.<br>
+Tutto il dettaglio delle zone luminose è perso.</p>
+<p>Il rendering <strong>high dynamic range</strong> permette ai colori di superare 1 mentre l'immagine viene costruita, e converte il risultato in un intervallo visualizzabile solo alla fine, in un passo chiamato <strong>tone mapping</strong>.</p>
+<h2 id="render-target-in-virgola-mobile">Render target in virgola mobile<a class="headerlink" href="#render-target-in-virgola-mobile" title="Permanent link">#</a></h2>
+<p>La scena viene disegnata in una texture con un formato in virgola mobile, che conserva valori ben oltre 1 senza tagliarli:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">descriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLTextureDescriptor</span><span class="p">.</span><span class="n">texture2DDescriptor</span><span class="p">(</span>
 <span class="w">    </span><span class="n">pixelFormat</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">rgba16Float</span><span class="p">,</span><span class="w"> </span><span class="n">width</span><span class="p">:</span><span class="w"> </span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">:</span><span class="w"> </span><span class="n">height</span><span class="p">,</span><span class="w"> </span><span class="n">mipmapped</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
@@ -161,29 +163,32 @@
 <table>
 <thead>
 <tr>
-<th>Format</th>
-<th>Notes</th>
+<th>Formato</th>
+<th>Note</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>.rgba16Float</code></td>
-<td>The standard choice. 16-bit half floats per channel.</td>
+<td>La scelta standard. Half float a 16 bit per canale.</td>
 </tr>
 <tr>
 <td><code>.rg11b10Float</code></td>
-<td>Half the memory, no alpha, slightly less precision. Good on mobile.</td>
+<td>Metà della memoria, niente alpha, precisione un po' inferiore. Buono sui dispositivi mobili.</td>
 </tr>
 <tr>
 <td><code>.rgba32Float</code></td>
-<td>Rarely needed for color.</td>
+<td>Per il colore serve di rado.</td>
 </tr>
 </tbody>
 </table>
-<p>Set the scene pipelines' color format to match, and render the scene as in <a href="../advanced-metal/render-targets.html">Render Targets</a>. The lighting shaders do not change. They simply stop being clamped.</p>
+<p>Imposta il formato di colore delle pipeline della scena perché coincida, e disegna la scena come in <a href="../advanced-metal/render-targets.html">Render target</a>.<br>
+Gli shader di illuminazione non cambiano.<br>
+Smettono semplicemente di essere tagliati.</p>
 <h2 id="tone-mapping">Tone mapping<a class="headerlink" href="#tone-mapping" title="Permanent link">#</a></h2>
-<p>A full-screen pass reads the HDR texture and maps it to the 0 to 1 range for the drawable.</p>
-<p>The simplest operator is <strong>Reinhard</strong>, which divides each color by itself plus one. Bright values are squeezed together toward 1 and dark values are left nearly untouched:</p>
+<p>Un pass a tutto schermo legge la texture HDR e la riporta all'intervallo da 0 a 1 per il drawable.</p>
+<p>L'operatore più semplice è <strong>Reinhard</strong>, che divide ogni colore per sé stesso più uno.<br>
+I valori alti vengono compressi verso 1 e quelli bassi restano quasi intatti:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_tonemap</span><span class="p">(</span><span class="n">ScreenOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
 <span class="w">                                 </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">hdrTexture</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
 <span class="w">                                 </span><span class="n">sampler</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="p">[[</span><span class="na">sampler</span><span class="p">(</span><span class="mi">0</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
@@ -193,15 +198,21 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>The drawable should have an sRGB format, as set up in <a href="gamma-correction.html">Gamma Correction</a>, so the result is gamma-encoded automatically. Tone mapping always comes before gamma encoding.</p>
-<h2 id="exposure">Exposure<a class="headerlink" href="#exposure" title="Permanent link">#</a></h2>
-<p>A camera adapts to the brightness of a scene with its exposure. An <strong>exposure</strong> tone mapper gives us the same control:</p>
+<p>Il drawable dovrebbe avere un formato sRGB, come impostato in <a href="gamma-correction.html">Correzione gamma</a>, così il risultato viene codificato in gamma automaticamente.<br>
+Il tone mapping viene sempre prima della codifica gamma.</p>
+<h2 id="esposizione">Esposizione<a class="headerlink" href="#esposizione" title="Permanent link">#</a></h2>
+<p>Una fotocamera si adatta alla luminosità di una scena con la sua esposizione.<br>
+Un tone mapper con <strong>esposizione</strong> ci dà lo stesso controllo:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">mapped</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">hdr</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">exposure</span><span class="p">);</span>
 </code></pre></div>
 
-<p>A low exposure reveals detail in bright areas and crushes the dark ones; a high exposure does the reverse. With it you can render a dim interior and a sunlit exterior with the same physical light values, changing only the exposure. Automatic exposure, or <strong>eye adaptation</strong>, computes the average brightness of the frame, for example from the smallest mip level of the HDR texture, and eases the exposure toward a target over time.</p>
-<h2 id="filmic-curves">Filmic curves<a class="headerlink" href="#filmic-curves" title="Permanent link">#</a></h2>
-<p>Reinhard tends to look washed out. Film-like curves keep more contrast and roll highlights off more gracefully. A popular compact fit to the ACES film curve, by Krzysztof Narkowicz:</p>
+<p>Un'esposizione bassa rivela il dettaglio nelle zone luminose e schiaccia quelle scure; una alta fa il contrario.<br>
+Così puoi disegnare un interno in penombra e un esterno al sole con gli stessi valori fisici di luce, cambiando solo l'esposizione.<br>
+L'esposizione automatica, o <strong>eye adaptation</strong>, calcola la luminosità media del frame, per esempio dal livello di mip più piccolo della texture HDR, e avvicina gradualmente l'esposizione a un valore obiettivo.</p>
+<h2 id="curve-filmiche">Curve filmiche<a class="headerlink" href="#curve-filmiche" title="Permanent link">#</a></h2>
+<p>Reinhard tende a dare immagini slavate.<br>
+Le curve simili a quelle della pellicola tengono più contrasto e attenuano le alte luci con più grazia.<br>
+Un'approssimazione compatta e diffusa della curva ACES, di Krzysztof Narkowicz:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="nf">acesFilm</span><span class="p">(</span><span class="n">float3</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">2.51</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.03</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">2.43</span><span class="p">,</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.59</span><span class="p">,</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.14</span><span class="p">;</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">saturate</span><span class="p">((</span><span class="n">x</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">))</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">d</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">e</span><span class="p">));</span>
@@ -210,23 +221,32 @@
 <span class="n">float3</span><span class="w"> </span><span class="n">mapped</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">acesFilm</span><span class="p">(</span><span class="n">hdr</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">exposure</span><span class="p">);</span>
 </code></pre></div>
 
-<p>The tone mapper is one of the biggest contributors to the overall look of a renderer. Try several.</p>
-<h2 id="a-test-scene">A test scene<a class="headerlink" href="#a-test-scene" title="Permanent link">#</a></h2>
-<p>Build a long tunnel from a stretched, inward-facing cube with one very bright light at the far end, with a color around (200, 200, 200), and a few dim colored lights along the walls. Without HDR the far end is a white blob. With HDR and exposure control, you can see the texture of the wall right up to the light.</p>
+<p>Il tone mapper è una delle cose che più contribuiscono all'aspetto complessivo di un renderer.<br>
+Provane diversi.</p>
+<h2 id="una-scena-di-prova">Una scena di prova<a class="headerlink" href="#una-scena-di-prova" title="Permanent link">#</a></h2>
+<p>Costruisci un lungo tunnel con un cubo allungato e rivolto verso l'interno, con una luce molto forte in fondo, di colore intorno a (200, 200, 200), e alcune luci colorate deboli lungo le pareti.<br>
+Senza HDR il fondo è una macchia bianca.<br>
+Con l'HDR e il controllo dell'esposizione vedi la texture della parete fin sotto la luce.</p>
 <div class="lm-demo" data-demo="hdr" data-fallback="../../assets/img/advanced-lighting/hdr.webp"></div>
 
-<h2 id="why-it-matters-beyond-bright-lights">Why it matters beyond bright lights<a class="headerlink" href="#why-it-matters-beyond-bright-lights" title="Permanent link">#</a></h2>
+<h2 id="perche-conta-al-di-la-delle-luci-forti">Perché conta al di là delle luci forti<a class="headerlink" href="#perche-conta-al-di-la-delle-luci-forti" title="Permanent link">#</a></h2>
 <ul>
-<li><strong>Bloom</strong> needs to know which pixels are brighter than white. See the <a href="bloom.html">next chapter</a>.</li>
-<li><strong>Physically based rendering</strong> uses real-world light intensities, which span a huge range.</li>
-<li>Post effects such as depth of field and motion blur look far more natural when computed on HDR values.</li>
+<li>Il <strong>bloom</strong> ha bisogno di sapere quali pixel sono più luminosi del bianco.<br>
+Vedi il <a href="bloom.html">prossimo capitolo</a>.</li>
+<li>Il <strong>rendering fisicamente corretto</strong> usa intensità di luce del mondo reale, che coprono un intervallo enorme.</li>
+<li>Effetti di post-processing come la profondità di campo e il motion blur risultano molto più naturali se calcolati su valori HDR.</li>
 </ul>
-<h2 id="displaying-hdr-directly">Displaying HDR directly<a class="headerlink" href="#displaying-hdr-directly" title="Permanent link">#</a></h2>
-<p>Apple displays with <strong>Extended Dynamic Range</strong> (EDR) can show values brighter than standard white. A Metal layer opts in by using a floating-point drawable format (<code>.rgba16Float</code>), an extended linear color space, and <code>wantsExtendedDynamicRangeContent = true</code> on the <code>CAMetalLayer</code>. Values above 1.0 are then shown brighter than the UI's white, up to a headroom that the screen reports and that changes with brightness settings. You still tone map, but into the display's available range instead of 0 to 1. It is a worthwhile upgrade once the rest of the pipeline is in place.</p>
-<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<h2 id="mostrare-direttamente-lhdr">Mostrare direttamente l'HDR<a class="headerlink" href="#mostrare-direttamente-lhdr" title="Permanent link">#</a></h2>
+<p>Gli schermi Apple con <strong>Extended Dynamic Range</strong> (EDR) possono mostrare valori più luminosi del bianco standard.<br>
+Un layer Metal lo attiva usando un formato di drawable in virgola mobile (<code>.rgba16Float</code>), uno spazio colore lineare esteso e <code>wantsExtendedDynamicRangeContent = true</code> sul <code>CAMetalLayer</code>.<br>
+I valori sopra 1.0 vengono allora mostrati più luminosi del bianco dell'interfaccia, fino a un margine che lo schermo riporta e che cambia con le impostazioni di luminosità.<br>
+Il tone mapping si fa comunque, ma verso l'intervallo disponibile sullo schermo invece che da 0 a 1.<br>
+È un miglioramento che vale la pena fare quando il resto della pipeline è a posto.</p>
+<h2 id="esercizi">Esercizi<a class="headerlink" href="#esercizi" title="Permanent link">#</a></h2>
 <ul>
-<li>Add keys to raise and lower the exposure.<details class="solution"><summary>Mostra la soluzione</summary><p>Keep an <code>exposure</code> value in the renderer, multiply or divide it by a constant such as 1.1 while a key is held, and send it in the tone mapping pass's uniforms. Multiplying, not adding, makes each step feel equal, because brightness perception is logarithmic.</p></details></li>
-<li>Show Reinhard on the left half of the screen and ACES on the right.<details class="solution"><summary>Mostra la soluzione</summary><p>Choose by the horizontal texture coordinate.</p>
+<li>Aggiungi dei tasti per alzare e abbassare l'esposizione.<details class="solution"><summary>Mostra la soluzione</summary><p>Tieni un valore <code>exposure</code> nel renderer, moltiplicalo o dividilo per una costante come 1.1 finché un tasto resta premuto, e invialo negli uniform del pass di tone mapping.<br>
+Moltiplicare, e non sommare, fa percepire uguale ogni passo, perché la percezione della luminosità è logaritmica.</p></details></li>
+<li>Mostra Reinhard sulla metà sinistra dello schermo e ACES sulla destra.<details class="solution"><summary>Mostra la soluzione</summary><p>Scegli in base alla coordinata di texture orizzontale.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">mapped</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.5</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">hdr</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">hdr</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">1.0</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">acesFilm</span><span class="p">(</span><span class="n">hdr</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">exposure</span><span class="p">);</span>
 </code></pre></div></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../advanced-lighting/parallax-mapping.html"><small>Precedente</small>Parallax mapping</a><a class="next" href="../advanced-lighting/bloom.html"><small>Successivo</small>Bloom</a></nav>
@@ -235,7 +255,7 @@
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#floating-point-render-targets">Floating-point render targets</a></li><li><a href="#tone-mapping">Tone mapping</a></li><li><a href="#exposure">Exposure</a></li><li><a href="#filmic-curves">Filmic curves</a></li><li><a href="#a-test-scene">A test scene</a></li><li><a href="#why-it-matters-beyond-bright-lights">Why it matters beyond bright lights</a></li><li><a href="#displaying-hdr-directly">Displaying HDR directly</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#render-target-in-virgola-mobile">Render target in virgola mobile</a></li><li><a href="#tone-mapping">Tone mapping</a></li><li><a href="#esposizione">Esposizione</a></li><li><a href="#curve-filmiche">Curve filmiche</a></li><li><a href="#una-scena-di-prova">Una scena di prova</a></li><li><a href="#perche-conta-al-di-la-delle-luci-forti">Perché conta al di là delle luci forti</a></li><li><a href="#mostrare-direttamente-lhdr">Mostrare direttamente l&#x27;HDR</a></li><li><a href="#esercizi">Esercizi</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

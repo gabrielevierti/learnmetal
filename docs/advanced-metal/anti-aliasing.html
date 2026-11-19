@@ -135,22 +135,30 @@
 </nav>
 <main class="content" id="main">
 <article><p class="crumb">Advanced Metal</p><h1 id="anti-aliasing">Anti-Aliasing<a class="headerlink" href="#anti-aliasing" title="Permanent link">#</a></h1>
-<p>Look closely at the edge of any cube we have rendered and you see a staircase. A pixel is either inside a triangle or outside it, and nothing in between. That stair-step pattern is <strong>aliasing</strong>, and techniques that hide it are called <strong>anti-aliasing</strong>.</p>
+<p>Look closely at the edge of any cube we have rendered and you see a staircase.<br>
+A pixel is either inside a triangle or outside it, and nothing in between.<br>
+That stair-step pattern is <strong>aliasing</strong>, and techniques that hide it are called <strong>anti-aliasing</strong>.</p>
 <h2 id="why-edges-alias">Why edges alias<a class="headerlink" href="#why-edges-alias" title="Permanent link">#</a></h2>
-<p>The rasterizer tests one point per pixel, its center, against each triangle. If the center is covered, the fragment function runs and the whole pixel takes the color. A slanted edge therefore advances in whole-pixel steps.</p>
+<p>The rasterizer tests one point per pixel, its center, against each triangle.<br>
+If the center is covered, the fragment function runs and the whole pixel takes the color.<br>
+A slanted edge therefore advances in whole-pixel steps.</p>
 <p>Rendering at a higher resolution and scaling down (<strong>supersampling</strong>) solves it, but shading four times as many pixels is expensive.</p>
 <h2 id="multisampling">Multisampling<a class="headerlink" href="#multisampling" title="Permanent link">#</a></h2>
-<p><strong>Multisample anti-aliasing</strong> (MSAA) gets most of the benefit at a fraction of the cost. Each pixel has several <strong>sample points</strong>, typically four, at different positions inside it. For every triangle:</p>
+<p><strong>Multisample anti-aliasing</strong> (MSAA) gets most of the benefit at a fraction of the cost.<br>
+Each pixel has several <strong>sample points</strong>, typically four, at different positions inside it.<br>
+For every triangle:</p>
 <ul>
 <li>coverage and depth are tested at <strong>every sample</strong>,</li>
 <li>the fragment function still runs only <strong>once per pixel</strong>,</li>
 <li>its result is stored in each sample that the triangle covers.</li>
 </ul>
-<p>At the end, the samples of each pixel are averaged in a step called the <strong>resolve</strong>. A pixel half covered by a triangle ends up as an even mix of the triangle's color and the background.</p>
+<p>At the end, the samples of each pixel are averaged in a step called the <strong>resolve</strong>.<br>
+A pixel half covered by a triangle ends up as an even mix of the triangle's color and the background.</p>
 <figure><img src="../assets/img/advanced-metal/anti-aliasing.webp" alt="A magnified triangle edge. With four samples per pixel, partially covered pixels get intermediate colors." width="880" height="246" loading="lazy"><figcaption>A magnified triangle edge. With four samples per pixel, partially covered pixels get intermediate colors.</figcaption></figure>
 
 <h2 id="msaa-with-mtkview">MSAA with MTKView<a class="headerlink" href="#msaa-with-mtkview" title="Permanent link">#</a></h2>
-<p><code>MTKView</code> manages the multisample texture and the resolve for you. Two lines are needed:</p>
+<p><code>MTKView</code> manages the multisample texture and the resolve for you.<br>
+Two lines are needed:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">view</span><span class="p">.</span><span class="n">sampleCount</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">4</span>
 </code></pre></div>
@@ -171,10 +179,13 @@
 </code></pre></div>
 </div>
 
-<p>Every pipeline state used in the pass must have the same sample count as the attachments. Run it and the edges are smooth.</p>
-<p>A sample count of 4 is supported on all Metal devices. Check others with <code>device.supportsTextureSampleCount(8)</code>.</p>
+<p>Every pipeline state used in the pass must have the same sample count as the attachments.<br>
+Run it and the edges are smooth.</p>
+<p>A sample count of 4 is supported on all Metal devices.<br>
+Check others with <code>device.supportsTextureSampleCount(8)</code>.</p>
 <h2 id="msaa-in-your-own-render-passes">MSAA in your own render passes<a class="headerlink" href="#msaa-in-your-own-render-passes" title="Permanent link">#</a></h2>
-<p>For offscreen passes you create the textures yourself. You need two color textures: a multisample texture to render into, and an ordinary texture to receive the resolved image.</p>
+<p>For offscreen passes you create the textures yourself.<br>
+You need two color textures: a multisample texture to render into, and an ordinary texture to receive the resolved image.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">msaaDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLTextureDescriptor</span><span class="p">.</span><span class="n">texture2DDescriptor</span><span class="p">(</span>
 <span class="w">    </span><span class="n">pixelFormat</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">bgra8Unorm</span><span class="p">,</span><span class="w"> </span><span class="n">width</span><span class="p">:</span><span class="w"> </span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">:</span><span class="w"> </span><span class="n">height</span><span class="p">,</span><span class="w"> </span><span class="n">mipmapped</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
@@ -196,7 +207,8 @@
 </code></pre></div>
 </div>
 
-<p>The depth texture must be multisampled in the same way. Then connect them in the render pass descriptor:</p>
+<p>The depth texture must be multisampled in the same way.<br>
+Then connect them in the render pass descriptor:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">pass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">texture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">msaaColor</span>
 <span class="n">pass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">resolveTexture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">sceneColor</span><span class="w">       </span><span class="c1">// ordinary texture</span>
@@ -216,12 +228,16 @@
 </code></pre></div>
 </div>
 
-<p>The store action <code>.multisampleResolve</code> averages the samples into <code>resolveTexture</code> at the end of the pass and discards the multisample data. Because the samples are never needed afterward, the multisample textures can be <strong>memoryless</strong> on Apple GPUs: 4× MSAA then costs no extra memory at all, only some extra work inside each tile. This is a real advantage of tile-based GPUs and makes MSAA unusually cheap on Apple devices.</p>
+<p>The store action <code>.multisampleResolve</code> averages the samples into <code>resolveTexture</code> at the end of the pass and discards the multisample data.<br>
+Because the samples are never needed afterward, the multisample textures can be <strong>memoryless</strong> on Apple GPUs: 4× MSAA then costs no extra memory at all, only some extra work inside each tile.<br>
+This is a real advantage of tile-based GPUs and makes MSAA unusually cheap on Apple devices.</p>
 <h2 id="limits-of-msaa">Limits of MSAA<a class="headerlink" href="#limits-of-msaa" title="Permanent link">#</a></h2>
-<p>MSAA smooths <strong>geometry edges</strong> only. The fragment function runs once per pixel, so it does nothing for:</p>
+<p>MSAA smooths <strong>geometry edges</strong> only.<br>
+The fragment function runs once per pixel, so it does nothing for:</p>
 <ul>
 <li>shimmering inside a surface from high-frequency textures or sharp specular highlights,</li>
-<li>edges created by <code>discard_fragment</code> in alpha-tested textures. For those, enable <code>isAlphaToCoverageEnabled</code> on the pipeline descriptor, which converts the fragment's alpha into a sample coverage mask.</li>
+<li>edges created by <code>discard_fragment</code> in alpha-tested textures.<br>
+For those, enable <code>isAlphaToCoverageEnabled</code> on the pipeline descriptor, which converts the fragment's alpha into a sample coverage mask.</li>
 </ul>
 <p>MSAA also clashes with <a href="../advanced-lighting/deferred-shading.html">deferred shading</a>, where lighting happens after geometry has been flattened into textures.</p>
 <h2 id="reading-individual-samples">Reading individual samples<a class="headerlink" href="#reading-individual-samples" title="Permanent link">#</a></h2>
@@ -237,17 +253,25 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>A custom resolve matters for HDR rendering, where tone mapping each sample before averaging gives much cleaner bright edges. The multisample texture then needs <code>.shaderRead</code> usage and cannot be memoryless.</p>
+<p>A custom resolve matters for HDR rendering, where tone mapping each sample before averaging gives much cleaner bright edges.<br>
+The multisample texture then needs <code>.shaderRead</code> usage and cannot be memoryless.</p>
 <h2 id="other-approaches">Other approaches<a class="headerlink" href="#other-approaches" title="Permanent link">#</a></h2>
 <ul>
-<li><strong>FXAA and SMAA</strong> are post-processing filters that find edges in the finished image and blur along them. They are cheap and work with any renderer, at the cost of some sharpness.</li>
-<li><strong>Temporal anti-aliasing</strong> (TAA) shifts the camera by a sub-pixel amount each frame and blends with previous frames. It handles shading aliasing too, but needs motion vectors and care to avoid ghosting.</li>
-<li><strong>MetalFX</strong> is Apple's upscaling framework. You render at a lower resolution, and it reconstructs a sharp, anti-aliased image at full resolution with either a spatial or a temporal method. The temporal upscaler doubles as high-quality anti-aliasing.</li>
+<li><strong>FXAA and SMAA</strong> are post-processing filters that find edges in the finished image and blur along them.<br>
+They are cheap and work with any renderer, at the cost of some sharpness.</li>
+<li><strong>Temporal anti-aliasing</strong> (TAA) shifts the camera by a sub-pixel amount each frame and blends with previous frames.<br>
+It handles shading aliasing too, but needs motion vectors and care to avoid ghosting.</li>
+<li><strong>MetalFX</strong> is Apple's upscaling framework.<br>
+You render at a lower resolution, and it reconstructs a sharp, anti-aliased image at full resolution with either a spatial or a temporal method.<br>
+The temporal upscaler doubles as high-quality anti-aliasing.</li>
 </ul>
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
-<li>Compare sample counts 1, 2 and 4 on a thin, nearly horizontal triangle.<details class="solution"><summary>Show solution</summary><p>With 1 sample the long edge is a staircase with steps several pixels long. With 2 samples each step gets one intermediate shade; with 4 there are three, and the edge reads as a smooth line. Nearly horizontal and nearly vertical edges show the difference most, because their steps are the longest.</p></details></li>
-<li>Draw alpha-tested grass with and without alpha-to-coverage under 4× MSAA.<details class="solution"><summary>Show solution</summary><p>Without alpha-to-coverage, <code>discard_fragment</code> decides per pixel, so MSAA cannot smooth the cut-out edges inside the quad. With <code>isAlphaToCoverageEnabled</code> the alpha value turns into a coverage mask: an alpha of 0.5 covers two of four samples, and the resolve averages them into a soft edge, with no sorting needed.</p></details></li>
+<li>Compare sample counts 1, 2 and 4 on a thin, nearly horizontal triangle.<details class="solution"><summary>Show solution</summary><p>With 1 sample the long edge is a staircase with steps several pixels long.<br>
+With 2 samples each step gets one intermediate shade; with 4 there are three, and the edge reads as a smooth line.<br>
+Nearly horizontal and nearly vertical edges show the difference most, because their steps are the longest.</p></details></li>
+<li>Draw alpha-tested grass with and without alpha-to-coverage under 4× MSAA.<details class="solution"><summary>Show solution</summary><p>Without alpha-to-coverage, <code>discard_fragment</code> decides per pixel, so MSAA cannot smooth the cut-out edges inside the quad.<br>
+With <code>isAlphaToCoverageEnabled</code> the alpha value turns into a coverage mask: an alpha of 0.5 covers two of four samples, and the resolve averages them into a soft edge, with no sorting needed.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../advanced-metal/instancing.html"><small>Previous</small>Instancing</a><a class="next" href="../advanced-lighting/blinn-phong.html"><small>Next</small>Blinn-Phong</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>

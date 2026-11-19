@@ -42,7 +42,7 @@ Niente arriva alla GPU finché non fai il commit. Fare encoding significa soltan
 
 ## Oggetti di stato al posto di una macchina a stati
 
-!!! note "Coming from OpenGL"
+!!! note "Se vieni da OpenGL"
     OpenGL è una grande macchina a stati globale: leghi le cose a un contesto e azioni interruttori con `glEnable`. Metal non ha alcuno stato globale. La configurazione costosa viene fissata in anticipo dentro oggetti immutabili (pipeline state, depth-stencil state, sampler state), mentre lo stato leggero di ogni disegno si imposta su un encoder che vive per un solo pass. Quando un encoder finisce, il suo stato sparisce.
 
 Questa scelta è la ragione principale per cui Metal è veloce e prevedibile. La compilazione degli shader e la validazione della configurazione avvengono una volta sola, quando crei un oggetto di stato, e non a sorpresa nel mezzo di un frame.

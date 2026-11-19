@@ -135,10 +135,18 @@
 </nav>
 <main class="content" id="main">
 <article><p class="crumb">In Practice</p><h1 id="engine-the-renderer">Engine: The Renderer<a class="headerlink" href="#engine-the-renderer" title="Permanent link">#</a></h1>
-<p>The <a href="game-engine.html">previous chapter</a> showed a game that never mentions a render pass. This one opens the part of the LearnMetal Engine that does all the mentioning: the renderer. It draws whatever is in the scene, in six steps, and every step is a chapter you have already read.</p>
+<p>The <a href="game-engine.html">previous chapter</a> showed a game that never mentions a render pass.<br>
+This one opens the part of the LearnMetal Engine that does all the mentioning: the renderer.<br>
+It draws whatever is in the scene, in six steps, and every step is a chapter you have already read.</p>
 <h2 id="from-a-scene-to-draw-calls">From a scene to draw calls<a class="headerlink" href="#from-a-scene-to-draw-calls" title="Permanent link">#</a></h2>
-<p>A scene is a collection of entities; the GPU wants a list of draw calls. The renderer starts every frame by walking the scene once and copying out what it needs, a step often called <strong>extraction</strong>. It finds the camera and computes its matrices. It collects the lights. And for every entity that has a mesh, it records one item: the mesh, the material, the world matrix, and the bounding box of the mesh in world space.</p>
-<p>Then it throws most of the work away before doing it. Items whose bounding box lies entirely outside the camera's view are dropped (<strong>frustum culling</strong>). The opaque ones that are left are sorted so that items with the same material and the same mesh sit next to each other, and each such run becomes a single draw call:</p>
+<p>A scene is a collection of entities; the GPU wants a list of draw calls.<br>
+The renderer starts every frame by walking the scene once and copying out what it needs, a step often called <strong>extraction</strong>.<br>
+It finds the camera and computes its matrices.<br>
+It collects the lights.<br>
+And for every entity that has a mesh, it records one item: the mesh, the material, the world matrix, and the bounding box of the mesh in world space.</p>
+<p>Then it throws most of the work away before doing it.<br>
+Items whose bounding box lies entirely outside the camera's view are dropped (<strong>frustum culling</strong>).<br>
+The opaque ones that are left are sorted so that items with the same material and the same mesh sit next to each other, and each such run becomes a single draw call:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="nv">first</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span>
 <span class="k">while</span><span class="w"> </span><span class="bp">first</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="bp">sorted</span><span class="p">.</span><span class="bp">count</span><span class="w"> </span><span class="p">{</span>
@@ -177,7 +185,9 @@
 </code></pre></div>
 </div>
 
-<p>This is the <a href="../advanced-metal/instancing.html">Instancing</a> chapter, applied automatically. The game never asks for it: forty identical floor tiles are forty entities, and one draw call. A lone object is simply a batch of one, so the shaders have a single code path:</p>
+<p>This is the <a href="../advanced-metal/instancing.html">Instancing</a> chapter, applied automatically.<br>
+The game never asks for it: forty identical floor tiles are forty entities, and one draw call.<br>
+A lone object is simply a batch of one, so the shaders have a single code path:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">vertex</span><span class="w"> </span><span class="n">MeshVertexOut</span><span class="w"> </span><span class="n">vertex_mesh</span><span class="p">(</span><span class="n">MeshVertexIn</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
 <span class="w">                                 </span><span class="n">uint</span><span class="w"> </span><span class="n">instanceID</span><span class="w"> </span><span class="p">[[</span><span class="na">instance_id</span><span class="p">]],</span>
 <span class="w">                                 </span><span class="n">constant</span><span class="w"> </span><span class="n">PassUniforms</span><span class="w"> </span><span class="o">&amp;</span><span class="n">pass</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="n">LMBufferPass</span><span class="p">)]],</span>
@@ -197,10 +207,13 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>Transparent items are the exception. They are sorted from the farthest to the nearest instead, because <a href="../advanced-metal/blending.html">blending</a> depends on the order.</p>
+<p>Transparent items are the exception.<br>
+They are sorted from the farthest to the nearest instead, because <a href="../advanced-metal/blending.html">blending</a> depends on the order.</p>
 <h2 id="memory-that-lasts-one-frame">Memory that lasts one frame<a class="headerlink" href="#memory-that-lasts-one-frame" title="Permanent link">#</a></h2>
-<p>Instance matrices, camera uniforms, the vertices of the interface, particles: a great deal of data is rebuilt every frame and is useless afterwards. Creating a Metal buffer for each piece would be slow, and reusing one buffer is dangerous, because the GPU is usually still drawing the previous frame when the CPU starts filling the next.</p>
-<p>The engine uses one large buffer per frame and hands out pieces of it in order. Allocating is adding to an offset:</p>
+<p>Instance matrices, camera uniforms, the vertices of the interface, particles: a great deal of data is rebuilt every frame and is useless afterwards.<br>
+Creating a Metal buffer for each piece would be slow, and reusing one buffer is dangerous, because the GPU is usually still drawing the previous frame when the CPU starts filling the next.</p>
+<p>The engine uses one large buffer per frame and hands out pieces of it in order.<br>
+Allocating is adding to an offset:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">allocate</span><span class="p">(</span><span class="n">size</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">,</span><span class="w"> </span><span class="n">alignment</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">256</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="n">Allocation</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">start</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">(</span><span class="n">offset</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">alignment</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">alignment</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">alignment</span>
@@ -233,7 +246,8 @@
 </code></pre></div>
 </div>
 
-<p>There are three of these buffers, used in turn, and a semaphore that starts at three. A frame takes one unit before it touches anything and gives it back when the GPU reports that the frame is finished:</p>
+<p>There are three of these buffers, used in turn, and a semaphore that starts at three.<br>
+A frame takes one unit before it touches anything and gives it back when the GPU reports that the frame is finished:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// At most three frames may be waiting for the GPU. If it is behind, wait here.</span>
 <span class="n">frameSemaphore</span><span class="p">.</span><span class="n">wait</span><span class="p">()</span>
@@ -263,7 +277,9 @@
 
 <p>By the time a buffer comes around again, the frame that used it is guaranteed to be done.</p>
 <h2 id="pipelines-on-demand">Pipelines on demand<a class="headerlink" href="#pipelines-on-demand" title="Permanent link">#</a></h2>
-<p>A render pipeline state fixes the vertex and fragment functions, the pixel formats, the sample count and the blending. The combinations multiply quickly: the same mesh shader is used with a color target, without one for shadows, with and without blending. Listing every combination by hand is the kind of code that is always one entry short.</p>
+<p>A render pipeline state fixes the vertex and fragment functions, the pixel formats, the sample count and the blending.<br>
+The combinations multiply quickly: the same mesh shader is used with a color target, without one for shadows, with and without blending.<br>
+Listing every combination by hand is the kind of code that is always one entry short.</p>
 <p>Instead, each draw describes what it needs, and a cache creates the pipeline the first time that description appears:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="nv">sky</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">PipelineDescription</span><span class="p">()</span>
@@ -297,7 +313,10 @@
 </div>
 
 <p>The first frame creates the pipelines the scene needs and is a little slower; after that the cache answers from a table.</p>
-<p>The cache has a second use. The engine compiles its shaders from the <code>.metal</code> files when it starts, and every thirty frames it checks whether one of them has changed on disk. If so it compiles them again and empties the cache. Save a shader while the game is running and the picture changes; if the new version has an error, the message is logged and the old shaders stay.</p>
+<p>The cache has a second use.<br>
+The engine compiles its shaders from the <code>.metal</code> files when it starts, and every thirty frames it checks whether one of them has changed on disk.<br>
+If so it compiles them again and empties the cache.<br>
+Save a shader while the game is running and the picture changes; if the new version has an error, the message is logged and the old shaders stay.</p>
 <h2 id="the-passes">The passes<a class="headerlink" href="#the-passes" title="Permanent link">#</a></h2>
 <table>
 <thead>
@@ -343,8 +362,14 @@
 <figure><img src="../assets/img/in-practice/engine-renderer.webp" alt="One frame of Marble, pass by pass. Each picture is the texture that the pass draws into." width="880" height="751" loading="lazy"><figcaption>One frame of Marble, pass by pass. Each picture is the texture that the pass draws into.</figcaption></figure>
 
 <h2 id="shadows-in-cascades">Shadows in cascades<a class="headerlink" href="#shadows-in-cascades" title="Permanent link">#</a></h2>
-<p>The <a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a> chapter used one shadow map for a small scene. Stretch one map over everything a camera can see and its texels become far too large to draw a sharp edge. The usual answer is to cut the view distance into slices and give each slice its own map: small and sharp near the camera, large and soft far away. These are <strong>cascades</strong>, and the engine uses four.</p>
-<p>Fitting a map to a slice has one subtlety. The obvious fit, a box around the slice's corners, changes shape whenever the camera turns, and the shadow edges crawl. A sphere around the slice does not care which way the camera faces. Snapping its center to whole texels removes the remaining shimmer when the camera moves:</p>
+<p>The <a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a> chapter used one shadow map for a small scene.<br>
+Stretch one map over everything a camera can see and its texels become far too large to draw a sharp edge.<br>
+The usual answer is to cut the view distance into slices and give each slice its own map: small and sharp near the camera, large and soft far away.<br>
+These are <strong>cascades</strong>, and the engine uses four.</p>
+<p>Fitting a map to a slice has one subtlety.<br>
+The obvious fit, a box around the slice's corners, changes shape whenever the camera turns, and the shadow edges crawl.<br>
+A sphere around the slice does not care which way the camera faces.<br>
+Snapping its center to whole texels removes the remaining shimmer when the camera moves:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// Enclose the slice in a sphere. A sphere looks the same from every direction,</span>
 <span class="c1">// so the area the cascade covers does not change when the camera turns.</span>
@@ -403,11 +428,17 @@
 <span class="kt">float</span><span class="w"> </span><span class="n">depth</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">clip</span><span class="p">.</span><span class="n">z</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">frame</span><span class="p">.</span><span class="n">shadowBias</span><span class="p">;</span>
 </code></pre></div>
 
-<p>Moving the lookup point along the normal, instead of adding a large bias to the depth, is what keeps shadows attached to the objects that cast them. Nine comparison samples around <code>uv</code> then soften the edge, as in the original chapter.</p>
-<p>Materials with holes need one more thing. A fence drawn with a cut-out texture must cast a shadow with holes in it, so for those materials the shadow pass runs a tiny fragment function whose only job is to <code>discard_fragment()</code> where the texture is transparent.</p>
+<p>Moving the lookup point along the normal, instead of adding a large bias to the depth, is what keeps shadows attached to the objects that cast them.<br>
+Nine comparison samples around <code>uv</code> then soften the edge, as in the original chapter.</p>
+<p>Materials with holes need one more thing.<br>
+A fence drawn with a cut-out texture must cast a shadow with holes in it, so for those materials the shadow pass runs a tiny fragment function whose only job is to <code>discard_fragment()</code> where the texture is transparent.</p>
 <h2 id="ambient-occlusion">Ambient occlusion<a class="headerlink" href="#ambient-occlusion" title="Permanent link">#</a></h2>
-<p><a href="../advanced-lighting/ssao.html">SSAO</a> needs the depth and the normal of every pixel before the scene is shaded. In a deferred renderer those are already there. In a forward renderer they have to be drawn first, so pass 2 draws all opaque geometry into a depth texture and a normal texture, and pass 3 turns them into an occlusion value per pixel and blurs it. The main pass then reads that texture by pixel position.</p>
-<p>The price is one more trip through the opaque geometry. It can be switched off with one setting, and then passes 2 and 3 do not run at all.</p>
+<p><a href="../advanced-lighting/ssao.html">SSAO</a> needs the depth and the normal of every pixel before the scene is shaded.<br>
+In a deferred renderer those are already there.<br>
+In a forward renderer they have to be drawn first, so pass 2 draws all opaque geometry into a depth texture and a normal texture, and pass 3 turns them into an occlusion value per pixel and blurs it.<br>
+The main pass then reads that texture by pixel position.</p>
+<p>The price is one more trip through the opaque geometry.<br>
+It can be switched off with one setting, and then passes 2 and 3 do not run at all.</p>
 <h2 id="the-main-pass">The main pass<a class="headerlink" href="#the-main-pass" title="Permanent link">#</a></h2>
 <p>The scene is drawn in HDR (<code>rgba16Float</code>), with four samples per pixel:</p>
 <div class="lang-swift">
@@ -453,17 +484,24 @@
 </code></pre></div>
 </div>
 
-<p>Neither the multisampled color texture nor the depth texture is needed after the pass. On Apple GPUs the engine creates both as <strong>memoryless</strong>: they exist only in the GPU's tile memory while the pass runs, as the <a href="../apple-platforms/tile-based-gpus.html">Tile-Based GPUs</a> chapter explains, and a 4x multisampled HDR target that would have cost tens of megabytes costs nothing.</p>
+<p>Neither the multisampled color texture nor the depth texture is needed after the pass.<br>
+On Apple GPUs the engine creates both as <strong>memoryless</strong>: they exist only in the GPU's tile memory while the pass runs, as the <a href="../apple-platforms/tile-based-gpus.html">Tile-Based GPUs</a> chapter explains, and a 4x multisampled HDR target that would have cost tens of megabytes costs nothing.</p>
 <p>Inside the pass the order matters:</p>
 <ol>
 <li><strong>Opaque objects</strong>, writing depth.</li>
-<li><strong>The sky</strong>, a single triangle placed exactly on the far plane and drawn with a "less or equal" depth test. Only the pixels nothing else covered run its fragment function. Drawing it first would shade the whole screen and then cover most of it.</li>
+<li><strong>The sky</strong>, a single triangle placed exactly on the far plane and drawn with a "less or equal" depth test.<br>
+Only the pixels nothing else covered run its fragment function.<br>
+Drawing it first would shade the whole screen and then cover most of it.</li>
 <li><strong>Transparent objects</strong>, far to near, testing depth but not writing it.</li>
 <li><strong>Particles</strong> and <strong>debug lines</strong>.</li>
 </ol>
-<p>The fragment function is the one from the <a href="../pbr/lighting.html">PBR</a> chapters, with a loop over the lights. This is forward rendering: one function computes a pixel completely. It fits Apple GPUs well, because they find the visible surface of each pixel before running any fragment function, so hidden surfaces cost nothing; and it works with multisampling and with transparency without special cases.</p>
+<p>The fragment function is the one from the <a href="../pbr/lighting.html">PBR</a> chapters, with a loop over the lights.<br>
+This is forward rendering: one function computes a pixel completely.<br>
+It fits Apple GPUs well, because they find the visible surface of each pixel before running any fragment function, so hidden surfaces cost nothing; and it works with multisampling and with transparency without special cases.</p>
 <h2 id="light-from-the-sky">Light from the sky<a class="headerlink" href="#light-from-the-sky" title="Permanent link">#</a></h2>
-<p>The sky is not a texture. It is a few lines of shader code: a gradient from the horizon to the zenith, the ground below, a glow around the sun. When the engine starts, it renders that sky into a cubemap, one face at a time, and then filters the cubemap into the maps that <a href="../pbr/diffuse-irradiance.html">image-based lighting</a> needs:</p>
+<p>The sky is not a texture.<br>
+It is a few lines of shader code: a gradient from the horizon to the zenith, the ground below, a glow around the sun.<br>
+When the engine starts, it renders that sky into a cubemap, one face at a time, and then filters the cubemap into the maps that <a href="../pbr/diffuse-irradiance.html">image-based lighting</a> needs:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// 2. Diffuse irradiance.</span>
 <span class="k">for</span><span class="w"> </span><span class="n">face</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mf">0.</span><span class="p">.&lt;</span><span class="mi">6</span><span class="w"> </span><span class="p">{</span>
@@ -501,13 +539,19 @@
 </code></pre></div>
 </div>
 
-<p>Each call is a small render pass into one face and one mip level of a cubemap. Because the lighting is computed from the same function that draws the visible sky, reflections and ambient light always agree with what the player sees. Change the sky's colors or turn the sun, and the engine notices and runs these passes again.</p>
+<p>Each call is a small render pass into one face and one mip level of a cubemap.<br>
+Because the lighting is computed from the same function that draws the visible sky, reflections and ambient light always agree with what the player sees.<br>
+Change the sky's colors or turn the sun, and the engine notices and runs these passes again.</p>
 <h2 id="bloom-and-the-final-pass">Bloom and the final pass<a class="headerlink" href="#bloom-and-the-final-pass" title="Permanent link">#</a></h2>
-<p><a href="../advanced-lighting/bloom.html">Bloom</a> keeps the parts of the image brighter than a threshold, and blurs them through a chain of textures, each half the size of the one before: down the chain, then back up, adding each level to the larger one. Wide and narrow glows pile up, for the price of a few very small passes.</p>
-<p>The last pass adds the bloom to the scene, applies exposure and the <a href="../advanced-lighting/hdr.html">tone mapping</a> curve, and writes to the drawable, whose sRGB format takes care of <a href="../advanced-lighting/gamma-correction.html">gamma</a>. The 2D interface is drawn in the same pass, after tone mapping: the orange of a title should be the orange the designer picked, not what a filmic curve makes of it.</p>
+<p><a href="../advanced-lighting/bloom.html">Bloom</a> keeps the parts of the image brighter than a threshold, and blurs them through a chain of textures, each half the size of the one before: down the chain, then back up, adding each level to the larger one.<br>
+Wide and narrow glows pile up, for the price of a few very small passes.</p>
+<p>The last pass adds the bloom to the scene, applies exposure and the <a href="../advanced-lighting/hdr.html">tone mapping</a> curve, and writes to the drawable, whose sRGB format takes care of <a href="../advanced-lighting/gamma-correction.html">gamma</a>.<br>
+The 2D interface is drawn in the same pass, after tone mapping: the orange of a title should be the orange the designer picked, not what a filmic curve makes of it.</p>
 <h2 id="seeing-what-it-does">Seeing what it does<a class="headerlink" href="#seeing-what-it-does" title="Permanent link">#</a></h2>
-<p>Every pass has a label and the main pass is divided into debug groups, so a frame captured in Xcode's GPU debugger reads like the table above. That costs nothing and saves hours, as the <a href="debugging.html">Debugging</a> chapter argued.</p>
-<p>For everything else there is <code>engine.debug</code>, which draws lines in 3D for one frame: a line, a box, a sphere, the axes of a transform. F2 uses it to show every collider in the scene.</p>
+<p>Every pass has a label and the main pass is divided into debug groups, so a frame captured in Xcode's GPU debugger reads like the table above.<br>
+That costs nothing and saves hours, as the <a href="debugging.html">Debugging</a> chapter argued.</p>
+<p>For everything else there is <code>engine.debug</code>, which draws lines in 3D for one frame: a line, a box, a sphere, the axes of a transform.<br>
+F2 uses it to show every collider in the scene.</p>
 <p>The <a href="engine-gameplay.html">next chapter</a> leaves the renderer and builds the game.</p></article><nav class="pager" id="pager"><a class="prev" href="../in-practice/game-engine.html"><small>Previous</small>A Game Engine</a><a class="next" href="../in-practice/engine-gameplay.html"><small>Next</small>Engine: The Game</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>

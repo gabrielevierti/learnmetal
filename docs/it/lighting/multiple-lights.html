@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,12 +134,16 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Illuminazione</p><h1 id="multiple-lights">Multiple Lights<a class="headerlink" href="#multiple-lights" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
+<article><p class="crumb">Illuminazione</p><h1 id="piu-luci">Più luci<a class="headerlink" href="#piu-luci" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Progetto di esempio</strong> <code>examples/Sources/10-MultipleLights</code>, si esegue con <code>swift run MultipleLights</code>. <a href="../../downloads/learnmetal-examples.zip">Scarica tutti gli esempi</a> oppure guarda <a href="../resources/examples.html">come eseguirli</a>.</div>
 
-<p>A scene rarely has one light. This chapter combines everything from the lighting section: one directional light, four point lights and a flashlight, all in a single fragment function. The trick is organization: one function per light type, and their results added together.</p>
-<h2 id="shader-functions">Shader functions<a class="headerlink" href="#shader-functions" title="Permanent link">#</a></h2>
-<p>MSL is C++, so ordinary helper functions work. Anything not marked <code>vertex</code>, <code>fragment</code> or <code>kernel</code> is a plain function you can call. Mark helpers <code>static</code> so they stay private to the file.</p>
+<p>È raro che una scena abbia una luce sola.<br>
+Questo capitolo mette insieme tutta la sezione sull'illuminazione: una luce direzionale, quattro luci puntiformi e una torcia, tutte in un'unica fragment function.<br>
+Il trucco sta nell'organizzazione: una funzione per ogni tipo di luce, e i risultati sommati.</p>
+<h2 id="funzioni-negli-shader">Funzioni negli shader<a class="headerlink" href="#funzioni-negli-shader" title="Permanent link">#</a></h2>
+<p>MSL è C++, quindi le normali funzioni di supporto funzionano.<br>
+Tutto ciò che non è marcato <code>vertex</code>, <code>fragment</code> o <code>kernel</code> è una funzione qualunque che puoi chiamare.<br>
+Marca le funzioni di supporto come <code>static</code>, così restano private al file.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">Surface</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">position</span><span class="p">;</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">normal</span><span class="p">;</span>
@@ -176,10 +180,10 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p><code>calcSpotLight</code> is the point light function with the cone intensity from the previous chapter multiplied into the diffuse and specular terms.</p>
-<p>Collecting the surface properties in a <code>Surface</code> struct keeps the parameter lists short and means textures are sampled once, not once per light.</p>
-<h2 id="arrays-in-uniforms">Arrays in uniforms<a class="headerlink" href="#arrays-in-uniforms" title="Permanent link">#</a></h2>
-<p>A fixed-size array inside the uniform struct holds the point lights:</p>
+<p><code>calcSpotLight</code> è la funzione della luce puntiforme con l'intensità del cono del capitolo precedente moltiplicata nei termini diffuse e specular.</p>
+<p>Raccogliere le proprietà della superficie in una struct <code>Surface</code> tiene corte le liste dei parametri e fa sì che le texture vengano lette una volta sola, e non una volta per luce.</p>
+<h2 id="array-negli-uniform">Array negli uniform<a class="headerlink" href="#array-negli-uniform" title="Permanent link">#</a></h2>
+<p>Un array di dimensione fissa dentro la struct degli uniform contiene le luci puntiformi:</p>
 <div class="codehilite"><pre><span></span><code><span class="cp">#define POINT_LIGHT_COUNT 4</span>
 
 <span class="k">struct</span><span class="w"> </span><span class="nc">FragmentUniforms</span><span class="w"> </span><span class="p">{</span>
@@ -214,8 +218,8 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<h2 id="the-swift-side">The Swift side<a class="headerlink" href="#the-swift-side" title="Permanent link">#</a></h2>
-<p>Swift has no fixed-size C arrays in structs, but a <strong>tuple</strong> of identical elements has the same memory layout:</p>
+<h2 id="il-lato-swift">Il lato Swift<a class="headerlink" href="#il-lato-swift" title="Permanent link">#</a></h2>
+<p>Swift non ha array C di dimensione fissa nelle struct, ma una <strong>tupla</strong> di elementi identici ha lo stesso layout in memoria:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">FragmentUniforms</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">directionalLight</span><span class="p">:</span><span class="w"> </span><span class="n">DirectionalLight</span>
@@ -238,7 +242,8 @@
 </code></pre></div>
 </div>
 
-<p>That gets clumsy for larger counts. The scalable alternative is to put the lights in their own <code>MTLBuffer</code> and pass a pointer plus a count:</p>
+<p>Con numeri più grandi diventa scomodo.<br>
+L'alternativa che scala è mettere le luci in un loro <code>MTLBuffer</code> e passare un puntatore più un conteggio:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_main</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
 <span class="w">                              </span><span class="n">constant</span><span class="w"> </span><span class="n">FragmentUniforms</span><span class="w"> </span><span class="o">&amp;</span><span class="n">uniforms</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
 <span class="w">                              </span><span class="n">constant</span><span class="w"> </span><span class="n">PointLight</span><span class="w"> </span><span class="o">*</span><span class="n">pointLights</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">2</span><span class="p">)]],</span>
@@ -264,9 +269,10 @@
 </code></pre></div>
 </div>
 
-<p>A buffer bound to a shader is just memory, and a pointer parameter lets the shader index it as an array of any length. This is far more flexible than uniform arrays in older APIs, and it is the form we use from now on.</p>
-<h2 id="setting-the-scene">Setting the scene<a class="headerlink" href="#setting-the-scene" title="Permanent link">#</a></h2>
-<p>Four point lights at different positions, each drawn as a small lamp cube with the unlit pipeline from the <a href="colors.html">Colors</a> chapter:</p>
+<p>Un buffer collegato a uno shader è soltanto memoria, e un parametro puntatore permette allo shader di indicizzarlo come un array di qualsiasi lunghezza.<br>
+È molto più flessibile degli array di uniform delle API più vecchie, ed è la forma che useremo da adesso.</p>
+<h2 id="preparare-la-scena">Preparare la scena<a class="headerlink" href="#preparare-la-scena" title="Permanent link">#</a></h2>
+<p>Quattro luci puntiformi in posizioni diverse, ognuna disegnata come un piccolo cubo lampada con la pipeline senza illuminazione del capitolo <a href="colors.html">Colori</a>:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">pointLightPositions</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="n">Float3</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">[</span><span class="w"> </span><span class="mf">0.7</span><span class="p">,</span><span class="w">  </span><span class="mf">0.2</span><span class="p">,</span><span class="w">   </span><span class="mf">2.0</span><span class="p">],</span>
@@ -288,19 +294,26 @@
 
 <div class="lm-demo" data-demo="multiple-lights" data-fallback="../../assets/img/lighting/multiple-lights.webp"></div>
 
-<h2 id="the-cost-of-many-lights">The cost of many lights<a class="headerlink" href="#the-cost-of-many-lights" title="Permanent link">#</a></h2>
-<p>Every fragment evaluates every light, so the cost is fragments × lights. A handful is fine. Hundreds are not, and solving that is the purpose of <a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a> later on.</p>
-<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<h2 id="il-costo-di-molte-luci">Il costo di molte luci<a class="headerlink" href="#il-costo-di-molte-luci" title="Permanent link">#</a></h2>
+<p>Ogni fragment valuta ogni luce, quindi il costo è fragment × luci.<br>
+Una manciata va bene.<br>
+Centinaia no, e risolvere questo problema è lo scopo del <a href="../advanced-lighting/deferred-shading.html">Deferred shading</a>, più avanti.</p>
+<h2 id="esercizi">Esercizi<a class="headerlink" href="#esercizi" title="Permanent link">#</a></h2>
 <ul>
-<li>Recreate different atmospheres only by changing light colors and the clear color: a desert at noon, a dim factory, a horror corridor lit by the flashlight alone.<details class="solution"><summary>Mostra la soluzione</summary><p>Desert: a strong warm directional light (1.0, 0.95, 0.8), a bright sandy clear color, and point lights nearly off. Factory: a weak cold directional light, bluish point lights with short range, a dark gray-blue clear color. Horror: clear color black, directional light at about 0.02, point lights off or deep red, and only the spotlight at full strength.</p></details></li>
-<li>Move the lights over time by rewriting the buffer contents each frame through <code>lightBuffer.contents()</code>.<details class="solution"><summary>Mostra la soluzione</summary><p>Get a typed pointer to the buffer's memory and write the new values before encoding the frame. In Swift: <code>let lights = lightBuffer.contents().bindMemory(to: PointLight.self, capacity: count)</code> then <code>lights[i].position = ...</code>. In C++: <code>auto* lights = static_cast&lt;PointLight*&gt;(lightBuffer-&gt;contents());</code>. When the GPU might still be reading the previous frame, use the ring of buffers from Advanced Data.</p></details></li>
+<li>Ricrea atmosfere diverse cambiando solo i colori delle luci e il colore di sfondo: un deserto a mezzogiorno, una fabbrica in penombra, un corridoio horror illuminato dalla sola torcia.<details class="solution"><summary>Mostra la soluzione</summary><p>Deserto: una luce direzionale forte e calda (1.0, 0.95, 0.8), un colore di sfondo chiaro color sabbia e le luci puntiformi quasi spente.<br>
+Fabbrica: una luce direzionale debole e fredda, luci puntiformi bluastre a corta portata, uno sfondo grigio-blu scuro.<br>
+Horror: sfondo nero, luce direzionale a circa 0.02, luci puntiformi spente o rosso cupo, e solo lo spot a piena intensità.</p></details></li>
+<li>Muovi le luci nel tempo riscrivendo a ogni frame il contenuto del buffer attraverso <code>lightBuffer.contents()</code>.<details class="solution"><summary>Mostra la soluzione</summary><p>Ottieni un puntatore tipizzato alla memoria del buffer e scrivi i nuovi valori prima di codificare il frame.<br>
+In Swift: <code>let lights = lightBuffer.contents().bindMemory(to: PointLight.self, capacity: count)</code> e poi <code>lights[i].position = ...</code>.<br>
+In C++: <code>auto* lights = static_cast&lt;PointLight*&gt;(lightBuffer-&gt;contents());</code>.<br>
+Quando la GPU potrebbe stare ancora leggendo il frame precedente, usa l'anello di buffer del capitolo Dati avanzati.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../lighting/light-casters.html"><small>Precedente</small>Tipi di luce</a><a class="next" href="../lighting/review.html"><small>Successivo</small>Riepilogo</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#shader-functions">Shader functions</a></li><li><a href="#arrays-in-uniforms">Arrays in uniforms</a></li><li><a href="#the-swift-side">The Swift side</a></li><li><a href="#setting-the-scene">Setting the scene</a></li><li><a href="#the-cost-of-many-lights">The cost of many lights</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#funzioni-negli-shader">Funzioni negli shader</a></li><li><a href="#array-negli-uniform">Array negli uniform</a></li><li><a href="#il-lato-swift">Il lato Swift</a></li><li><a href="#preparare-la-scena">Preparare la scena</a></li><li><a href="#il-costo-di-molte-luci">Il costo di molte luci</a></li><li><a href="#esercizi">Esercizi</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

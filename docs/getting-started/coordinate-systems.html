@@ -137,13 +137,18 @@
 <article><p class="crumb">Getting Started</p><h1 id="coordinate-systems">Coordinate Systems<a class="headerlink" href="#coordinate-systems" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Example project</strong> <code>examples/Sources/06-CoordinateSystems</code>, run with <code>swift run CoordinateSystems</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
 
-<p>A vertex travels through several coordinate systems on its way to the screen. Splitting the journey into steps makes each one simple, and three matrices carry the vertex from one step to the next. At the end of this chapter we have real 3D: a perspective view of textured cubes with correct depth.</p>
+<p>A vertex travels through several coordinate systems on its way to the screen.<br>
+Splitting the journey into steps makes each one simple, and three matrices carry the vertex from one step to the next.<br>
+At the end of this chapter we have real 3D: a perspective view of textured cubes with correct depth.</p>
 <h2 id="the-spaces">The spaces<a class="headerlink" href="#the-spaces" title="Permanent link">#</a></h2>
 <ol>
 <li><strong>Local space</strong> (object space): coordinates relative to the object's own origin, as stored in the vertex buffer.</li>
-<li><strong>World space</strong>: where the object sits in the scene. The <strong>model matrix</strong> takes local to world.</li>
-<li><strong>View space</strong> (camera space): the world as seen from the camera, with the camera at the origin. The <strong>view matrix</strong> takes world to view.</li>
-<li><strong>Clip space</strong>: the output of the vertex function. The <strong>projection matrix</strong> takes view to clip.</li>
+<li><strong>World space</strong>: where the object sits in the scene.<br>
+The <strong>model matrix</strong> takes local to world.</li>
+<li><strong>View space</strong> (camera space): the world as seen from the camera, with the camera at the origin.<br>
+The <strong>view matrix</strong> takes world to view.</li>
+<li><strong>Clip space</strong>: the output of the vertex function.<br>
+The <strong>projection matrix</strong> takes view to clip.</li>
 <li><strong>Normalized device coordinates</strong>: the GPU divides clip-space x, y, z by w (the <strong>perspective divide</strong>).</li>
 <li><strong>Viewport coordinates</strong>: NDC mapped to pixels.</li>
 </ol>
@@ -174,16 +179,22 @@
 </figure>
 
 <ul>
-<li>NDC x and y run from -1 to 1 with <strong>y up</strong>. NDC <strong>z runs from 0 to 1</strong>.</li>
+<li>NDC x and y run from -1 to 1 with <strong>y up</strong>.<br>
+NDC <strong>z runs from 0 to 1</strong>.</li>
 <li>Pixel coordinates and texture coordinates start at the <strong>top left</strong> with y down.</li>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Coming from OpenGL</p>
-<p>OpenGL's NDC z runs from -1 to 1. A projection matrix copied from an OpenGL tutorial puts half of your depth range in front of the near plane, so geometry near the camera disappears. Always use a projection matrix built for a 0 to 1 depth range, like the one below.</p>
+<p>OpenGL's NDC z runs from -1 to 1.<br>
+A projection matrix copied from an OpenGL tutorial puts half of your depth range in front of the near plane, so geometry near the camera disappears.<br>
+Always use a projection matrix built for a 0 to 1 depth range, like the one below.</p>
 </div>
-<p>Metal does not care whether your world is left-handed or right-handed; that is decided entirely by your matrices. This series uses a <strong>right-handed</strong> world, the same as most tutorials and modeling tools: +x right, +y up, and the camera looks down <strong>-z</strong>.</p>
+<p>Metal does not care whether your world is left-handed or right-handed; that is decided entirely by your matrices.<br>
+This series uses a <strong>right-handed</strong> world, the same as most tutorials and modeling tools: +x right, +y up, and the camera looks down <strong>-z</strong>.</p>
 <h2 id="perspective-projection">Perspective projection<a class="headerlink" href="#perspective-projection" title="Permanent link">#</a></h2>
-<p>A perspective projection makes distant things smaller. It is defined by a vertical field of view, the aspect ratio of the view, and a near and far plane; together they bound a truncated pyramid called the <strong>frustum</strong>. Add to <code>Math.swift</code>:</p>
+<p>A perspective projection makes distant things smaller.<br>
+It is defined by a vertical field of view, the aspect ratio of the view, and a near and far plane; together they bound a truncated pyramid called the <strong>frustum</strong>.<br>
+Add to <code>Math.swift</code>:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">extension</span><span class="w"> </span><span class="nc">float4x4</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="c1">/// Right-handed perspective projection with a 0...1 depth range.</span>
@@ -214,7 +225,9 @@
 </code></pre></div>
 </div>
 
-<p>The <code>-1</code> copies the negated view-space z into w. After the perspective divide, everything is divided by its distance from the camera, which is exactly what perspective is. Keep the near plane as far out as you can (0.1 is typical). Depth precision is concentrated close to the near plane, and a tiny value such as 0.0001 wastes almost all of it.</p>
+<p>The <code>-1</code> copies the negated view-space z into w. After the perspective divide, everything is divided by its distance from the camera, which is exactly what perspective is.<br>
+Keep the near plane as far out as you can (0.1 is typical).<br>
+Depth precision is concentrated close to the near plane, and a tiny value such as 0.0001 wastes almost all of it.</p>
 <p>An <strong>orthographic</strong> projection, which has no perspective, appears in the <a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a> chapter.</p>
 <h2 id="model-view-projection">Model, view, projection<a class="headerlink" href="#model-view-projection" title="Permanent link">#</a></h2>
 <div class="lang-swift">
@@ -266,9 +279,12 @@
 </code></pre></div>
 </div>
 
-<p>The view matrix moves the whole world 3 units away along -z. Moving the world backward and moving the camera forward are the same thing.</p>
+<p>The view matrix moves the whole world 3 units away along -z.<br>
+Moving the world backward and moving the camera forward are the same thing.</p>
 <h2 id="a-cube">A cube<a class="headerlink" href="#a-cube" title="Permanent link">#</a></h2>
-<p>A flat rectangle makes a poor 3D demo. From now on we use a proper vertex struct and generate a cube in code. Each vertex has a position, a <strong>normal</strong> (the direction the surface faces, needed for lighting soon), and a texture coordinate:</p>
+<p>A flat rectangle makes a poor 3D demo.<br>
+From now on we use a proper vertex struct and generate a cube in code.<br>
+Each vertex has a position, a <strong>normal</strong> (the direction the surface faces, needed for lighting soon), and a texture coordinate:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">Vertex</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">position</span><span class="p">:</span><span class="w"> </span><span class="n">Float3</span>
@@ -334,7 +350,8 @@
 </code></pre></div>
 </div>
 
-<p>That is 36 vertices for a cube one unit wide, wound counter-clockwise when seen from outside. Build the vertex descriptor from the struct itself so offsets can never be wrong:</p>
+<p>That is 36 vertices for a cube one unit wide, wound counter-clockwise when seen from outside.<br>
+Build the vertex descriptor from the struct itself so offsets can never be wrong:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">format</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">float3</span>
 <span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">offset</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="n">Vertex</span><span class="p">&gt;.</span><span class="n">offset</span><span class="p">(</span><span class="n">of</span><span class="p">:</span><span class="w"> </span><span class="err">\</span><span class="p">.</span><span class="n">position</span><span class="p">)</span><span class="o">!</span>
@@ -356,7 +373,9 @@
 </code></pre></div>
 </div>
 
-<p>All three attributes use <code>bufferIndex</code> 0, the default. Because <code>SIMD3&lt;Float&gt;</code> occupies 16 bytes, the offsets are 0, 16 and 32 and the stride is 48. In the shader:</p>
+<p>All three attributes use <code>bufferIndex</code> 0, the default.<br>
+Because <code>SIMD3&lt;Float&gt;</code> occupies 16 bytes, the offsets are 0, 16 and 32 and the stride is 48.<br>
+In the shader:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">VertexIn</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="p">[[</span><span class="na">attribute</span><span class="p">(</span><span class="mi">0</span><span class="p">)]];</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">normal</span><span class="w">   </span><span class="p">[[</span><span class="na">attribute</span><span class="p">(</span><span class="mi">1</span><span class="p">)]];</span>
@@ -366,7 +385,9 @@
 
 <p>Draw with <code>vertexCount: 36</code>.</p>
 <h2 id="the-depth-buffer">The depth buffer<a class="headerlink" href="#the-depth-buffer" title="Permanent link">#</a></h2>
-<p>Run it and the cube looks inside out: faces drawn later cover faces drawn earlier, whichever is closer. The fix is a <strong>depth buffer</strong>, a texture that stores the depth of the closest fragment drawn so far at each pixel. A new fragment is kept only if it is closer.</p>
+<p>Run it and the cube looks inside out: faces drawn later cover faces drawn earlier, whichever is closer.<br>
+The fix is a <strong>depth buffer</strong>, a texture that stores the depth of the closest fragment drawn so far at each pixel.<br>
+A new fragment is kept only if it is closer.</p>
 <p>Three steps enable it.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// 1. Ask the view for a depth texture.</span>
@@ -461,9 +482,14 @@
 
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
-<li>Change the field of view and the aspect ratio by hand and describe what each does.<details class="solution"><summary>Show solution</summary><p>A larger field of view fits more of the scene into the view, so objects look smaller and perspective gets stronger near the edges; a small one acts like a telephoto lens. An aspect ratio that does not match the view stretches the image: too large squeezes everything horizontally, too small widens it. That is why the aspect ratio must be recomputed when the view is resized.</p></details></li>
-<li>Make every third cube rotate over time.<details class="solution"><summary>Show solution</summary><p>Add the time to the angle of every third cube when building its model matrix: in Swift, <code>var angle = (20 * Float(i)).radians; if i % 3 == 0 { angle += time }</code>. Nothing else changes, because each cube already gets its own matrix.</p></details></li>
-<li>Set <code>depthCompareFunction</code> to <code>.always</code> and to <code>.greater</code> and explain what you see.<details class="solution"><summary>Show solution</summary><p>With <code>.always</code> every fragment passes, so the result depends on draw order: later cubes cover earlier ones even when they are farther away. With <code>.greater</code> a fragment passes only if it is farther than what is stored. The depth buffer is cleared to 1, the farthest value, so nothing passes and the view stays empty, unless you also clear the depth to 0.</p></details></li>
+<li>Change the field of view and the aspect ratio by hand and describe what each does.<details class="solution"><summary>Show solution</summary><p>A larger field of view fits more of the scene into the view, so objects look smaller and perspective gets stronger near the edges; a small one acts like a telephoto lens.<br>
+An aspect ratio that does not match the view stretches the image: too large squeezes everything horizontally, too small widens it.<br>
+That is why the aspect ratio must be recomputed when the view is resized.</p></details></li>
+<li>Make every third cube rotate over time.<details class="solution"><summary>Show solution</summary><p>Add the time to the angle of every third cube when building its model matrix: in Swift, <code>var angle = (20 * Float(i)).radians; if i % 3 == 0 { angle += time }</code>.<br>
+Nothing else changes, because each cube already gets its own matrix.</p></details></li>
+<li>Set <code>depthCompareFunction</code> to <code>.always</code> and to <code>.greater</code> and explain what you see.<details class="solution"><summary>Show solution</summary><p>With <code>.always</code> every fragment passes, so the result depends on draw order: later cubes cover earlier ones even when they are farther away.<br>
+With <code>.greater</code> a fragment passes only if it is farther than what is stored.<br>
+The depth buffer is cleared to 1, the farthest value, so nothing passes and the view stays empty, unless you also clear the depth to 0.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../getting-started/transformations.html"><small>Previous</small>Transformations</a><a class="next" href="../getting-started/camera.html"><small>Next</small>Camera</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>

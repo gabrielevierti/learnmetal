@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -137,11 +137,15 @@
 <article><p class="crumb">Per iniziare</p><h1 id="la-prima-vista">La prima vista<a class="headerlink" href="#la-prima-vista" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Progetto di esempio</strong> <code>examples/Sources/01-HelloView</code>, si esegue con <code>swift run HelloView</code>. <a href="../../downloads/learnmetal-examples.zip">Scarica tutti gli esempi</a> oppure guarda <a href="../resources/examples.html">come eseguirli</a>.</div>
 
-<p>È il momento del primo codice Metal: un renderer che a ogni frame riempie la finestra con un colore. Non disegna geometria, ma contiene lo scheletro completo di un frame, e ogni capitolo successivo non fa che aggiungervi qualcosa.</p>
+<p>È il momento del primo codice Metal: un renderer che a ogni frame riempie la finestra con un colore.<br>
+Non disegna geometria, ma contiene lo scheletro completo di un frame, e ogni capitolo successivo non fa che aggiungervi qualcosa.</p>
 <div class="lang-cpp">
 <div class="admonition note">
 <p class="admonition-title">Leggere questo capitolo in C++</p>
-<p>In metal-cpp non ci sono né <code>MTKView</code> né delegate. Il tuo renderer tiene il <code>CAMetalLayer</code> di <a href="project-setup.html">Preparare il progetto</a>, e <code>main.cpp</code> chiama <code>renderer.draw()</code> una volta per ciclo. Dove il testo dice <code>view.currentDrawable</code>, tu chiami <code>layer-&gt;nextDrawable()</code>. Dove dice <code>view.currentRenderPassDescriptor</code>, compili tu un <code>MTL::RenderPassDescriptor</code>, e così le load e store action spiegate più sotto diventano visibili nel tuo codice.</p>
+<p>In metal-cpp non ci sono né <code>MTKView</code> né delegate.<br>
+Il tuo renderer tiene il <code>CAMetalLayer</code> di <a href="project-setup.html">Preparare il progetto</a>, e <code>main.cpp</code> chiama <code>renderer.draw()</code> una volta per ciclo.<br>
+Dove il testo dice <code>view.currentDrawable</code>, tu chiami <code>layer-&gt;nextDrawable()</code>.<br>
+Dove dice <code>view.currentRenderPassDescriptor</code>, compili tu un <code>MTL::RenderPassDescriptor</code>, e così le load e store action spiegate più sotto diventano visibili nel tuo codice.</p>
 </div>
 </div>
 
@@ -254,41 +258,71 @@
 </code></pre></div>
 </div>
 
-<p>Eseguilo. Dovresti vedere una finestra riempita di verde petrolio scuro.</p>
+<p>Eseguilo.<br>
+Dovresti vedere una finestra riempita di verde petrolio scuro.</p>
 <div class="lm-demo" data-demo="hello-view" data-fallback="../../assets/img/getting-started/hello-view.webp"></div>
 
 <h2 id="il-device-e-la-coda">Il device e la coda<a class="headerlink" href="#il-device-e-la-coda" title="Permanent link">#</a></h2>
-<p><code>MTLCreateSystemDefaultDevice()</code> restituisce la GPU consigliata dal sistema. Su Apple silicon ce n'è una sola. Tutto il resto viene creato a partire da questo device.</p>
-<p>La <strong>command queue</strong> si crea una volta e si tiene per tutta la vita dell'app. Garantisce che i command buffer di cui fai il commit vengano eseguiti in ordine.</p>
+<p><code>MTLCreateSystemDefaultDevice()</code> restituisce la GPU consigliata dal sistema.<br>
+Su Apple silicon ce n'è una sola.<br>
+Tutto il resto viene creato a partire da questo device.</p>
+<p>La <strong>command queue</strong> si crea una volta e si tiene per tutta la vita dell'app.<br>
+Garantisce che i command buffer di cui fai il commit vengano eseguiti in ordine.</p>
 <h2 id="configurare-la-vista">Configurare la vista<a class="headerlink" href="#configurare-la-vista" title="Permanent link">#</a></h2>
 <ul>
-<li><code>view.device</code> dice alla vista su quale GPU vivono le sue texture. Senza, non viene disegnato nulla.</li>
-<li><code>colorPixelFormat</code> è il formato della texture mostrata a schermo. <code>.bgra8Unorm</code> significa quattro canali a 8 bit memorizzati come blu, verde, rosso, alfa, che gli shader leggono come float da 0 a 1. È il valore predefinito della vista; lo impostiamo in modo esplicito perché lo cambieremo nel capitolo <a href="../advanced-lighting/gamma-correction.html">Correzione gamma</a>.</li>
+<li><code>view.device</code> dice alla vista su quale GPU vivono le sue texture.<br>
+Senza, non viene disegnato nulla.</li>
+<li><code>colorPixelFormat</code> è il formato della texture mostrata a schermo.<br>
+<code>.bgra8Unorm</code> significa quattro canali a 8 bit memorizzati come blu, verde, rosso, alfa, che gli shader leggono come float da 0 a 1.<br>
+È il valore predefinito della vista; lo impostiamo in modo esplicito perché lo cambieremo nel capitolo <a href="../advanced-lighting/gamma-correction.html">Correzione gamma</a>.</li>
 <li><code>clearColor</code> è il colore con cui il drawable viene riempito all'inizio di ogni frame.</li>
 </ul>
 <h2 id="anatomia-di-un-frame">Anatomia di un frame<a class="headerlink" href="#anatomia-di-un-frame" title="Permanent link">#</a></h2>
-<p><code>draw(in:)</code> viene chiamato una volta per ogni aggiornamento dello schermo, di solito 60 o 120 volte al secondo. Dentro succedono quattro cose.</p>
-<p><strong>1. Ottenere un render pass descriptor.</strong> Un render pass è un blocco di disegno diretto a un insieme di texture, i suoi <strong>attachment</strong>. <code>currentRenderPassDescriptor</code> è un descriptor già pronto il cui attachment di colore è la texture del drawable di questo frame. Per ogni attachment un descriptor contiene anche:</p>
+<p><code>draw(in:)</code> viene chiamato una volta per ogni aggiornamento dello schermo, di solito 60 o 120 volte al secondo.<br>
+Dentro succedono quattro cose.</p>
+<p><strong>1. Ottenere un render pass descriptor.</strong><br>
+Un render pass è un blocco di disegno diretto a un insieme di texture, i suoi <strong>attachment</strong>.<br>
+<code>currentRenderPassDescriptor</code> è un descriptor già pronto il cui attachment di colore è la texture del drawable di questo frame.<br>
+Per ogni attachment un descriptor contiene anche:</p>
 <ul>
 <li>una <strong>load action</strong>: che cosa fare del contenuto esistente quando il pass inizia (<code>.clear</code>, <code>.load</code> o <code>.dontCare</code>),</li>
 <li>una <strong>store action</strong>: che cosa fare del risultato quando finisce (<code>.store</code>, <code>.dontCare</code> o un multisample resolve).</li>
 </ul>
-<p>Il descriptor della vista usa <code>.clear</code> con il tuo <code>clearColor</code>, e <code>.store</code>. Ecco perché otteniamo una finestra colorata senza disegnare niente: la pulizia fa parte dell'inizio del pass.</p>
+<p>Il descriptor della vista usa <code>.clear</code> con il tuo <code>clearColor</code>, e <code>.store</code>.<br>
+Ecco perché otteniamo una finestra colorata senza disegnare niente: la pulizia fa parte dell'inizio del pass.</p>
 <div class="admonition note">
-<p class="admonition-title">Coming from OpenGL</p>
-<p>Non esiste una chiamata <code>glClear</code>. La pulizia è una proprietà del render pass, e scegliere bene le load e store action conta per le prestazioni sulle GPU tile-based, perché ognuna può far risparmiare o costare una copia intera della texture.</p>
+<p class="admonition-title">Se vieni da OpenGL</p>
+<p>Non esiste una chiamata <code>glClear</code>.<br>
+La pulizia è una proprietà del render pass, e scegliere bene le load e store action conta per le prestazioni sulle GPU tile-based, perché ognuna può far risparmiare o costare una copia intera della texture.</p>
 </div>
-<p><strong>2. Creare un command buffer e un encoder.</strong> Il command buffer conserva i comandi codificati per questo frame. Il render command encoder traduce le tue chiamate (imposta la pipeline, imposta il buffer, disegna) in comandi GPU per questo singolo pass.</p>
-<p><strong>3. Chiudere l'encoding.</strong> Devi chiamare <code>endEncoding()</code> prima di creare un altro encoder o di fare il commit. Dimenticarlo è un errore di validazione.</p>
-<p><strong>4. Presentare e fare il commit.</strong> <code>present(drawable)</code> programma la visualizzazione del drawable non appena la GPU finisce questo command buffer. <code>commit()</code> consegna il buffer alla coda. La chiamata ritorna subito; la GPU lavora in modo asincrono.</p>
+<p><strong>2. Creare un command buffer e un encoder.</strong><br>
+Il command buffer conserva i comandi codificati per questo frame.<br>
+Il render command encoder traduce le tue chiamate (imposta la pipeline, imposta il buffer, disegna) in comandi GPU per questo singolo pass.</p>
+<p><strong>3. Chiudere l'encoding.</strong><br>
+Devi chiamare <code>endEncoding()</code> prima di creare un altro encoder o di fare il commit.<br>
+Dimenticarlo è un errore di validazione.</p>
+<p><strong>4. Presentare e fare il commit.</strong><br>
+<code>present(drawable)</code> programma la visualizzazione del drawable non appena la GPU finisce questo command buffer.<br>
+<code>commit()</code> consegna il buffer alla coda.<br>
+La chiamata ritorna subito; la GPU lavora in modo asincrono.</p>
 <h2 id="i-drawable-sono-pochi">I drawable sono pochi<a class="headerlink" href="#i-drawable-sono-pochi" title="Permanent link">#</a></h2>
-<p><code>currentDrawable</code> arriva da un piccolo gruppo, di solito tre texture. Se sono tutte in uso, la chiamata resta in attesa finché una non si libera, e può restituire <code>nil</code>. Per questo il metodo inizia con un <code>guard</code> e salta semplicemente il frame quando manca qualcosa. Tieni un drawable per il minor tempo possibile e non conservarlo mai.</p>
+<p><code>currentDrawable</code> arriva da un piccolo gruppo, di solito tre texture.<br>
+Se sono tutte in uso, la chiamata resta in attesa finché una non si libera, e può restituire <code>nil</code>.<br>
+Per questo il metodo inizia con un <code>guard</code> e salta semplicemente il frame quando manca qualcosa.<br>
+Tieni un drawable per il minor tempo possibile e non conservarlo mai.</p>
 <h2 id="continuo-o-su-richiesta">Continuo o su richiesta<a class="headerlink" href="#continuo-o-su-richiesta" title="Permanent link">#</a></h2>
-<p>In modo predefinito <code>MTKView</code> ridisegna di continuo a <code>preferredFramesPerSecond</code>. Per un'app in stile editor, che cambia solo quando arriva un input, puoi impostare <code>view.isPaused = true</code> e <code>view.enableSetNeedsDisplay = true</code>, e poi chiedere i frame con <code>setNeedsDisplay</code>. Un gioco o un'animazione tengono il comportamento predefinito.</p>
+<p>In modo predefinito <code>MTKView</code> ridisegna di continuo a <code>preferredFramesPerSecond</code>.<br>
+Per un'app in stile editor, che cambia solo quando arriva un input, puoi impostare <code>view.isPaused = true</code> e <code>view.enableSetNeedsDisplay = true</code>, e poi chiedere i frame con <code>setNeedsDisplay</code>.<br>
+Un gioco o un'animazione tengono il comportamento predefinito.</p>
 <h2 id="esercizi">Esercizi<a class="headerlink" href="#esercizi" title="Permanent link">#</a></h2>
 <ul>
-<li>Cambia il colore di sfondo a ogni frame usando <code>CACurrentMediaTime()</code> e <code>sin</code>, in modo che la finestra pulsi.<details class="solution"><summary>Mostra la soluzione</summary><p>Compute the color in the draw method, before asking for the render pass descriptor, because the descriptor copies the clear color when you read it. In Swift: <code>let t = sin(CACurrentMediaTime()) * 0.5 + 0.5</code> then <code>view.clearColor = MTLClearColor(red: 0.2 * t, green: 0.3, blue: 0.3 * t, alpha: 1)</code>. In C++ do the same arithmetic with <code>glfwGetTime()</code> and pass the result to <code>setClearColor</code>.</p></details></li>
-<li>Stampa <code>view.drawableSize</code> in <code>mtkView(_:drawableSizeWillChange:)</code> e ridimensiona la finestra. Nota che la dimensione è in pixel, non in punti: su uno schermo Retina è il doppio di quella della finestra.<details class="solution"><summary>Mostra la soluzione</summary><p>The callback receives the size in pixels. A window that is 800 × 600 points on a Retina display reports 1600 × 1200. Everything in Metal (viewports, texture sizes, <code>in.position.xy</code> in a fragment function) is in pixels, so always derive aspect ratios and offscreen texture sizes from this value and never from the window's point size.</p></details></li>
+<li>Cambia il colore di sfondo a ogni frame usando <code>CACurrentMediaTime()</code> e <code>sin</code>, in modo che la finestra pulsi.<details class="solution"><summary>Mostra la soluzione</summary><p>Calcola il colore nel metodo di disegno, prima di chiedere il render pass descriptor, perché il descriptor copia il colore di sfondo nel momento in cui lo leggi.<br>
+In Swift: <code>let t = sin(CACurrentMediaTime()) * 0.5 + 0.5</code> e poi <code>view.clearColor = MTLClearColor(red: 0.2 * t, green: 0.3, blue: 0.3 * t, alpha: 1)</code>.<br>
+In C++ fai lo stesso calcolo con <code>glfwGetTime()</code> e passa il risultato a <code>setClearColor</code>.</p></details></li>
+<li>Stampa <code>view.drawableSize</code> in <code>mtkView(_:drawableSizeWillChange:)</code> e ridimensiona la finestra.<br>
+Nota che la dimensione è in pixel, non in punti: su uno schermo Retina è il doppio di quella della finestra.<details class="solution"><summary>Mostra la soluzione</summary><p>La callback riceve la dimensione in pixel.<br>
+Una finestra di 800 × 600 punti su uno schermo Retina riporta 1600 × 1200.<br>
+In Metal tutto (viewport, dimensioni delle texture, <code>in.position.xy</code> in una fragment function) è in pixel, quindi ricava sempre i rapporti d'aspetto e le dimensioni delle texture offscreen da questo valore e mai dalla dimensione in punti della finestra.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../getting-started/project-setup.html"><small>Precedente</small>Preparare il progetto</a><a class="next" href="../getting-started/hello-triangle.html"><small>Successivo</small>Il primo triangolo</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>

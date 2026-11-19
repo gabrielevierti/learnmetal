@@ -135,7 +135,9 @@
 </nav>
 <main class="content" id="main">
 <article><p class="crumb">Advanced Lighting</p><h1 id="point-shadows">Point Shadows<a class="headerlink" href="#point-shadows" title="Permanent link">#</a></h1>
-<p>A directional shadow map covers one direction. A point light shines in all directions, so one flat map cannot hold its shadows. The answer is a <strong>cube</strong> shadow map: six depth maps arranged around the light, sampled with the direction from the light to the fragment.</p>
+<p>A directional shadow map covers one direction.<br>
+A point light shines in all directions, so one flat map cannot hold its shadows.<br>
+The answer is a <strong>cube</strong> shadow map: six depth maps arranged around the light, sampled with the direction from the light to the fragment.</p>
 <h2 id="the-plan">The plan<a class="headerlink" href="#the-plan" title="Permanent link">#</a></h2>
 <ol>
 <li>Render the scene six times from the light's position, once per cube face, storing each fragment's <strong>distance to the light</strong>.</li>
@@ -164,7 +166,8 @@
 </div>
 
 <h2 id="six-views">Six views<a class="headerlink" href="#six-views" title="Permanent link">#</a></h2>
-<p>Use the left-handed helpers and the face table from the <a href="../advanced-metal/cubemaps.html">Cubemaps</a> chapter. Each face has a 90 degree field of view and an aspect ratio of 1, so the six frustums fit together exactly:</p>
+<p>Use the left-handed helpers and the face table from the <a href="../advanced-metal/cubemaps.html">Cubemaps</a> chapter.<br>
+Each face has a 90 degree field of view and an aspect ratio of 1, so the six frustums fit together exactly:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">farPlane</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">25</span>
 <span class="kd">let</span><span class="w"> </span><span class="nv">projection</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">float4x4</span><span class="p">(</span><span class="n">perspectiveLHFov</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">pi</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">aspect</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">near</span><span class="p">:</span><span class="w"> </span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="n">far</span><span class="p">:</span><span class="w"> </span><span class="n">farPlane</span><span class="p">)</span>
@@ -249,7 +252,8 @@
 </code></pre></div>
 </div>
 
-<p>Six passes can be merged into one with layered rendering, as described in <a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a>. Start with the loop; it is easier to debug.</p>
+<p>Six passes can be merged into one with layered rendering, as described in <a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a>.<br>
+Start with the loop; it is easier to debug.</p>
 <h2 id="writing-distance-as-depth">Writing distance as depth<a class="headerlink" href="#writing-distance-as-depth" title="Permanent link">#</a></h2>
 <p>The fragment function overrides the depth value with the linear distance to the light, scaled into the 0 to 1 range:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">PointShadowOut</span><span class="w"> </span><span class="p">{</span>
@@ -278,7 +282,8 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p><code>[[depth(any)]]</code> lets a fragment function replace the depth computed by the rasterizer. The pipeline has a fragment function this time, but still no color attachment.</p>
+<p><code>[[depth(any)]]</code> lets a fragment function replace the depth computed by the rasterizer.<br>
+The pipeline has a fragment function this time, but still no color attachment.</p>
 <h2 id="sampling-the-cube">Sampling the cube<a class="headerlink" href="#sampling-the-cube" title="Permanent link">#</a></h2>
 <p>In the main pass:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="nf">calcPointShadow</span><span class="p">(</span><span class="n">float3</span><span class="w"> </span><span class="n">worldPosition</span><span class="p">,</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="n">lightPosition</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">farPlane</span><span class="p">,</span>
@@ -292,9 +297,13 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>The direction does not need to be normalized. The cube picks the face and texel by itself. With a comparison sampler you can write it as <code>shadowCube.sample_compare(s, lightToFragment, currentDepth - bias)</code> and get hardware filtering as a bonus.</p>
+<p>The direction does not need to be normalized.<br>
+The cube picks the face and texel by itself.<br>
+With a comparison sampler you can write it as <code>shadowCube.sample_compare(s, lightToFragment, currentDepth - bias)</code> and get hardware filtering as a bonus.</p>
 <h2 id="soft-edges">Soft edges<a class="headerlink" href="#soft-edges" title="Permanent link">#</a></h2>
-<p>For a 2D map we averaged neighboring texels. For a cube, offset the sample <strong>direction</strong> instead. Twenty well-spread offsets give a good result:</p>
+<p>For a 2D map we averaged neighboring texels.<br>
+For a cube, offset the sample <strong>direction</strong> instead.<br>
+Twenty well-spread offsets give a good result:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">const</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="n">offsets</span><span class="p">[</span><span class="mi">20</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mi">-1</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">},</span>
 <span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mi">-1</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">},</span>
@@ -316,11 +325,14 @@
 <figure><img src="../assets/img/advanced-lighting/point-shadows.webp" alt="A point light in the middle of a room casts shadows in every direction." width="880" height="495" loading="lazy"><figcaption>A point light in the middle of a room casts shadows in every direction.</figcaption></figure>
 
 <h2 id="cost">Cost<a class="headerlink" href="#cost" title="Permanent link">#</a></h2>
-<p>Point shadows render the scene six extra times per light. Keep the number of shadow-casting point lights small, cull objects per face, and update the map only when the light or the objects near it move.</p>
+<p>Point shadows render the scene six extra times per light.<br>
+Keep the number of shadow-casting point lights small, cull objects per face, and update the map only when the light or the objects near it move.</p>
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
-<li>Visualize the stored distance by returning <code>float4(float3(closestDepth), 1)</code>.<details class="solution"><summary>Show solution</summary><p>Return the sampled value as a gray color from the main fragment function. Surfaces close to the light are dark and far ones bright, and each object is surrounded by a darker halo of the same shape on the walls behind it, which is its shadow before the comparison.</p></details></li>
-<li>Convert the six passes into a single layered pass.<details class="solution"><summary>Show solution</summary><p>Set <code>renderTargetArrayLength = 6</code> on the pass, set <code>inputPrimitiveTopology = .triangle</code> on the pipeline, and draw every object with an instance count of 6. In the vertex function use <code>instanceID % 6</code> as the face: pick that face's matrix and write the face index to an output marked <code>[[render_target_array_index]]</code>.</p></details></li>
+<li>Visualize the stored distance by returning <code>float4(float3(closestDepth), 1)</code>.<details class="solution"><summary>Show solution</summary><p>Return the sampled value as a gray color from the main fragment function.<br>
+Surfaces close to the light are dark and far ones bright, and each object is surrounded by a darker halo of the same shape on the walls behind it, which is its shadow before the comparison.</p></details></li>
+<li>Convert the six passes into a single layered pass.<details class="solution"><summary>Show solution</summary><p>Set <code>renderTargetArrayLength = 6</code> on the pass, set <code>inputPrimitiveTopology = .triangle</code> on the pipeline, and draw every object with an instance count of 6.<br>
+In the vertex function use <code>instanceID % 6</code> as the face: pick that face's matrix and write the face index to an output marked <code>[[render_target_array_index]]</code>.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../advanced-lighting/shadow-mapping.html"><small>Previous</small>Shadow Mapping</a><a class="next" href="../advanced-lighting/normal-mapping.html"><small>Next</small>Normal Mapping</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>

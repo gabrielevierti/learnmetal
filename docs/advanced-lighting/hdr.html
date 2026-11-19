@@ -137,7 +137,9 @@
 <article><p class="crumb">Advanced Lighting</p><h1 id="hdr">HDR<a class="headerlink" href="#hdr" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Example project</strong> <code>examples/Sources/15-HDRBloom</code>, run with <code>swift run HDRBloom</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
 
-<p>Color values written to an 8-bit texture are clamped to the 0 to 1 range. Put several bright lights in a scene and large areas add up to more than 1, get clamped, and turn into a featureless white patch. All the detail in the bright regions is lost.</p>
+<p>Color values written to an 8-bit texture are clamped to the 0 to 1 range.<br>
+Put several bright lights in a scene and large areas add up to more than 1, get clamped, and turn into a featureless white patch.<br>
+All the detail in the bright regions is lost.</p>
 <p><strong>High dynamic range</strong> rendering lets colors exceed 1 while the image is being built, and converts the result to a displayable range at the very end, in a step called <strong>tone mapping</strong>.</p>
 <h2 id="floating-point-render-targets">Floating-point render targets<a class="headerlink" href="#floating-point-render-targets" title="Permanent link">#</a></h2>
 <p>The scene is rendered into a texture with a floating-point format, which stores values far beyond 1 without clamping:</p>
@@ -180,10 +182,13 @@
 </tr>
 </tbody>
 </table>
-<p>Set the scene pipelines' color format to match, and render the scene as in <a href="../advanced-metal/render-targets.html">Render Targets</a>. The lighting shaders do not change. They simply stop being clamped.</p>
+<p>Set the scene pipelines' color format to match, and render the scene as in <a href="../advanced-metal/render-targets.html">Render Targets</a>.<br>
+The lighting shaders do not change.<br>
+They simply stop being clamped.</p>
 <h2 id="tone-mapping">Tone mapping<a class="headerlink" href="#tone-mapping" title="Permanent link">#</a></h2>
 <p>A full-screen pass reads the HDR texture and maps it to the 0 to 1 range for the drawable.</p>
-<p>The simplest operator is <strong>Reinhard</strong>, which divides each color by itself plus one. Bright values are squeezed together toward 1 and dark values are left nearly untouched:</p>
+<p>The simplest operator is <strong>Reinhard</strong>, which divides each color by itself plus one.<br>
+Bright values are squeezed together toward 1 and dark values are left nearly untouched:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_tonemap</span><span class="p">(</span><span class="n">ScreenOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
 <span class="w">                                 </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">hdrTexture</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
 <span class="w">                                 </span><span class="n">sampler</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="p">[[</span><span class="na">sampler</span><span class="p">(</span><span class="mi">0</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
@@ -193,15 +198,21 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>The drawable should have an sRGB format, as set up in <a href="gamma-correction.html">Gamma Correction</a>, so the result is gamma-encoded automatically. Tone mapping always comes before gamma encoding.</p>
+<p>The drawable should have an sRGB format, as set up in <a href="gamma-correction.html">Gamma Correction</a>, so the result is gamma-encoded automatically.<br>
+Tone mapping always comes before gamma encoding.</p>
 <h2 id="exposure">Exposure<a class="headerlink" href="#exposure" title="Permanent link">#</a></h2>
-<p>A camera adapts to the brightness of a scene with its exposure. An <strong>exposure</strong> tone mapper gives us the same control:</p>
+<p>A camera adapts to the brightness of a scene with its exposure.<br>
+An <strong>exposure</strong> tone mapper gives us the same control:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">mapped</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">hdr</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">exposure</span><span class="p">);</span>
 </code></pre></div>
 
-<p>A low exposure reveals detail in bright areas and crushes the dark ones; a high exposure does the reverse. With it you can render a dim interior and a sunlit exterior with the same physical light values, changing only the exposure. Automatic exposure, or <strong>eye adaptation</strong>, computes the average brightness of the frame, for example from the smallest mip level of the HDR texture, and eases the exposure toward a target over time.</p>
+<p>A low exposure reveals detail in bright areas and crushes the dark ones; a high exposure does the reverse.<br>
+With it you can render a dim interior and a sunlit exterior with the same physical light values, changing only the exposure.<br>
+Automatic exposure, or <strong>eye adaptation</strong>, computes the average brightness of the frame, for example from the smallest mip level of the HDR texture, and eases the exposure toward a target over time.</p>
 <h2 id="filmic-curves">Filmic curves<a class="headerlink" href="#filmic-curves" title="Permanent link">#</a></h2>
-<p>Reinhard tends to look washed out. Film-like curves keep more contrast and roll highlights off more gracefully. A popular compact fit to the ACES film curve, by Krzysztof Narkowicz:</p>
+<p>Reinhard tends to look washed out.<br>
+Film-like curves keep more contrast and roll highlights off more gracefully.<br>
+A popular compact fit to the ACES film curve, by Krzysztof Narkowicz:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="nf">acesFilm</span><span class="p">(</span><span class="n">float3</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">2.51</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.03</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">2.43</span><span class="p">,</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.59</span><span class="p">,</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.14</span><span class="p">;</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">saturate</span><span class="p">((</span><span class="n">x</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">))</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">d</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">e</span><span class="p">));</span>
@@ -210,22 +221,31 @@
 <span class="n">float3</span><span class="w"> </span><span class="n">mapped</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">acesFilm</span><span class="p">(</span><span class="n">hdr</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">exposure</span><span class="p">);</span>
 </code></pre></div>
 
-<p>The tone mapper is one of the biggest contributors to the overall look of a renderer. Try several.</p>
+<p>The tone mapper is one of the biggest contributors to the overall look of a renderer.<br>
+Try several.</p>
 <h2 id="a-test-scene">A test scene<a class="headerlink" href="#a-test-scene" title="Permanent link">#</a></h2>
-<p>Build a long tunnel from a stretched, inward-facing cube with one very bright light at the far end, with a color around (200, 200, 200), and a few dim colored lights along the walls. Without HDR the far end is a white blob. With HDR and exposure control, you can see the texture of the wall right up to the light.</p>
+<p>Build a long tunnel from a stretched, inward-facing cube with one very bright light at the far end, with a color around (200, 200, 200), and a few dim colored lights along the walls.<br>
+Without HDR the far end is a white blob.<br>
+With HDR and exposure control, you can see the texture of the wall right up to the light.</p>
 <div class="lm-demo" data-demo="hdr" data-fallback="../assets/img/advanced-lighting/hdr.webp"></div>
 
 <h2 id="why-it-matters-beyond-bright-lights">Why it matters beyond bright lights<a class="headerlink" href="#why-it-matters-beyond-bright-lights" title="Permanent link">#</a></h2>
 <ul>
-<li><strong>Bloom</strong> needs to know which pixels are brighter than white. See the <a href="bloom.html">next chapter</a>.</li>
+<li><strong>Bloom</strong> needs to know which pixels are brighter than white.<br>
+See the <a href="bloom.html">next chapter</a>.</li>
 <li><strong>Physically based rendering</strong> uses real-world light intensities, which span a huge range.</li>
 <li>Post effects such as depth of field and motion blur look far more natural when computed on HDR values.</li>
 </ul>
 <h2 id="displaying-hdr-directly">Displaying HDR directly<a class="headerlink" href="#displaying-hdr-directly" title="Permanent link">#</a></h2>
-<p>Apple displays with <strong>Extended Dynamic Range</strong> (EDR) can show values brighter than standard white. A Metal layer opts in by using a floating-point drawable format (<code>.rgba16Float</code>), an extended linear color space, and <code>wantsExtendedDynamicRangeContent = true</code> on the <code>CAMetalLayer</code>. Values above 1.0 are then shown brighter than the UI's white, up to a headroom that the screen reports and that changes with brightness settings. You still tone map, but into the display's available range instead of 0 to 1. It is a worthwhile upgrade once the rest of the pipeline is in place.</p>
+<p>Apple displays with <strong>Extended Dynamic Range</strong> (EDR) can show values brighter than standard white.<br>
+A Metal layer opts in by using a floating-point drawable format (<code>.rgba16Float</code>), an extended linear color space, and <code>wantsExtendedDynamicRangeContent = true</code> on the <code>CAMetalLayer</code>.<br>
+Values above 1.0 are then shown brighter than the UI's white, up to a headroom that the screen reports and that changes with brightness settings.<br>
+You still tone map, but into the display's available range instead of 0 to 1.<br>
+It is a worthwhile upgrade once the rest of the pipeline is in place.</p>
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
-<li>Add keys to raise and lower the exposure.<details class="solution"><summary>Show solution</summary><p>Keep an <code>exposure</code> value in the renderer, multiply or divide it by a constant such as 1.1 while a key is held, and send it in the tone mapping pass's uniforms. Multiplying, not adding, makes each step feel equal, because brightness perception is logarithmic.</p></details></li>
+<li>Add keys to raise and lower the exposure.<details class="solution"><summary>Show solution</summary><p>Keep an <code>exposure</code> value in the renderer, multiply or divide it by a constant such as 1.1 while a key is held, and send it in the tone mapping pass's uniforms.<br>
+Multiplying, not adding, makes each step feel equal, because brightness perception is logarithmic.</p></details></li>
 <li>Show Reinhard on the left half of the screen and ACES on the right.<details class="solution"><summary>Show solution</summary><p>Choose by the horizontal texture coordinate.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">mapped</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.5</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">hdr</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">hdr</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">1.0</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">acesFilm</span><span class="p">(</span><span class="n">hdr</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">exposure</span><span class="p">);</span>
 </code></pre></div></details></li>

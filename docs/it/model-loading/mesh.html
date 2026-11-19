@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,71 +134,76 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Caricare i modelli</p><h1 id="mesh">Mesh<a class="headerlink" href="#mesh" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
+<article><p class="crumb">Caricare i modelli</p><h1 id="mesh">Mesh<a class="headerlink" href="#mesh" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Progetto di esempio</strong> <code>examples/Sources/11-ModelLoading</code>, si esegue con <code>swift run ModelLoading</code>. <a href="../../downloads/learnmetal-examples.zip">Scarica tutti gli esempi</a> oppure guarda <a href="../resources/examples.html">come eseguirli</a>.</div>
 
-<p>MetalKit handed us <code>MTKMesh</code> objects. This chapter looks inside one, draws it, and wraps it together with its materials in a small type of our own.</p>
+<p>MetalKit ci ha consegnato degli oggetti <code>MTKMesh</code>.<br>
+Questo capitolo ne apre uno, lo disegna e lo racchiude insieme ai suoi materiali in un piccolo tipo nostro.</p>
 <div class="lang-cpp">
 <div class="admonition note">
-<p class="admonition-title">Model loading in C++</p>
-<p>Model I/O and MetalKit's mesh types are not part of metal-cpp. The C++ version of this section loads Wavefront OBJ files with the single-header library <a href="https://github.com/tinyobjloader/tinyobjloader">tinyobjloader</a> and builds the Metal buffers by hand. The ideas are the same: a model is meshes, a mesh has one vertex buffer and one index buffer per material, and a material is values plus textures. To load USD from C++, call Model I/O from a small Objective-C++ file, as the window code in <a href="../getting-started/project-setup.html">Project Setup</a> does for AppKit, or convert the model to OBJ or glTF.</p>
+<p class="admonition-title">Caricare i modelli in C++</p>
+<p>Model I/O e i tipi di mesh di MetalKit non fanno parte di metal-cpp.<br>
+La versione C++ di questa sezione carica file Wavefront OBJ con la libreria a singolo header <a href="https://github.com/tinyobjloader/tinyobjloader">tinyobjloader</a> e costruisce a mano i buffer di Metal.<br>
+Le idee sono le stesse: un modello è fatto di mesh, una mesh ha un vertex buffer e un index buffer per ogni materiale, e un materiale è fatto di valori e di texture.<br>
+Per caricare USD da C++ chiama Model I/O da un piccolo file Objective-C++, come fa per AppKit il codice della finestra in <a href="../getting-started/project-setup.html">Preparare il progetto</a>, oppure converti il modello in OBJ o glTF.</p>
 </div>
 </div>
 
-<h2 id="inside-an-mtkmesh">Inside an MTKMesh<a class="headerlink" href="#inside-an-mtkmesh" title="Permanent link">#</a></h2>
+<h2 id="dentro-una-mtkmesh">Dentro una MTKMesh<a class="headerlink" href="#dentro-una-mtkmesh" title="Permanent link">#</a></h2>
 <table>
 <thead>
 <tr>
-<th>Property</th>
-<th>Contents</th>
+<th>Proprietà</th>
+<th>Contenuto</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>vertexBuffers</code></td>
-<td>An array of <code>MTKMeshBuffer</code>, each with a <code>buffer</code> (<code>MTLBuffer</code>) and an <code>offset</code> into it.</td>
+<td>Un array di <code>MTKMeshBuffer</code>, ognuno con un <code>buffer</code> (<code>MTLBuffer</code>) e un <code>offset</code> al suo interno.</td>
 </tr>
 <tr>
 <td><code>vertexDescriptor</code></td>
-<td>The Model I/O vertex descriptor of the data.</td>
+<td>Il vertex descriptor di Model I/O dei dati.</td>
 </tr>
 <tr>
 <td><code>submeshes</code></td>
-<td>An array of <code>MTKSubmesh</code>.</td>
+<td>Un array di <code>MTKSubmesh</code>.</td>
 </tr>
 <tr>
 <td><code>vertexCount</code></td>
-<td>Number of vertices.</td>
+<td>Il numero di vertici.</td>
 </tr>
 </tbody>
 </table>
-<p>and each <code>MTKSubmesh</code> has:</p>
+<p>e ogni <code>MTKSubmesh</code> ha:</p>
 <table>
 <thead>
 <tr>
-<th>Property</th>
-<th>Contents</th>
+<th>Proprietà</th>
+<th>Contenuto</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>indexBuffer</code></td>
-<td>An <code>MTKMeshBuffer</code> with the indices.</td>
+<td>Un <code>MTKMeshBuffer</code> con gli indici.</td>
 </tr>
 <tr>
 <td><code>indexCount</code>, <code>indexType</code></td>
-<td>How many indices and whether they are 16 or 32 bit.</td>
+<td>Quanti indici ci sono e se sono a 16 o a 32 bit.</td>
 </tr>
 <tr>
 <td><code>primitiveType</code></td>
-<td>Usually <code>.triangle</code>.</td>
+<td>Di solito <code>.triangle</code>.</td>
 </tr>
 </tbody>
 </table>
-<p>The offsets are important. The allocator may place several meshes in one large <code>MTLBuffer</code>, so always pass the offset when binding.</p>
-<figure><img src="../../assets/img/model-loading/mesh.webp" alt="The packed vertex layout requested from Model I/O, and the index buffer of a submesh." width="880" height="250" loading="lazy"><figcaption>The packed vertex layout requested from Model I/O, and the index buffer of a submesh.</figcaption></figure>
+<p>Gli offset sono importanti.<br>
+L'allocator può mettere più mesh in un unico grande <code>MTLBuffer</code>, quindi passa sempre l'offset quando colleghi un buffer.</p>
+<figure><img src="../../assets/img/model-loading/mesh.webp" alt="Il layout compatto dei vertici chiesto a Model I/O, e l&#x27;index buffer di una submesh." width="880" height="250" loading="lazy"><figcaption>Il layout compatto dei vertici chiesto a Model I/O, e l&#x27;index buffer di una submesh.</figcaption></figure>
 
-<h2 id="drawing-a-mesh">Drawing a mesh<a class="headerlink" href="#drawing-a-mesh" title="Permanent link">#</a></h2>
+<h2 id="disegnare-una-mesh">Disegnare una mesh<a class="headerlink" href="#disegnare-una-mesh" title="Permanent link">#</a></h2>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">draw</span><span class="p">(</span><span class="kc">_</span><span class="w"> </span><span class="n">mesh</span><span class="p">:</span><span class="w"> </span><span class="bp">MTKMesh</span><span class="p">,</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">encoder</span><span class="p">:</span><span class="w"> </span><span class="bp">MTLRenderCommandEncoder</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">index</span><span class="p">,</span><span class="w"> </span><span class="n">vertexBuffer</span><span class="p">)</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">vertexBuffers</span><span class="p">.</span><span class="n">enumerated</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
@@ -234,8 +239,9 @@
 </code></pre></div>
 </div>
 
-<p>With the layout from the previous chapter there is one vertex buffer, bound at slot 0, which leaves slot 1 for uniforms as before.</p>
-<p>The pipeline state needs the matching Metal vertex descriptor. Either reuse the one you built by hand or derive it from the mesh:</p>
+<p>Con il layout del capitolo precedente c'è un solo vertex buffer, collegato allo slot 0, e lo slot 1 resta libero per gli uniform come prima.</p>
+<p>Al pipeline state serve il vertex descriptor di Metal corrispondente.<br>
+Puoi riusare quello costruito a mano oppure ricavarlo dalla mesh:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">pipelineDescriptor</span><span class="p">.</span><span class="n">vertexDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MTKMetalVertexDescriptorFromModelIO</span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">vertexDescriptor</span><span class="p">)</span>
 </code></pre></div>
@@ -246,8 +252,9 @@
 </code></pre></div>
 </div>
 
-<h2 id="materials">Materials<a class="headerlink" href="#materials" title="Permanent link">#</a></h2>
-<p>Each <code>MDLSubmesh</code> has an optional <code>MDLMaterial</code>. A material is a bag of properties looked up by <strong>semantic</strong>:</p>
+<h2 id="materiali">Materiali<a class="headerlink" href="#materiali" title="Permanent link">#</a></h2>
+<p>Ogni <code>MDLSubmesh</code> ha un <code>MDLMaterial</code> facoltativo.<br>
+Un materiale è un sacco di proprietà che si cercano per <strong>semantic</strong>:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">property</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">mdlSubmesh</span><span class="p">.</span><span class="n">material</span><span class="p">?.</span><span class="n">property</span><span class="p">(</span><span class="n">with</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">baseColor</span><span class="p">)</span>
 </code></pre></div>
@@ -258,7 +265,8 @@
 </code></pre></div>
 </div>
 
-<p>A property can be a plain value or a texture, so we handle both. A small material type for the Phong shader from the lighting section:</p>
+<p>Una proprietà può essere un semplice valore oppure una texture, quindi gestiamo entrambi i casi.<br>
+Un piccolo tipo di materiale per lo shader di Phong della sezione sull'illuminazione:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">MeshMaterial</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">baseColor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Float3</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
@@ -329,13 +337,14 @@
 </code></pre></div>
 </div>
 
-<p>The texture case covers images embedded in USDZ archives (after <code>asset.loadTextures()</code>), and the URL case covers OBJ files that reference images on disk next to the <code>.mtl</code> file.</p>
+<p>Il caso della texture copre le immagini incorporate negli archivi USDZ (dopo <code>asset.loadTextures()</code>), e il caso dell'URL copre i file OBJ che fanno riferimento a immagini su disco accanto al file <code>.mtl</code>.</p>
 <div class="admonition note">
-<p class="admonition-title">The sRGB flag</p>
-<p>Color textures are stored in sRGB, data textures such as specular or normal maps are not. Until the <a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a> chapter, pass <code>false</code> for everything so the output matches earlier chapters.</p>
+<p class="admonition-title">Il flag sRGB</p>
+<p>Le texture di colore sono salvate in sRGB, quelle di dati come le specular map o le normal map no.<br>
+Fino al capitolo <a href="../advanced-lighting/gamma-correction.html">Correzione gamma</a> passa <code>false</code> per tutte, così il risultato coincide con quello dei capitoli precedenti.</p>
 </div>
-<h2 id="a-mesh-type">A Mesh type<a class="headerlink" href="#a-mesh-type" title="Permanent link">#</a></h2>
-<p>Bundle the Metal mesh with one material per submesh:</p>
+<h2 id="un-tipo-mesh">Un tipo Mesh<a class="headerlink" href="#un-tipo-mesh" title="Permanent link">#</a></h2>
+<p>Metti insieme la mesh di Metal e un materiale per ogni submesh:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">Mesh</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">mtkMesh</span><span class="p">:</span><span class="w"> </span><span class="bp">MTKMesh</span>
@@ -387,8 +396,9 @@
 </code></pre></div>
 </div>
 
-<h2 id="a-fallback-texture">A fallback texture<a class="headerlink" href="#a-fallback-texture" title="Permanent link">#</a></h2>
-<p>A shader that samples a texture must have one bound. For materials without a texture, bind a 1×1 white texture, which multiplies to nothing:</p>
+<h2 id="una-texture-di-riserva">Una texture di riserva<a class="headerlink" href="#una-texture-di-riserva" title="Permanent link">#</a></h2>
+<p>Uno shader che legge una texture deve averne una collegata.<br>
+Per i materiali senza texture collega una texture bianca da 1×1, che nella moltiplicazione non cambia nulla:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">makeSolidTexture</span><span class="p">(</span><span class="n">device</span><span class="p">:</span><span class="w"> </span><span class="bp">MTLDevice</span><span class="p">,</span><span class="w"> </span><span class="n">color</span><span class="p">:</span><span class="w"> </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">UInt8</span><span class="p">&gt;)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="bp">MTLTexture</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">descriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLTextureDescriptor</span><span class="p">.</span><span class="n">texture2DDescriptor</span><span class="p">(</span><span class="n">pixelFormat</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">rgba8Unorm</span><span class="p">,</span>
@@ -416,13 +426,13 @@
 </code></pre></div>
 </div>
 
-<p>This is also your first hand-made texture: a descriptor, <code>makeTexture</code>, and <code>replace</code> to upload bytes.</p></article><nav class="pager" id="pager"><a class="prev" href="../model-loading/model-io.html"><small>Precedente</small>Model I/O</a><a class="next" href="../model-loading/model.html"><small>Successivo</small>Modello</a></nav>
+<p>È anche la tua prima texture fatta a mano: un descriptor, <code>makeTexture</code>, e <code>replace</code> per caricare i byte.</p></article><nav class="pager" id="pager"><a class="prev" href="../model-loading/model-io.html"><small>Precedente</small>Model I/O</a><a class="next" href="../model-loading/model.html"><small>Successivo</small>Modello</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#inside-an-mtkmesh">Inside an MTKMesh</a></li><li><a href="#drawing-a-mesh">Drawing a mesh</a></li><li><a href="#materials">Materials</a></li><li><a href="#a-mesh-type">A Mesh type</a></li><li><a href="#a-fallback-texture">A fallback texture</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#dentro-una-mtkmesh">Dentro una MTKMesh</a></li><li><a href="#disegnare-una-mesh">Disegnare una mesh</a></li><li><a href="#materiali">Materiali</a></li><li><a href="#un-tipo-mesh">Un tipo Mesh</a></li><li><a href="#una-texture-di-riserva">Una texture di riserva</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

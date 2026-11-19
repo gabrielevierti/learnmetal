@@ -80,8 +80,12 @@ final class Spin: Game {
     }
 }
 
-let engine = Engine(config: EngineConfig.fromArguments(CommandLine.arguments))
-exit(engine.run(Spin()))
+// The engine lives on the main actor, so the program's first lines say they run there.
+let result: Int32 = MainActor.assumeIsolated {
+    let engine = Engine(config: EngineConfig.fromArguments(CommandLine.arguments))
+    return engine.run(Spin())
+}
+exit(result)
 ```
 
 There is no render pass in it, no pipeline state, no buffer. The game says what exists; everything from the earlier chapters happens inside `engine.run`.

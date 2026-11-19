@@ -137,7 +137,9 @@
 <article><p class="crumb">Advanced Lighting</p><h1 id="bloom">Bloom<a class="headerlink" href="#bloom" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Example project</strong> <code>examples/Sources/15-HDRBloom</code>, run with <code>swift run HDRBloom</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
 
-<p>A monitor cannot show a light as blindingly bright as it would be in reality. What we can do is imitate what bright lights do in a camera or in the eye: their glow bleeds over the surrounding image. This effect is <strong>bloom</strong>, and it is one of the cheapest ways to make a scene feel luminous.</p>
+<p>A monitor cannot show a light as blindingly bright as it would be in reality.<br>
+What we can do is imitate what bright lights do in a camera or in the eye: their glow bleeds over the surrounding image.<br>
+This effect is <strong>bloom</strong>, and it is one of the cheapest ways to make a scene feel luminous.</p>
 <p>The recipe has three steps:</p>
 <ol>
 <li>Extract the bright parts of the HDR scene into a separate texture.</li>
@@ -145,7 +147,8 @@
 <li>Add the blurred result on top of the scene, then tone map.</li>
 </ol>
 <h2 id="extracting-bright-areas">Extracting bright areas<a class="headerlink" href="#extracting-bright-areas" title="Permanent link">#</a></h2>
-<p>We could run a pass over the scene texture to pick out bright pixels. A neater way is to let the scene's fragment function write to <strong>two color attachments</strong> at once, which is called multiple render targets (MRT):</p>
+<p>We could run a pass over the scene texture to pick out bright pixels.<br>
+A neater way is to let the scene's fragment function write to <strong>two color attachments</strong> at once, which is called multiple render targets (MRT):</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">SceneOut</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">color</span><span class="w">  </span><span class="p">[[</span><span class="na">color</span><span class="p">(</span><span class="mi">0</span><span class="p">)]];</span>
 <span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">bright</span><span class="w"> </span><span class="p">[[</span><span class="na">color</span><span class="p">(</span><span class="mi">1</span><span class="p">)]];</span>
@@ -163,7 +166,8 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>A threshold of 1.0 only makes sense because the scene is rendered in HDR: only pixels brighter than display white glow. Give the render pass and the pipeline a second attachment:</p>
+<p>A threshold of 1.0 only makes sense because the scene is rendered in HDR: only pixels brighter than display white glow.<br>
+Give the render pass and the pipeline a second attachment:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">scenePass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">texture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">brightTexture</span>
 <span class="n">scenePass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">loadAction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">clear</span>
@@ -181,9 +185,12 @@
 </code></pre></div>
 </div>
 
-<p>Every pipeline used in that pass must declare both attachments. A fragment function that should not write to one of them, such as the lamp shader, can leave it out of its output struct; with <code>writeMask = []</code> on the attachment you can also disable writes explicitly.</p>
+<p>Every pipeline used in that pass must declare both attachments.<br>
+A fragment function that should not write to one of them, such as the lamp shader, can leave it out of its output struct; with <code>writeMask = []</code> on the attachment you can also disable writes explicitly.</p>
 <h2 id="gaussian-blur">Gaussian blur<a class="headerlink" href="#gaussian-blur" title="Permanent link">#</a></h2>
-<p>A <strong>Gaussian blur</strong> averages each pixel with its neighbors, weighted by a bell curve. A two-dimensional kernel of 9 × 9 would cost 81 samples per pixel. The Gaussian is <strong>separable</strong>: blurring horizontally and then vertically gives the identical result with 9 + 9 samples.</p>
+<p>A <strong>Gaussian blur</strong> averages each pixel with its neighbors, weighted by a bell curve.<br>
+A two-dimensional kernel of 9 × 9 would cost 81 samples per pixel.<br>
+The Gaussian is <strong>separable</strong>: blurring horizontally and then vertically gives the identical result with 9 + 9 samples.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">BlurUniforms</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">direction</span><span class="p">;</span><span class="w">    </span><span class="c1">// (1, 0) or (0, 1)</span>
 <span class="p">};</span>
@@ -256,7 +263,8 @@
 </code></pre></div>
 </div>
 
-<p>The load action is <code>.dontCare</code> because the full-screen triangle overwrites every pixel anyway. Skipping the load is free performance on a tile-based GPU.</p>
+<p>The load action is <code>.dontCare</code> because the full-screen triangle overwrites every pixel anyway.<br>
+Skipping the load is free performance on a tile-based GPU.</p>
 <h2 id="combining">Combining<a class="headerlink" href="#combining" title="Permanent link">#</a></h2>
 <p>The final pass adds the blurred glow to the scene and then tone maps:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_composite</span><span class="p">(</span><span class="n">ScreenOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
@@ -275,22 +283,31 @@
 <div class="lm-demo" data-demo="bloom"></div>
 
 <h2 id="doing-it-better">Doing it better<a class="headerlink" href="#doing-it-better" title="Permanent link">#</a></h2>
-<p>Ten full-resolution passes with a small kernel give a tight glow at a high cost. Modern bloom works on a <strong>mip chain</strong> instead:</p>
+<p>Ten full-resolution passes with a small kernel give a tight glow at a high cost.<br>
+Modern bloom works on a <strong>mip chain</strong> instead:</p>
 <ol>
 <li>Downsample the bright texture repeatedly, halving the size each time, for five or six levels.</li>
 <li>Walk back up, upsampling each level with a small blur and adding it to the next larger one.</li>
 </ol>
-<p>Each level contributes a wider glow, the total cost is around one and a third full-resolution passes, and the result is a broad, smooth halo. This is the approach used in most current engines, and it also removes the need for a hard threshold: blending a small fraction of the blurred chain with the scene looks more natural.</p>
+<p>Each level contributes a wider glow, the total cost is around one and a third full-resolution passes, and the result is a broad, smooth halo.<br>
+This is the approach used in most current engines, and it also removes the need for a hard threshold: blending a small fraction of the blurred chain with the scene looks more natural.</p>
 <p>Two Metal-specific shortcuts are worth knowing:</p>
 <ul>
-<li><strong>Metal Performance Shaders</strong> ships tuned image filters. <code>MPSImageGaussianBlur(device:sigma:)</code> blurs a texture with one call: <code>blur.encode(commandBuffer:sourceTexture:destinationTexture:)</code>.</li>
+<li><strong>Metal Performance Shaders</strong> ships tuned image filters.<br>
+<code>MPSImageGaussianBlur(device:sigma:)</code> blurs a texture with one call: <code>blur.encode(commandBuffer:sourceTexture:destinationTexture:)</code>.</li>
 <li>A blur can also run as a <a href="../beyond/compute-shaders.html">compute function</a>, which avoids setting up render passes for image processing.</li>
 </ul>
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
-<li>Change the number of blur iterations and watch the glow widen.<details class="solution"><summary>Show solution</summary><p>Each pair of passes widens the blur a little, since repeated Gaussian blurs add up. Two iterations give a tight glow around the lamps; twenty give a wide haze, at twenty times the cost. That cost is the reason for the mip chain approach.</p></details></li>
-<li>Run the blur at half resolution and compare the quality and the GPU time.<details class="solution"><summary>Show solution</summary><p>Make the two blur textures half the size of the scene. The blur then costs a quarter as much and covers twice the screen distance per pass. Because the glow is smooth, the lower resolution is not visible after the final upsample.</p></details></li>
-<li>Implement the downsample and upsample chain.<details class="solution"><summary>Show solution</summary><p>Create a chain of textures, each half the size of the previous. Downsample the bright texture into each level with a small filter, then go back up: upsample level n, add it to level n - 1, and repeat to the top. The live demo above uses the texture's own mipmaps as the downsample chain and sums five levels in one pass.</p></details></li>
+<li>Change the number of blur iterations and watch the glow widen.<details class="solution"><summary>Show solution</summary><p>Each pair of passes widens the blur a little, since repeated Gaussian blurs add up.<br>
+Two iterations give a tight glow around the lamps; twenty give a wide haze, at twenty times the cost.<br>
+That cost is the reason for the mip chain approach.</p></details></li>
+<li>Run the blur at half resolution and compare the quality and the GPU time.<details class="solution"><summary>Show solution</summary><p>Make the two blur textures half the size of the scene.<br>
+The blur then costs a quarter as much and covers twice the screen distance per pass.<br>
+Because the glow is smooth, the lower resolution is not visible after the final upsample.</p></details></li>
+<li>Implement the downsample and upsample chain.<details class="solution"><summary>Show solution</summary><p>Create a chain of textures, each half the size of the previous.<br>
+Downsample the bright texture into each level with a small filter, then go back up: upsample level n, add it to level n - 1, and repeat to the top.<br>
+The live demo above uses the texture's own mipmaps as the downsample chain and sums five levels in one pass.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../advanced-lighting/hdr.html"><small>Previous</small>HDR</a><a class="next" href="../advanced-lighting/deferred-shading.html"><small>Next</small>Deferred Shading</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>

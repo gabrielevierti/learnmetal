@@ -135,14 +135,22 @@
 </nav>
 <main class="content" id="main">
 <article><p class="crumb">Beyond</p><h1 id="mesh-shaders">Mesh Shaders<a class="headerlink" href="#mesh-shaders" title="Permanent link">#</a></h1>
-<p>A vertex function receives one vertex and returns one vertex. It cannot create geometry, and it cannot throw a whole object away. A <strong>mesh shader</strong> pipeline replaces the vertex stage with two programmable stages that can do both, entirely on the GPU. It is Metal's answer to the geometry shaders of other APIs, and since Metal 4 it is also the recommended replacement for tessellation.</p>
+<p>A vertex function receives one vertex and returns one vertex.<br>
+It cannot create geometry, and it cannot throw a whole object away.<br>
+A <strong>mesh shader</strong> pipeline replaces the vertex stage with two programmable stages that can do both, entirely on the GPU.<br>
+It is Metal's answer to the geometry shaders of other APIs, and since Metal 4 it is also the recommended replacement for tessellation.</p>
 <h2 id="two-new-stages">Two new stages<a class="headerlink" href="#two-new-stages" title="Permanent link">#</a></h2>
 <ul>
-<li>The <strong>object stage</strong> runs once per object, or per cluster of triangles. It decides whether that object is visible, how much detail it deserves, and how many meshes to launch for it. It can pass a small block of data, the <strong>payload</strong>, to the next stage. This stage is optional.</li>
-<li>The <strong>mesh stage</strong> runs once per mesh and writes the vertices, the indices and the number of primitives of a small mesh. The rasterizer then takes over as usual, and the fragment function does not change.</li>
+<li>The <strong>object stage</strong> runs once per object, or per cluster of triangles.<br>
+It decides whether that object is visible, how much detail it deserves, and how many meshes to launch for it.<br>
+It can pass a small block of data, the <strong>payload</strong>, to the next stage.<br>
+This stage is optional.</li>
+<li>The <strong>mesh stage</strong> runs once per mesh and writes the vertices, the indices and the number of primitives of a small mesh.<br>
+The rasterizer then takes over as usual, and the fragment function does not change.</li>
 </ul>
 <p>Both stages run like compute kernels: you dispatch a grid of threadgroups, and each thread knows its own index.</p>
-<p>A small mesh of at most a few hundred triangles is called a <strong>meshlet</strong>. Splitting a large model into meshlets ahead of time, and culling them in the object stage, is the main use of this pipeline: triangles that cannot be seen never reach the rasterizer.</p>
+<p>A small mesh of at most a few hundred triangles is called a <strong>meshlet</strong>.<br>
+Splitting a large model into meshlets ahead of time, and culling them in the object stage, is the main use of this pipeline: triangles that cannot be seen never reach the rasterizer.</p>
 <h2 id="the-mesh-function">The mesh function<a class="headerlink" href="#the-mesh-function" title="Permanent link">#</a></h2>
 <p>The output type is a <code>mesh</code> template: the vertex type, the per-primitive type, the maximum number of vertices and primitives, and the topology.</p>
 <div class="codehilite"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;metal_stdlib&gt;</span>
@@ -192,7 +200,8 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p><code>set_primitive_count</code> is what makes the stage flexible: write 0 and the mesh produces nothing. The fragment function receives the interpolated vertex data and, if it asks for it, the per-primitive data.</p>
+<p><code>set_primitive_count</code> is what makes the stage flexible: write 0 and the mesh produces nothing.<br>
+The fragment function receives the interpolated vertex data and, if it asks for it, the per-primitive data.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">FragmentIn</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">VertexOut</span><span class="w"> </span><span class="n">vertex</span><span class="p">;</span>
 <span class="w">    </span><span class="n">PrimitiveOut</span><span class="w"> </span><span class="n">primitive</span><span class="p">;</span>
@@ -204,7 +213,8 @@
 </code></pre></div>
 
 <h2 id="the-pipeline-and-the-draw-call">The pipeline and the draw call<a class="headerlink" href="#the-pipeline-and-the-draw-call" title="Permanent link">#</a></h2>
-<p>The pipeline uses its own descriptor type. There is no vertex descriptor, because there are no vertex buffers: the mesh function reads whatever buffers it likes.</p>
+<p>The pipeline uses its own descriptor type.<br>
+There is no vertex descriptor, because there are no vertex buffers: the mesh function reads whatever buffers it likes.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">descriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MTLMeshRenderPipelineDescriptor</span><span class="p">()</span>
 <span class="n">descriptor</span><span class="p">.</span><span class="n">meshFunction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">library</span><span class="p">.</span><span class="n">makeFunction</span><span class="p">(</span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="s">"mesh_main"</span><span class="p">)</span>
@@ -279,19 +289,27 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>The mesh function receives the payload with <code>const object_data Payload &amp;payload [[payload]]</code>. On the pipeline descriptor set <code>objectFunction</code>, <code>payloadMemoryLength</code> (the size of the payload struct) and <code>maxTotalThreadgroupsPerMeshGrid</code> (here 64).</p>
+<p>The mesh function receives the payload with <code>const object_data Payload &amp;payload [[payload]]</code>.<br>
+On the pipeline descriptor set <code>objectFunction</code>, <code>payloadMemoryLength</code> (the size of the payload struct) and <code>maxTotalThreadgroupsPerMeshGrid</code> (here 64).</p>
 <h2 id="when-to-use-them">When to use them<a class="headerlink" href="#when-to-use-them" title="Permanent link">#</a></h2>
 <ul>
-<li><strong>Meshlet culling.</strong> Per-cluster frustum, back-face and occlusion culling for dense models.</li>
-<li><strong>Procedural geometry.</strong> Grass, hair, particles as quads, terrain patches: geometry that would otherwise need a compute pass and an intermediate buffer.</li>
+<li><strong>Meshlet culling.</strong><br>
+Per-cluster frustum, back-face and occlusion culling for dense models.</li>
+<li><strong>Procedural geometry.</strong><br>
+Grass, hair, particles as quads, terrain patches: geometry that would otherwise need a compute pass and an intermediate buffer.</li>
 <li><strong>Level of detail on the GPU</strong>, chosen per cluster and per frame.</li>
 <li><strong>Replacing geometry shaders</strong> when porting from other APIs, and tessellation in Metal 4.</li>
 </ul>
-<p>Mesh shaders need Metal 3: Apple silicon Macs, and iPhones and iPads with an A14 chip or later. Check <code>device.supportsFamily(.metal3)</code>. For an ordinary model drawn once, the vertex pipeline is simpler and just as fast.</p>
+<p>Mesh shaders need Metal 3: Apple silicon Macs, and iPhones and iPads with an A14 chip or later.<br>
+Check <code>device.supportsFamily(.metal3)</code>.<br>
+For an ordinary model drawn once, the vertex pipeline is simpler and just as fast.</p>
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
-<li>Change the number of quads by changing only the grid size in the draw call.<details class="solution"><summary>Show solution</summary><p>Pass <code>MTLSize(width: 64, height: 64, depth: 1)</code> and you get 4,096 quads. Nothing else changes, because every threadgroup computes its own position from <code>threadgroup_position_in_grid</code>. Adjust the <code>- 16.0</code> offset to keep the field centered.</p></details></li>
-<li>Make the mesh function return zero primitives for every other quad, like a checkerboard.<details class="solution"><summary>Show solution</summary><p>Decide from the group position and write the count accordingly. Vertices written for a mesh with zero primitives are ignored.</p>
+<li>Change the number of quads by changing only the grid size in the draw call.<details class="solution"><summary>Show solution</summary><p>Pass <code>MTLSize(width: 64, height: 64, depth: 1)</code> and you get 4,096 quads.<br>
+Nothing else changes, because every threadgroup computes its own position from <code>threadgroup_position_in_grid</code>.<br>
+Adjust the <code>- 16.0</code> offset to keep the field centered.</p></details></li>
+<li>Make the mesh function return zero primitives for every other quad, like a checkerboard.<details class="solution"><summary>Show solution</summary><p>Decide from the group position and write the count accordingly.<br>
+Vertices written for a mesh with zero primitives are ignored.</p>
 <div class="codehilite"><pre><span></span><code><span class="kt">bool</span><span class="w"> </span><span class="n">keep</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">((</span><span class="n">group</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">group</span><span class="p">.</span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="mi">1u</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0u</span><span class="p">;</span>
 <span class="n">output</span><span class="p">.</span><span class="n">set_primitive_count</span><span class="p">(</span><span class="n">keep</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
 </code></pre></div></details></li>

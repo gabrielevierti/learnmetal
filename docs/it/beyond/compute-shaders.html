@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,13 +134,18 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Oltre</p><h1 id="compute-shaders">Compute Shaders<a class="headerlink" href="#compute-shaders" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
+<article><p class="crumb">Oltre</p><h1 id="compute-shader">Compute shader<a class="headerlink" href="#compute-shader" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Progetto di esempio</strong> <code>examples/Sources/17-ComputeParticles</code>, si esegue con <code>swift run ComputeParticles</code>. <a href="../../downloads/learnmetal-examples.zip">Scarica tutti gli esempi</a> oppure guarda <a href="../resources/examples.html">come eseguirli</a>.</div>
 
-<p>A GPU is a massively parallel computer that happens to be good at drawing triangles. <strong>Compute functions</strong>, called kernels in Metal, let you use that power for anything: image processing, physics, particle systems, simulations, culling, machine learning. They run outside the render pipeline, with no vertices or fragments, only data in and data out.</p>
-<p>In Metal, compute is not an add-on. It uses the same device, command buffers, buffers, textures and shading language as rendering, so results flow between the two with no copying.</p>
-<h2 id="a-first-kernel-image-processing">A first kernel: image processing<a class="headerlink" href="#a-first-kernel-image-processing" title="Permanent link">#</a></h2>
-<p>A kernel is a function marked <code>kernel</code> that returns <code>void</code>. It is executed once for every point in a grid that you define. For an image, the grid is the pixels:</p>
+<p>Una GPU è un computer massicciamente parallelo che, guarda caso, è bravo a disegnare triangoli.<br>
+Le <strong>compute function</strong>, che in Metal si chiamano kernel, ti permettono di usare quella potenza per qualsiasi cosa: elaborazione di immagini, fisica, sistemi particellari, simulazioni, culling, machine learning.<br>
+Girano fuori dalla pipeline di rendering, senza vertici né fragment, solo dati in ingresso e dati in uscita.</p>
+<p>In Metal il compute non è un'aggiunta.<br>
+Usa lo stesso device, gli stessi command buffer, buffer, texture e linguaggio di shading del rendering, quindi i risultati passano dall'uno all'altro senza alcuna copia.</p>
+<h2 id="un-primo-kernel-elaborare-unimmagine">Un primo kernel: elaborare un'immagine<a class="headerlink" href="#un-primo-kernel-elaborare-unimmagine" title="Permanent link">#</a></h2>
+<p>Un kernel è una funzione marcata <code>kernel</code> che restituisce <code>void</code>.<br>
+Viene eseguita una volta per ogni punto di una griglia che definisci tu.<br>
+Per un'immagine la griglia sono i pixel:</p>
 <div class="codehilite"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;metal_stdlib&gt;</span>
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">metal</span><span class="p">;</span>
 
@@ -154,11 +159,13 @@
 </code></pre></div>
 
 <ul>
-<li>Textures declare how they are accessed: <code>access::read</code>, <code>access::write</code> or <code>access::read_write</code>. A texture that a kernel writes to must be created with <code>.shaderWrite</code> usage.</li>
-<li><code>[[thread_position_in_grid]]</code> is the coordinate of this invocation, here the pixel.</li>
-<li>There is no sampler: <code>read</code> and <code>write</code> address exact texels. You can still pass a sampler and call <code>sample</code> with normalized coordinates when you want filtering.</li>
+<li>Le texture dichiarano come vi si accede: <code>access::read</code>, <code>access::write</code> o <code>access::read_write</code>.<br>
+Una texture in cui un kernel scrive deve essere creata con l'uso <code>.shaderWrite</code>.</li>
+<li><code>[[thread_position_in_grid]]</code> è la coordinata di questa esecuzione, qui il pixel.</li>
+<li>Non c'è sampler: <code>read</code> e <code>write</code> indirizzano texel esatti.<br>
+Puoi comunque passare un sampler e chiamare <code>sample</code> con coordinate normalizzate quando vuoi il filtro.</li>
 </ul>
-<h2 id="running-it">Running it<a class="headerlink" href="#running-it" title="Permanent link">#</a></h2>
+<h2 id="eseguirlo">Eseguirlo<a class="headerlink" href="#eseguirlo" title="Permanent link">#</a></h2>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">function</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">library</span><span class="p">.</span><span class="n">makeFunction</span><span class="p">(</span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="s">"grayscale"</span><span class="p">)</span><span class="o">!</span>
 <span class="kd">let</span><span class="w"> </span><span class="nv">computePipeline</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeComputePipelineState</span><span class="p">(</span><span class="n">function</span><span class="p">:</span><span class="w"> </span><span class="n">function</span><span class="p">)</span>
@@ -198,18 +205,23 @@
 </code></pre></div>
 </div>
 
-<p>A compute encoder lives in a command buffer next to render encoders. A typical frame might run a compute pass to update particles, then a render pass that draws them, in one command buffer.</p>
-<figure><img src="../../assets/img/beyond/compute-shaders.webp" alt="A kernel reads one texture and writes another, one thread per pixel." width="880" height="246" loading="lazy"><figcaption>A kernel reads one texture and writes another, one thread per pixel.</figcaption></figure>
+<p>Un compute encoder vive in un command buffer accanto ai render encoder.<br>
+Un frame tipico può eseguire un compute pass per aggiornare le particelle e poi un render pass che le disegna, in un unico command buffer.</p>
+<figure><img src="../../assets/img/beyond/compute-shaders.webp" alt="Un kernel legge una texture e ne scrive un&#x27;altra, un thread per pixel." width="880" height="246" loading="lazy"><figcaption>Un kernel legge una texture e ne scrive un&#x27;altra, un thread per pixel.</figcaption></figure>
 
-<h2 id="threads-and-threadgroups">Threads and threadgroups<a class="headerlink" href="#threads-and-threadgroups" title="Permanent link">#</a></h2>
-<p>The GPU executes the grid in batches called <strong>threadgroups</strong>. Threads in one group run together and can share a small amount of fast memory.</p>
-<p><code>dispatchThreads</code> takes the total grid size and a threadgroup size, and Metal handles grids that are not an exact multiple of the group size. It requires non-uniform threadgroup support, which every Apple silicon device has. The older <code>dispatchThreadgroups</code> takes a number of <em>groups</em> instead, so the grid is rounded up and the kernel must check for out-of-range coordinates itself:</p>
+<h2 id="thread-e-threadgroup">Thread e threadgroup<a class="headerlink" href="#thread-e-threadgroup" title="Permanent link">#</a></h2>
+<p>La GPU esegue la griglia a lotti chiamati <strong>threadgroup</strong>.<br>
+I thread di uno stesso gruppo girano insieme e possono condividere una piccola quantità di memoria veloce.</p>
+<p><code>dispatchThreads</code> prende la dimensione totale della griglia e la dimensione di un threadgroup, e Metal gestisce le griglie che non sono un multiplo esatto della dimensione del gruppo.<br>
+Richiede il supporto ai threadgroup non uniformi, che ogni dispositivo Apple silicon ha.<br>
+Il più vecchio <code>dispatchThreadgroups</code> prende invece un numero di <em>gruppi</em>, quindi la griglia viene arrotondata per eccesso e il kernel deve controllare da solo le coordinate fuori intervallo:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">gid</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">output</span><span class="p">.</span><span class="n">get_width</span><span class="p">()</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">gid</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">output</span><span class="p">.</span><span class="n">get_height</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
 
-<p>The sizes used above, <code>threadExecutionWidth</code> wide and as tall as the maximum allows, are a good default for 2D work.</p>
-<h2 id="a-particle-system">A particle system<a class="headerlink" href="#a-particle-system" title="Permanent link">#</a></h2>
-<p>Buffers work in kernels just as textures do. Here every particle is moved by one thread:</p>
+<p>Le dimensioni usate sopra, larghe quanto <code>threadExecutionWidth</code> e alte quanto il massimo consente, sono una buona scelta predefinita per il lavoro in 2D.</p>
+<h2 id="un-sistema-particellare">Un sistema particellare<a class="headerlink" href="#un-sistema-particellare" title="Permanent link">#</a></h2>
+<p>Nei kernel i buffer funzionano come le texture.<br>
+Qui ogni particella viene mossa da un thread:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">Particle</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">position</span><span class="p">;</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">velocity</span><span class="p">;</span>
@@ -238,7 +250,8 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>The buffer is in the <code>device</code> address space because the kernel writes to it. The grid is one-dimensional:</p>
+<p>Il buffer sta nello spazio di indirizzamento <code>device</code> perché il kernel ci scrive.<br>
+La griglia è a una dimensione:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">encoder</span><span class="p">.</span><span class="n">setBuffer</span><span class="p">(</span><span class="n">particleBuffer</span><span class="p">,</span><span class="w"> </span><span class="n">offset</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
 <span class="n">encoder</span><span class="p">.</span><span class="n">setBytes</span><span class="p">(&amp;</span><span class="n">simulationUniforms</span><span class="p">,</span><span class="w"> </span><span class="n">length</span><span class="p">:</span><span class="w"> </span><span class="n">MemoryLayout</span><span class="p">&lt;</span><span class="n">SimulationUniforms</span><span class="p">&gt;.</span><span class="bp">stride</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
@@ -255,24 +268,34 @@
 </code></pre></div>
 </div>
 
-<p>Then bind the same buffer to an instanced billboard vertex function like the one in <a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a>, with its <code>Particle</code> struct changed to match this one, and draw. The particle data never leaves the GPU, and a million particles animate comfortably.</p>
+<p>Poi collega lo stesso buffer a una vertex function di billboard con instancing, come quella di <a href="../advanced-metal/no-geometry-shaders.html">Vivere senza geometry shader</a>, con la sua struct <code>Particle</code> modificata perché corrisponda a questa, e disegna.<br>
+I dati delle particelle non lasciano mai la GPU, e un milione di particelle si anima senza fatica.</p>
 <div class="admonition warning">
-<p class="admonition-title">Data races</p>
-<p>Threads run in parallel in no guaranteed order. Each thread must write only to its own element. If a thread reads data that another thread writes, as in a blur that reads neighbors, use separate input and output resources and swap them after each step. For shared counters, MSL provides atomic types such as <code>atomic_uint</code>.</p>
+<p class="admonition-title">Data race</p>
+<p>I thread girano in parallelo senza un ordine garantito.<br>
+Ogni thread deve scrivere solo nel proprio elemento.<br>
+Se un thread legge dati che un altro scrive, come in una sfocatura che legge i vicini, usa risorse separate per ingresso e uscita e scambiale dopo ogni passo.<br>
+Per i contatori condivisi MSL offre tipi atomici come <code>atomic_uint</code>.</p>
 </div>
-<h2 id="where-compute-is-used-in-a-renderer">Where compute is used in a renderer<a class="headerlink" href="#where-compute-is-used-in-a-renderer" title="Permanent link">#</a></h2>
+<h2 id="dove-si-usa-il-compute-in-un-renderer">Dove si usa il compute in un renderer<a class="headerlink" href="#dove-si-usa-il-compute-in-un-renderer" title="Permanent link">#</a></h2>
 <ul>
-<li><strong>Post-processing</strong>: blur, bloom, tone mapping, depth of field. A kernel avoids the full-screen triangle and can read and write any pixel.</li>
-<li><strong>Culling</strong>: test object bounds against the view frustum and write a list of visible instances or an indirect command buffer.</li>
-<li><strong>Light assignment</strong>: build per-tile or per-cluster light lists for forward rendering with many lights.</li>
-<li><strong>Precomputation</strong>: the irradiance and prefiltered maps of the <a href="../pbr/diffuse-irradiance.html">IBL chapters</a> can be generated by kernels writing directly to cube faces.</li>
-<li><strong>Simulation</strong>: cloth, fluids, flocking.</li>
-<li><strong>Mesh generation</strong>: terrain, marching cubes, skinning.</li>
+<li><strong>Post-processing</strong>: sfocatura, bloom, tone mapping, profondità di campo.<br>
+Un kernel evita il triangolo a tutto schermo e può leggere e scrivere qualsiasi pixel.</li>
+<li><strong>Culling</strong>: confronta l'ingombro degli oggetti con il frustum della vista e scrivi un elenco di istanze visibili o un indirect command buffer.</li>
+<li><strong>Assegnazione delle luci</strong>: costruisci liste di luci per tile o per cluster, per il forward rendering con molte luci.</li>
+<li><strong>Precalcolo</strong>: la irradiance map e la mappa prefiltrata dei <a href="../pbr/diffuse-irradiance.html">capitoli sull'IBL</a> si possono generare con kernel che scrivono direttamente nelle facce del cubo.</li>
+<li><strong>Simulazione</strong>: stoffa, fluidi, stormi.</li>
+<li><strong>Generazione di mesh</strong>: terreno, marching cubes, skinning.</li>
 </ul>
-<h2 id="compute-or-fragment">Compute or fragment?<a class="headerlink" href="#compute-or-fragment" title="Permanent link">#</a></h2>
-<p>A full-screen fragment function and a kernel can often do the same job. Fragment functions benefit from the tile-based architecture when they write to render pass attachments, especially memoryless ones. Kernels are more flexible: arbitrary reads and writes, several outputs of different sizes, shared threadgroup memory. On Apple GPUs, prefer a fragment function when the result goes straight into the current render pass, and a kernel otherwise. Measure when it matters.</p>
-<h2 id="ready-made-kernels">Ready-made kernels<a class="headerlink" href="#ready-made-kernels" title="Permanent link">#</a></h2>
-<p><strong>Metal Performance Shaders</strong> (MPS) is a library of tuned kernels: Gaussian blur, convolution, histogram, image scaling, matrix multiplication, and more. For standard image operations, use it before writing your own:</p>
+<h2 id="compute-o-fragment">Compute o fragment?<a class="headerlink" href="#compute-o-fragment" title="Permanent link">#</a></h2>
+<p>Una fragment function a tutto schermo e un kernel possono spesso fare lo stesso lavoro.<br>
+Le fragment function traggono vantaggio dall'architettura tile-based quando scrivono negli attachment di un render pass, soprattutto in quelli memoryless.<br>
+I kernel sono più flessibili: letture e scritture arbitrarie, più uscite di dimensioni diverse, memoria condivisa nel threadgroup.<br>
+Sulle GPU Apple preferisci una fragment function quando il risultato va dritto nel render pass corrente, e un kernel negli altri casi.<br>
+Quando conta, misura.</p>
+<h2 id="kernel-gia-pronti">Kernel già pronti<a class="headerlink" href="#kernel-gia-pronti" title="Permanent link">#</a></h2>
+<p><strong>Metal Performance Shaders</strong> (MPS) è una libreria di kernel ottimizzati: sfocatura gaussiana, convoluzione, istogramma, ridimensionamento di immagini, prodotto di matrici e altro.<br>
+Per le operazioni standard sulle immagini usala prima di scriverne di tuoi:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">import</span><span class="w"> </span><span class="nc">MetalPerformanceShaders</span>
 
@@ -291,9 +314,9 @@
 </code></pre></div>
 </div>
 
-<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<h2 id="esercizi">Esercizi<a class="headerlink" href="#esercizi" title="Permanent link">#</a></h2>
 <ul>
-<li>Write a kernel that inverts an image and display the result.<details class="solution"><summary>Mostra la soluzione</summary><div class="codehilite"><pre><span></span><code><span class="n">kernel</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">invert</span><span class="p">(</span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="p">,</span><span class="w"> </span><span class="n">access</span><span class="o">::</span><span class="n">read</span><span class="o">&gt;</span><span class="w">  </span><span class="n">input</span><span class="w">  </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
+<li>Scrivi un kernel che inverte un'immagine e mostra il risultato.<details class="solution"><summary>Mostra la soluzione</summary><div class="codehilite"><pre><span></span><code><span class="n">kernel</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">invert</span><span class="p">(</span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="p">,</span><span class="w"> </span><span class="n">access</span><span class="o">::</span><span class="n">read</span><span class="o">&gt;</span><span class="w">  </span><span class="n">input</span><span class="w">  </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
 <span class="w">                   </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="p">,</span><span class="w"> </span><span class="n">access</span><span class="o">::</span><span class="n">write</span><span class="o">&gt;</span><span class="w"> </span><span class="n">output</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
 <span class="w">                   </span><span class="n">uint2</span><span class="w"> </span><span class="n">gid</span><span class="w"> </span><span class="p">[[</span><span class="na">thread_position_in_grid</span><span class="p">]])</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">input</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="n">gid</span><span class="p">);</span>
@@ -301,8 +324,8 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>Create the output texture with <code>.shaderWrite</code> and <code>.shaderRead</code> usage, then show it with the full-screen triangle.</p></details></li>
-<li>Port the box blur from the SSAO chapter to a kernel.<details class="solution"><summary>Mostra la soluzione</summary><div class="codehilite"><pre><span></span><code><span class="n">kernel</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">box_blur</span><span class="p">(</span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="p">,</span><span class="w"> </span><span class="n">access</span><span class="o">::</span><span class="n">read</span><span class="o">&gt;</span><span class="w">  </span><span class="n">input</span><span class="w">  </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
+<p>Crea la texture di uscita con gli usi <code>.shaderWrite</code> e <code>.shaderRead</code>, poi mostrala con il triangolo a tutto schermo.</p></details></li>
+<li>Porta in un kernel la sfocatura a scatola del capitolo sull'SSAO.<details class="solution"><summary>Mostra la soluzione</summary><div class="codehilite"><pre><span></span><code><span class="n">kernel</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">box_blur</span><span class="p">(</span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="p">,</span><span class="w"> </span><span class="n">access</span><span class="o">::</span><span class="n">read</span><span class="o">&gt;</span><span class="w">  </span><span class="n">input</span><span class="w">  </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
 <span class="w">                     </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="p">,</span><span class="w"> </span><span class="n">access</span><span class="o">::</span><span class="n">write</span><span class="o">&gt;</span><span class="w"> </span><span class="n">output</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
 <span class="w">                     </span><span class="n">uint2</span><span class="w"> </span><span class="n">gid</span><span class="w"> </span><span class="p">[[</span><span class="na">thread_position_in_grid</span><span class="p">]])</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">int2</span><span class="w"> </span><span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">int2</span><span class="p">(</span><span class="n">input</span><span class="p">.</span><span class="n">get_width</span><span class="p">(),</span><span class="w"> </span><span class="n">input</span><span class="p">.</span><span class="n">get_height</span><span class="p">());</span>
@@ -317,21 +340,22 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>Input and output must be different textures.</p></details></li>
-<li>Add an attractor point to the particle simulation that pulls particles toward the mouse.<details class="solution"><summary>Mostra la soluzione</summary><p>Add a <code>float3 attractor</code> to the simulation uniforms and accelerate each particle toward it. Unproject the mouse position onto a plane in front of the camera to get the point.</p>
+<p>Ingresso e uscita devono essere texture diverse.</p></details></li>
+<li>Aggiungi alla simulazione delle particelle un punto attrattore che le tira verso il mouse.<details class="solution"><summary>Mostra la soluzione</summary><p>Aggiungi un <code>float3 attractor</code> agli uniform della simulazione e accelera ogni particella verso di esso.<br>
+Per ottenere il punto, proietta la posizione del mouse su un piano davanti alla camera.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">toAttractor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">attractor</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">position</span><span class="p">;</span>
 <span class="kt">float</span><span class="w"> </span><span class="n">distanceSquared</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">max</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">toAttractor</span><span class="p">,</span><span class="w"> </span><span class="n">toAttractor</span><span class="p">),</span><span class="w"> </span><span class="mf">0.25</span><span class="p">);</span>
 <span class="n">p</span><span class="p">.</span><span class="n">velocity</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">toAttractor</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mf">6.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">distanceSquared</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">deltaTime</span><span class="p">;</span>
 </code></pre></div>
 
-<p>The <code>max</code> keeps the force finite when a particle passes through the attractor.</p></details></li>
+<p>Il <code>max</code> tiene finita la forza quando una particella attraversa l'attrattore.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../in-practice/engine-editor.html"><small>Precedente</small>Engine: l&#x27;editor</a><a class="next" href="../beyond/tessellation.html"><small>Successivo</small>Tassellazione</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#a-first-kernel-image-processing">A first kernel: image processing</a></li><li><a href="#running-it">Running it</a></li><li><a href="#threads-and-threadgroups">Threads and threadgroups</a></li><li><a href="#a-particle-system">A particle system</a></li><li><a href="#where-compute-is-used-in-a-renderer">Where compute is used in a renderer</a></li><li><a href="#compute-or-fragment">Compute or fragment?</a></li><li><a href="#ready-made-kernels">Ready-made kernels</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#un-primo-kernel-elaborare-unimmagine">Un primo kernel: elaborare un&#x27;immagine</a></li><li><a href="#eseguirlo">Eseguirlo</a></li><li><a href="#thread-e-threadgroup">Thread e threadgroup</a></li><li><a href="#un-sistema-particellare">Un sistema particellare</a></li><li><a href="#dove-si-usa-il-compute-in-un-renderer">Dove si usa il compute in un renderer</a></li><li><a href="#compute-o-fragment">Compute o fragment?</a></li><li><a href="#kernel-gia-pronti">Kernel già pronti</a></li><li><a href="#esercizi">Esercizi</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

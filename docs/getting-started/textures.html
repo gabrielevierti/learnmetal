@@ -137,12 +137,17 @@
 <article><p class="crumb">Getting Started</p><h1 id="textures">Textures<a class="headerlink" href="#textures" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Example project</strong> <code>examples/Sources/04-Textures</code>, run with <code>swift run Textures</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
 
-<p>Giving every vertex a color cannot produce a brick wall or a wooden crate. For detail we wrap images around geometry. An image used this way is a <strong>texture</strong>, and reading a color from it is called <strong>sampling</strong>.</p>
+<p>Giving every vertex a color cannot produce a brick wall or a wooden crate.<br>
+For detail we wrap images around geometry.<br>
+An image used this way is a <strong>texture</strong>, and reading a color from it is called <strong>sampling</strong>.</p>
 <h2 id="texture-coordinates">Texture coordinates<a class="headerlink" href="#texture-coordinates" title="Permanent link">#</a></h2>
-<p>Each vertex gets a 2D <strong>texture coordinate</strong> (often called UV) that says which point of the image belongs to it. Coordinates run from 0 to 1 on both axes, and they are interpolated across the triangle like any other vertex output.</p>
+<p>Each vertex gets a 2D <strong>texture coordinate</strong> (often called UV) that says which point of the image belongs to it.<br>
+Coordinates run from 0 to 1 on both axes, and they are interpolated across the triangle like any other vertex output.</p>
 <div class="admonition warning">
 <p class="admonition-title">Metal's origin is at the top left</p>
-<p>In Metal, texture coordinate (0, 0) is the <strong>top-left</strong> corner of the image and v increases downward. OpenGL puts (0, 0) at the bottom left. Texture coordinates copied from OpenGL tutorials or exported by tools that follow the OpenGL convention will show images upside down unless you flip v (<code>v = 1 - v</code>) or flip the image when loading.</p>
+<p>In Metal, texture coordinate (0, 0) is the <strong>top-left</strong> corner of the image and v increases downward.<br>
+OpenGL puts (0, 0) at the bottom left.<br>
+Texture coordinates copied from OpenGL tutorials or exported by tools that follow the OpenGL convention will show images upside down unless you flip v (<code>v = 1 - v</code>) or flip the image when loading.</p>
 </div>
 <p>A rectangle with positions and texture coordinates:</p>
 <div class="lang-swift">
@@ -190,7 +195,8 @@
 </div>
 
 <h2 id="loading-an-image">Loading an image<a class="headerlink" href="#loading-an-image" title="Permanent link">#</a></h2>
-<p>MetalKit's <code>MTKTextureLoader</code> decodes PNG, JPEG, HEIC, TIFF and other common formats and uploads the result to a new <code>MTLTexture</code>. Drag an image such as <code>container.jpg</code> into the project, then:</p>
+<p>MetalKit's <code>MTKTextureLoader</code> decodes PNG, JPEG, HEIC, TIFF and other common formats and uploads the result to a new <code>MTLTexture</code>.<br>
+Drag an image such as <code>container.jpg</code> into the project, then:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">texture</span><span class="p">:</span><span class="w"> </span><span class="bp">MTLTexture</span>
 
@@ -234,17 +240,22 @@
 </code></pre></div>
 </div>
 
-<p><code>.SRGB: false</code> tells the loader to treat pixel values as plain numbers. We will revisit that choice in <a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a>. If you ever need the OpenGL orientation, add <code>.origin: MTKTextureLoader.Origin.bottomLeft</code>, which flips the image vertically during loading.</p>
+<p><code>.SRGB: false</code> tells the loader to treat pixel values as plain numbers.<br>
+We will revisit that choice in <a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a>.<br>
+If you ever need the OpenGL orientation, add <code>.origin: MTKTextureLoader.Origin.bottomLeft</code>, which flips the image vertically during loading.</p>
 <p>Images in an asset catalog can be loaded by name with <code>loader.newTexture(name:scaleFactor:bundle:options:)</code>.</p>
 <div class="lang-cpp">
 <div class="admonition note">
 <p class="admonition-title">Loading images in C++</p>
-<p><code>MTKTextureLoader</code> belongs to MetalKit, which metal-cpp does not wrap. The C++ version decodes the file with the single-header library <a href="https://github.com/nothings/stb">stb_image</a> and uploads the pixels with <code>replaceRegion</code>. stb_image returns the top row first, which matches Metal's top-left origin. To get the OpenGL orientation, call <code>stbi_set_flip_vertically_on_load(true)</code> before loading.</p>
+<p><code>MTKTextureLoader</code> belongs to MetalKit, which metal-cpp does not wrap.<br>
+The C++ version decodes the file with the single-header library <a href="https://github.com/nothings/stb">stb_image</a> and uploads the pixels with <code>replaceRegion</code>. stb_image returns the top row first, which matches Metal's top-left origin.<br>
+To get the OpenGL orientation, call <code>stbi_set_flip_vertically_on_load(true)</code> before loading.</p>
 </div>
 </div>
 
 <h2 id="samplers">Samplers<a class="headerlink" href="#samplers" title="Permanent link">#</a></h2>
-<p>A texture is only pixels. How they are read is decided by a separate object, the <strong>sampler state</strong>:</p>
+<p>A texture is only pixels.<br>
+How they are read is decided by a separate object, the <strong>sampler state</strong>:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">samplerState</span><span class="p">:</span><span class="w"> </span><span class="bp">MTLSamplerState</span>
 
@@ -304,11 +315,17 @@
 </tr>
 </tbody>
 </table>
-<p><strong>Filtering</strong> decides what happens when a texture pixel (a <em>texel</em>) does not map one to one onto a screen pixel. <code>.nearest</code> picks the closest texel and looks blocky when magnified. <code>.linear</code> blends the four nearest texels and looks smooth.</p>
-<p><strong>Mipmaps</strong> are a chain of pre-shrunk copies of the texture, each half the size of the previous one. When a surface is far away, sampling a small copy avoids shimmering and is faster. <code>mipFilter = .linear</code> blends between the two closest levels, which together with linear min filtering is known as trilinear filtering. Setting <code>samplerDescriptor.maxAnisotropy = 8</code> further sharpens surfaces seen at a steep angle.</p>
+<p><strong>Filtering</strong> decides what happens when a texture pixel (a <em>texel</em>) does not map one to one onto a screen pixel.<br>
+<code>.nearest</code> picks the closest texel and looks blocky when magnified.<br>
+<code>.linear</code> blends the four nearest texels and looks smooth.</p>
+<p><strong>Mipmaps</strong> are a chain of pre-shrunk copies of the texture, each half the size of the previous one.<br>
+When a surface is far away, sampling a small copy avoids shimmering and is faster.<br>
+<code>mipFilter = .linear</code> blends between the two closest levels, which together with linear min filtering is known as trilinear filtering.<br>
+Setting <code>samplerDescriptor.maxAnisotropy = 8</code> further sharpens surfaces seen at a steep angle.</p>
 <div class="admonition note">
 <p class="admonition-title">Coming from OpenGL</p>
-<p>Wrap and filter settings are not properties of the texture. One texture can be read through several samplers, and one sampler can serve every texture.</p>
+<p>Wrap and filter settings are not properties of the texture.<br>
+One texture can be read through several samplers, and one sampler can serve every texture.</p>
 </div>
 <figure><img src="../assets/img/getting-started/address-modes.webp" alt="Address modes decide what is sampled outside the 0 to 1 range. Here the coordinates run from -1 to 2." width="880" height="499" loading="lazy"><figcaption>Address modes decide what is sampled outside the 0 to 1 range. Here the coordinates run from -1 to 2.</figcaption></figure>
 
@@ -337,7 +354,8 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>Textures and samplers have their own index tables, selected with <code>[[texture(n)]]</code> and <code>[[sampler(n)]]</code>. Bind them before drawing:</p>
+<p>Textures and samplers have their own index tables, selected with <code>[[texture(n)]]</code> and <code>[[sampler(n)]]</code>.<br>
+Bind them before drawing:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">encoder</span><span class="p">.</span><span class="n">setFragmentTexture</span><span class="p">(</span><span class="n">texture</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
 <span class="n">encoder</span><span class="p">.</span><span class="n">setFragmentSamplerState</span><span class="p">(</span><span class="n">samplerState</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
@@ -353,7 +371,8 @@
 <div class="lm-demo" data-demo="textures" data-fallback="../assets/img/getting-started/textures.webp"></div>
 
 <h2 id="two-textures-at-once">Two textures at once<a class="headerlink" href="#two-textures-at-once" title="Permanent link">#</a></h2>
-<p>A fragment function can read many textures. Load a second image, bind it at index 1, and blend:</p>
+<p>A fragment function can read many textures.<br>
+Load a second image, bind it at index 1, and blend:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_main</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
 <span class="w">                              </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">texture0</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
 <span class="w">                              </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">texture1</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
@@ -367,8 +386,12 @@
 <p><code>mix(a, b, t)</code> returns <code>a * (1 - t) + b * t</code>, so the result is 80% of the first texture and 20% of the second.</p>
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
-<li>Multiply the uv by 2 in the fragment function and try each address mode.<details class="solution"><summary>Show solution</summary><p>Sample with <code>in.uv * 2.0</code>. With <code>.repeat</code> you see four copies, with <code>.mirrorRepeat</code> the copies are mirrored so the seams match, and with <code>.clampToEdge</code> the image fills one quarter and its edge pixels stretch across the rest. You can try all three in the live demo above by raising the UV scale.</p></details></li>
-<li>Switch the filters to <code>.nearest</code> and display only the center of the texture (uv from 0.45 to 0.55) to see individual texels.<details class="solution"><summary>Show solution</summary><p>Set <code>minFilter</code> and <code>magFilter</code> to <code>.nearest</code> and remap the coordinates so the quad shows a tenth of the image. Each texel becomes a visible square. Switch back to <code>.linear</code> and the squares blend into a blur.</p>
+<li>Multiply the uv by 2 in the fragment function and try each address mode.<details class="solution"><summary>Show solution</summary><p>Sample with <code>in.uv * 2.0</code>.<br>
+With <code>.repeat</code> you see four copies, with <code>.mirrorRepeat</code> the copies are mirrored so the seams match, and with <code>.clampToEdge</code> the image fills one quarter and its edge pixels stretch across the rest.<br>
+You can try all three in the live demo above by raising the UV scale.</p></details></li>
+<li>Switch the filters to <code>.nearest</code> and display only the center of the texture (uv from 0.45 to 0.55) to see individual texels.<details class="solution"><summary>Show solution</summary><p>Set <code>minFilter</code> and <code>magFilter</code> to <code>.nearest</code> and remap the coordinates so the quad shows a tenth of the image.<br>
+Each texel becomes a visible square.<br>
+Switch back to <code>.linear</code> and the squares blend into a blur.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float2</span><span class="w"> </span><span class="n">uv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.45</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.1</span><span class="p">;</span>
 <span class="k">return</span><span class="w"> </span><span class="n">colorTexture</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">textureSampler</span><span class="p">,</span><span class="w"> </span><span class="n">uv</span><span class="p">);</span>
 </code></pre></div></details></li>

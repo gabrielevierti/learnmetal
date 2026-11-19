@@ -56,7 +56,7 @@ Il pipeline state unisce le funzioni shader, la disposizione dei vertici e il fo
 
 `makeDefaultLibrary()` carica gli shader compilati dal bundle dell'app. Creare un pipeline state compila gli shader per la GPU ed è lento, quindi fallo sempre al caricamento e mai a ogni frame. Il formato dei pixel deve coincidere con il `colorPixelFormat` della vista; una discordanza è il primo errore di validazione più comune.
 
-!!! note "Coming from OpenGL"
+!!! note "Se vieni da OpenGL"
     Un pipeline state è più o meno un programma shader linkato, più la disposizione degli attributi del VAO, più lo stato del blending, tutto congelato in un solo oggetto. Non c'è nessuna danza di binding tra VAO e VBO.
 
 ## Disegnare

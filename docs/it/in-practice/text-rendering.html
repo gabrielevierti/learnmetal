@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,23 +134,34 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">In pratica</p><h1 id="text-rendering">Text Rendering<a class="headerlink" href="#text-rendering" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
-<p>Sooner or later you want to draw text: a frame counter, a score, a label above an object. Metal has no text support. It draws triangles. Text is therefore rendered as textured quads, one per character, with a texture that contains the shapes of the characters.</p>
-<h2 id="options">Options<a class="headerlink" href="#options" title="Permanent link">#</a></h2>
+<article><p class="crumb">In pratica</p><h1 id="rendering-del-testo">Rendering del testo<a class="headerlink" href="#rendering-del-testo" title="Permanent link">#</a></h1>
+<p>Prima o poi vorrai disegnare del testo: un contatore di frame, un punteggio, un'etichetta sopra un oggetto.<br>
+Metal non ha alcun supporto per il testo.<br>
+Disegna triangoli.<br>
+Il testo si disegna quindi come rettangoli con texture, uno per carattere, con una texture che contiene le forme dei caratteri.</p>
+<h2 id="le-opzioni">Le opzioni<a class="headerlink" href="#le-opzioni" title="Permanent link">#</a></h2>
 <ul>
-<li><strong>Let the system do it.</strong> For UI that sits on top of your view, put a SwiftUI or UIKit label over the <code>MTKView</code>. It is free, sharp, localized and accessible. For debug overlays and menus this is usually the right answer.</li>
-<li><strong>Render strings to textures.</strong> Draw a whole string with Core Text into a bitmap and show it on a quad. Good for text that rarely changes.</li>
-<li><strong>A glyph atlas.</strong> Draw every character once into one texture, then compose any string from quads. This is the classic approach for text inside the 3D scene or text that changes every frame, and it is what this chapter builds.</li>
+<li><strong>Lasciar fare al sistema.</strong><br>
+Per l'interfaccia che sta sopra la tua vista, metti un'etichetta SwiftUI o UIKit sopra la <code>MTKView</code>.<br>
+È gratis, nitida, localizzata e accessibile.<br>
+Per gli overlay di debug e i menu di solito è la risposta giusta.</li>
+<li><strong>Disegnare le stringhe in texture.</strong><br>
+Disegna un'intera stringa con Core Text in una bitmap e mostrala su un rettangolo.<br>
+Va bene per il testo che cambia di rado.</li>
+<li><strong>Un atlas di glifi.</strong><br>
+Disegna ogni carattere una volta sola in un'unica texture, poi componi qualsiasi stringa con dei rettangoli.<br>
+È l'approccio classico per il testo dentro la scena 3D o per il testo che cambia a ogni frame, ed è quello che costruiamo in questo capitolo.</li>
 </ul>
-<h2 id="glyphs-and-metrics">Glyphs and metrics<a class="headerlink" href="#glyphs-and-metrics" title="Permanent link">#</a></h2>
-<p>A font is a collection of <strong>glyphs</strong>, the shapes of characters. To place them correctly, we need a few measurements for each glyph, all relative to the <strong>baseline</strong> on which the text sits:</p>
+<h2 id="glifi-e-metriche">Glifi e metriche<a class="headerlink" href="#glifi-e-metriche" title="Permanent link">#</a></h2>
+<p>Un font è una raccolta di <strong>glifi</strong>, le forme dei caratteri.<br>
+Per disporli correttamente ci servono alcune misure per ogni glifo, tutte relative alla <strong>baseline</strong> su cui il testo poggia:</p>
 <ul>
-<li>the <strong>bounding box</strong>: the rectangle the shape occupies, which can extend below the baseline for letters like g and p,</li>
-<li>the <strong>advance</strong>: how far to move the pen to the right before drawing the next glyph.</li>
+<li>il <strong>bounding box</strong>: il rettangolo occupato dalla forma, che può scendere sotto la baseline per lettere come g e p,</li>
+<li>l'<strong>advance</strong>: di quanto spostare la penna verso destra prima di disegnare il glifo successivo.</li>
 </ul>
-<p><strong>Core Text</strong> provides both, and can draw glyphs into a Core Graphics bitmap.</p>
-<h2 id="building-the-atlas">Building the atlas<a class="headerlink" href="#building-the-atlas" title="Permanent link">#</a></h2>
-<p>We draw the printable ASCII characters into a single-channel bitmap, packing them in rows, and record where each one ended up.</p>
+<p><strong>Core Text</strong> fornisce entrambe, e sa disegnare i glifi in una bitmap di Core Graphics.</p>
+<h2 id="costruire-latlas">Costruire l'atlas<a class="headerlink" href="#costruire-latlas" title="Permanent link">#</a></h2>
+<p>Disegniamo i caratteri ASCII stampabili in una bitmap a un solo canale, disponendoli in righe, e annotiamo dove è finito ciascuno.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">import</span><span class="w"> </span><span class="nc">CoreText</span>
 <span class="kd">import</span><span class="w"> </span><span class="nc">Metal</span>
@@ -308,9 +319,10 @@
 </code></pre></div>
 </div>
 
-<p>The bitmap's memory starts with the top row of the image, which matches Metal's top-left texture origin. Only the glyph positions, which Core Graphics measures from the bottom, need converting.</p>
-<h2 id="building-quads-for-a-string">Building quads for a string<a class="headerlink" href="#building-quads-for-a-string" title="Permanent link">#</a></h2>
-<p>For each character, look up its glyph, emit two triangles, and advance the pen:</p>
+<p>La memoria della bitmap comincia dalla riga in alto dell'immagine, che coincide con l'origine in alto a sinistra delle texture di Metal.<br>
+Vanno convertite solo le posizioni dei glifi, che Core Graphics misura dal basso.</p>
+<h2 id="costruire-i-rettangoli-per-una-stringa">Costruire i rettangoli per una stringa<a class="headerlink" href="#costruire-i-rettangoli-per-una-stringa" title="Permanent link">#</a></h2>
+<p>Per ogni carattere cerca il suo glifo, emetti due triangoli e fai avanzare la penna:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">TextVertex</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">position</span><span class="p">:</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;</span>
@@ -382,9 +394,9 @@
 </code></pre></div>
 </div>
 
-<p>Positions are in pixels with y up, and <code>origin</code> is the start of the baseline.</p>
-<h2 id="the-shaders">The shaders<a class="headerlink" href="#the-shaders" title="Permanent link">#</a></h2>
-<p>Text is drawn with an <strong>orthographic projection</strong> that maps pixel coordinates straight to the screen:</p>
+<p>Le posizioni sono in pixel con y verso l'alto, e <code>origin</code> è l'inizio della baseline.</p>
+<h2 id="gli-shader">Gli shader<a class="headerlink" href="#gli-shader" title="Permanent link">#</a></h2>
+<p>Il testo si disegna con una <strong>proiezione ortografica</strong> che porta le coordinate in pixel direttamente sullo schermo:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">projection</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">float4x4</span><span class="p">(</span><span class="n">orthographicLeft</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="kr">right</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">(</span><span class="n">view</span><span class="p">.</span><span class="n">drawableSize</span><span class="p">.</span><span class="n">width</span><span class="p">),</span>
 <span class="w">                          </span><span class="n">bottom</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">top</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">(</span><span class="n">view</span><span class="p">.</span><span class="n">drawableSize</span><span class="p">.</span><span class="n">height</span><span class="p">),</span>
@@ -429,8 +441,10 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>The atlas stores only coverage. The color comes from a uniform, so one atlas serves text of every color. The pipeline needs <strong>alpha blending</strong> enabled, as in the <a href="../advanced-metal/blending.html">Blending</a> chapter, and text should be drawn last with depth testing off.</p>
-<h2 id="drawing">Drawing<a class="headerlink" href="#drawing" title="Permanent link">#</a></h2>
+<p>L'atlas contiene solo la copertura.<br>
+Il colore arriva da un uniform, quindi un solo atlas serve per testo di ogni colore.<br>
+La pipeline ha bisogno dell'<strong>alpha blending</strong> attivo, come nel capitolo <a href="../advanced-metal/blending.html">Blending</a>, e il testo va disegnato per ultimo con il test di profondità spento.</p>
+<h2 id="disegnare">Disegnare<a class="headerlink" href="#disegnare" title="Permanent link">#</a></h2>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">vertices</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">makeVertices</span><span class="p">(</span><span class="k">for</span><span class="p">:</span><span class="w"> </span><span class="s">"FPS: </span><span class="si">\(</span><span class="n">fps</span><span class="si">)</span><span class="s">"</span><span class="p">,</span><span class="w"> </span><span class="n">atlas</span><span class="p">:</span><span class="w"> </span><span class="n">atlas</span><span class="p">,</span><span class="w"> </span><span class="n">origin</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">])</span>
 <span class="n">textBuffer</span><span class="p">.</span><span class="n">contents</span><span class="p">().</span><span class="n">copyMemory</span><span class="p">(</span><span class="n">from</span><span class="p">:</span><span class="w"> </span><span class="n">vertices</span><span class="p">,</span>
@@ -459,29 +473,36 @@
 </code></pre></div>
 </div>
 
-<p>Allocate <code>textBuffer</code> once, large enough for the longest text you expect, and rewrite it each frame.</p>
-<figure><img src="../../assets/img/in-practice/text-rendering.webp" alt="The glyph atlas, and text composed from one textured quad per character." width="880" height="301" loading="lazy"><figcaption>The glyph atlas, and text composed from one textured quad per character.</figcaption></figure>
+<p>Alloca <code>textBuffer</code> una volta sola, grande abbastanza per il testo più lungo che prevedi, e riscrivilo a ogni frame.</p>
+<figure><img src="../../assets/img/in-practice/text-rendering.webp" alt="L&#x27;atlas di glifi, e il testo composto con un rettangolo con texture per carattere." width="880" height="301" loading="lazy"><figcaption>L&#x27;atlas di glifi, e il testo composto con un rettangolo con texture per carattere.</figcaption></figure>
 
-<h2 id="limits-of-this-approach">Limits of this approach<a class="headerlink" href="#limits-of-this-approach" title="Permanent link">#</a></h2>
+<h2 id="i-limiti-di-questo-approccio">I limiti di questo approccio<a class="headerlink" href="#i-limiti-di-questo-approccio" title="Permanent link">#</a></h2>
 <ul>
-<li><strong>Scaling blurs.</strong> A bitmap atlas is sharp at the size it was rendered. Render the atlas at the pixel size you will display, remembering that Retina displays have two or three pixels per point.</li>
-<li><strong>Only simple scripts.</strong> Mapping one character to one glyph ignores kerning, ligatures, combining marks, right-to-left text and complex scripts. For correct layout, let Core Text shape the string (<code>CTLineCreateWithAttributedString</code>, then read its glyph runs) and draw the glyphs and positions it returns from your atlas.</li>
-<li><strong>ASCII only.</strong> A dynamic atlas that adds glyphs on demand removes that limit.</li>
+<li><strong>Scalare sfoca.</strong><br>
+Un atlas bitmap è nitido alla dimensione a cui è stato disegnato.<br>
+Disegna l'atlas alla dimensione in pixel a cui lo mostrerai, ricordando che gli schermi Retina hanno due o tre pixel per punto.</li>
+<li><strong>Solo scritture semplici.</strong><br>
+Far corrispondere un carattere a un glifo ignora il kerning, le legature, i segni combinanti, il testo da destra a sinistra e le scritture complesse.<br>
+Per un'impaginazione corretta lascia che sia Core Text a comporre la stringa (<code>CTLineCreateWithAttributedString</code>, poi leggi i suoi glyph run) e disegna dal tuo atlas i glifi e le posizioni che restituisce.</li>
+<li><strong>Solo ASCII.</strong><br>
+Un atlas dinamico che aggiunge i glifi a richiesta toglie questo limite.</li>
 </ul>
-<h2 id="signed-distance-fields">Signed distance fields<a class="headerlink" href="#signed-distance-fields" title="Permanent link">#</a></h2>
-<p>For text that must stay sharp at any size, especially in 3D, store a <strong>signed distance field</strong> in the atlas instead of coverage: each texel holds the distance to the nearest glyph edge. Bilinear filtering interpolates distances faithfully, so the edge can be reconstructed crisply at any magnification:</p>
+<h2 id="signed-distance-field">Signed distance field<a class="headerlink" href="#signed-distance-field" title="Permanent link">#</a></h2>
+<p>Per il testo che deve restare nitido a qualsiasi dimensione, soprattutto in 3D, salva nell'atlas un <strong>signed distance field</strong> al posto della copertura: ogni texel contiene la distanza dal bordo del glifo più vicino.<br>
+Il filtro bilineare interpola le distanze in modo fedele, quindi il bordo si può ricostruire netto a qualsiasi ingrandimento:</p>
 <div class="codehilite"><pre><span></span><code><span class="kt">float</span><span class="w"> </span><span class="n">distance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">atlas</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">r</span><span class="p">;</span>
 <span class="kt">float</span><span class="w"> </span><span class="n">width</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fwidth</span><span class="p">(</span><span class="n">distance</span><span class="p">);</span>
 <span class="kt">float</span><span class="w"> </span><span class="n">coverage</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">smoothstep</span><span class="p">(</span><span class="mf">0.5</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">distance</span><span class="p">);</span>
 </code></pre></div>
 
-<p>Outlines, glows and drop shadows become one extra <code>smoothstep</code> each. Multi-channel distance fields (MSDF) additionally preserve sharp corners, and are the technique most engines use today.</p></article><nav class="pager" id="pager"><a class="prev" href="../in-practice/debugging.html"><small>Precedente</small>Debug</a><a class="next" href="../in-practice/2d-game.html"><small>Successivo</small>Un gioco 2D</a></nav>
+<p>Contorni, bagliori e ombre portate diventano ciascuno un <code>smoothstep</code> in più.<br>
+I distance field a più canali (MSDF) conservano inoltre gli angoli vivi, e sono la tecnica che oggi usa la maggior parte dei motori.</p></article><nav class="pager" id="pager"><a class="prev" href="../in-practice/debugging.html"><small>Precedente</small>Debug</a><a class="next" href="../in-practice/2d-game.html"><small>Successivo</small>Un gioco 2D</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#options">Options</a></li><li><a href="#glyphs-and-metrics">Glyphs and metrics</a></li><li><a href="#building-the-atlas">Building the atlas</a></li><li><a href="#building-quads-for-a-string">Building quads for a string</a></li><li><a href="#the-shaders">The shaders</a></li><li><a href="#drawing">Drawing</a></li><li><a href="#limits-of-this-approach">Limits of this approach</a></li><li><a href="#signed-distance-fields">Signed distance fields</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#le-opzioni">Le opzioni</a></li><li><a href="#glifi-e-metriche">Glifi e metriche</a></li><li><a href="#costruire-latlas">Costruire l&#x27;atlas</a></li><li><a href="#costruire-i-rettangoli-per-una-stringa">Costruire i rettangoli per una stringa</a></li><li><a href="#gli-shader">Gli shader</a></li><li><a href="#disegnare">Disegnare</a></li><li><a href="#i-limiti-di-questo-approccio">I limiti di questo approccio</a></li><li><a href="#signed-distance-field">Signed distance field</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

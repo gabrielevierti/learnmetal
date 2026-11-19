@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,18 +134,22 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Caricare i modelli</p><h1 id="model">Model<a class="headerlink" href="#model" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
+<article><p class="crumb">Caricare i modelli</p><h1 id="modello">Modello<a class="headerlink" href="#modello" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Progetto di esempio</strong> <code>examples/Sources/11-ModelLoading</code>, si esegue con <code>swift run ModelLoading</code>. <a href="../../downloads/learnmetal-examples.zip">Scarica tutti gli esempi</a> oppure guarda <a href="../resources/examples.html">come eseguirli</a>.</div>
 
-<p>A file usually contains several meshes arranged in a hierarchy, each with its own transform. A <code>Model</code> type collects them so that loading and drawing a whole file is one line each.</p>
+<p>Di solito un file contiene più mesh disposte in una gerarchia, ognuna con la propria trasformazione.<br>
+Un tipo <code>Model</code> le raccoglie, così caricare e disegnare un file intero richiede una riga per ciascuna delle due cose.</p>
 <div class="lang-cpp">
 <div class="admonition note">
-<p class="admonition-title">Model loading in C++</p>
-<p>Model I/O and MetalKit's mesh types are not part of metal-cpp. The C++ version of this section loads Wavefront OBJ files with the single-header library <a href="https://github.com/tinyobjloader/tinyobjloader">tinyobjloader</a> and builds the Metal buffers by hand. The ideas are the same: a model is meshes, a mesh has one vertex buffer and one index buffer per material, and a material is values plus textures. To load USD from C++, call Model I/O from a small Objective-C++ file, as the window code in <a href="../getting-started/project-setup.html">Project Setup</a> does for AppKit, or convert the model to OBJ or glTF.</p>
+<p class="admonition-title">Caricare i modelli in C++</p>
+<p>Model I/O e i tipi di mesh di MetalKit non fanno parte di metal-cpp.<br>
+La versione C++ di questa sezione carica file Wavefront OBJ con la libreria a singolo header <a href="https://github.com/tinyobjloader/tinyobjloader">tinyobjloader</a> e costruisce a mano i buffer di Metal.<br>
+Le idee sono le stesse: un modello è fatto di mesh, una mesh ha un vertex buffer e un index buffer per ogni materiale, e un materiale è fatto di valori e di texture.<br>
+Per caricare USD da C++ chiama Model I/O da un piccolo file Objective-C++, come fa per AppKit il codice della finestra in <a href="../getting-started/project-setup.html">Preparare il progetto</a>, oppure converti il modello in OBJ o glTF.</p>
 </div>
 </div>
 
-<h2 id="the-model-class">The Model class<a class="headerlink" href="#the-model-class" title="Permanent link">#</a></h2>
+<h2 id="la-classe-model">La classe Model<a class="headerlink" href="#la-classe-model" title="Permanent link">#</a></h2>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">import</span><span class="w"> </span><span class="nc">MetalKit</span>
 <span class="kd">import</span><span class="w"> </span><span class="nc">ModelIO</span>
@@ -259,9 +263,12 @@
 </code></pre></div>
 </div>
 
-<p>Every <code>MDLObject</code> can carry a transform relative to its parent. Walking up the parent chain and multiplying gives the mesh's placement within the model. Simple OBJ files have no hierarchy, so the loop just returns the identity. USD files often do, and skipping this step is why parts of a model sometimes appear piled up at the origin.</p>
-<h2 id="drawing">Drawing<a class="headerlink" href="#drawing" title="Permanent link">#</a></h2>
-<p>Each node combines the model's own matrix with its node transform:</p>
+<p>Ogni <code>MDLObject</code> può avere una trasformazione relativa al suo genitore.<br>
+Risalire la catena dei genitori e moltiplicare dà la collocazione della mesh dentro il modello.<br>
+I file OBJ semplici non hanno gerarchia, quindi il ciclo restituisce soltanto l'identità.<br>
+I file USD spesso ce l'hanno, e saltare questo passo è il motivo per cui a volte le parti di un modello compaiono ammucchiate nell'origine.</p>
+<h2 id="disegnare">Disegnare<a class="headerlink" href="#disegnare" title="Permanent link">#</a></h2>
+<p>Ogni nodo combina la matrice del modello con la propria trasformazione di nodo:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">extension</span><span class="w"> </span><span class="nc">Model</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nf">draw</span><span class="p">(</span><span class="n">with</span><span class="w"> </span><span class="n">encoder</span><span class="p">:</span><span class="w"> </span><span class="bp">MTLRenderCommandEncoder</span><span class="p">,</span>
@@ -291,7 +298,7 @@
 </code></pre></div>
 </div>
 
-<p>In the renderer:</p>
+<p>Nel renderer:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// init</span>
 <span class="kd">let</span><span class="w"> </span><span class="nv">url</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Bundle</span><span class="p">.</span><span class="n">main</span><span class="p">.</span><span class="n">url</span><span class="p">(</span><span class="n">forResource</span><span class="p">:</span><span class="w"> </span><span class="s">"backpack"</span><span class="p">,</span><span class="w"> </span><span class="n">withExtension</span><span class="p">:</span><span class="w"> </span><span class="s">"usdz"</span><span class="p">)</span><span class="o">!</span>
@@ -323,18 +330,20 @@
 </code></pre></div>
 </div>
 
-<p>Add the point lights from the previous section and you have a properly lit, textured model.</p>
-<figure><img src="../../assets/img/model-loading/model.webp" alt="Meshes with different materials and transforms drawn through one Model type." width="880" height="495" loading="lazy"><figcaption>Meshes with different materials and transforms drawn through one Model type.</figcaption></figure>
+<p>Aggiungi le luci puntiformi della sezione precedente e hai un modello con texture e illuminato come si deve.</p>
+<figure><img src="../../assets/img/model-loading/model.webp" alt="Mesh con materiali e trasformazioni diversi disegnate attraverso un unico tipo Model." width="880" height="495" loading="lazy"><figcaption>Mesh con materiali e trasformazioni diversi disegnate attraverso un unico tipo Model.</figcaption></figure>
 
-<h2 id="finding-models">Finding models<a class="headerlink" href="#finding-models" title="Permanent link">#</a></h2>
+<h2 id="dove-trovare-i-modelli">Dove trovare i modelli<a class="headerlink" href="#dove-trovare-i-modelli" title="Permanent link">#</a></h2>
 <ul>
-<li>Apple publishes sample USDZ models in its AR Quick Look gallery.</li>
-<li>Sites such as Sketchfab, Poly Haven and Kenney offer free models. Check each license.</li>
-<li>Blender exports both OBJ and USD.</li>
+<li>Apple pubblica modelli USDZ di esempio nella sua galleria AR Quick Look.</li>
+<li>Siti come Sketchfab, Poly Haven e Kenney offrono modelli gratuiti.<br>
+Controlla la licenza di ciascuno.</li>
+<li>Blender esporta sia OBJ sia USD.</li>
 </ul>
-<p>When a model looks wrong, the usual suspects are, in order: flipped texture coordinates, missing normals, a scale that is off by a factor of 100 (centimeters versus meters), and ignored node transforms.</p>
-<h2 id="bounds-and-framing">Bounds and framing<a class="headerlink" href="#bounds-and-framing" title="Permanent link">#</a></h2>
-<p>An unknown model can be any size. Model I/O reports the bounding box, which lets you scale and center anything automatically:</p>
+<p>Quando un modello appare sbagliato i soliti sospetti sono, nell'ordine: coordinate di texture ribaltate, normali mancanti, una scala sbagliata di un fattore 100 (centimetri contro metri) e trasformazioni dei nodi ignorate.</p>
+<h2 id="ingombro-e-inquadratura">Ingombro e inquadratura<a class="headerlink" href="#ingombro-e-inquadratura" title="Permanent link">#</a></h2>
+<p>Un modello sconosciuto può avere qualsiasi dimensione.<br>
+Model I/O ne riporta il bounding box, che permette di scalare e centrare qualsiasi cosa in automatico:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">bounds</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">asset</span><span class="p">.</span><span class="n">boundingBox</span>
 <span class="kd">let</span><span class="w"> </span><span class="nv">size</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">bounds</span><span class="p">.</span><span class="n">maxBounds</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">bounds</span><span class="p">.</span><span class="n">minBounds</span>
@@ -353,25 +362,31 @@
 </code></pre></div>
 </div>
 
-<p>Multiply <code>normalize</code> into the model matrix and every model fits in a box two units wide around the origin.</p>
-<h2 id="what-we-left-out">What we left out<a class="headerlink" href="#what-we-left-out" title="Permanent link">#</a></h2>
-<p>A production loader also handles skeletal animation (<code>MDLSkeleton</code>, <code>MDLAnimationBindComponent</code>), morph targets, cameras and lights stored in the file, and it caches textures so an image shared by ten materials is loaded once. Add a dictionary from URL to <code>MTLTexture</code> to the material loader as a first improvement.</p>
-<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<p>Moltiplica <code>normalize</code> nella matrice model e ogni modello entra in una scatola larga due unità intorno all'origine.</p>
+<h2 id="che-cosa-abbiamo-lasciato-fuori">Che cosa abbiamo lasciato fuori<a class="headerlink" href="#che-cosa-abbiamo-lasciato-fuori" title="Permanent link">#</a></h2>
+<p>Un loader da produzione gestisce anche l'animazione scheletrica (<code>MDLSkeleton</code>, <code>MDLAnimationBindComponent</code>), i morph target, le camere e le luci salvate nel file, e tiene una cache delle texture, così un'immagine condivisa da dieci materiali viene caricata una volta sola.<br>
+Come primo miglioramento aggiungi al loader dei materiali un dizionario da URL a <code>MTLTexture</code>.</p>
+<h2 id="esercizi">Esercizi<a class="headerlink" href="#esercizi" title="Permanent link">#</a></h2>
 <ul>
-<li>Draw the model ten times using the cube positions from the first section.<details class="solution"><summary>Mostra la soluzione</summary><p>Call the model's draw method in a loop with a different model matrix each time, multiplying the per-instance translation and rotation by the normalization matrix. The vertex and index buffers are shared, so ten copies cost ten sets of draw calls and no extra memory. For many copies, switch to instancing.</p></details></li>
-<li>Implement the texture cache.<details class="solution"><summary>Mostra la soluzione</summary><p>Keep a dictionary from the texture's file path to the loaded texture, and look it up before loading. In Swift a <code>[URL: MTLTexture]</code> on the loader object; in C++ a <code>std::unordered_map&lt;std::string, MTL::Texture*&gt;</code>. Models commonly reference the same image from many materials, so this cuts both load time and memory.</p></details></li>
-<li>Load a model with no textures and confirm that the fallback texture and <code>baseColor</code> produce a sensible result. You will need to pass <code>baseColor</code> to the shader in the fragment uniforms.<details class="solution"><summary>Mostra la soluzione</summary><p>Add <code>float3 baseColor</code> to the fragment uniforms, set it per submesh from the material, bind the 1 × 1 white texture where there is no image, and multiply.</p>
+<li>Disegna il modello dieci volte usando le posizioni dei cubi della prima sezione.<details class="solution"><summary>Mostra la soluzione</summary><p>Chiama il metodo di disegno del modello in un ciclo, ogni volta con una matrice model diversa, moltiplicando la traslazione e la rotazione di ogni copia per la matrice di normalizzazione.<br>
+I vertex buffer e gli index buffer sono condivisi, quindi dieci copie costano dieci gruppi di draw call e nessuna memoria in più.<br>
+Per molte copie passa all'instancing.</p></details></li>
+<li>Implementa la cache delle texture.<details class="solution"><summary>Mostra la soluzione</summary><p>Tieni un dizionario dal percorso del file della texture alla texture caricata, e consultalo prima di caricare.<br>
+In Swift un <code>[URL: MTLTexture]</code> nell'oggetto loader; in C++ una <code>std::unordered_map&lt;std::string, MTL::Texture*&gt;</code>.<br>
+È frequente che un modello usi la stessa immagine in molti materiali, quindi così si riducono sia il tempo di caricamento sia la memoria.</p></details></li>
+<li>Carica un modello senza texture e verifica che la texture di riserva e <code>baseColor</code> diano un risultato sensato.<br>
+Dovrai passare <code>baseColor</code> allo shader negli uniform del fragment.<details class="solution"><summary>Mostra la soluzione</summary><p>Aggiungi <code>float3 baseColor</code> agli uniform del fragment, impostalo per ogni submesh a partire dal materiale, collega la texture bianca da 1 × 1 dove non c'è un'immagine, e moltiplica.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">albedo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">baseColorTexture</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">mapSampler</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">rgb</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">baseColor</span><span class="p">;</span>
 </code></pre></div>
 
-<p>White times the color gives the color; an image times a white base color gives the image.</p></details></li>
+<p>Il bianco per il colore dà il colore; un'immagine per un base color bianco dà l'immagine.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../model-loading/mesh.html"><small>Precedente</small>Mesh</a><a class="next" href="../advanced-metal/depth-testing.html"><small>Successivo</small>Test di profondità</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#the-model-class">The Model class</a></li><li><a href="#drawing">Drawing</a></li><li><a href="#finding-models">Finding models</a></li><li><a href="#bounds-and-framing">Bounds and framing</a></li><li><a href="#what-we-left-out">What we left out</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#la-classe-model">La classe Model</a></li><li><a href="#disegnare">Disegnare</a></li><li><a href="#dove-trovare-i-modelli">Dove trovare i modelli</a></li><li><a href="#ingombro-e-inquadratura">Ingombro e inquadratura</a></li><li><a href="#che-cosa-abbiamo-lasciato-fuori">Che cosa abbiamo lasciato fuori</a></li><li><a href="#esercizi">Esercizi</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

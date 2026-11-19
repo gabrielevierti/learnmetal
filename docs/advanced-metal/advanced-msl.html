@@ -135,7 +135,8 @@
 </nav>
 <main class="content" id="main">
 <article><p class="crumb">Advanced Metal</p><h1 id="advanced-msl">Advanced MSL<a class="headerlink" href="#advanced-msl" title="Permanent link">#</a></h1>
-<p>This chapter collects features of the Metal Shading Language that do not get a chapter of their own but are worth knowing. Nothing here is required reading; skim it now and return when you need a piece.</p>
+<p>This chapter collects features of the Metal Shading Language that do not get a chapter of their own but are worth knowing.<br>
+Nothing here is required reading; skim it now and return when you need a piece.</p>
 <h2 id="built-in-inputs-and-outputs">Built-in inputs and outputs<a class="headerlink" href="#built-in-inputs-and-outputs" title="Permanent link">#</a></h2>
 <p>Attributes in double brackets connect variables to values the pipeline provides.</p>
 <p><strong>Vertex function inputs</strong></p>
@@ -269,7 +270,8 @@
 </code></pre></div>
 
 <h2 id="interpolation-control">Interpolation control<a class="headerlink" href="#interpolation-control" title="Permanent link">#</a></h2>
-<p>Members of the vertex output are interpolated with perspective correction by default. You can change that per member:</p>
+<p>Members of the vertex output are interpolated with perspective correction by default.<br>
+You can change that per member:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">VertexOut</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="p">[[</span><span class="na">position</span><span class="p">]];</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">normal</span><span class="p">;</span><span class="w">                       </span><span class="c1">// perspective-correct, the default</span>
@@ -284,8 +286,10 @@
 <h2 id="address-spaces">Address spaces<a class="headerlink" href="#address-spaces" title="Permanent link">#</a></h2>
 <p>Every pointer or reference parameter must say where its memory lives:</p>
 <ul>
-<li><code>constant</code>: read-only buffer data. Use it for uniforms.</li>
-<li><code>device</code>: read-write buffer data. Use it for large arrays and anything a compute function writes.</li>
+<li><code>constant</code>: read-only buffer data.<br>
+Use it for uniforms.</li>
+<li><code>device</code>: read-write buffer data.<br>
+Use it for large arrays and anything a compute function writes.</li>
 </ul>
 <div class="codehilite"><pre><span></span><code><span class="n">vertex</span><span class="w"> </span><span class="n">VertexOut</span><span class="w"> </span><span class="n">vertex_main</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">device</span><span class="w"> </span><span class="n">Vertex</span><span class="w"> </span><span class="o">*</span><span class="n">vertices</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
 <span class="w">                             </span><span class="n">constant</span><span class="w"> </span><span class="n">Uniforms</span><span class="w"> </span><span class="o">&amp;</span><span class="n">uniforms</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
@@ -295,9 +299,12 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>This example also shows that a vertex descriptor is optional. A vertex function can fetch its own data from a buffer by index, which is sometimes called <strong>vertex pulling</strong>. The struct layout must then match the buffer bytes exactly, using <code>packed_float3</code> where the data is tightly packed.</p>
+<p>This example also shows that a vertex descriptor is optional.<br>
+A vertex function can fetch its own data from a buffer by index, which is sometimes called <strong>vertex pulling</strong>.<br>
+The struct layout must then match the buffer bytes exactly, using <code>packed_float3</code> where the data is tightly packed.</p>
 <h2 id="function-constants">Function constants<a class="headerlink" href="#function-constants" title="Permanent link">#</a></h2>
-<p>A value marked as a <strong>function constant</strong> is fixed when the function is specialized, before the pipeline state is created. The compiler can then remove dead branches entirely:</p>
+<p>A value marked as a <strong>function constant</strong> is fixed when the function is specialized, before the pipeline state is created.<br>
+The compiler can then remove dead branches entirely:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">constant</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">useNormalMap</span><span class="w"> </span><span class="p">[[</span><span class="na">function_constant</span><span class="p">(</span><span class="mi">0</span><span class="p">)]];</span>
 <span class="n">constant</span><span class="w"> </span><span class="kt">int</span><span class="w">  </span><span class="n">lightCount</span><span class="w">   </span><span class="p">[[</span><span class="na">function_constant</span><span class="p">(</span><span class="mi">1</span><span class="p">)]];</span>
 
@@ -333,7 +340,8 @@
 
 <p>This is Metal's answer to <code>#ifdef</code> shader variants: one source function, many specialized pipeline states.</p>
 <h2 id="argument-buffers">Argument buffers<a class="headerlink" href="#argument-buffers" title="Permanent link">#</a></h2>
-<p>Binding ten textures and three buffers one call at a time is slow when you have thousands of draws. An <strong>argument buffer</strong> is a struct of resources stored in a buffer and bound with a single call:</p>
+<p>Binding ten textures and three buffers one call at a time is slow when you have thousands of draws.<br>
+An <strong>argument buffer</strong> is a struct of resources stored in a buffer and bound with a single call:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">MaterialArguments</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">baseColor</span><span class="p">;</span>
 <span class="w">    </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">normalMap</span><span class="p">;</span>
@@ -348,9 +356,13 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>On the Swift side an <code>MTLArgumentEncoder</code>, created from the function with <code>makeArgumentEncoder(bufferIndex:)</code>, writes the resources into the buffer. Newer OS versions allow writing resource IDs into the buffer directly. You must also tell the encoder which resources the buffer references, with <code>useResource(_:usage:stages:)</code>, so Metal can track them. Argument buffers can contain arrays of textures, which is the foundation of "bindless" rendering and of ray tracing, where any ray may hit any material.</p>
+<p>On the Swift side an <code>MTLArgumentEncoder</code>, created from the function with <code>makeArgumentEncoder(bufferIndex:)</code>, writes the resources into the buffer.<br>
+Newer OS versions allow writing resource IDs into the buffer directly.<br>
+You must also tell the encoder which resources the buffer references, with <code>useResource(_:usage:stages:)</code>, so Metal can track them.<br>
+Argument buffers can contain arrays of textures, which is the foundation of "bindless" rendering and of ray tracing, where any ray may hit any material.</p>
 <h2 id="samplers-defined-in-the-shader">Samplers defined in the shader<a class="headerlink" href="#samplers-defined-in-the-shader" title="Permanent link">#</a></h2>
-<p>A sampler does not have to come from Swift. It can be declared as a constant:</p>
+<p>A sampler does not have to come from Swift.<br>
+It can be declared as a constant:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">constexpr</span><span class="w"> </span><span class="n">sampler</span><span class="w"> </span><span class="nf">linearSampler</span><span class="p">(</span><span class="n">filter</span><span class="o">::</span><span class="n">linear</span><span class="p">,</span><span class="w"> </span><span class="n">mip_filter</span><span class="o">::</span><span class="n">linear</span><span class="p">,</span><span class="w"> </span><span class="n">address</span><span class="o">::</span><span class="n">repeat</span><span class="p">);</span>
 
 <span class="n">float4</span><span class="w"> </span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">colorTexture</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">linearSampler</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">);</span>
@@ -401,9 +413,13 @@
 </tbody>
 </table>
 <h2 id="precision-half">Precision: half<a class="headerlink" href="#precision-half" title="Permanent link">#</a></h2>
-<p><code>half</code> is a 16-bit float. On mobile GPUs half-precision math is faster and uses less power, and it is precise enough for colors and normalized directions. Use <code>float</code> for positions, texture coordinates on large textures, and depth. Literals take an <code>h</code> suffix: <code>half3(0.5h)</code>.</p>
+<p><code>half</code> is a 16-bit float.<br>
+On mobile GPUs half-precision math is faster and uses less power, and it is precise enough for colors and normalized directions.<br>
+Use <code>float</code> for positions, texture coordinates on large textures, and depth.<br>
+Literals take an <code>h</code> suffix: <code>half3(0.5h)</code>.</p>
 <h2 id="derivatives">Derivatives<a class="headerlink" href="#derivatives" title="Permanent link">#</a></h2>
-<p><code>dfdx(v)</code> and <code>dfdy(v)</code> return how fast a value changes between neighboring pixels, and <code>fwidth(v)</code> is the sum of their absolute values. They are the tools for anti-aliased procedural patterns and for computing a flat face normal without vertex normals:</p>
+<p><code>dfdx(v)</code> and <code>dfdy(v)</code> return how fast a value changes between neighboring pixels, and <code>fwidth(v)</code> is the sum of their absolute values.<br>
+They are the tools for anti-aliased procedural patterns and for computing a flat face normal without vertex normals:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">faceNormal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">cross</span><span class="p">(</span><span class="n">dfdx</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">worldPosition</span><span class="p">),</span><span class="w"> </span><span class="n">dfdy</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">worldPosition</span><span class="p">)));</span>
 </code></pre></div>
 

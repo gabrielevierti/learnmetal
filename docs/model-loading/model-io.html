@@ -137,12 +137,17 @@
 <article><p class="crumb">Model Loading</p><h1 id="model-io">Model I/O<a class="headerlink" href="#model-io" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Example project</strong> <code>examples/Sources/11-ModelLoading</code>, run with <code>swift run ModelLoading</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
 
-<p>Nobody types the vertices of a character by hand. Artists build models in tools such as Blender and export them to files, and our job is to turn those files into vertex buffers, index buffers and textures.</p>
-<p>On Apple platforms you do not need a third-party library for this. The system framework <strong>Model I/O</strong> reads common 3D formats, and <strong>MetalKit</strong> converts the result into Metal objects.</p>
+<p>Nobody types the vertices of a character by hand.<br>
+Artists build models in tools such as Blender and export them to files, and our job is to turn those files into vertex buffers, index buffers and textures.</p>
+<p>On Apple platforms you do not need a third-party library for this.<br>
+The system framework <strong>Model I/O</strong> reads common 3D formats, and <strong>MetalKit</strong> converts the result into Metal objects.</p>
 <div class="lang-cpp">
 <div class="admonition note">
 <p class="admonition-title">Model loading in C++</p>
-<p>Model I/O and MetalKit's mesh types are not part of metal-cpp. The C++ version of this section loads Wavefront OBJ files with the single-header library <a href="https://github.com/tinyobjloader/tinyobjloader">tinyobjloader</a> and builds the Metal buffers by hand. The ideas are the same: a model is meshes, a mesh has one vertex buffer and one index buffer per material, and a material is values plus textures. To load USD from C++, call Model I/O from a small Objective-C++ file, as the window code in <a href="../getting-started/project-setup.html">Project Setup</a> does for AppKit, or convert the model to OBJ or glTF.</p>
+<p>Model I/O and MetalKit's mesh types are not part of metal-cpp.<br>
+The C++ version of this section loads Wavefront OBJ files with the single-header library <a href="https://github.com/tinyobjloader/tinyobjloader">tinyobjloader</a> and builds the Metal buffers by hand.<br>
+The ideas are the same: a model is meshes, a mesh has one vertex buffer and one index buffer per material, and a material is values plus textures.<br>
+To load USD from C++, call Model I/O from a small Objective-C++ file, as the window code in <a href="../getting-started/project-setup.html">Project Setup</a> does for AppKit, or convert the model to OBJ or glTF.</p>
 </div>
 </div>
 
@@ -176,22 +181,30 @@
 </table>
 <div class="admonition note">
 <p class="admonition-title">What about glTF and FBX?</p>
-<p>Model I/O does not read glTF or FBX. Convert them to USDZ with Apple's Reality Converter or with Blender, or use an open-source loader. For learning, OBJ and USDZ are plenty.</p>
+<p>Model I/O does not read glTF or FBX.<br>
+Convert them to USDZ with Apple's Reality Converter or with Blender, or use an open-source loader.<br>
+For learning, OBJ and USDZ are plenty.</p>
 </div>
 <h2 id="how-a-model-is-structured">How a model is structured<a class="headerlink" href="#how-a-model-is-structured" title="Permanent link">#</a></h2>
 <p>Model I/O represents a file as a tree:</p>
 <ul>
-<li><strong><code>MDLAsset</code></strong>: the whole file. A container of objects.</li>
+<li><strong><code>MDLAsset</code></strong>: the whole file.<br>
+A container of objects.</li>
 <li><strong><code>MDLObject</code></strong>: a node with a transform and children.</li>
-<li><strong><code>MDLMesh</code></strong>: a node that has geometry. It owns vertex buffers and a vertex descriptor.</li>
-<li><strong><code>MDLSubmesh</code></strong>: a part of a mesh drawn with one material. It owns an index buffer.</li>
+<li><strong><code>MDLMesh</code></strong>: a node that has geometry.<br>
+It owns vertex buffers and a vertex descriptor.</li>
+<li><strong><code>MDLSubmesh</code></strong>: a part of a mesh drawn with one material.<br>
+It owns an index buffer.</li>
 <li><strong><code>MDLMaterial</code></strong>: named properties such as base color, roughness and normal, each a value or a texture.</li>
 </ul>
-<p>One mesh shares its vertices among several submeshes. A car body might be one mesh with a submesh for paint, one for glass and one for chrome.</p>
+<p>One mesh shares its vertices among several submeshes.<br>
+A car body might be one mesh with a submesh for paint, one for glass and one for chrome.</p>
 <figure><img src="../assets/img/model-loading/model-io.webp" alt="model io" width="880" height="355" loading="lazy"></figure>
 
 <h2 id="asking-for-the-layout-you-want">Asking for the layout you want<a class="headerlink" href="#asking-for-the-layout-you-want" title="Permanent link">#</a></h2>
-<p>Files store vertex data in whatever layout the exporter chose. Model I/O can rearrange it into the layout our shaders expect. Start from the Metal vertex descriptor, convert it, and name the attributes so Model I/O knows which data goes where:</p>
+<p>Files store vertex data in whatever layout the exporter chose.<br>
+Model I/O can rearrange it into the layout our shaders expect.<br>
+Start from the Metal vertex descriptor, convert it, and name the attributes so Model I/O knows which data goes where:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">import</span><span class="w"> </span><span class="nc">MetalKit</span>
 <span class="kd">import</span><span class="w"> </span><span class="nc">ModelIO</span>
@@ -230,7 +243,9 @@
 </code></pre></div>
 </div>
 
-<p>Since Model I/O writes the buffer for us, we are free to pack it tightly: <code>.float3</code> occupies 12 bytes in a vertex buffer, so a vertex is 32 bytes. This is the same vertex layout as our cube in spirit, only without Swift's padding. The shader's <code>VertexIn</code> does not change at all; <code>[[attribute(n)]]</code> hides the layout.</p>
+<p>Since Model I/O writes the buffer for us, we are free to pack it tightly: <code>.float3</code> occupies 12 bytes in a vertex buffer, so a vertex is 32 bytes.<br>
+This is the same vertex layout as our cube in spirit, only without Swift's padding.<br>
+The shader's <code>VertexIn</code> does not change at all; <code>[[attribute(n)]]</code> hides the layout.</p>
 <h2 id="loading-the-asset">Loading the asset<a class="headerlink" href="#loading-the-asset" title="Permanent link">#</a></h2>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">allocator</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTKMeshBufferAllocator</span><span class="p">(</span><span class="n">device</span><span class="p">:</span><span class="w"> </span><span class="n">device</span><span class="p">)</span>
@@ -259,7 +274,8 @@
 </code></pre></div>
 </div>
 
-<p>The <strong>buffer allocator</strong> is the key detail. With an <code>MTKMeshBufferAllocator</code>, Model I/O loads vertex and index data straight into <code>MTLBuffer</code>s, with no intermediate copy.</p>
+<p>The <strong>buffer allocator</strong> is the key detail.<br>
+With an <code>MTKMeshBufferAllocator</code>, Model I/O loads vertex and index data straight into <code>MTLBuffer</code>s, with no intermediate copy.</p>
 <p>Two optional steps are often useful right after loading:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">asset</span><span class="p">.</span><span class="n">loadTextures</span><span class="p">()</span><span class="w">   </span><span class="c1">// resolve texture references in materials</span>
@@ -311,7 +327,10 @@
 </code></pre></div>
 </div>
 
-<p>You get two parallel arrays. The <code>MTKMesh</code> objects hold the Metal buffers for drawing. The <code>MDLMesh</code> objects still hold what Metal does not care about: materials and transforms. The next two chapters wrap these into types of our own.</p>
+<p>You get two parallel arrays.<br>
+The <code>MTKMesh</code> objects hold the Metal buffers for drawing.<br>
+The <code>MDLMesh</code> objects still hold what Metal does not care about: materials and transforms.<br>
+The next two chapters wrap these into types of our own.</p>
 <h2 id="built-in-shapes">Built-in shapes<a class="headerlink" href="#built-in-shapes" title="Permanent link">#</a></h2>
 <p>Model I/O can also generate geometry, which is handy for tests:</p>
 <div class="lang-swift">
@@ -349,7 +368,8 @@
 <p>There are similar initializers for boxes, planes, cylinders, capsules, cones and icosahedra.</p>
 <div class="admonition warning">
 <p class="admonition-title">Texture coordinates again</p>
-<p>Many files follow the OpenGL convention with v pointing up. If a model's textures look scrambled or mirrored, flip v when loading: <code>mesh.flipTextureCoordinates(inAttributeNamed: MDLVertexAttributeTextureCoordinate)</code>.</p>
+<p>Many files follow the OpenGL convention with v pointing up.<br>
+If a model's textures look scrambled or mirrored, flip v when loading: <code>mesh.flipTextureCoordinates(inAttributeNamed: MDLVertexAttributeTextureCoordinate)</code>.</p>
 </div></article><nav class="pager" id="pager"><a class="prev" href="../lighting/review.html"><small>Previous</small>Review</a><a class="next" href="../model-loading/mesh.html"><small>Next</small>Mesh</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>

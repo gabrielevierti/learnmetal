@@ -137,11 +137,15 @@
 <article><p class="crumb">Model Loading</p><h1 id="mesh">Mesh<a class="headerlink" href="#mesh" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Example project</strong> <code>examples/Sources/11-ModelLoading</code>, run with <code>swift run ModelLoading</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
 
-<p>MetalKit handed us <code>MTKMesh</code> objects. This chapter looks inside one, draws it, and wraps it together with its materials in a small type of our own.</p>
+<p>MetalKit handed us <code>MTKMesh</code> objects.<br>
+This chapter looks inside one, draws it, and wraps it together with its materials in a small type of our own.</p>
 <div class="lang-cpp">
 <div class="admonition note">
 <p class="admonition-title">Model loading in C++</p>
-<p>Model I/O and MetalKit's mesh types are not part of metal-cpp. The C++ version of this section loads Wavefront OBJ files with the single-header library <a href="https://github.com/tinyobjloader/tinyobjloader">tinyobjloader</a> and builds the Metal buffers by hand. The ideas are the same: a model is meshes, a mesh has one vertex buffer and one index buffer per material, and a material is values plus textures. To load USD from C++, call Model I/O from a small Objective-C++ file, as the window code in <a href="../getting-started/project-setup.html">Project Setup</a> does for AppKit, or convert the model to OBJ or glTF.</p>
+<p>Model I/O and MetalKit's mesh types are not part of metal-cpp.<br>
+The C++ version of this section loads Wavefront OBJ files with the single-header library <a href="https://github.com/tinyobjloader/tinyobjloader">tinyobjloader</a> and builds the Metal buffers by hand.<br>
+The ideas are the same: a model is meshes, a mesh has one vertex buffer and one index buffer per material, and a material is values plus textures.<br>
+To load USD from C++, call Model I/O from a small Objective-C++ file, as the window code in <a href="../getting-started/project-setup.html">Project Setup</a> does for AppKit, or convert the model to OBJ or glTF.</p>
 </div>
 </div>
 
@@ -195,7 +199,8 @@
 </tr>
 </tbody>
 </table>
-<p>The offsets are important. The allocator may place several meshes in one large <code>MTLBuffer</code>, so always pass the offset when binding.</p>
+<p>The offsets are important.<br>
+The allocator may place several meshes in one large <code>MTLBuffer</code>, so always pass the offset when binding.</p>
 <figure><img src="../assets/img/model-loading/mesh.webp" alt="The packed vertex layout requested from Model I/O, and the index buffer of a submesh." width="880" height="250" loading="lazy"><figcaption>The packed vertex layout requested from Model I/O, and the index buffer of a submesh.</figcaption></figure>
 
 <h2 id="drawing-a-mesh">Drawing a mesh<a class="headerlink" href="#drawing-a-mesh" title="Permanent link">#</a></h2>
@@ -235,7 +240,8 @@
 </div>
 
 <p>With the layout from the previous chapter there is one vertex buffer, bound at slot 0, which leaves slot 1 for uniforms as before.</p>
-<p>The pipeline state needs the matching Metal vertex descriptor. Either reuse the one you built by hand or derive it from the mesh:</p>
+<p>The pipeline state needs the matching Metal vertex descriptor.<br>
+Either reuse the one you built by hand or derive it from the mesh:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">pipelineDescriptor</span><span class="p">.</span><span class="n">vertexDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MTKMetalVertexDescriptorFromModelIO</span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">vertexDescriptor</span><span class="p">)</span>
 </code></pre></div>
@@ -247,7 +253,8 @@
 </div>
 
 <h2 id="materials">Materials<a class="headerlink" href="#materials" title="Permanent link">#</a></h2>
-<p>Each <code>MDLSubmesh</code> has an optional <code>MDLMaterial</code>. A material is a bag of properties looked up by <strong>semantic</strong>:</p>
+<p>Each <code>MDLSubmesh</code> has an optional <code>MDLMaterial</code>.<br>
+A material is a bag of properties looked up by <strong>semantic</strong>:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">property</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">mdlSubmesh</span><span class="p">.</span><span class="n">material</span><span class="p">?.</span><span class="n">property</span><span class="p">(</span><span class="n">with</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">baseColor</span><span class="p">)</span>
 </code></pre></div>
@@ -258,7 +265,8 @@
 </code></pre></div>
 </div>
 
-<p>A property can be a plain value or a texture, so we handle both. A small material type for the Phong shader from the lighting section:</p>
+<p>A property can be a plain value or a texture, so we handle both.<br>
+A small material type for the Phong shader from the lighting section:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">MeshMaterial</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">baseColor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Float3</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
@@ -332,7 +340,8 @@
 <p>The texture case covers images embedded in USDZ archives (after <code>asset.loadTextures()</code>), and the URL case covers OBJ files that reference images on disk next to the <code>.mtl</code> file.</p>
 <div class="admonition note">
 <p class="admonition-title">The sRGB flag</p>
-<p>Color textures are stored in sRGB, data textures such as specular or normal maps are not. Until the <a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a> chapter, pass <code>false</code> for everything so the output matches earlier chapters.</p>
+<p>Color textures are stored in sRGB, data textures such as specular or normal maps are not.<br>
+Until the <a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a> chapter, pass <code>false</code> for everything so the output matches earlier chapters.</p>
 </div>
 <h2 id="a-mesh-type">A Mesh type<a class="headerlink" href="#a-mesh-type" title="Permanent link">#</a></h2>
 <p>Bundle the Metal mesh with one material per submesh:</p>
@@ -388,7 +397,8 @@
 </div>
 
 <h2 id="a-fallback-texture">A fallback texture<a class="headerlink" href="#a-fallback-texture" title="Permanent link">#</a></h2>
-<p>A shader that samples a texture must have one bound. For materials without a texture, bind a 1×1 white texture, which multiplies to nothing:</p>
+<p>A shader that samples a texture must have one bound.<br>
+For materials without a texture, bind a 1×1 white texture, which multiplies to nothing:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">makeSolidTexture</span><span class="p">(</span><span class="n">device</span><span class="p">:</span><span class="w"> </span><span class="bp">MTLDevice</span><span class="p">,</span><span class="w"> </span><span class="n">color</span><span class="p">:</span><span class="w"> </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">UInt8</span><span class="p">&gt;)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="bp">MTLTexture</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">descriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLTextureDescriptor</span><span class="p">.</span><span class="n">texture2DDescriptor</span><span class="p">(</span><span class="n">pixelFormat</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">rgba8Unorm</span><span class="p">,</span>

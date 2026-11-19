@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,23 +134,28 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Illuminazione avanzata</p><h1 id="blinn-phong">Blinn-Phong<a class="headerlink" href="#blinn-phong" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
-<p>The Phong specular term has a flaw that shows on rough surfaces viewed at a low angle. A small change to the formula, proposed by James Blinn in 1977, fixes it and has been the default ever since.</p>
-<h2 id="the-problem-with-phong">The problem with Phong<a class="headerlink" href="#the-problem-with-phong" title="Permanent link">#</a></h2>
-<p>Phong measures the angle between the <strong>view direction</strong> and the <strong>reflected light direction</strong>. When the viewer and the light are on the same side of a surface and both near the horizon, that angle can exceed 90 degrees. The dot product goes negative and is clamped to zero, so the highlight is cut off abruptly.</p>
-<p>With a high shininess exponent the highlight is tiny and the cut-off region is never reached. With a low exponent, such as a wide, soft highlight on a floor, you get a visible hard edge where the specular light suddenly stops.</p>
-<h2 id="the-halfway-vector">The halfway vector<a class="headerlink" href="#the-halfway-vector" title="Permanent link">#</a></h2>
-<p>Blinn-Phong replaces the reflection vector with the <strong>halfway vector</strong>: the unit vector exactly between the light direction and the view direction.</p>
+<article><p class="crumb">Illuminazione avanzata</p><h1 id="blinn-phong">Blinn-Phong<a class="headerlink" href="#blinn-phong" title="Permanent link">#</a></h1>
+<p>Il termine specular di Phong ha un difetto che si nota sulle superfici ruvide viste con un angolo basso.<br>
+Una piccola modifica alla formula, proposta da James Blinn nel 1977, lo corregge, e da allora è la scelta predefinita.</p>
+<h2 id="il-problema-di-phong">Il problema di Phong<a class="headerlink" href="#il-problema-di-phong" title="Permanent link">#</a></h2>
+<p>Phong misura l'angolo tra la <strong>direzione di vista</strong> e la <strong>direzione della luce riflessa</strong>.<br>
+Quando chi guarda e la luce stanno dallo stesso lato di una superficie, ed entrambi vicini all'orizzonte, quell'angolo può superare i 90 gradi.<br>
+Il prodotto scalare diventa negativo e viene portato a zero, così il riflesso si interrompe di colpo.</p>
+<p>Con un esponente di shininess alto il riflesso è minuscolo e la zona del taglio non viene mai raggiunta.<br>
+Con un esponente basso, come nel caso di un riflesso largo e morbido su un pavimento, ottieni un bordo netto ben visibile dove la luce speculare finisce all'improvviso.</p>
+<h2 id="il-vettore-halfway">Il vettore halfway<a class="headerlink" href="#il-vettore-halfway" title="Permanent link">#</a></h2>
+<p>Blinn-Phong sostituisce il vettore di riflessione con il <strong>vettore halfway</strong>: il vettore unitario esattamente a metà tra la direzione della luce e la direzione di vista.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">halfwayDir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">lightDir</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">viewDir</span><span class="p">);</span>
 </code></pre></div>
 
-<p>The specular strength is then the angle between the halfway vector and the <strong>normal</strong>:</p>
+<p>L'intensità speculare dipende allora dall'angolo tra il vettore halfway e la <strong>normale</strong>:</p>
 <div class="codehilite"><pre><span></span><code><span class="kt">float</span><span class="w"> </span><span class="n">spec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pow</span><span class="p">(</span><span class="n">max</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">normal</span><span class="p">,</span><span class="w"> </span><span class="n">halfwayDir</span><span class="p">),</span><span class="w"> </span><span class="mf">0.0</span><span class="p">),</span><span class="w"> </span><span class="n">shininess</span><span class="p">);</span>
 </code></pre></div>
 
-<p>When the view direction lines up perfectly with the reflection, the halfway vector lines up with the normal, so both models agree on where the highlight is brightest. The difference is that the angle between the normal and the halfway vector never exceeds 90 degrees as long as the light is above the surface, so the cut-off cannot happen.</p>
-<h2 id="in-the-shader">In the shader<a class="headerlink" href="#in-the-shader" title="Permanent link">#</a></h2>
-<p>Only the specular lines of the lighting functions change:</p>
+<p>Quando la direzione di vista si allinea perfettamente con la riflessione, il vettore halfway si allinea con la normale, quindi i due modelli sono d'accordo su dove il riflesso è più luminoso.<br>
+La differenza è che l'angolo tra la normale e il vettore halfway non supera mai i 90 gradi finché la luce sta sopra la superficie, quindi il taglio non può avvenire.</p>
+<h2 id="nello-shader">Nello shader<a class="headerlink" href="#nello-shader" title="Permanent link">#</a></h2>
+<p>Cambiano solo le righe dello specular nelle funzioni di illuminazione:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="nf">calcPointLight</span><span class="p">(</span><span class="n">PointLight</span><span class="w"> </span><span class="n">light</span><span class="p">,</span><span class="w"> </span><span class="n">Surface</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">toLight</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">light</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">position</span><span class="p">;</span>
 <span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">distance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">length</span><span class="p">(</span><span class="n">toLight</span><span class="p">);</span>
@@ -166,10 +171,12 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<h2 id="adjusting-shininess">Adjusting shininess<a class="headerlink" href="#adjusting-shininess" title="Permanent link">#</a></h2>
-<p>The angle to the halfway vector is smaller than the angle Phong uses, roughly half of it. The same exponent therefore gives a larger highlight with Blinn-Phong. To get a similar look, multiply your old shininess values by somewhere between 2 and 4.</p>
-<h2 id="a-test-scene">A test scene<a class="headerlink" href="#a-test-scene" title="Permanent link">#</a></h2>
-<p>Lay a large textured floor under a single point light close to the surface, and add a uniform that switches between the two formulas:</p>
+<h2 id="regolare-la-shininess">Regolare la shininess<a class="headerlink" href="#regolare-la-shininess" title="Permanent link">#</a></h2>
+<p>L'angolo con il vettore halfway è più piccolo di quello usato da Phong, circa la metà.<br>
+A parità di esponente, quindi, Blinn-Phong dà un riflesso più grande.<br>
+Per avere un aspetto simile moltiplica i vecchi valori di shininess per un numero tra 2 e 4.</p>
+<h2 id="una-scena-di-prova">Una scena di prova<a class="headerlink" href="#una-scena-di-prova" title="Permanent link">#</a></h2>
+<p>Stendi un grande pavimento con texture sotto una sola luce puntiforme vicina alla superficie, e aggiungi un uniform che passa da una formula all'altra:</p>
 <div class="codehilite"><pre><span></span><code><span class="kt">float</span><span class="w"> </span><span class="n">spec</span><span class="p">;</span>
 <span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">uniforms</span><span class="p">.</span><span class="n">useBlinn</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">halfwayDir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">lightDir</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">viewDir</span><span class="p">);</span>
@@ -180,19 +187,22 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>With Phong, the highlight on the floor is chopped off along a curve. With Blinn-Phong it fades out smoothly and stretches toward the horizon, which is how real glossy floors behave.</p>
+<p>Con Phong il riflesso sul pavimento è troncato lungo una curva.<br>
+Con Blinn-Phong sfuma dolcemente e si allunga verso l'orizzonte, che è come si comportano i veri pavimenti lucidi.</p>
 <div class="admonition note">
-<p class="admonition-title">Booleans in uniforms</p>
-<p>MSL's <code>bool</code> is one byte, and so is Swift's <code>Bool</code>, but alignment and padding around them are easy to get wrong. Many people use a <code>uint</code> or <code>int</code> flag (<code>UInt32</code> in Swift) in uniform structs to keep layouts obvious.</p>
+<p class="admonition-title">I booleani negli uniform</p>
+<p>Il <code>bool</code> di MSL occupa un byte, e così il <code>Bool</code> di Swift, ma è facile sbagliare l'allineamento e il padding intorno a loro.<br>
+Molti nelle struct di uniform usano un flag <code>uint</code> o <code>int</code> (<code>UInt32</code> in Swift) per tenere i layout evidenti.</p>
 </div>
-<p>Blinn-Phong is used for the rest of this section. It is still an empirical model, and the PBR section will replace it, but the halfway vector stays: it is central to physically based specular reflection as well.</p>
+<p>Blinn-Phong viene usato per il resto di questa sezione.<br>
+Resta un modello empirico, e la sezione PBR lo sostituirà, ma il vettore halfway rimane: è centrale anche nella riflessione speculare fisicamente corretta.</p>
 <div class="lm-demo" data-demo="blinn-phong" data-fallback="../../assets/img/advanced-lighting/blinn-phong.webp"></div></article><nav class="pager" id="pager"><a class="prev" href="../advanced-metal/anti-aliasing.html"><small>Precedente</small>Anti-aliasing</a><a class="next" href="../advanced-lighting/gamma-correction.html"><small>Successivo</small>Correzione gamma</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#the-problem-with-phong">The problem with Phong</a></li><li><a href="#the-halfway-vector">The halfway vector</a></li><li><a href="#in-the-shader">In the shader</a></li><li><a href="#adjusting-shininess">Adjusting shininess</a></li><li><a href="#a-test-scene">A test scene</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#il-problema-di-phong">Il problema di Phong</a></li><li><a href="#il-vettore-halfway">Il vettore halfway</a></li><li><a href="#nello-shader">Nello shader</a></li><li><a href="#regolare-la-shininess">Regolare la shininess</a></li><li><a href="#una-scena-di-prova">Una scena di prova</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

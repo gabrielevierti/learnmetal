@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,17 +134,21 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">In pratica</p><h1 id="a-2d-game">A 2D Game<a class="headerlink" href="#a-2d-game" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
-<p>Everything so far has been technique. This chapter puts a handful of those techniques to work in something playable: a small brick-breaking game. A paddle, a ball, a wall of bricks. It is deliberately tiny, so that the whole structure fits in one chapter and you can see how a renderer and game logic meet.</p>
-<h2 id="what-we-need">What we need<a class="headerlink" href="#what-we-need" title="Permanent link">#</a></h2>
+<article><p class="crumb">In pratica</p><h1 id="un-gioco-2d">Un gioco 2D<a class="headerlink" href="#un-gioco-2d" title="Permanent link">#</a></h1>
+<p>Finora è stato tutto tecnica.<br>
+Questo capitolo mette al lavoro una manciata di quelle tecniche in qualcosa di giocabile: un piccolo gioco in cui si rompono mattoni.<br>
+Una racchetta, una palla, un muro di mattoni.<br>
+È minuscolo di proposito, così l'intera struttura sta in un capitolo e puoi vedere come si incontrano un renderer e la logica di gioco.</p>
+<h2 id="che-cosa-ci-serve">Che cosa ci serve<a class="headerlink" href="#che-cosa-ci-serve" title="Permanent link">#</a></h2>
 <ul>
-<li>A <strong>sprite renderer</strong> that draws many colored, textured rectangles in one draw call.</li>
-<li>An <strong>orthographic camera</strong> in pixel-like units.</li>
-<li>A <strong>game loop</strong> with delta time and input.</li>
-<li><strong>Collision detection</strong> between a circle and rectangles.</li>
+<li>Uno <strong>sprite renderer</strong> che disegna molti rettangoli colorati e con texture in una sola draw call.</li>
+<li>Una <strong>camera ortografica</strong> in unità simili ai pixel.</li>
+<li>Un <strong>game loop</strong> con delta time e input.</li>
+<li>Il <strong>rilevamento delle collisioni</strong> tra un cerchio e dei rettangoli.</li>
 </ul>
-<h2 id="the-sprite-renderer">The sprite renderer<a class="headerlink" href="#the-sprite-renderer" title="Permanent link">#</a></h2>
-<p>A sprite is a quad with a position, size, color and texture region. We use <a href="../advanced-metal/instancing.html">instancing</a>: one unit quad generated in the vertex function, and one instance per sprite.</p>
+<h2 id="lo-sprite-renderer">Lo sprite renderer<a class="headerlink" href="#lo-sprite-renderer" title="Permanent link">#</a></h2>
+<p>Uno sprite è un rettangolo con una posizione, una dimensione, un colore e una regione di texture.<br>
+Usiamo l'<a href="../advanced-metal/instancing.html">instancing</a>: un rettangolo unitario generato nella vertex function e un'istanza per sprite.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">SpriteInstance</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">position</span><span class="p">;</span><span class="w">     </span><span class="c1">// top-left corner, in game units</span>
 <span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">size</span><span class="p">;</span>
@@ -180,7 +184,7 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>On the Swift side the renderer collects sprites during the frame and draws them all at once:</p>
+<p>Dal lato Swift il renderer raccoglie gli sprite durante il frame e li disegna tutti insieme:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">SpriteInstance</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">position</span><span class="p">:</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;</span>
@@ -251,9 +255,11 @@
 </code></pre></div>
 </div>
 
-<p>Use a pipeline with alpha blending. Put all the game's images in one texture, an <strong>atlas</strong>, and select regions with <code>uvRect</code>, so that the whole game is a single draw call. For solid-colored rectangles, bind a 1 × 1 white texture.</p>
-<h2 id="the-playing-field">The playing field<a class="headerlink" href="#the-playing-field" title="Permanent link">#</a></h2>
-<p>Give the game a fixed logical size, independent of the window, with the origin at the top left and y pointing down, which is convenient for 2D:</p>
+<p>Usa una pipeline con alpha blending.<br>
+Metti tutte le immagini del gioco in un'unica texture, un <strong>atlas</strong>, e scegli le regioni con <code>uvRect</code>, così l'intero gioco è una sola draw call.<br>
+Per i rettangoli a tinta unita collega una texture bianca da 1 × 1.</p>
+<h2 id="il-campo-di-gioco">Il campo di gioco<a class="headerlink" href="#il-campo-di-gioco" title="Permanent link">#</a></h2>
+<p>Dai al gioco una dimensione logica fissa, indipendente dalla finestra, con l'origine in alto a sinistra e y verso il basso, cosa comoda in 2D:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">fieldSize</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;(</span><span class="mi">800</span><span class="p">,</span><span class="w"> </span><span class="mi">600</span><span class="p">)</span>
 <span class="kd">var</span><span class="w"> </span><span class="nv">projection</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">float4x4</span><span class="p">(</span><span class="n">orthographicLeft</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="kr">right</span><span class="p">:</span><span class="w"> </span><span class="n">fieldSize</span><span class="p">.</span><span class="n">x</span><span class="p">,</span>
@@ -269,8 +275,8 @@
 </code></pre></div>
 </div>
 
-<p>Swapping <code>bottom</code> and <code>top</code> flips the y axis.</p>
-<h2 id="game-objects">Game objects<a class="headerlink" href="#game-objects" title="Permanent link">#</a></h2>
+<p>Scambiare <code>bottom</code> e <code>top</code> ribalta l'asse y.</p>
+<h2 id="gli-oggetti-di-gioco">Gli oggetti di gioco<a class="headerlink" href="#gli-oggetti-di-gioco" title="Permanent link">#</a></h2>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">Brick</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">position</span><span class="p">:</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;</span>
@@ -350,7 +356,8 @@
 </code></pre></div>
 </div>
 
-<p>A level is just data. Loading levels from a text file where each digit is a brick type is an easy extension.</p>
+<p>Un livello è soltanto dati.<br>
+Caricare i livelli da un file di testo in cui ogni cifra è un tipo di mattone è un'estensione facile.</p>
 <h2 id="update">Update<a class="headerlink" href="#update" title="Permanent link">#</a></h2>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">extension</span><span class="w"> </span><span class="nc">Game</span><span class="w"> </span><span class="p">{</span>
@@ -457,9 +464,12 @@
 </code></pre></div>
 </div>
 
-<p>Steering the ball by where it meets the paddle is what makes the game controllable. A purely physical reflection would feel lifeless.</p>
-<h2 id="circle-against-rectangle">Circle against rectangle<a class="headerlink" href="#circle-against-rectangle" title="Permanent link">#</a></h2>
-<p>Find the point of the rectangle closest to the circle's center by clamping. If that point is within one radius, they overlap. The direction from the closest point to the center tells us which side was hit:</p>
+<p>Dirigere la palla in base a dove tocca la racchetta è ciò che rende il gioco controllabile.<br>
+Una riflessione puramente fisica risulterebbe senza vita.</p>
+<h2 id="cerchio-contro-rettangolo">Cerchio contro rettangolo<a class="headerlink" href="#cerchio-contro-rettangolo" title="Permanent link">#</a></h2>
+<p>Trova il punto del rettangolo più vicino al centro del cerchio con un clamp.<br>
+Se quel punto dista meno di un raggio, i due si sovrappongono.<br>
+La direzione dal punto più vicino al centro ci dice quale lato è stato colpito:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">collide</span><span class="p">(</span><span class="kc">_</span><span class="w"> </span><span class="n">ball</span><span class="p">:</span><span class="w"> </span><span class="n">Ball</span><span class="p">,</span><span class="w"> </span><span class="n">rectPosition</span><span class="p">:</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;,</span><span class="w"> </span><span class="n">rectSize</span><span class="p">:</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="n">SIMD2</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;?</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">closest</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">simd_clamp</span><span class="p">(</span><span class="n">ball</span><span class="p">.</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="n">rectPosition</span><span class="p">,</span><span class="w"> </span><span class="n">rectPosition</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">rectSize</span><span class="p">)</span>
@@ -493,7 +503,8 @@
 </code></pre></div>
 </div>
 
-<p>At high speeds a ball can pass through a thin brick between two frames. Running the update in several small sub-steps per frame is the simplest protection.</p>
+<p>Ad alta velocità una palla può attraversare un mattone sottile tra un frame e l'altro.<br>
+Eseguire l'aggiornamento in più piccoli sotto-passi per frame è la protezione più semplice.</p>
 <h2 id="render">Render<a class="headerlink" href="#render" title="Permanent link">#</a></h2>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="n">game</span><span class="p">:</span><span class="w"> </span><span class="n">Game</span><span class="p">,</span><span class="w"> </span><span class="n">batch</span><span class="p">:</span><span class="w"> </span><span class="n">SpriteBatch</span><span class="p">,</span><span class="w"> </span><span class="n">encoder</span><span class="p">:</span><span class="w"> </span><span class="bp">MTLRenderCommandEncoder</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -532,27 +543,31 @@
 </code></pre></div>
 </div>
 
-<p>The renderer knows nothing about the rules, and the game knows nothing about Metal. Keeping that separation is the most valuable habit in this chapter.</p>
+<p>Il renderer non sa niente delle regole, e il gioco non sa niente di Metal.<br>
+Mantenere questa separazione è l'abitudine più preziosa di questo capitolo.</p>
 <div class="lm-demo" data-demo="breakout" data-fallback="../../assets/img/in-practice/2d-game.webp"></div>
 
-<h2 id="making-it-feel-good">Making it feel good<a class="headerlink" href="#making-it-feel-good" title="Permanent link">#</a></h2>
-<p>The game works. What makes it fun is polish, and each item below reuses a technique from this series:</p>
+<h2 id="renderlo-piacevole">Renderlo piacevole<a class="headerlink" href="#renderlo-piacevole" title="Permanent link">#</a></h2>
+<p>Il gioco funziona.<br>
+Ciò che lo rende divertente è la rifinitura, e ogni voce qui sotto riusa una tecnica di questa serie:</p>
 <ul>
-<li><strong>Particles</strong>: an additive-blended trail behind the ball, drawn with the same sprite batch.</li>
-<li><strong>Screen shake and flashes</strong>: render the game to a texture and distort it in a <a href="../advanced-metal/render-targets.html">post-processing pass</a> for a few frames after a hit.</li>
-<li><strong>Glow</strong>: <a href="../advanced-lighting/bloom.html">bloom</a> on bright bricks.</li>
-<li><strong>Score and lives</strong>: the atlas text from <a href="text-rendering.html">Text Rendering</a>.</li>
-<li><strong>Power-ups</strong>: sprites that fall from destroyed bricks and change the paddle size or ball speed when caught.</li>
-<li><strong>Sound</strong>: <code>AVAudioEngine</code> or <code>AVAudioPlayer</code> for hit effects.</li>
+<li><strong>Particelle</strong>: una scia con blending additivo dietro la palla, disegnata con lo stesso gruppo di sprite.</li>
+<li><strong>Scosse dello schermo e lampi</strong>: disegna il gioco in una texture e deformala in un <a href="../advanced-metal/render-targets.html">pass di post-processing</a> per qualche frame dopo un colpo.</li>
+<li><strong>Bagliore</strong>: il <a href="../advanced-lighting/bloom.html">bloom</a> sui mattoni luminosi.</li>
+<li><strong>Punteggio e vite</strong>: il testo con atlas di <a href="text-rendering.html">Rendering del testo</a>.</li>
+<li><strong>Power-up</strong>: sprite che cadono dai mattoni distrutti e, se presi, cambiano la dimensione della racchetta o la velocità della palla.</li>
+<li><strong>Suono</strong>: <code>AVAudioEngine</code> o <code>AVAudioPlayer</code> per gli effetti dei colpi.</li>
 </ul>
-<h2 id="where-to-go-from-here">Where to go from here<a class="headerlink" href="#where-to-go-from-here" title="Permanent link">#</a></h2>
-<p>Add a state machine for menu, playing, won and lost. Add levels. Then try a different game with the same sprite batch: the renderer you wrote here is enough for a great many 2D games.</p></article><nav class="pager" id="pager"><a class="prev" href="../in-practice/text-rendering.html"><small>Precedente</small>Rendering del testo</a><a class="next" href="../in-practice/game-engine.html"><small>Successivo</small>Un game engine</a></nav>
+<h2 id="come-proseguire">Come proseguire<a class="headerlink" href="#come-proseguire" title="Permanent link">#</a></h2>
+<p>Aggiungi una macchina a stati per menu, partita, vittoria e sconfitta.<br>
+Aggiungi dei livelli.<br>
+Poi prova un gioco diverso con lo stesso gruppo di sprite: il renderer che hai scritto qui basta per moltissimi giochi 2D.</p></article><nav class="pager" id="pager"><a class="prev" href="../in-practice/text-rendering.html"><small>Precedente</small>Rendering del testo</a><a class="next" href="../in-practice/game-engine.html"><small>Successivo</small>Un game engine</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#what-we-need">What we need</a></li><li><a href="#the-sprite-renderer">The sprite renderer</a></li><li><a href="#the-playing-field">The playing field</a></li><li><a href="#game-objects">Game objects</a></li><li><a href="#update">Update</a></li><li><a href="#circle-against-rectangle">Circle against rectangle</a></li><li><a href="#render">Render</a></li><li><a href="#making-it-feel-good">Making it feel good</a></li><li><a href="#where-to-go-from-here">Where to go from here</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#che-cosa-ci-serve">Che cosa ci serve</a></li><li><a href="#lo-sprite-renderer">Lo sprite renderer</a></li><li><a href="#il-campo-di-gioco">Il campo di gioco</a></li><li><a href="#gli-oggetti-di-gioco">Gli oggetti di gioco</a></li><li><a href="#update">Update</a></li><li><a href="#cerchio-contro-rettangolo">Cerchio contro rettangolo</a></li><li><a href="#render">Render</a></li><li><a href="#renderlo-piacevole">Renderlo piacevole</a></li><li><a href="#come-proseguire">Come proseguire</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

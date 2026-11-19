@@ -137,11 +137,15 @@
 <article><p class="crumb">Getting Started</p><h1 id="hello-view">Hello View<a class="headerlink" href="#hello-view" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Example project</strong> <code>examples/Sources/01-HelloView</code>, run with <code>swift run HelloView</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
 
-<p>Time for the first Metal code: a renderer that clears the window to a color every frame. It draws no geometry, but it contains the complete skeleton of a frame, and every later chapter only adds to it.</p>
+<p>Time for the first Metal code: a renderer that clears the window to a color every frame.<br>
+It draws no geometry, but it contains the complete skeleton of a frame, and every later chapter only adds to it.</p>
 <div class="lang-cpp">
 <div class="admonition note">
 <p class="admonition-title">Reading this chapter in C++</p>
-<p>There is no <code>MTKView</code> or delegate in metal-cpp. Your renderer keeps the <code>CAMetalLayer</code> from <a href="project-setup.html">Project Setup</a>, and <code>main.cpp</code> calls <code>renderer.draw()</code> once per loop. Where the text says <code>view.currentDrawable</code>, you call <code>layer-&gt;nextDrawable()</code>. Where it says <code>view.currentRenderPassDescriptor</code>, you fill in an <code>MTL::RenderPassDescriptor</code> yourself, which makes the load and store actions explained below visible in your own code.</p>
+<p>There is no <code>MTKView</code> or delegate in metal-cpp.<br>
+Your renderer keeps the <code>CAMetalLayer</code> from <a href="project-setup.html">Project Setup</a>, and <code>main.cpp</code> calls <code>renderer.draw()</code> once per loop.<br>
+Where the text says <code>view.currentDrawable</code>, you call <code>layer-&gt;nextDrawable()</code>.<br>
+Where it says <code>view.currentRenderPassDescriptor</code>, you fill in an <code>MTL::RenderPassDescriptor</code> yourself, which makes the load and store actions explained below visible in your own code.</p>
 </div>
 </div>
 
@@ -254,41 +258,71 @@
 </code></pre></div>
 </div>
 
-<p>Run it. You should see a window filled with dark teal.</p>
+<p>Run it.<br>
+You should see a window filled with dark teal.</p>
 <div class="lm-demo" data-demo="hello-view" data-fallback="../assets/img/getting-started/hello-view.webp"></div>
 
 <h2 id="the-device-and-the-queue">The device and the queue<a class="headerlink" href="#the-device-and-the-queue" title="Permanent link">#</a></h2>
-<p><code>MTLCreateSystemDefaultDevice()</code> returns the GPU the system recommends. On Apple silicon there is only one. Everything else is created from this device.</p>
-<p>The <strong>command queue</strong> is created once and kept for the lifetime of the app. It guarantees that the command buffers you commit are executed in order.</p>
+<p><code>MTLCreateSystemDefaultDevice()</code> returns the GPU the system recommends.<br>
+On Apple silicon there is only one.<br>
+Everything else is created from this device.</p>
+<p>The <strong>command queue</strong> is created once and kept for the lifetime of the app.<br>
+It guarantees that the command buffers you commit are executed in order.</p>
 <h2 id="configuring-the-view">Configuring the view<a class="headerlink" href="#configuring-the-view" title="Permanent link">#</a></h2>
 <ul>
-<li><code>view.device</code> tells the view which GPU its textures live on. Without it nothing is drawn.</li>
-<li><code>colorPixelFormat</code> is the format of the texture shown on screen. <code>.bgra8Unorm</code> means four 8-bit channels stored as blue, green, red, alpha, read by shaders as floats from 0 to 1. This is the view's default; we set it explicitly because we will change it in the <a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a> chapter.</li>
+<li><code>view.device</code> tells the view which GPU its textures live on.<br>
+Without it nothing is drawn.</li>
+<li><code>colorPixelFormat</code> is the format of the texture shown on screen.<br>
+<code>.bgra8Unorm</code> means four 8-bit channels stored as blue, green, red, alpha, read by shaders as floats from 0 to 1.<br>
+This is the view's default; we set it explicitly because we will change it in the <a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a> chapter.</li>
 <li><code>clearColor</code> is the color the drawable is filled with at the start of each frame.</li>
 </ul>
 <h2 id="anatomy-of-a-frame">Anatomy of a frame<a class="headerlink" href="#anatomy-of-a-frame" title="Permanent link">#</a></h2>
-<p><code>draw(in:)</code> is called once per display refresh, typically 60 or 120 times per second. Four things happen in it.</p>
-<p><strong>1. Get a render pass descriptor.</strong> A render pass is a batch of drawing that targets one set of textures, its <strong>attachments</strong>. <code>currentRenderPassDescriptor</code> is a ready-made descriptor whose color attachment is this frame's drawable texture. For each attachment a descriptor also holds:</p>
+<p><code>draw(in:)</code> is called once per display refresh, typically 60 or 120 times per second.<br>
+Four things happen in it.</p>
+<p><strong>1. Get a render pass descriptor.</strong><br>
+A render pass is a batch of drawing that targets one set of textures, its <strong>attachments</strong>.<br>
+<code>currentRenderPassDescriptor</code> is a ready-made descriptor whose color attachment is this frame's drawable texture.<br>
+For each attachment a descriptor also holds:</p>
 <ul>
 <li>a <strong>load action</strong>: what to do with the existing contents when the pass begins (<code>.clear</code>, <code>.load</code>, or <code>.dontCare</code>),</li>
 <li>a <strong>store action</strong>: what to do with the result when it ends (<code>.store</code>, <code>.dontCare</code>, or a multisample resolve).</li>
 </ul>
-<p>The view's descriptor uses <code>.clear</code> with your <code>clearColor</code>, and <code>.store</code>. That is why we get a colored window without drawing anything: clearing is part of beginning the pass.</p>
+<p>The view's descriptor uses <code>.clear</code> with your <code>clearColor</code>, and <code>.store</code>.<br>
+That is why we get a colored window without drawing anything: clearing is part of beginning the pass.</p>
 <div class="admonition note">
 <p class="admonition-title">Coming from OpenGL</p>
-<p>There is no <code>glClear</code> call. Clearing is a property of the render pass, and choosing load and store actions well matters for performance on tile-based GPUs, since each one can save or cost a full copy of the texture.</p>
+<p>There is no <code>glClear</code> call.<br>
+Clearing is a property of the render pass, and choosing load and store actions well matters for performance on tile-based GPUs, since each one can save or cost a full copy of the texture.</p>
 </div>
-<p><strong>2. Create a command buffer and an encoder.</strong> The command buffer stores the encoded commands for this frame. The render command encoder translates your calls (set pipeline, set buffer, draw) into GPU commands for this one pass.</p>
-<p><strong>3. End encoding.</strong> You must call <code>endEncoding()</code> before creating another encoder or committing. Forgetting it is a validation error.</p>
-<p><strong>4. Present and commit.</strong> <code>present(drawable)</code> schedules the drawable to be shown as soon as the GPU finishes this command buffer. <code>commit()</code> hands the buffer to the queue. The call returns immediately; the GPU works asynchronously.</p>
+<p><strong>2. Create a command buffer and an encoder.</strong><br>
+The command buffer stores the encoded commands for this frame.<br>
+The render command encoder translates your calls (set pipeline, set buffer, draw) into GPU commands for this one pass.</p>
+<p><strong>3. End encoding.</strong><br>
+You must call <code>endEncoding()</code> before creating another encoder or committing.<br>
+Forgetting it is a validation error.</p>
+<p><strong>4. Present and commit.</strong><br>
+<code>present(drawable)</code> schedules the drawable to be shown as soon as the GPU finishes this command buffer.<br>
+<code>commit()</code> hands the buffer to the queue.<br>
+The call returns immediately; the GPU works asynchronously.</p>
 <h2 id="drawables-are-scarce">Drawables are scarce<a class="headerlink" href="#drawables-are-scarce" title="Permanent link">#</a></h2>
-<p><code>currentDrawable</code> comes from a small pool, usually three textures. If all are in use, the call blocks until one is free, and it can return <code>nil</code>. That is why the method starts with a <code>guard</code> and simply skips the frame when anything is missing. Hold on to a drawable for as short a time as possible and never store it.</p>
+<p><code>currentDrawable</code> comes from a small pool, usually three textures.<br>
+If all are in use, the call blocks until one is free, and it can return <code>nil</code>.<br>
+That is why the method starts with a <code>guard</code> and simply skips the frame when anything is missing.<br>
+Hold on to a drawable for as short a time as possible and never store it.</p>
 <h2 id="continuous-or-on-demand">Continuous or on demand<a class="headerlink" href="#continuous-or-on-demand" title="Permanent link">#</a></h2>
-<p>By default <code>MTKView</code> redraws continuously at <code>preferredFramesPerSecond</code>. For an editor-style app that only changes on input you can set <code>view.isPaused = true</code> and <code>view.enableSetNeedsDisplay = true</code>, then request frames with <code>setNeedsDisplay</code>. A game or an animation keeps the default.</p>
+<p>By default <code>MTKView</code> redraws continuously at <code>preferredFramesPerSecond</code>.<br>
+For an editor-style app that only changes on input you can set <code>view.isPaused = true</code> and <code>view.enableSetNeedsDisplay = true</code>, then request frames with <code>setNeedsDisplay</code>.<br>
+A game or an animation keeps the default.</p>
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
-<li>Change the clear color every frame using <code>CACurrentMediaTime()</code> and <code>sin</code> so the window pulses.<details class="solution"><summary>Show solution</summary><p>Compute the color in the draw method, before asking for the render pass descriptor, because the descriptor copies the clear color when you read it. In Swift: <code>let t = sin(CACurrentMediaTime()) * 0.5 + 0.5</code> then <code>view.clearColor = MTLClearColor(red: 0.2 * t, green: 0.3, blue: 0.3 * t, alpha: 1)</code>. In C++ do the same arithmetic with <code>glfwGetTime()</code> and pass the result to <code>setClearColor</code>.</p></details></li>
-<li>Print <code>view.drawableSize</code> in <code>mtkView(_:drawableSizeWillChange:)</code> and resize the window. Notice that the size is in pixels, not points: on a Retina display it is twice the window size.<details class="solution"><summary>Show solution</summary><p>The callback receives the size in pixels. A window that is 800 × 600 points on a Retina display reports 1600 × 1200. Everything in Metal (viewports, texture sizes, <code>in.position.xy</code> in a fragment function) is in pixels, so always derive aspect ratios and offscreen texture sizes from this value and never from the window's point size.</p></details></li>
+<li>Change the clear color every frame using <code>CACurrentMediaTime()</code> and <code>sin</code> so the window pulses.<details class="solution"><summary>Show solution</summary><p>Compute the color in the draw method, before asking for the render pass descriptor, because the descriptor copies the clear color when you read it.<br>
+In Swift: <code>let t = sin(CACurrentMediaTime()) * 0.5 + 0.5</code> then <code>view.clearColor = MTLClearColor(red: 0.2 * t, green: 0.3, blue: 0.3 * t, alpha: 1)</code>.<br>
+In C++ do the same arithmetic with <code>glfwGetTime()</code> and pass the result to <code>setClearColor</code>.</p></details></li>
+<li>Print <code>view.drawableSize</code> in <code>mtkView(_:drawableSizeWillChange:)</code> and resize the window.<br>
+Notice that the size is in pixels, not points: on a Retina display it is twice the window size.<details class="solution"><summary>Show solution</summary><p>The callback receives the size in pixels.<br>
+A window that is 800 × 600 points on a Retina display reports 1600 × 1200.<br>
+Everything in Metal (viewports, texture sizes, <code>in.position.xy</code> in a fragment function) is in pixels, so always derive aspect ratios and offscreen texture sizes from this value and never from the window's point size.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../getting-started/project-setup.html"><small>Previous</small>Project Setup</a><a class="next" href="../getting-started/hello-triangle.html"><small>Next</small>Hello Triangle</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>

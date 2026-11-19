@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,50 +134,53 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Risorse</p><h1 id="example-code">Example Code<a class="headerlink" href="#example-code" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
-<p>There are two sets of projects: Swift examples for the main chapters, and a C++ starter for readers using metal-cpp.</p>
-<p>The repository includes a Swift package with runnable examples for the main chapters. Each one is a small macOS app in a single <code>main.swift</code> plus a <code>Shaders.metal</code> file.</p>
-<p><a class="cta" href="../../downloads/learnmetal-examples.zip">Download all examples (.zip)</a></p>
+<article><p class="crumb">Risorse</p><h1 id="codice-di-esempio">Codice di esempio<a class="headerlink" href="#codice-di-esempio" title="Permanent link">#</a></h1>
+<p>Ci sono due gruppi di progetti: gli esempi in Swift per i capitoli principali, e un progetto di partenza in C++ per chi usa metal-cpp.</p>
+<p>Il repository comprende un package Swift con esempi eseguibili per i capitoli principali.<br>
+Ognuno è una piccola app macOS in un solo <code>main.swift</code> più un file <code>Shaders.metal</code>.</p>
+<p><a class="cta" href="../../downloads/learnmetal-examples.zip">Scarica tutti gli esempi (.zip)</a></p>
 
-<h2 id="running-an-example">Running an example<a class="headerlink" href="#running-an-example" title="Permanent link">#</a></h2>
-<p>You need macOS 13 or later and Xcode 15 or later. In the unzipped folder:</p>
+<h2 id="eseguire-un-esempio">Eseguire un esempio<a class="headerlink" href="#eseguire-un-esempio" title="Permanent link">#</a></h2>
+<p>Ti servono macOS 13 o successivo e Xcode 15 o successivo.<br>
+Nella cartella estratta:</p>
 <div class="codehilite"><pre><span></span><code>swift<span class="w"> </span>run<span class="w"> </span>HelloTriangle
 swift<span class="w"> </span>run<span class="w"> </span>-c<span class="w"> </span>release<span class="w"> </span>Instancing
 </code></pre></div>
 
-<p>You can also open <code>Package.swift</code> in Xcode, choose an example from the scheme menu and press Run. That gives you API validation, the GPU frame debugger and the performance HUD described in <a href="../in-practice/debugging.html">Debugging</a>.</p>
-<h2 id="the-examples">The examples<a class="headerlink" href="#the-examples" title="Permanent link">#</a></h2>
+<p>Puoi anche aprire <code>Package.swift</code> in Xcode, scegliere un esempio dal menu degli scheme e premere Run.<br>
+Così hai la validazione dell'API, il GPU frame debugger e l'HUD delle prestazioni descritti in <a href="../in-practice/debugging.html">Debug</a>.</p>
+<h2 id="gli-esempi">Gli esempi<a class="headerlink" href="#gli-esempi" title="Permanent link">#</a></h2>
 <table>
 <thead>
 <tr>
 <th>Target</th>
-<th>Chapters</th>
+<th>Capitoli</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>HelloView</code></td>
-<td><a href="../getting-started/hello-view.html">Hello View</a></td>
+<td><a href="../getting-started/hello-view.html">La prima vista</a></td>
 </tr>
 <tr>
 <td><code>HelloTriangle</code></td>
-<td><a href="../getting-started/hello-triangle.html">Hello Triangle</a></td>
+<td><a href="../getting-started/hello-triangle.html">Il primo triangolo</a></td>
 </tr>
 <tr>
 <td><code>Shaders</code></td>
-<td><a href="../getting-started/shaders.html">Shaders</a></td>
+<td><a href="../getting-started/shaders.html">Shader</a></td>
 </tr>
 <tr>
 <td><code>Textures</code></td>
-<td><a href="../getting-started/textures.html">Textures</a></td>
+<td><a href="../getting-started/textures.html">Texture</a></td>
 </tr>
 <tr>
 <td><code>Transformations</code></td>
-<td><a href="../getting-started/transformations.html">Transformations</a></td>
+<td><a href="../getting-started/transformations.html">Trasformazioni</a></td>
 </tr>
 <tr>
 <td><code>CoordinateSystems</code></td>
-<td><a href="../getting-started/coordinate-systems.html">Coordinate Systems</a></td>
+<td><a href="../getting-started/coordinate-systems.html">Sistemi di coordinate</a></td>
 </tr>
 <tr>
 <td><code>Camera</code></td>
@@ -185,23 +188,23 @@ swift<span class="w"> </span>run<span class="w"> </span>-c<span class="w"> </spa
 </tr>
 <tr>
 <td><code>BasicLighting</code></td>
-<td><a href="../lighting/colors.html">Colors</a>, <a href="../lighting/basic-lighting.html">Basic Lighting</a>, <a href="../lighting/materials.html">Materials</a></td>
+<td><a href="../lighting/colors.html">Colori</a>, <a href="../lighting/basic-lighting.html">Illuminazione di base</a>, <a href="../lighting/materials.html">Materiali</a></td>
 </tr>
 <tr>
 <td><code>LightingMaps</code></td>
-<td><a href="../lighting/lighting-maps.html">Lighting Maps</a></td>
+<td><a href="../lighting/lighting-maps.html">Mappe di illuminazione</a></td>
 </tr>
 <tr>
 <td><code>MultipleLights</code></td>
-<td><a href="../lighting/light-casters.html">Light Casters</a>, <a href="../lighting/multiple-lights.html">Multiple Lights</a></td>
+<td><a href="../lighting/light-casters.html">Tipi di luce</a>, <a href="../lighting/multiple-lights.html">Più luci</a></td>
 </tr>
 <tr>
 <td><code>ModelLoading</code></td>
-<td><a href="../model-loading/model-io.html">Model I/O</a>, <a href="../model-loading/mesh.html">Mesh</a>, <a href="../model-loading/model.html">Model</a></td>
+<td><a href="../model-loading/model-io.html">Model I/O</a>, <a href="../model-loading/mesh.html">Mesh</a>, <a href="../model-loading/model.html">Modello</a></td>
 </tr>
 <tr>
 <td><code>RenderTargets</code></td>
-<td><a href="../advanced-metal/render-targets.html">Render Targets</a></td>
+<td><a href="../advanced-metal/render-targets.html">Render target</a></td>
 </tr>
 <tr>
 <td><code>Instancing</code></td>
@@ -209,7 +212,7 @@ swift<span class="w"> </span>run<span class="w"> </span>-c<span class="w"> </spa
 </tr>
 <tr>
 <td><code>ShadowMapping</code></td>
-<td><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></td>
+<td><a href="../advanced-lighting/shadow-mapping.html">Shadow mapping</a></td>
 </tr>
 <tr>
 <td><code>HDRBloom</code></td>
@@ -217,37 +220,51 @@ swift<span class="w"> </span>run<span class="w"> </span>-c<span class="w"> </spa
 </tr>
 <tr>
 <td><code>PBR</code></td>
-<td><a href="../pbr/lighting.html">PBR Lighting</a></td>
+<td><a href="../pbr/lighting.html">Illuminazione PBR</a></td>
 </tr>
 <tr>
 <td><code>ComputeParticles</code></td>
-<td><a href="../beyond/compute-shaders.html">Compute Shaders</a></td>
+<td><a href="../beyond/compute-shaders.html">Compute shader</a></td>
 </tr>
 </tbody>
 </table>
-<p>Chapters that are not in this list have their code inline only.</p>
-<h2 id="how-they-differ-from-the-chapters">How they differ from the chapters<a class="headerlink" href="#how-they-differ-from-the-chapters" title="Permanent link">#</a></h2>
+<p>I capitoli che non compaiono in questo elenco hanno il codice solo nel testo.</p>
+<h2 id="in-che-cosa-differiscono-dai-capitoli">In che cosa differiscono dai capitoli<a class="headerlink" href="#in-che-cosa-differiscono-dai-capitoli" title="Permanent link">#</a></h2>
 <ul>
-<li><strong>No Xcode project.</strong> The chapters build a SwiftUI app. The examples use a small library, <code>LearnMetalKit</code>, that opens a plain AppKit window, so each example is one file.</li>
-<li><strong>Shaders are compiled at launch</strong> from the <code>Shaders.metal</code> text with <code>makeLibrary(source:)</code>. That lets <code>swift run</code> work without Xcode's Metal build step. Shader errors are printed to the console.</li>
-<li><strong>Textures are generated in code</strong>, so there is nothing else to download.</li>
-<li><strong>Examples 01 to 03 write the frame loop by hand.</strong> Later ones inherit it from a <code>BaseRenderer</code> class to stay short.</li>
+<li><strong>Nessun progetto Xcode.</strong><br>
+I capitoli costruiscono un'app SwiftUI.<br>
+Gli esempi usano una piccola libreria, <code>LearnMetalKit</code>, che apre una semplice finestra AppKit, così ogni esempio è un file solo.</li>
+<li><strong>Gli shader vengono compilati all'avvio</strong> dal testo di <code>Shaders.metal</code> con <code>makeLibrary(source:)</code>.<br>
+Questo permette a <code>swift run</code> di funzionare senza il passo di build di Metal di Xcode.<br>
+Gli errori degli shader vengono stampati in console.</li>
+<li><strong>Le texture sono generate nel codice</strong>, quindi non c'è nient'altro da scaricare.</li>
+<li><strong>Gli esempi da 01 a 03 scrivono a mano il ciclo dei frame.</strong><br>
+Quelli successivi lo ereditano da una classe <code>BaseRenderer</code> per restare brevi.</li>
 </ul>
-<h2 id="c-starter">C++ starter<a class="headerlink" href="#c-starter" title="Permanent link">#</a></h2>
-<p><a class="cta" href="../../downloads/learnmetal-cpp-starter.zip">Download the C++ starter (.zip)</a></p>
+<h2 id="il-progetto-di-partenza-in-c">Il progetto di partenza in C++<a class="headerlink" href="#il-progetto-di-partenza-in-c" title="Permanent link">#</a></h2>
+<p><a class="cta" href="../../downloads/learnmetal-cpp-starter.zip">Scarica il progetto di partenza in C++ (.zip)</a></p>
 
-<p>The starter is the Hello Triangle chapter in C++: a GLFW window, a <code>CAMetalLayer</code>, and a renderer written with Apple's metal-cpp. It needs <code>brew install glfw cmake</code> and a copy of <a href="https://developer.apple.com/metal/cpp/">metal-cpp</a> unzipped into the folder. Build it with CMake as described in <a href="../getting-started/project-setup.html">Project Setup</a>. It is the base that the C++ code in the chapters builds on.</p>
-<h2 id="the-engine">The engine<a class="headerlink" href="#the-engine" title="Permanent link">#</a></h2>
-<p>The largest example has a repository of its own. The <a href="https://github.com/gabrielevierti/learnmetal-engine">LearnMetal Engine</a> is a small game engine with a playable game, written in Swift and in C++, that puts the techniques of this site to work together. <a href="../in-practice/game-engine.html">A Game Engine</a> introduces it, and the chapters after it walk through the renderer, the game and the editor.</p>
-<h2 id="about-the-live-demos-and-the-figures">About the live demos and the figures<a class="headerlink" href="#about-the-live-demos-and-the-figures" title="Permanent link">#</a></h2>
-<p>The live demos run in your browser with WebGL. The shader you edit is Metal Shading Language, translated to GLSL on the fly by a small script (<code>assets/live.js</code>). The translator covers the subset of the language the chapters use; it is a teaching aid and not a full Metal implementation, so a few things differ from a real Mac, such as stricter rules about mixing <code>int</code> and <code>float</code>.</p>
-<p>The remaining static images are illustrations. They are drawn by a small software renderer in the repository's <code>tools/</code> folder, which implements the same math as each chapter's shaders with numpy. They are not screenshots of the Metal examples, so expect small differences in textures and framing when you run the code. The pictures in the engine chapters are a different case: they were produced by the engine's own shaders, run on the CPU by a test program.</p></article><nav class="pager" id="pager"><a class="prev" href="../apple-platforms/visionos.html"><small>Precedente</small>visionOS</a></nav>
+<p>Il progetto di partenza è il capitolo Il primo triangolo in C++: una finestra GLFW, un <code>CAMetalLayer</code> e un renderer scritto con metal-cpp di Apple.<br>
+Richiede <code>brew install glfw cmake</code> e una copia di <a href="https://developer.apple.com/metal/cpp/">metal-cpp</a> estratta nella cartella.<br>
+Compilalo con CMake come descritto in <a href="../getting-started/project-setup.html">Preparare il progetto</a>.<br>
+È la base su cui si costruisce il codice C++ dei capitoli.</p>
+<h2 id="lengine">L'engine<a class="headerlink" href="#lengine" title="Permanent link">#</a></h2>
+<p>L'esempio più grande ha un repository tutto suo.<br>
+Il <a href="https://github.com/gabrielevierti/learnmetal-engine">LearnMetal Engine</a> è un piccolo game engine con un gioco giocabile, scritto in Swift e in C++, che mette al lavoro insieme le tecniche di questo sito.<br>
+<a href="../in-practice/game-engine.html">Un game engine</a> lo presenta, e i capitoli successivi percorrono il renderer, il gioco e l'editor.</p>
+<h2 id="sulle-demo-interattive-e-sulle-figure">Sulle demo interattive e sulle figure<a class="headerlink" href="#sulle-demo-interattive-e-sulle-figure" title="Permanent link">#</a></h2>
+<p>Le demo interattive girano nel tuo browser con WebGL.<br>
+Lo shader che modifichi è Metal Shading Language, tradotto al volo in GLSL da un piccolo script (<code>assets/live.js</code>).<br>
+Il traduttore copre la parte del linguaggio usata dai capitoli; è un aiuto didattico e non un'implementazione completa di Metal, quindi alcune cose differiscono da un vero Mac, per esempio regole più rigide sul mescolare <code>int</code> e <code>float</code>.</p>
+<p>Le immagini statiche che restano sono illustrazioni.<br>
+Le disegna un piccolo renderer software nella cartella <code>tools/</code> del repository, che implementa con numpy la stessa matematica degli shader di ogni capitolo.<br>
+Non sono screenshot degli esempi Metal, quindi aspettati piccole differenze nelle texture e nell'inquadratura quando esegui il codice.</p></article><nav class="pager" id="pager"><a class="prev" href="../apple-platforms/visionos.html"><small>Precedente</small>visionOS</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#running-an-example">Running an example</a></li><li><a href="#the-examples">The examples</a></li><li><a href="#how-they-differ-from-the-chapters">How they differ from the chapters</a></li><li><a href="#c-starter">C++ starter</a></li><li><a href="#the-engine">The engine</a></li><li><a href="#about-the-live-demos-and-the-figures">About the live demos and the figures</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#eseguire-un-esempio">Eseguire un esempio</a></li><li><a href="#gli-esempi">Gli esempi</a></li><li><a href="#in-che-cosa-differiscono-dai-capitoli">In che cosa differiscono dai capitoli</a></li><li><a href="#il-progetto-di-partenza-in-c">Il progetto di partenza in C++</a></li><li><a href="#lengine">L&#x27;engine</a></li><li><a href="#sulle-demo-interattive-e-sulle-figure">Sulle demo interattive e sulle figure</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

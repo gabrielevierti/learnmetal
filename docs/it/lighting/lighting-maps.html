@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,12 +134,16 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Illuminazione</p><h1 id="lighting-maps">Lighting Maps<a class="headerlink" href="#lighting-maps" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
+<article><p class="crumb">Illuminazione</p><h1 id="mappe-di-illuminazione">Mappe di illuminazione<a class="headerlink" href="#mappe-di-illuminazione" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Progetto di esempio</strong> <code>examples/Sources/09-LightingMaps</code>, si esegue con <code>swift run LightingMaps</code>. <a href="../../downloads/learnmetal-examples.zip">Scarica tutti gli esempi</a> oppure guarda <a href="../resources/examples.html">come eseguirli</a>.</div>
 
-<p>A material with one color per object is still too coarse. A wooden crate with a steel frame is two materials on one surface: the wood is dull, the steel is shiny. The answer is to store material properties in textures, so they can vary per pixel. Such textures are called <strong>lighting maps</strong>.</p>
-<h2 id="diffuse-maps">Diffuse maps<a class="headerlink" href="#diffuse-maps" title="Permanent link">#</a></h2>
-<p>A <strong>diffuse map</strong> is what earlier chapters simply called a texture: an image holding the surface's color at every point. Replace the material's diffuse color with a texture lookup, and use the same value for ambient:</p>
+<p>Un materiale con un solo colore per oggetto è ancora troppo grossolano.<br>
+Una cassa di legno con un telaio d'acciaio è fatta di due materiali su una stessa superficie: il legno è opaco, l'acciaio è lucido.<br>
+La risposta è salvare le proprietà del materiale in texture, così possono variare da pixel a pixel.<br>
+Queste texture si chiamano <strong>lighting map</strong>.</p>
+<h2 id="diffuse-map">Diffuse map<a class="headerlink" href="#diffuse-map" title="Permanent link">#</a></h2>
+<p>Una <strong>diffuse map</strong> è ciò che i capitoli precedenti chiamavano semplicemente texture: un'immagine che contiene il colore della superficie in ogni punto.<br>
+Sostituisci il colore diffuse del materiale con una lettura dalla texture, e usa lo stesso valore per l'ambient:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">Material</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">shininess</span><span class="p">;</span>
 <span class="p">};</span>
@@ -170,10 +174,12 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>Remember to shrink the Swift <code>Material</code> struct to match.</p>
-<h2 id="specular-maps">Specular maps<a class="headerlink" href="#specular-maps" title="Permanent link">#</a></h2>
-<p>The <strong>specular map</strong> is a second image, usually grayscale, that says how strongly each point reflects highlights. For the crate it is black over the wood and bright over the steel frame, with scratches and wear painted in. Black means no highlight; white means full.</p>
-<p>Load both images and bind them to the two texture slots:</p>
+<p>Ricorda di accorciare la struct <code>Material</code> di Swift perché corrisponda.</p>
+<h2 id="specular-map">Specular map<a class="headerlink" href="#specular-map" title="Permanent link">#</a></h2>
+<p>La <strong>specular map</strong> è una seconda immagine, di solito in scala di grigi, che dice quanto intensamente ogni punto riflette.<br>
+Per la cassa è nera sul legno e chiara sul telaio d'acciaio, con graffi e usura dipinti sopra.<br>
+Nero significa nessun riflesso; bianco significa riflesso pieno.</p>
+<p>Carica entrambe le immagini e collegale ai due slot delle texture:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">diffuseMap</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="p">!</span><span class="w"> </span><span class="n">loader</span><span class="p">.</span><span class="n">newTexture</span><span class="p">(</span><span class="n">URL</span><span class="p">:</span><span class="w"> </span><span class="n">url</span><span class="p">(</span><span class="k">for</span><span class="p">:</span><span class="w"> </span><span class="s">"container2"</span><span class="p">,</span><span class="w"> </span><span class="s">"png"</span><span class="p">),</span><span class="w"> </span><span class="n">options</span><span class="p">:</span><span class="w"> </span><span class="n">options</span><span class="p">)</span>
 <span class="n">specularMap</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="p">!</span><span class="w"> </span><span class="n">loader</span><span class="p">.</span><span class="n">newTexture</span><span class="p">(</span><span class="n">URL</span><span class="p">:</span><span class="w"> </span><span class="n">url</span><span class="p">(</span><span class="k">for</span><span class="p">:</span><span class="w"> </span><span class="s">"container2_specular"</span><span class="p">,</span><span class="w"> </span><span class="s">"png"</span><span class="p">),</span><span class="w"> </span><span class="n">options</span><span class="p">:</span><span class="w"> </span><span class="n">options</span><span class="p">)</span>
@@ -198,36 +204,42 @@
 </code></pre></div>
 </div>
 
-<p>Now only the metal border of the crate shines, and the highlight breaks up over its scratches.</p>
+<p>Adesso luccica solo il bordo metallico della cassa, e il riflesso si spezza sui suoi graffi.</p>
 <div class="lm-demo" data-demo="lighting-maps" data-fallback="../../assets/img/lighting/lighting-maps.webp"></div>
 
-<h2 id="one-sampler-many-textures">One sampler, many textures<a class="headerlink" href="#one-sampler-many-textures" title="Permanent link">#</a></h2>
-<p>Both maps are read through the same sampler. A sampler describes <em>how</em> to read, and that is nearly always the same for all maps of a material, so a single sampler state is typical.</p>
-<h2 id="single-channel-textures">Single-channel textures<a class="headerlink" href="#single-channel-textures" title="Permanent link">#</a></h2>
-<p>A grayscale specular map wastes three channels when loaded as RGBA. Metal has one-channel formats such as <code>.r8Unorm</code>, and a PNG saved as grayscale is loaded that way by <code>MTKTextureLoader</code>. In the shader you then read only <code>.r</code>:</p>
+<h2 id="un-sampler-molte-texture">Un sampler, molte texture<a class="headerlink" href="#un-sampler-molte-texture" title="Permanent link">#</a></h2>
+<p>Entrambe le mappe vengono lette attraverso lo stesso sampler.<br>
+Un sampler descrive <em>come</em> leggere, e questo è quasi sempre uguale per tutte le mappe di un materiale: un solo sampler state è la norma.</p>
+<h2 id="texture-a-un-solo-canale">Texture a un solo canale<a class="headerlink" href="#texture-a-un-solo-canale" title="Permanent link">#</a></h2>
+<p>Una specular map in scala di grigi, caricata come RGBA, spreca tre canali.<br>
+Metal ha formati a un canale come <code>.r8Unorm</code>, e <code>MTKTextureLoader</code> carica così un PNG salvato in scala di grigi.<br>
+Nello shader leggi allora solo <code>.r</code>:</p>
 <div class="codehilite"><pre><span></span><code><span class="kt">float</span><span class="w"> </span><span class="n">specularStrength</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">specularMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">mapSampler</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">r</span><span class="p">;</span>
 </code></pre></div>
 
-<p>Real asset pipelines go further and pack several grayscale maps into the channels of one texture, for example roughness in green and metalness in blue. You will see that in the PBR section.</p>
-<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<p>Le pipeline di asset reali vanno oltre e impacchettano più mappe in scala di grigi nei canali di una sola texture, per esempio la roughness nel verde e la metalness nel blu.<br>
+Lo vedrai nella sezione PBR.</p>
+<h2 id="esercizi">Esercizi<a class="headerlink" href="#esercizi" title="Permanent link">#</a></h2>
 <ul>
-<li>Invert the specular map in the shader so the wood shines and the steel does not.<details class="solution"><summary>Mostra la soluzione</summary><p>Subtract the sampled value from one.</p>
+<li>Inverti la specular map nello shader, così luccica il legno e non l'acciaio.<details class="solution"><summary>Mostra la soluzione</summary><p>Sottrai da uno il valore letto.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">specularColor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">specularMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">mapSampler</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">rgb</span><span class="p">;</span>
 </code></pre></div></details></li>
-<li>Use a colored specular map and see how it tints the highlights.<details class="solution"><summary>Mostra la soluzione</summary><p>Nothing in the shader changes: the specular term is already multiplied by the map's rgb. A map painted blue over the steel gives blue highlights there. This is how colored metals are done in the Phong model.</p></details></li>
-<li>Add an <strong>emission map</strong>: a third texture whose color is added to the result regardless of lighting, making parts of the object appear to glow.<details class="solution"><summary>Mostra la soluzione</summary><p>Bind a third texture and add its color after the lighting, without multiplying by any light term.</p>
+<li>Usa una specular map colorata e guarda come tinge i riflessi.<details class="solution"><summary>Mostra la soluzione</summary><p>Nello shader non cambia niente: il termine specular è già moltiplicato per l'rgb della mappa.<br>
+Una mappa dipinta di blu sopra l'acciaio dà lì riflessi blu.<br>
+È così che nel modello di Phong si fanno i metalli colorati.</p></details></li>
+<li>Aggiungi una <strong>emission map</strong>: una terza texture il cui colore viene sommato al risultato senza tener conto dell'illuminazione, in modo che alcune parti dell'oggetto sembrino brillare.<details class="solution"><summary>Mostra la soluzione</summary><p>Collega una terza texture e somma il suo colore dopo l'illuminazione, senza moltiplicarlo per alcun termine della luce.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">emission</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">emissionMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">mapSampler</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">rgb</span><span class="p">;</span>
 <span class="k">return</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">ambient</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">diffuse</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">specular</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">emission</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
 </code></pre></div>
 
-<p>To keep the steel frame from glowing, multiply the emission by <code>1.0 - step(0.01, specularColor.r)</code> so it only shows where the specular map is black.</p></details></li>
+<p>Per evitare che il telaio d'acciaio brilli, moltiplica l'emissione per <code>1.0 - step(0.01, specularColor.r)</code>, così compare solo dove la specular map è nera.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../lighting/materials.html"><small>Precedente</small>Materiali</a><a class="next" href="../lighting/light-casters.html"><small>Successivo</small>Tipi di luce</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#diffuse-maps">Diffuse maps</a></li><li><a href="#specular-maps">Specular maps</a></li><li><a href="#one-sampler-many-textures">One sampler, many textures</a></li><li><a href="#single-channel-textures">Single-channel textures</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#diffuse-map">Diffuse map</a></li><li><a href="#specular-map">Specular map</a></li><li><a href="#un-sampler-molte-texture">Un sampler, molte texture</a></li><li><a href="#texture-a-un-solo-canale">Texture a un solo canale</a></li><li><a href="#esercizi">Esercizi</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

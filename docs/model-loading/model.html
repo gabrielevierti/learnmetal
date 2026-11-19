@@ -137,11 +137,15 @@
 <article><p class="crumb">Model Loading</p><h1 id="model">Model<a class="headerlink" href="#model" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Example project</strong> <code>examples/Sources/11-ModelLoading</code>, run with <code>swift run ModelLoading</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
 
-<p>A file usually contains several meshes arranged in a hierarchy, each with its own transform. A <code>Model</code> type collects them so that loading and drawing a whole file is one line each.</p>
+<p>A file usually contains several meshes arranged in a hierarchy, each with its own transform.<br>
+A <code>Model</code> type collects them so that loading and drawing a whole file is one line each.</p>
 <div class="lang-cpp">
 <div class="admonition note">
 <p class="admonition-title">Model loading in C++</p>
-<p>Model I/O and MetalKit's mesh types are not part of metal-cpp. The C++ version of this section loads Wavefront OBJ files with the single-header library <a href="https://github.com/tinyobjloader/tinyobjloader">tinyobjloader</a> and builds the Metal buffers by hand. The ideas are the same: a model is meshes, a mesh has one vertex buffer and one index buffer per material, and a material is values plus textures. To load USD from C++, call Model I/O from a small Objective-C++ file, as the window code in <a href="../getting-started/project-setup.html">Project Setup</a> does for AppKit, or convert the model to OBJ or glTF.</p>
+<p>Model I/O and MetalKit's mesh types are not part of metal-cpp.<br>
+The C++ version of this section loads Wavefront OBJ files with the single-header library <a href="https://github.com/tinyobjloader/tinyobjloader">tinyobjloader</a> and builds the Metal buffers by hand.<br>
+The ideas are the same: a model is meshes, a mesh has one vertex buffer and one index buffer per material, and a material is values plus textures.<br>
+To load USD from C++, call Model I/O from a small Objective-C++ file, as the window code in <a href="../getting-started/project-setup.html">Project Setup</a> does for AppKit, or convert the model to OBJ or glTF.</p>
 </div>
 </div>
 
@@ -259,7 +263,10 @@
 </code></pre></div>
 </div>
 
-<p>Every <code>MDLObject</code> can carry a transform relative to its parent. Walking up the parent chain and multiplying gives the mesh's placement within the model. Simple OBJ files have no hierarchy, so the loop just returns the identity. USD files often do, and skipping this step is why parts of a model sometimes appear piled up at the origin.</p>
+<p>Every <code>MDLObject</code> can carry a transform relative to its parent.<br>
+Walking up the parent chain and multiplying gives the mesh's placement within the model.<br>
+Simple OBJ files have no hierarchy, so the loop just returns the identity.<br>
+USD files often do, and skipping this step is why parts of a model sometimes appear piled up at the origin.</p>
 <h2 id="drawing">Drawing<a class="headerlink" href="#drawing" title="Permanent link">#</a></h2>
 <p>Each node combines the model's own matrix with its node transform:</p>
 <div class="lang-swift">
@@ -329,12 +336,14 @@
 <h2 id="finding-models">Finding models<a class="headerlink" href="#finding-models" title="Permanent link">#</a></h2>
 <ul>
 <li>Apple publishes sample USDZ models in its AR Quick Look gallery.</li>
-<li>Sites such as Sketchfab, Poly Haven and Kenney offer free models. Check each license.</li>
+<li>Sites such as Sketchfab, Poly Haven and Kenney offer free models.<br>
+Check each license.</li>
 <li>Blender exports both OBJ and USD.</li>
 </ul>
 <p>When a model looks wrong, the usual suspects are, in order: flipped texture coordinates, missing normals, a scale that is off by a factor of 100 (centimeters versus meters), and ignored node transforms.</p>
 <h2 id="bounds-and-framing">Bounds and framing<a class="headerlink" href="#bounds-and-framing" title="Permanent link">#</a></h2>
-<p>An unknown model can be any size. Model I/O reports the bounding box, which lets you scale and center anything automatically:</p>
+<p>An unknown model can be any size.<br>
+Model I/O reports the bounding box, which lets you scale and center anything automatically:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">bounds</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">asset</span><span class="p">.</span><span class="n">boundingBox</span>
 <span class="kd">let</span><span class="w"> </span><span class="nv">size</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">bounds</span><span class="p">.</span><span class="n">maxBounds</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">bounds</span><span class="p">.</span><span class="n">minBounds</span>
@@ -355,12 +364,18 @@
 
 <p>Multiply <code>normalize</code> into the model matrix and every model fits in a box two units wide around the origin.</p>
 <h2 id="what-we-left-out">What we left out<a class="headerlink" href="#what-we-left-out" title="Permanent link">#</a></h2>
-<p>A production loader also handles skeletal animation (<code>MDLSkeleton</code>, <code>MDLAnimationBindComponent</code>), morph targets, cameras and lights stored in the file, and it caches textures so an image shared by ten materials is loaded once. Add a dictionary from URL to <code>MTLTexture</code> to the material loader as a first improvement.</p>
+<p>A production loader also handles skeletal animation (<code>MDLSkeleton</code>, <code>MDLAnimationBindComponent</code>), morph targets, cameras and lights stored in the file, and it caches textures so an image shared by ten materials is loaded once.<br>
+Add a dictionary from URL to <code>MTLTexture</code> to the material loader as a first improvement.</p>
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
-<li>Draw the model ten times using the cube positions from the first section.<details class="solution"><summary>Show solution</summary><p>Call the model's draw method in a loop with a different model matrix each time, multiplying the per-instance translation and rotation by the normalization matrix. The vertex and index buffers are shared, so ten copies cost ten sets of draw calls and no extra memory. For many copies, switch to instancing.</p></details></li>
-<li>Implement the texture cache.<details class="solution"><summary>Show solution</summary><p>Keep a dictionary from the texture's file path to the loaded texture, and look it up before loading. In Swift a <code>[URL: MTLTexture]</code> on the loader object; in C++ a <code>std::unordered_map&lt;std::string, MTL::Texture*&gt;</code>. Models commonly reference the same image from many materials, so this cuts both load time and memory.</p></details></li>
-<li>Load a model with no textures and confirm that the fallback texture and <code>baseColor</code> produce a sensible result. You will need to pass <code>baseColor</code> to the shader in the fragment uniforms.<details class="solution"><summary>Show solution</summary><p>Add <code>float3 baseColor</code> to the fragment uniforms, set it per submesh from the material, bind the 1 × 1 white texture where there is no image, and multiply.</p>
+<li>Draw the model ten times using the cube positions from the first section.<details class="solution"><summary>Show solution</summary><p>Call the model's draw method in a loop with a different model matrix each time, multiplying the per-instance translation and rotation by the normalization matrix.<br>
+The vertex and index buffers are shared, so ten copies cost ten sets of draw calls and no extra memory.<br>
+For many copies, switch to instancing.</p></details></li>
+<li>Implement the texture cache.<details class="solution"><summary>Show solution</summary><p>Keep a dictionary from the texture's file path to the loaded texture, and look it up before loading.<br>
+In Swift a <code>[URL: MTLTexture]</code> on the loader object; in C++ a <code>std::unordered_map&lt;std::string, MTL::Texture*&gt;</code>.<br>
+Models commonly reference the same image from many materials, so this cuts both load time and memory.</p></details></li>
+<li>Load a model with no textures and confirm that the fallback texture and <code>baseColor</code> produce a sensible result.<br>
+You will need to pass <code>baseColor</code> to the shader in the fragment uniforms.<details class="solution"><summary>Show solution</summary><p>Add <code>float3 baseColor</code> to the fragment uniforms, set it per submesh from the material, bind the 1 × 1 white texture where there is no image, and multiply.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">albedo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">baseColorTexture</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">mapSampler</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">rgb</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">baseColor</span><span class="p">;</span>
 </code></pre></div>
 

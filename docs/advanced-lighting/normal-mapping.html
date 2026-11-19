@@ -135,15 +135,21 @@
 </nav>
 <main class="content" id="main">
 <article><p class="crumb">Advanced Lighting</p><h1 id="normal-mapping">Normal Mapping<a class="headerlink" href="#normal-mapping" title="Permanent link">#</a></h1>
-<p>A brick wall rendered as a flat quad looks flat, however good the texture is. The lighting gives it away, because every fragment has the same normal. <strong>Normal mapping</strong> stores a different normal for every texel, so light reacts to bumps and grooves that are not there in the geometry.</p>
+<p>A brick wall rendered as a flat quad looks flat, however good the texture is.<br>
+The lighting gives it away, because every fragment has the same normal.<br>
+<strong>Normal mapping</strong> stores a different normal for every texel, so light reacts to bumps and grooves that are not there in the geometry.</p>
 <h2 id="normal-maps">Normal maps<a class="headerlink" href="#normal-maps" title="Permanent link">#</a></h2>
-<p>A normal is a vector with components from -1 to 1. Stored in an image, each component is remapped to the 0 to 1 range, and the shader undoes it:</p>
+<p>A normal is a vector with components from -1 to 1.<br>
+Stored in an image, each component is remapped to the 0 to 1 range, and the shader undoes it:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">normal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">xyz</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
 </code></pre></div>
 
-<p>Normal maps look bluish because most normals point straight out of the surface, along +z, which is stored as the color (0.5, 0.5, 1.0). Load normal maps as <strong>linear</strong> data, never sRGB.</p>
+<p>Normal maps look bluish because most normals point straight out of the surface, along +z, which is stored as the color (0.5, 0.5, 1.0).<br>
+Load normal maps as <strong>linear</strong> data, never sRGB.</p>
 <h2 id="tangent-space">Tangent space<a class="headerlink" href="#tangent-space" title="Permanent link">#</a></h2>
-<p>The normals in the map are expressed relative to the surface itself, in <strong>tangent space</strong>, where +z points away from the surface. That is what makes one map usable on a wall facing any direction, or wrapped around a curved model. To light with them, we need a way to rotate them from tangent space into world space.</p>
+<p>The normals in the map are expressed relative to the surface itself, in <strong>tangent space</strong>, where +z points away from the surface.<br>
+That is what makes one map usable on a wall facing any direction, or wrapped around a curved model.<br>
+To light with them, we need a way to rotate them from tangent space into world space.</p>
 <p>That rotation is the <strong>TBN matrix</strong>, built from three perpendicular unit vectors at each vertex:</p>
 <ul>
 <li><strong>N</strong>, the vertex normal,</li>
@@ -151,7 +157,9 @@
 <li><strong>B</strong>, the <strong>bitangent</strong>, pointing along the surface in the direction of increasing v.</li>
 </ul>
 <h2 id="getting-tangents">Getting tangents<a class="headerlink" href="#getting-tangents" title="Permanent link">#</a></h2>
-<p>Tangents are computed from positions and texture coordinates. Model I/O does it for you. Add a tangent attribute to the vertex descriptor and ask for the basis after loading:</p>
+<p>Tangents are computed from positions and texture coordinates.<br>
+Model I/O does it for you.<br>
+Add a tangent attribute to the vertex descriptor and ask for the basis after loading:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">3</span><span class="p">].</span><span class="n">format</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">float3</span><span class="w">   </span><span class="c1">// tangent</span>
 <span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">3</span><span class="p">].</span><span class="n">offset</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">32</span>
@@ -256,16 +264,25 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p><code>float3x3(T, B, N)</code> builds a matrix with those vectors as columns, so multiplying takes a tangent-space vector into world space. Use the returned normal in place of <code>normalize(in.normal)</code> everywhere in the lighting code. Nothing else changes.</p>
+<p><code>float3x3(T, B, N)</code> builds a matrix with those vectors as columns, so multiplying takes a tangent-space vector into world space.<br>
+Use the returned normal in place of <code>normalize(in.normal)</code> everywhere in the lighting code.<br>
+Nothing else changes.</p>
 <div class="lm-demo" data-demo="normal-mapping" data-fallback="../assets/img/advanced-lighting/normal-mapping.webp"></div>
 
 <h2 id="green-channel-and-handedness">Green channel and handedness<a class="headerlink" href="#green-channel-and-handedness" title="Permanent link">#</a></h2>
 <p>Two things commonly make a normal-mapped surface look "inside out", with bumps lit as dents:</p>
 <ul>
-<li><strong>Normal map convention.</strong> Maps come in two flavors that differ in the sign of the green channel, usually labeled OpenGL (+Y) and DirectX (-Y). Which one is right depends on which way your v coordinate and bitangent run. If bumps look inverted, negate <code>tangentNormal.y</code>.</li>
-<li><strong>Mirrored texture coordinates.</strong> Symmetric models often mirror their UVs, which flips the bitangent on one half. Exporters encode this as a sign in the tangent's fourth component. Model I/O offers <code>addTangentBasis(forTextureCoordinateAttributeNamed:tangentAttributeNamed:bitangentAttributeNamed:)</code> to store an explicit bitangent if you need to support it.</li>
+<li><strong>Normal map convention.</strong><br>
+Maps come in two flavors that differ in the sign of the green channel, usually labeled OpenGL (+Y) and DirectX (-Y).<br>
+Which one is right depends on which way your v coordinate and bitangent run.<br>
+If bumps look inverted, negate <code>tangentNormal.y</code>.</li>
+<li><strong>Mirrored texture coordinates.</strong><br>
+Symmetric models often mirror their UVs, which flips the bitangent on one half.<br>
+Exporters encode this as a sign in the tangent's fourth component.<br>
+Model I/O offers <code>addTangentBasis(forTextureCoordinateAttributeNamed:tangentAttributeNamed:bitangentAttributeNamed:)</code> to store an explicit bitangent if you need to support it.</li>
 </ul>
-<p>A quick sanity check for any model: output <code>N * 0.5 + 0.5</code> as the color. Smoothly changing pastel colors mean the basis is healthy.</p>
+<p>A quick sanity check for any model: output <code>N * 0.5 + 0.5</code> as the color.<br>
+Smoothly changing pastel colors mean the basis is healthy.</p>
 <h2 id="two-channel-normal-maps">Two-channel normal maps<a class="headerlink" href="#two-channel-normal-maps" title="Permanent link">#</a></h2>
 <p>Since a unit normal's z can be recomputed from x and y, normal maps are often stored with two channels in a compressed format, for example BC5 on Mac or EAC RG11 and ASTC on Apple GPUs:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float2</span><span class="w"> </span><span class="n">xy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">rg</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
@@ -274,8 +291,11 @@
 
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
-<li>Rotate a normal-mapped quad over time and confirm the lighting stays consistent with a fixed light.<details class="solution"><summary>Show solution</summary><p>Because the normal and tangent are transformed with the normal matrix, the TBN basis rotates with the quad, and the sampled normals end up in world space. With a fixed light, the bright side of each brick should stay on the side facing the light while the quad turns. If the shading rotates with the quad instead, the tangent is not being transformed.</p></details></li>
-<li>Scale the x and y of the tangent normal by a "bump strength" uniform before normalizing.<details class="solution"><summary>Show solution</summary><p>Scale before normalizing. The live demo has this as a slider.</p>
+<li>Rotate a normal-mapped quad over time and confirm the lighting stays consistent with a fixed light.<details class="solution"><summary>Show solution</summary><p>Because the normal and tangent are transformed with the normal matrix, the TBN basis rotates with the quad, and the sampled normals end up in world space.<br>
+With a fixed light, the bright side of each brick should stay on the side facing the light while the quad turns.<br>
+If the shading rotates with the quad instead, the tangent is not being transformed.</p></details></li>
+<li>Scale the x and y of the tangent normal by a "bump strength" uniform before normalizing.<details class="solution"><summary>Show solution</summary><p>Scale before normalizing.<br>
+The live demo has this as a slider.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">tangentNormal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">xyz</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
 <span class="n">tangentNormal</span><span class="p">.</span><span class="n">xy</span><span class="w"> </span><span class="o">*=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">strength</span><span class="p">;</span><span class="w">      </span><span class="c1">// 0 is flat, above 1 exaggerates</span>
 <span class="n">float3</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">TBN</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">tangentNormal</span><span class="p">);</span>

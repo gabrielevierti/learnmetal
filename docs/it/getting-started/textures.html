@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,17 +134,22 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Per iniziare</p><h1 id="textures">Textures<a class="headerlink" href="#textures" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
+<article><p class="crumb">Per iniziare</p><h1 id="texture">Texture<a class="headerlink" href="#texture" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Progetto di esempio</strong> <code>examples/Sources/04-Textures</code>, si esegue con <code>swift run Textures</code>. <a href="../../downloads/learnmetal-examples.zip">Scarica tutti gli esempi</a> oppure guarda <a href="../resources/examples.html">come eseguirli</a>.</div>
 
-<p>Giving every vertex a color cannot produce a brick wall or a wooden crate. For detail we wrap images around geometry. An image used this way is a <strong>texture</strong>, and reading a color from it is called <strong>sampling</strong>.</p>
-<h2 id="texture-coordinates">Texture coordinates<a class="headerlink" href="#texture-coordinates" title="Permanent link">#</a></h2>
-<p>Each vertex gets a 2D <strong>texture coordinate</strong> (often called UV) that says which point of the image belongs to it. Coordinates run from 0 to 1 on both axes, and they are interpolated across the triangle like any other vertex output.</p>
+<p>Dare un colore a ogni vertice non basta per ottenere un muro di mattoni o una cassa di legno.<br>
+Per avere dettaglio avvolgiamo delle immagini intorno alla geometria.<br>
+Un'immagine usata così è una <strong>texture</strong>, e leggerne un colore si dice fare <strong>sampling</strong>.</p>
+<h2 id="coordinate-di-texture">Coordinate di texture<a class="headerlink" href="#coordinate-di-texture" title="Permanent link">#</a></h2>
+<p>Ogni vertice riceve una <strong>coordinata di texture</strong> a due dimensioni (spesso chiamata UV) che dice quale punto dell'immagine gli appartiene.<br>
+Le coordinate vanno da 0 a 1 su entrambi gli assi e vengono interpolate lungo il triangolo come ogni altra uscita del vertice.</p>
 <div class="admonition warning">
-<p class="admonition-title">Metal's origin is at the top left</p>
-<p>In Metal, texture coordinate (0, 0) is the <strong>top-left</strong> corner of the image and v increases downward. OpenGL puts (0, 0) at the bottom left. Texture coordinates copied from OpenGL tutorials or exported by tools that follow the OpenGL convention will show images upside down unless you flip v (<code>v = 1 - v</code>) or flip the image when loading.</p>
+<p class="admonition-title">In Metal l'origine è in alto a sinistra</p>
+<p>In Metal la coordinata di texture (0, 0) è l'angolo <strong>in alto a sinistra</strong> dell'immagine e v cresce verso il basso.<br>
+OpenGL mette (0, 0) in basso a sinistra.<br>
+Le coordinate copiate dai tutorial di OpenGL, o esportate da strumenti che seguono la convenzione di OpenGL, mostrano le immagini capovolte, a meno di ribaltare v (<code>v = 1 - v</code>) o di ribaltare l'immagine al caricamento.</p>
 </div>
-<p>A rectangle with positions and texture coordinates:</p>
+<p>Un rettangolo con posizioni e coordinate di texture:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">vertices</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="nb">Float</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="c1">// position          // uv</span>
@@ -189,8 +194,9 @@
 </code></pre></div>
 </div>
 
-<h2 id="loading-an-image">Loading an image<a class="headerlink" href="#loading-an-image" title="Permanent link">#</a></h2>
-<p>MetalKit's <code>MTKTextureLoader</code> decodes PNG, JPEG, HEIC, TIFF and other common formats and uploads the result to a new <code>MTLTexture</code>. Drag an image such as <code>container.jpg</code> into the project, then:</p>
+<h2 id="caricare-unimmagine">Caricare un'immagine<a class="headerlink" href="#caricare-unimmagine" title="Permanent link">#</a></h2>
+<p><code>MTKTextureLoader</code> di MetalKit decodifica PNG, JPEG, HEIC, TIFF e altri formati comuni e carica il risultato in una nuova <code>MTLTexture</code>.<br>
+Trascina nel progetto un'immagine, per esempio <code>container.jpg</code>, e poi:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">texture</span><span class="p">:</span><span class="w"> </span><span class="bp">MTLTexture</span>
 
@@ -234,17 +240,22 @@
 </code></pre></div>
 </div>
 
-<p><code>.SRGB: false</code> tells the loader to treat pixel values as plain numbers. We will revisit that choice in <a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a>. If you ever need the OpenGL orientation, add <code>.origin: MTKTextureLoader.Origin.bottomLeft</code>, which flips the image vertically during loading.</p>
-<p>Images in an asset catalog can be loaded by name with <code>loader.newTexture(name:scaleFactor:bundle:options:)</code>.</p>
+<p><code>.SRGB: false</code> dice al loader di trattare i valori dei pixel come semplici numeri.<br>
+Torneremo su questa scelta in <a href="../advanced-lighting/gamma-correction.html">Correzione gamma</a>.<br>
+Se mai ti servisse l'orientamento di OpenGL, aggiungi <code>.origin: MTKTextureLoader.Origin.bottomLeft</code>, che ribalta l'immagine in verticale durante il caricamento.</p>
+<p>Le immagini di un asset catalog si caricano per nome con <code>loader.newTexture(name:scaleFactor:bundle:options:)</code>.</p>
 <div class="lang-cpp">
 <div class="admonition note">
-<p class="admonition-title">Loading images in C++</p>
-<p><code>MTKTextureLoader</code> belongs to MetalKit, which metal-cpp does not wrap. The C++ version decodes the file with the single-header library <a href="https://github.com/nothings/stb">stb_image</a> and uploads the pixels with <code>replaceRegion</code>. stb_image returns the top row first, which matches Metal's top-left origin. To get the OpenGL orientation, call <code>stbi_set_flip_vertically_on_load(true)</code> before loading.</p>
+<p class="admonition-title">Caricare le immagini in C++</p>
+<p><code>MTKTextureLoader</code> appartiene a MetalKit, che metal-cpp non copre.<br>
+La versione C++ decodifica il file con la libreria a singolo header <a href="https://github.com/nothings/stb">stb_image</a> e carica i pixel con <code>replaceRegion</code>. stb_image restituisce per prima la riga in alto, il che coincide con l'origine in alto a sinistra di Metal.<br>
+Per avere l'orientamento di OpenGL chiama <code>stbi_set_flip_vertically_on_load(true)</code> prima di caricare.</p>
 </div>
 </div>
 
-<h2 id="samplers">Samplers<a class="headerlink" href="#samplers" title="Permanent link">#</a></h2>
-<p>A texture is only pixels. How they are read is decided by a separate object, the <strong>sampler state</strong>:</p>
+<h2 id="sampler">Sampler<a class="headerlink" href="#sampler" title="Permanent link">#</a></h2>
+<p>Una texture è soltanto pixel.<br>
+Come vengono letti lo decide un oggetto separato, il <strong>sampler state</strong>:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">samplerState</span><span class="p">:</span><span class="w"> </span><span class="bp">MTLSamplerState</span>
 
@@ -273,46 +284,52 @@
 </code></pre></div>
 </div>
 
-<p><strong>Address modes</strong> decide what happens outside the 0 to 1 range:</p>
+<p>Gli <strong>address mode</strong> decidono che cosa succede fuori dall'intervallo da 0 a 1:</p>
 <table>
 <thead>
 <tr>
-<th>Mode</th>
-<th>Effect</th>
+<th>Modo</th>
+<th>Effetto</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>.clampToEdge</code></td>
-<td>The edge pixels stretch outward. This is the default.</td>
+<td>I pixel del bordo si allungano verso l'esterno. È il valore predefinito.</td>
 </tr>
 <tr>
 <td><code>.repeat</code></td>
-<td>The image tiles.</td>
+<td>L'immagine si ripete.</td>
 </tr>
 <tr>
 <td><code>.mirrorRepeat</code></td>
-<td>The image tiles, mirrored each time.</td>
+<td>L'immagine si ripete, ogni volta specchiata.</td>
 </tr>
 <tr>
 <td><code>.clampToBorderColor</code></td>
-<td>Outside is a fixed border color (macOS and newer iOS devices).</td>
+<td>Fuori c'è un colore di bordo fisso (macOS e dispositivi iOS più recenti).</td>
 </tr>
 <tr>
 <td><code>.clampToZero</code></td>
-<td>Outside is transparent black.</td>
+<td>Fuori c'è nero trasparente.</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Filtering</strong> decides what happens when a texture pixel (a <em>texel</em>) does not map one to one onto a screen pixel. <code>.nearest</code> picks the closest texel and looks blocky when magnified. <code>.linear</code> blends the four nearest texels and looks smooth.</p>
-<p><strong>Mipmaps</strong> are a chain of pre-shrunk copies of the texture, each half the size of the previous one. When a surface is far away, sampling a small copy avoids shimmering and is faster. <code>mipFilter = .linear</code> blends between the two closest levels, which together with linear min filtering is known as trilinear filtering. Setting <code>samplerDescriptor.maxAnisotropy = 8</code> further sharpens surfaces seen at a steep angle.</p>
+<p>Il <strong>filtering</strong> decide che cosa succede quando un pixel della texture (un <em>texel</em>) non corrisponde uno a uno a un pixel dello schermo.<br>
+<code>.nearest</code> prende il texel più vicino e, ingrandito, appare a blocchi.<br>
+<code>.linear</code> mescola i quattro texel più vicini e appare morbido.</p>
+<p>Le <strong>mipmap</strong> sono una catena di copie già rimpicciolite della texture, ognuna grande la metà della precedente.<br>
+Quando una superficie è lontana, leggere una copia piccola evita lo sfarfallio ed è più veloce.<br>
+<code>mipFilter = .linear</code> mescola i due livelli più vicini, cosa che insieme al filtro lineare in riduzione prende il nome di filtro trilineare.<br>
+Impostare <code>samplerDescriptor.maxAnisotropy = 8</code> rende ancora più nitide le superfici viste molto di taglio.</p>
 <div class="admonition note">
-<p class="admonition-title">Coming from OpenGL</p>
-<p>Wrap and filter settings are not properties of the texture. One texture can be read through several samplers, and one sampler can serve every texture.</p>
+<p class="admonition-title">Se vieni da OpenGL</p>
+<p>Le impostazioni di wrap e di filtro non sono proprietà della texture.<br>
+Una texture può essere letta attraverso più sampler, e un sampler può servire per tutte le texture.</p>
 </div>
-<figure><img src="../../assets/img/getting-started/address-modes.webp" alt="Address modes decide what is sampled outside the 0 to 1 range. Here the coordinates run from -1 to 2." width="880" height="499" loading="lazy"><figcaption>Address modes decide what is sampled outside the 0 to 1 range. Here the coordinates run from -1 to 2.</figcaption></figure>
+<figure><img src="../../assets/img/getting-started/address-modes.webp" alt="Gli address mode decidono che cosa viene letto fuori dall&#x27;intervallo da 0 a 1. Qui le coordinate vanno da -1 a 2." width="880" height="499" loading="lazy"><figcaption>Gli address mode decidono che cosa viene letto fuori dall&#x27;intervallo da 0 a 1. Qui le coordinate vanno da -1 a 2.</figcaption></figure>
 
-<h2 id="sampling-in-the-shader">Sampling in the shader<a class="headerlink" href="#sampling-in-the-shader" title="Permanent link">#</a></h2>
+<h2 id="il-sampling-nello-shader">Il sampling nello shader<a class="headerlink" href="#il-sampling-nello-shader" title="Permanent link">#</a></h2>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">VertexIn</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="p">[[</span><span class="na">attribute</span><span class="p">(</span><span class="mi">0</span><span class="p">)]];</span>
 <span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">uv</span><span class="w">       </span><span class="p">[[</span><span class="na">attribute</span><span class="p">(</span><span class="mi">1</span><span class="p">)]];</span>
@@ -337,7 +354,8 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>Textures and samplers have their own index tables, selected with <code>[[texture(n)]]</code> and <code>[[sampler(n)]]</code>. Bind them before drawing:</p>
+<p>Texture e sampler hanno ciascuno la propria tabella di indici, che si sceglie con <code>[[texture(n)]]</code> e <code>[[sampler(n)]]</code>.<br>
+Collegali prima di disegnare:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">encoder</span><span class="p">.</span><span class="n">setFragmentTexture</span><span class="p">(</span><span class="n">texture</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
 <span class="n">encoder</span><span class="p">.</span><span class="n">setFragmentSamplerState</span><span class="p">(</span><span class="n">samplerState</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
@@ -349,11 +367,12 @@
 </code></pre></div>
 </div>
 
-<p>Run it and the rectangle shows your image.</p>
+<p>Eseguilo e il rettangolo mostra la tua immagine.</p>
 <div class="lm-demo" data-demo="textures" data-fallback="../../assets/img/getting-started/textures.webp"></div>
 
-<h2 id="two-textures-at-once">Two textures at once<a class="headerlink" href="#two-textures-at-once" title="Permanent link">#</a></h2>
-<p>A fragment function can read many textures. Load a second image, bind it at index 1, and blend:</p>
+<h2 id="due-texture-insieme">Due texture insieme<a class="headerlink" href="#due-texture-insieme" title="Permanent link">#</a></h2>
+<p>Una fragment function può leggere molte texture.<br>
+Carica una seconda immagine, collegala all'indice 1 e mescola:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_main</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
 <span class="w">                              </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">texture0</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
 <span class="w">                              </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">texture1</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
@@ -364,15 +383,19 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p><code>mix(a, b, t)</code> returns <code>a * (1 - t) + b * t</code>, so the result is 80% of the first texture and 20% of the second.</p>
-<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<p><code>mix(a, b, t)</code> restituisce <code>a * (1 - t) + b * t</code>, quindi il risultato è per l'80% la prima texture e per il 20% la seconda.</p>
+<h2 id="esercizi">Esercizi<a class="headerlink" href="#esercizi" title="Permanent link">#</a></h2>
 <ul>
-<li>Multiply the uv by 2 in the fragment function and try each address mode.<details class="solution"><summary>Mostra la soluzione</summary><p>Sample with <code>in.uv * 2.0</code>. With <code>.repeat</code> you see four copies, with <code>.mirrorRepeat</code> the copies are mirrored so the seams match, and with <code>.clampToEdge</code> the image fills one quarter and its edge pixels stretch across the rest. You can try all three in the live demo above by raising the UV scale.</p></details></li>
-<li>Switch the filters to <code>.nearest</code> and display only the center of the texture (uv from 0.45 to 0.55) to see individual texels.<details class="solution"><summary>Mostra la soluzione</summary><p>Set <code>minFilter</code> and <code>magFilter</code> to <code>.nearest</code> and remap the coordinates so the quad shows a tenth of the image. Each texel becomes a visible square. Switch back to <code>.linear</code> and the squares blend into a blur.</p>
+<li>Moltiplica le uv per 2 nella fragment function e prova ogni address mode.<details class="solution"><summary>Mostra la soluzione</summary><p>Leggi la texture con <code>in.uv * 2.0</code>.<br>
+Con <code>.repeat</code> vedi quattro copie, con <code>.mirrorRepeat</code> le copie sono specchiate e le giunture combaciano, e con <code>.clampToEdge</code> l'immagine riempie un quarto e i pixel del suo bordo si allungano sul resto.<br>
+Puoi provare tutti e tre nella demo interattiva qui sopra alzando la scala delle UV.</p></details></li>
+<li>Passa i filtri a <code>.nearest</code> e mostra solo il centro della texture (uv da 0.45 a 0.55) per vedere i singoli texel.<details class="solution"><summary>Mostra la soluzione</summary><p>Imposta <code>minFilter</code> e <code>magFilter</code> a <code>.nearest</code> e rimappa le coordinate in modo che il rettangolo mostri un decimo dell'immagine.<br>
+Ogni texel diventa un quadrato visibile.<br>
+Torna a <code>.linear</code> e i quadrati si fondono in una sfocatura.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float2</span><span class="w"> </span><span class="n">uv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.45</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.1</span><span class="p">;</span>
 <span class="k">return</span><span class="w"> </span><span class="n">colorTexture</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">textureSampler</span><span class="p">,</span><span class="w"> </span><span class="n">uv</span><span class="p">);</span>
 </code></pre></div></details></li>
-<li>Add a uniform that controls the <code>mix</code> factor and animate it.<details class="solution"><summary>Mostra la soluzione</summary><p>Add a float to a uniform struct for the fragment stage, bind it with <code>setFragmentBytes</code>, and set it to <code>sin(time) * 0.5 + 0.5</code> each frame.</p>
+<li>Aggiungi un uniform che controlla il fattore di <code>mix</code> e animalo.<details class="solution"><summary>Mostra la soluzione</summary><p>Aggiungi un float a una struct di uniform per lo stadio di fragment, collegalo con <code>setFragmentBytes</code> e impostalo a <code>sin(time) * 0.5 + 0.5</code> a ogni frame.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_main</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
 <span class="w">                              </span><span class="n">constant</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="o">&amp;</span><span class="n">mixFactor</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
 <span class="w">                              </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">texture0</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
@@ -388,7 +411,7 @@
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#texture-coordinates">Texture coordinates</a></li><li><a href="#loading-an-image">Loading an image</a></li><li><a href="#samplers">Samplers</a></li><li><a href="#sampling-in-the-shader">Sampling in the shader</a></li><li><a href="#two-textures-at-once">Two textures at once</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#coordinate-di-texture">Coordinate di texture</a></li><li><a href="#caricare-unimmagine">Caricare un&#x27;immagine</a></li><li><a href="#sampler">Sampler</a></li><li><a href="#il-sampling-nello-shader">Il sampling nello shader</a></li><li><a href="#due-texture-insieme">Due texture insieme</a></li><li><a href="#esercizi">Esercizi</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

@@ -1,0 +1,3 @@
+Copia i quattro valori di una riga nell'uniform del materiale e imposta a bianco ambient, diffuse e specular della luce. La demo interattiva qui sopra ha i preset; passa dall'uno all'altro e confronta quanto è largo e quanto è colorato il riflesso.
+---
+Un metallo non ha una riflessione diffusa propria. Tutta la luce che restituisce viene riflessa in superficie, e quel riflesso prende la tinta del metallo: l'oro riflette luce gialla. Quindi il suo riflesso ha il colore del metallo. Il riflesso di una plastica viene dal suo strato esterno trasparente e resta bianco, qualunque sia il colore sotto. È l'idea che più avanti la sezione PBR rende precisa con il parametro metalness.

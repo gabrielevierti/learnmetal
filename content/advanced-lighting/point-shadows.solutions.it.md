@@ -1,0 +1,3 @@
+Restituisci il valore letto come colore grigio dalla fragment function principale. Le superfici vicine alla luce sono scure e quelle lontane chiare, e ogni oggetto è circondato, sulle pareti dietro di lui, da un alone più scuro della stessa forma: è la sua ombra prima del confronto.
+---
+Imposta `renderTargetArrayLength = 6` sul pass, imposta `inputPrimitiveTopology = .triangle` sulla pipeline e disegna ogni oggetto con un numero di istanze pari a 6. Nella vertex function usa `instanceID % 6` come faccia: scegli la matrice di quella faccia e scrivi l'indice della faccia in un output marcato `[[render_target_array_index]]`.

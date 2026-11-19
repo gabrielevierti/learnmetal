@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,12 +134,14 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Illuminazione</p><h1 id="light-casters">Light Casters<a class="headerlink" href="#light-casters" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
+<article><p class="crumb">Illuminazione</p><h1 id="tipi-di-luce">Tipi di luce<a class="headerlink" href="#tipi-di-luce" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Progetto di esempio</strong> <code>examples/Sources/10-MultipleLights</code>, si esegue con <code>swift run MultipleLights</code>. <a href="../../downloads/learnmetal-examples.zip">Scarica tutti gli esempi</a> oppure guarda <a href="../resources/examples.html">come eseguirli</a>.</div>
 
-<p>Until now the light has been a single point shining equally in all directions forever. Real scenes have three common kinds of light source: directional lights, point lights and spotlights.</p>
-<h2 id="directional-light">Directional light<a class="headerlink" href="#directional-light" title="Permanent link">#</a></h2>
-<p>A light that is extremely far away, like the sun, has rays that are effectively parallel. Its position is irrelevant; only its <strong>direction</strong> matters, and it is the same for every fragment.</p>
+<p>Finora la luce è stata un punto solo, che illumina in ogni direzione allo stesso modo e senza limiti.<br>
+Nelle scene reali le sorgenti di luce più comuni sono di tre tipi: luci direzionali, luci puntiformi e spot.</p>
+<h2 id="luce-direzionale">Luce direzionale<a class="headerlink" href="#luce-direzionale" title="Permanent link">#</a></h2>
+<p>Una luce lontanissima, come il sole, ha raggi che di fatto sono paralleli.<br>
+La sua posizione è irrilevante; conta solo la sua <strong>direzione</strong>, che è la stessa per ogni fragment.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">DirectionalLight</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">direction</span><span class="p">;</span><span class="w">   </span><span class="c1">// the direction the light travels</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">ambient</span><span class="p">;</span>
@@ -148,24 +150,29 @@
 <span class="p">};</span>
 </code></pre></div>
 
-<p>The lighting math wants a vector from the fragment <em>toward</em> the light, so negate it:</p>
+<p>I calcoli della luce vogliono un vettore che va dal fragment <em>verso</em> la luce, quindi cambiale segno:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">lightDir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="o">-</span><span class="n">light</span><span class="p">.</span><span class="n">direction</span><span class="p">);</span>
 </code></pre></div>
 
-<p>Everything else stays the same. With <code>direction = (-0.2, -1.0, -0.3)</code> all ten cubes are lit from above at the same angle.</p>
-<h2 id="point-light">Point light<a class="headerlink" href="#point-light" title="Permanent link">#</a></h2>
-<p>A point light has a position and shines in all directions, but it fades with distance. That fading is called <strong>attenuation</strong>. A formula that looks good and is cheap:</p>
+<p>Tutto il resto rimane uguale.<br>
+Con <code>direction = (-0.2, -1.0, -0.3)</code> tutti e dieci i cubi sono illuminati dall'alto con lo stesso angolo.</p>
+<h2 id="luce-puntiforme">Luce puntiforme<a class="headerlink" href="#luce-puntiforme" title="Permanent link">#</a></h2>
+<p>Una luce puntiforme ha una posizione e illumina in tutte le direzioni, ma si affievolisce con la distanza.<br>
+Questo calo si chiama <strong>attenuazione</strong>.<br>
+Una formula che rende bene e costa poco:</p>
 <div class="codehilite"><pre><span></span><code>attenuation = 1 / (constant + linear * d + quadratic * d²)
 </code></pre></div>
 
-<p>where <code>d</code> is the distance from the light. The constant term is normally 1 so the result never exceeds 1. The linear and quadratic terms set how fast the light dies off.</p>
+<p>dove <code>d</code> è la distanza dalla luce.<br>
+Il termine costante di solito vale 1, così il risultato non supera mai 1.<br>
+I termini lineare e quadratico decidono quanto in fretta la luce si spegne.</p>
 <table>
 <thead>
 <tr>
-<th>Range</th>
-<th>Constant</th>
-<th>Linear</th>
-<th>Quadratic</th>
+<th>Portata</th>
+<th>Costante</th>
+<th>Lineare</th>
+<th>Quadratico</th>
 </tr>
 </thead>
 <tbody>
@@ -216,9 +223,12 @@
 <span class="n">specular</span><span class="w"> </span><span class="o">*=</span><span class="w"> </span><span class="n">attenuation</span><span class="p">;</span>
 </code></pre></div>
 
-<h2 id="spotlight">Spotlight<a class="headerlink" href="#spotlight" title="Permanent link">#</a></h2>
-<p>A spotlight is a point light that only shines inside a cone. It needs a position, a direction, and a <strong>cutoff</strong> angle. For each fragment, compare the angle between the spotlight's direction and the direction from the light to the fragment against the cutoff.</p>
-<p>Comparing angles would require an expensive inverse cosine, so we compare cosines instead. Pass the cosine of the cutoff from Swift:</p>
+<h2 id="spot">Spot<a class="headerlink" href="#spot" title="Permanent link">#</a></h2>
+<p>Uno spot è una luce puntiforme che illumina solo dentro un cono.<br>
+Ha bisogno di una posizione, di una direzione e di un angolo di <strong>cutoff</strong>.<br>
+Per ogni fragment si confronta con il cutoff l'angolo tra la direzione dello spot e la direzione dalla luce al fragment.</p>
+<p>Confrontare gli angoli richiederebbe un costoso arcocoseno, quindi confrontiamo i coseni.<br>
+Passa da Swift il coseno del cutoff:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">light</span><span class="p">.</span><span class="n">cutOff</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">cos</span><span class="p">(</span><span class="nb">Float</span><span class="p">(</span><span class="mf">12.5</span><span class="p">).</span><span class="n">radians</span><span class="p">)</span>
 <span class="n">light</span><span class="p">.</span><span class="n">outerCutOff</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">cos</span><span class="p">(</span><span class="nb">Float</span><span class="p">(</span><span class="mf">17.5</span><span class="p">).</span><span class="n">radians</span><span class="p">)</span>
@@ -230,7 +240,8 @@
 </code></pre></div>
 </div>
 
-<p>A hard cutoff gives an ugly sharp circle. Two cones, an inner and a slightly larger outer one, give a soft edge: full brightness inside the inner cone, none outside the outer cone, and a smooth blend between.</p>
+<p>Un taglio netto dà un brutto cerchio dal bordo duro.<br>
+Due coni, uno interno e uno esterno appena più grande, danno un bordo morbido: piena luminosità dentro il cono interno, nessuna fuori da quello esterno, e una sfumatura continua in mezzo.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">SpotLight</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">position</span><span class="p">;</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">direction</span><span class="p">;</span>
@@ -251,9 +262,11 @@
 <span class="n">specular</span><span class="w"> </span><span class="o">*=</span><span class="w"> </span><span class="n">intensity</span><span class="p">;</span>
 </code></pre></div>
 
-<p><code>saturate(x)</code> clamps to the 0 to 1 range. Ambient is left alone so that the scene outside the cone is not pitch black. Remember that a <em>larger</em> cosine means a <em>smaller</em> angle, which is why the comparison looks reversed.</p>
-<h2 id="a-flashlight">A flashlight<a class="headerlink" href="#a-flashlight" title="Permanent link">#</a></h2>
-<p>A flashlight is a spotlight attached to the camera:</p>
+<p><code>saturate(x)</code> limita il valore all'intervallo da 0 a 1.<br>
+L'ambient non viene toccato, così la scena fuori dal cono non è buio pesto.<br>
+Ricorda che un coseno <em>più grande</em> significa un angolo <em>più piccolo</em>, ed è per questo che il confronto sembra rovesciato.</p>
+<h2 id="una-torcia">Una torcia<a class="headerlink" href="#una-torcia" title="Permanent link">#</a></h2>
+<p>Una torcia è uno spot attaccato alla camera:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">light</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">camera</span><span class="p">.</span><span class="n">position</span>
 <span class="n">light</span><span class="p">.</span><span class="n">direction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">camera</span><span class="p">.</span><span class="n">front</span>
@@ -265,28 +278,32 @@
 </code></pre></div>
 </div>
 
-<p>Add attenuation as well and walk around the cubes in the dark.</p>
+<p>Aggiungi anche l'attenuazione e cammina tra i cubi al buio.</p>
 <div class="lm-demo" data-demo="light-casters" data-fallback="../../assets/img/lighting/light-casters.webp"></div>
 
-<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<h2 id="esercizi">Esercizi<a class="headerlink" href="#esercizi" title="Permanent link">#</a></h2>
 <ul>
-<li>Give the directional light a warm color and a low angle for a sunset.<details class="solution"><summary>Mostra la soluzione</summary><p>Use a direction close to horizontal, such as (-1.0, -0.15, -0.3), and a diffuse color like (1.0, 0.55, 0.25) with a dim bluish ambient such as (0.05, 0.06, 0.1). Long shading gradients and warm highlights do the rest.</p></details></li>
-<li>Experiment with the attenuation terms until a point light reaches exactly the nearest cubes.<details class="solution"><summary>Mostra la soluzione</summary><p>Start from the table: for a range of about 13 units use linear 0.35 and quadratic 0.44. Raise the quadratic term to make the light die sooner without darkening what is close; raise the linear term to darken everything more evenly.</p></details></li>
-<li>Project a texture from the spotlight, like a slide projector: use the fragment's position within the cone as a texture coordinate.<details class="solution"><summary>Mostra la soluzione</summary><p>Build a view-projection matrix for the spotlight, as for a camera at the light looking along its direction. Transform the fragment's world position with it, divide by w, and map from -1...1 to 0...1 to get a texture coordinate. Multiply the light's color by the sampled image.</p>
+<li>Dai alla luce direzionale un colore caldo e un angolo basso, per un tramonto.<details class="solution"><summary>Mostra la soluzione</summary><p>Usa una direzione quasi orizzontale, per esempio (-1.0, -0.15, -0.3), e un colore diffuse come (1.0, 0.55, 0.25), con un ambient debole e bluastro come (0.05, 0.06, 0.1).<br>
+Le lunghe sfumature e i riflessi caldi fanno il resto.</p></details></li>
+<li>Sperimenta con i termini dell'attenuazione finché una luce puntiforme arriva esattamente ai cubi più vicini.<details class="solution"><summary>Mostra la soluzione</summary><p>Parti dalla tabella: per una portata di circa 13 unità usa 0.35 per il lineare e 0.44 per il quadratico.<br>
+Alza il termine quadratico per far spegnere prima la luce senza scurire ciò che è vicino; alza quello lineare per scurire tutto in modo più uniforme.</p></details></li>
+<li>Proietta una texture dallo spot, come un proiettore di diapositive: usa come coordinata di texture la posizione del fragment dentro il cono.<details class="solution"><summary>Mostra la soluzione</summary><p>Costruisci una matrice view-projection per lo spot, come per una camera messa nella luce che guarda lungo la sua direzione.<br>
+Trasforma con essa la posizione in spazio mondo del fragment, dividi per w e porta da -1...1 a 0...1 per ottenere una coordinata di texture.<br>
+Moltiplica il colore della luce per l'immagine letta.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float4</span><span class="w"> </span><span class="n">lightClip</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">lightViewProjection</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">worldPosition</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
 <span class="n">float2</span><span class="w"> </span><span class="n">slideUV</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lightClip</span><span class="p">.</span><span class="n">xy</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">lightClip</span><span class="p">.</span><span class="n">w</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">float2</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.5</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.5</span><span class="p">;</span>
 <span class="n">float3</span><span class="w"> </span><span class="n">slide</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">slideTexture</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">clampSampler</span><span class="p">,</span><span class="w"> </span><span class="n">slideUV</span><span class="p">).</span><span class="n">rgb</span><span class="p">;</span>
 <span class="n">diffuse</span><span class="w"> </span><span class="o">*=</span><span class="w"> </span><span class="n">slide</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">intensity</span><span class="p">;</span>
 </code></pre></div>
 
-<p>This is the first half of shadow mapping: the same projection later looks up a depth instead of a color.</p></details></li>
+<p>È la prima metà dello shadow mapping: più avanti la stessa proiezione leggerà una profondità invece di un colore.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../lighting/lighting-maps.html"><small>Precedente</small>Mappe di illuminazione</a><a class="next" href="../lighting/multiple-lights.html"><small>Successivo</small>Più luci</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#directional-light">Directional light</a></li><li><a href="#point-light">Point light</a></li><li><a href="#spotlight">Spotlight</a></li><li><a href="#a-flashlight">A flashlight</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#luce-direzionale">Luce direzionale</a></li><li><a href="#luce-puntiforme">Luce puntiforme</a></li><li><a href="#spot">Spot</a></li><li><a href="#una-torcia">Una torcia</a></li><li><a href="#esercizi">Esercizi</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

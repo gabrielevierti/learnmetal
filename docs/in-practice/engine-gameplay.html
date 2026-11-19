@@ -135,11 +135,17 @@
 </nav>
 <main class="content" id="main">
 <article><p class="crumb">In Practice</p><h1 id="engine-the-game">Engine: The Game<a class="headerlink" href="#engine-the-game" title="Permanent link">#</a></h1>
-<p>The <a href="engine-renderer.html">renderer</a> draws whatever is in the scene. This chapter is about what puts things there and makes them move: entities, physics, input, sound, an interface. The example is <strong>Marble</strong>, the game that comes with the LearnMetal Engine. All of it, level included, is about eight hundred lines, and nearly every line is a call into something this chapter explains.</p>
+<p>The <a href="engine-renderer.html">renderer</a> draws whatever is in the scene.<br>
+This chapter is about what puts things there and makes them move: entities, physics, input, sound, an interface.<br>
+The example is <strong>Marble</strong>, the game that comes with the LearnMetal Engine.<br>
+All of it, level included, is about eight hundred lines, and nearly every line is a call into something this chapter explains.</p>
 <figure><img src="../assets/img/in-practice/engine-gameplay.webp" alt="The whole course. The marble starts in the foreground, crosses the gap on the orange platform and finishes on the far right." width="880" height="495" loading="lazy"><figcaption>The whole course. The marble starts in the foreground, crosses the gap on the orange platform and finishes on the far right.</figcaption></figure>
 
 <h2 id="entities-and-components">Entities and components<a class="headerlink" href="#entities-and-components" title="Permanent link">#</a></h2>
-<p>An entity is nothing but an id. Everything that makes it a marble, a lamp or a wall is in its <strong>components</strong>: plain structs, stored by the scene. The engine brings the ones it has systems for: <code>Transform</code>, <code>Camera</code>, <code>Light</code>, <code>MeshRenderer</code>, <code>RigidBody</code>, <code>Collider</code>, <code>ParticleEmitter</code>. A game adds its own, and the engine does not need to be told about them:</p>
+<p>An entity is nothing but an id.<br>
+Everything that makes it a marble, a lamp or a wall is in its <strong>components</strong>: plain structs, stored by the scene.<br>
+The engine brings the ones it has systems for: <code>Transform</code>, <code>Camera</code>, <code>Light</code>, <code>MeshRenderer</code>, <code>RigidBody</code>, <code>Collider</code>, <code>ParticleEmitter</code>.<br>
+A game adds its own, and the engine does not need to be told about them:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">/// Something to collect. The entity also carries a mesh, a light and a trigger collider.</span>
 <span class="kd">struct</span><span class="w"> </span><span class="nc">Gem</span><span class="w"> </span><span class="p">{</span>
@@ -183,7 +189,8 @@
 </code></pre></div>
 </div>
 
-<p>There is no <code>Gem</code> class with a draw method and an update method. A gem is an entity that is given five components, and each one makes a different part of the engine take notice of it:</p>
+<p>There is no <code>Gem</code> class with a draw method and an update method.<br>
+A gem is an entity that is given five components, and each one makes a different part of the engine take notice of it:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="k">for</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">gemPositions</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">index</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">level</span><span class="p">.</span><span class="n">gemCount</span>
@@ -222,8 +229,11 @@
 </code></pre></div>
 </div>
 
-<p>The renderer sees a mesh and a light. Physics sees a trigger. Only the game sees a <code>Gem</code>.</p>
-<p>Behavior, then, is a loop over everything that has the right components. This one is the entire animation of the gems:</p>
+<p>The renderer sees a mesh and a light.<br>
+Physics sees a trigger.<br>
+Only the game sees a <code>Gem</code>.</p>
+<p>Behavior, then, is a loop over everything that has the right components.<br>
+This one is the entire animation of the gems:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// Gems turn and bob; their lights and triggers move with them.</span>
 <span class="kd">let</span><span class="w"> </span><span class="nv">time</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">Float</span><span class="p">(</span><span class="n">engine</span><span class="p">.</span><span class="n">time</span><span class="p">.</span><span class="n">elapsed</span><span class="p">)</span>
@@ -243,17 +253,27 @@
 </code></pre></div>
 </div>
 
-<p>Inside the scene, the components of one type sit back to back in one array, so a loop like this reads memory in order. The <code>Lifetime</code> component works the same way: a loop counts it down and destroys the entity at zero. Destroying is always safe inside a loop, because the entity is only really removed at the end of the step, as the <a href="game-engine.html">first chapter</a> showed.</p>
+<p>Inside the scene, the components of one type sit back to back in one array, so a loop like this reads memory in order.<br>
+The <code>Lifetime</code> component works the same way: a loop counts it down and destroys the entity at zero.<br>
+Destroying is always safe inside a loop, because the entity is only really removed at the end of the step, as the <a href="game-engine.html">first chapter</a> showed.</p>
 <div class="lang-swift">
-<p>One Swift detail matters everywhere in game code. Components are values. <code>scene[entity, RigidBody.self]</code> gives you a copy, so either change it in place through the subscript, as in <code>scene[cube, Transform.self]?.rotation = ...</code>, or take a copy, change it and store it back. Inside <code>each</code>, the closure's parameters are <code>inout</code>: what you change there is stored.</p>
+<p>One Swift detail matters everywhere in game code.<br>
+Components are values.<br>
+<code>scene[entity, RigidBody.self]</code> gives you a copy, so either change it in place through the subscript, as in <code>scene[cube, Transform.self]?.rotation = ...</code>, or take a copy, change it and store it back.<br>
+Inside <code>each</code>, the closure's parameters are <code>inout</code>: what you change there is stored.</p>
 </div>
 
 <div class="lang-cpp">
-<p>One C++ detail matters everywhere in game code. <code>scene.get&lt;RigidBody&gt;(entity)</code> returns a pointer into the scene's storage, or <code>nullptr</code>. The pointer stays valid until a component of the same type is added or removed, so use it and let it go; do not keep it in a member variable.</p>
+<p>One C++ detail matters everywhere in game code.<br>
+<code>scene.get&lt;RigidBody&gt;(entity)</code> returns a pointer into the scene's storage, or <code>nullptr</code>.<br>
+The pointer stays valid until a component of the same type is added or removed, so use it and let it go; do not keep it in a member variable.</p>
 </div>
 
 <h2 id="bodies-colliders-and-triggers">Bodies, colliders and triggers<a class="headerlink" href="#bodies-colliders-and-triggers" title="Permanent link">#</a></h2>
-<p>A <code>Collider</code> gives an entity a shape: a sphere, a box or a capsule. By itself it is a static obstacle, which is all a floor or a wall needs. Add a <code>RigidBody</code> and the entity moves. Marble's level is made of boxes with colliders; the ramp is simply a box that is tilted.</p>
+<p>A <code>Collider</code> gives an entity a shape: a sphere, a box or a capsule.<br>
+By itself it is a static obstacle, which is all a floor or a wall needs.<br>
+Add a <code>RigidBody</code> and the entity moves.<br>
+Marble's level is made of boxes with colliders; the ramp is simply a box that is tilted.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">scene</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">level</span><span class="p">.</span><span class="n">marble</span><span class="p">,</span><span class="w"> </span><span class="n">Collider</span><span class="p">.</span><span class="n">sphere</span><span class="p">(</span><span class="n">radius</span><span class="p">:</span><span class="w"> </span><span class="n">Level</span><span class="p">.</span><span class="n">marbleRadius</span><span class="p">))</span>
 <span class="kd">var</span><span class="w"> </span><span class="nv">marbleBody</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">RigidBody</span><span class="p">(</span><span class="n">restitution</span><span class="p">:</span><span class="w"> </span><span class="mf">0.35</span><span class="p">,</span><span class="w"> </span><span class="n">friction</span><span class="p">:</span><span class="w"> </span><span class="mf">0.03</span><span class="p">)</span><span class="w">      </span><span class="c1">// a rolling ball barely slows down by itself</span>
@@ -271,8 +291,12 @@
 </code></pre></div>
 </div>
 
-<p>The physics is of the kind most games want, sometimes called arcade physics: gravity, bouncing, friction, things that push each other and stack. It leaves out the hard parts on purpose. Bodies do not spin when they are hit, there are no joints, and a very fast object can pass through a thin one. When a game needs those, a dedicated physics library is the right tool.</p>
-<p>That first omission would look wrong on a marble: a ball that slides without turning. So the game turns it, by exactly the angle a ball of that size rolls through when it travels that far:</p>
+<p>The physics is of the kind most games want, sometimes called arcade physics: gravity, bouncing, friction, things that push each other and stack.<br>
+It leaves out the hard parts on purpose.<br>
+Bodies do not spin when they are hit, there are no joints, and a very fast object can pass through a thin one.<br>
+When a game needs those, a dedicated physics library is the right tool.</p>
+<p>That first omission would look wrong on a marble: a ball that slides without turning.<br>
+So the game turns it, by exactly the angle a ball of that size rolls through when it travels that far:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// The physics moves the marble but does not spin it. Turn it by the angle a ball of</span>
 <span class="c1">// this size rolls through when it travels this far: distance divided by radius.</span>
@@ -297,8 +321,11 @@
 </code></pre></div>
 </div>
 
-<p>Nobody watching can tell that the rotation is decoration. A great deal of game programming is this: simulate what matters, fake the rest convincingly.</p>
-<p>A collider marked as a <strong>trigger</strong> blocks nothing. It only reports what enters it. That is how the game knows a gem was touched or the goal was reached:</p>
+<p>Nobody watching can tell that the rotation is decoration.<br>
+A great deal of game programming is this: simulate what matters, fake the rest convincingly.</p>
+<p>A collider marked as a <strong>trigger</strong> blocks nothing.<br>
+It only reports what enters it.<br>
+That is how the game knows a gem was touched or the goal was reached:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// Physics events. They arrive at the end of a physics step.</span>
 <span class="n">engine</span><span class="p">.</span><span class="n">physics</span><span class="p">.</span><span class="n">onTriggerEnter</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">[</span><span class="kr">unowned</span><span class="w"> </span><span class="kc">self</span><span class="p">,</span><span class="w"> </span><span class="kr">unowned</span><span class="w"> </span><span class="n">engine</span><span class="p">]</span><span class="w"> </span><span class="n">trigger</span><span class="p">,</span><span class="w"> </span><span class="n">other</span><span class="w"> </span><span class="k">in</span>
@@ -344,9 +371,11 @@
 </code></pre></div>
 </div>
 
-<p>The second event fires when two solid things start touching, and says how fast they met. The game uses it for one thing: a thump whose volume depends on how hard the marble landed.</p>
+<p>The second event fires when two solid things start touching, and says how fast they met.<br>
+The game uses it for one thing: a thump whose volume depends on how hard the marble landed.</p>
 <h2 id="input-read-once-use-later">Input: read once, use later<a class="headerlink" href="#input-read-once-use-later" title="Permanent link">#</a></h2>
-<p>The game never asks whether the W key is down. It defines <strong>actions</strong> once, and from then on asks about those:</p>
+<p>The game never asks whether the W key is down.<br>
+It defines <strong>actions</strong> once, and from then on asks about those:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// Actions: the game asks "is jump pressed?" and never mentions a key or a button again.</span>
 <span class="kd">let</span><span class="w"> </span><span class="nv">input</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">engine</span><span class="p">.</span><span class="n">input</span>
@@ -373,7 +402,8 @@
 </div>
 
 <p>Keyboard and gamepad feed the same action, so supporting both costs nothing more.</p>
-<p>The first chapter warned that the fixed step is the wrong place to read input, because it runs zero, one or several times per frame. So <code>update</code> reads, and remembers:</p>
+<p>The first chapter warned that the fixed step is the wrong place to read input, because it runs zero, one or several times per frame.<br>
+So <code>update</code> reads, and remembers:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// Input is read here, once per frame, and remembered for the fixed steps.</span>
 <span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="n">isDemo</span><span class="w"> </span><span class="p">{</span>
@@ -397,7 +427,9 @@
 </code></pre></div>
 </div>
 
-<p>A jump is not remembered as "yes" but as "yes, for the next 0.15 seconds". Press the button a moment before the marble lands and it still jumps on landing. Players never notice this; they only notice games that do not do it.</p>
+<p>A jump is not remembered as "yes" but as "yes, for the next 0.15 seconds".<br>
+Press the button a moment before the marble lands and it still jumps on landing.<br>
+Players never notice this; they only notice games that do not do it.</p>
 <p><code>fixedUpdate</code> then turns what was remembered into motion:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// Push the marble where the stick points, relative to where the camera looks.</span>
@@ -470,9 +502,13 @@
 </code></pre></div>
 </div>
 
-<p>"Forward" means away from the camera, so the controls stay natural while the camera orbits. In the air the marble can still be steered, but only a little. And look at the <code>isDemo</code> branch: the autopilot produces the same two things a player produces, a direction and a jump. Because the game reads its input from two variables and not from the keyboard, replacing the player with a program took a handful of lines.</p>
+<p>"Forward" means away from the camera, so the controls stay natural while the camera orbits.<br>
+In the air the marble can still be steered, but only a little.<br>
+And look at the <code>isDemo</code> branch: the autopilot produces the same two things a player produces, a direction and a jump.<br>
+Because the game reads its input from two variables and not from the keyboard, replacing the player with a program took a handful of lines.</p>
 <h2 id="a-platform-that-carries-its-passenger">A platform that carries its passenger<a class="headerlink" href="#a-platform-that-carries-its-passenger" title="Permanent link">#</a></h2>
-<p>Halfway through the course a platform ferries the marble across a gap. It is a <strong>kinematic</strong> body: it moves, but nothing can push it.</p>
+<p>Halfway through the course a platform ferries the marble across a gap.<br>
+It is a <strong>kinematic</strong> body: it moves, but nothing can push it.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// The moving platform carries the marble across the gap between terrace and landing.</span>
 <span class="kd">let</span><span class="w"> </span><span class="nv">ferryStart</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Vec3</span><span class="p">(</span><span class="mi">17</span><span class="p">,</span><span class="w"> </span><span class="mf">2.25</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">12.4</span><span class="p">),</span><span class="w"> </span><span class="n">ferryEnd</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Vec3</span><span class="p">(</span><span class="mi">17</span><span class="p">,</span><span class="w"> </span><span class="mf">2.25</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">6.6</span><span class="p">)</span>
@@ -493,7 +529,9 @@
 </code></pre></div>
 </div>
 
-<p>The tempting way to move it is to write a new position every step. The marble would not come along: to the physics the platform would be teleporting, and a body that teleports has no velocity to pass on through friction. A kinematic body has to be moved the way the physics understands, by its velocity:</p>
+<p>The tempting way to move it is to write a new position every step.<br>
+The marble would not come along: to the physics the platform would be teleporting, and a body that teleports has no velocity to pass on through friction.<br>
+A kinematic body has to be moved the way the physics understands, by its velocity:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// Moving platforms: a kinematic body goes where its velocity takes it, so the</span>
 <span class="c1">// platform is steered by setting the velocity that leads to where it should be next.</span>
@@ -517,9 +555,11 @@
 </code></pre></div>
 </div>
 
-<p>Work out where the platform should be one step from now, and set the velocity that gets it there in exactly one step. The platform follows its path precisely, and the marble on top is carried by friction like any object resting on a moving one.</p>
+<p>Work out where the platform should be one step from now, and set the velocity that gets it there in exactly one step.<br>
+The platform follows its path precisely, and the marble on top is carried by friction like any object resting on a moving one.</p>
 <h2 id="sound-without-sound-files">Sound without sound files<a class="headerlink" href="#sound-without-sound-files" title="Permanent link">#</a></h2>
-<p>Marble has six sound effects and not one audio file. Each is computed when the game starts, from a waveform, a pitch that may slide, and a duration:</p>
+<p>Marble has six sound effects and not one audio file.<br>
+Each is computed when the game starts, from a waveform, a pitch that may slide, and a duration:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">note</span><span class="p">(</span><span class="kc">_</span><span class="w"> </span><span class="n">waveform</span><span class="p">:</span><span class="w"> </span><span class="n">Waveform</span><span class="p">,</span><span class="w"> </span><span class="kc">_</span><span class="w"> </span><span class="n">frequency</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">,</span><span class="w"> </span><span class="kc">_</span><span class="w"> </span><span class="n">duration</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">,</span><span class="w"> </span><span class="kc">_</span><span class="w"> </span><span class="n">volume</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="n">SynthParams</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">SynthParams</span><span class="p">(</span><span class="n">waveform</span><span class="p">:</span><span class="w"> </span><span class="n">waveform</span><span class="p">,</span><span class="w"> </span><span class="n">frequency</span><span class="p">:</span><span class="w"> </span><span class="n">frequency</span><span class="p">,</span><span class="w"> </span><span class="n">duration</span><span class="p">:</span><span class="w"> </span><span class="n">duration</span><span class="p">,</span><span class="w"> </span><span class="n">release</span><span class="p">:</span><span class="w"> </span><span class="n">duration</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.6</span><span class="p">,</span><span class="w"> </span><span class="n">volume</span><span class="p">:</span><span class="w"> </span><span class="n">volume</span><span class="p">)</span>
@@ -557,9 +597,16 @@
 </code></pre></div>
 </div>
 
-<p>The engine can load sound files too. But a handful of numbers is enough for the sounds of a small game, and it keeps the repository free of files with unclear licenses.</p>
-<p>Playing a clip hands it to the <strong>mixer</strong>. The operating system asks for audio in small blocks, many times per second, on a thread of its own. Each time, the mixer walks its list of playing sounds, reads the next piece of each clip, scales it by its volume and pan, and adds everything together. That is all a software mixer is.</p>
-<p>The speed at which a clip is read is its <strong>pitch</strong>, and it can change while the sound plays. Two effects in the game are built on that. Every gem plays the same chime a little higher than the one before, so collecting them sounds like climbing. And the rumble of the rolling marble is one second of noise, looped, played at about a tenth of its speed:</p>
+<p>The engine can load sound files too.<br>
+But a handful of numbers is enough for the sounds of a small game, and it keeps the repository free of files with unclear licenses.</p>
+<p>Playing a clip hands it to the <strong>mixer</strong>.<br>
+The operating system asks for audio in small blocks, many times per second, on a thread of its own.<br>
+Each time, the mixer walks its list of playing sounds, reads the next piece of each clip, scales it by its volume and pan, and adds everything together.<br>
+That is all a software mixer is.</p>
+<p>The speed at which a clip is read is its <strong>pitch</strong>, and it can change while the sound plays.<br>
+Two effects in the game are built on that.<br>
+Every gem plays the same chime a little higher than the one before, so collecting them sounds like climbing.<br>
+And the rumble of the rolling marble is one second of noise, looped, played at about a tenth of its speed:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// The rumble gets louder and higher with speed, and stops in the air.</span>
 <span class="kd">let</span><span class="w"> </span><span class="nv">rolling</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">body</span><span class="p">.</span><span class="n">isGrounded</span><span class="w"> </span><span class="p">?</span><span class="w"> </span><span class="n">saturate</span><span class="p">(</span><span class="n">speed</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">maxSpeed</span><span class="p">)</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
@@ -575,9 +622,12 @@
 </code></pre></div>
 </div>
 
-<p>The sound never starts or stops. It plays all the time, and is simply silent while the marble stands still or flies.</p>
+<p>The sound never starts or stops.<br>
+It plays all the time, and is simply silent while the marble stands still or flies.</p>
 <h2 id="the-interface">The interface<a class="headerlink" href="#the-interface" title="Permanent link">#</a></h2>
-<p>The counter, the clock and the messages are drawn with the engine's 2D <strong>canvas</strong>, which grew out of the <a href="text-rendering.html">Text Rendering</a> and <a href="2d-game.html">A 2D Game</a> chapters. It works in immediate mode: there are no label objects to create and keep up to date. Every frame, <code>draw</code> says what should be on screen:</p>
+<p>The counter, the clock and the messages are drawn with the engine's 2D <strong>canvas</strong>, which grew out of the <a href="text-rendering.html">Text Rendering</a> and <a href="2d-game.html">A 2D Game</a> chapters.<br>
+It works in immediate mode: there are no label objects to create and keep up to date.<br>
+Every frame, <code>draw</code> says what should be on screen:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// Gems, top left.</span>
 <span class="n">canvas</span><span class="p">.</span><span class="n">rect</span><span class="p">(</span><span class="n">Vec2</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">),</span><span class="w"> </span><span class="n">Vec2</span><span class="p">(</span><span class="mi">132</span><span class="p">,</span><span class="w"> </span><span class="mi">44</span><span class="p">),</span><span class="w"> </span><span class="n">panel</span><span class="p">)</span>
@@ -610,11 +660,15 @@
 </code></pre></div>
 </div>
 
-<p>Positions are in points from the top left corner, and colors are the sRGB values a color picker shows. The canvas turns the calls into triangles, and the renderer draws them at the end of the frame in as few draw calls as the textures allow.</p>
-<p>The text comes from a distance-field font atlas, which is why <code>size</code> can be any number. When a gem is collected, <code>collectPulse</code> jumps to one and fades, and the counter swells from 22 to 30 points and back without ever looking blurred.</p>
+<p>Positions are in points from the top left corner, and colors are the sRGB values a color picker shows.<br>
+The canvas turns the calls into triangles, and the renderer draws them at the end of the frame in as few draw calls as the textures allow.</p>
+<p>The text comes from a distance-field font atlas, which is why <code>size</code> can be any number.<br>
+When a gem is collected, <code>collectPulse</code> jumps to one and fades, and the counter swells from 22 to 30 points and back without ever looking blurred.</p>
 <h2 id="a-game-that-plays-itself">A game that plays itself<a class="headerlink" href="#a-game-that-plays-itself" title="Permanent link">#</a></h2>
-<p>Start the game with <code>--demo</code> and nobody needs to touch it. An autopilot rolls the marble through every gem, waits for the ferry, rides it, jumps for the gem above it, and finishes at the goal.</p>
-<p>It is a list of waypoints and one steering rule. The rule reads what a player would see, where the marble is and where the ferry is, and returns what a player would do:</p>
+<p>Start the game with <code>--demo</code> and nobody needs to touch it.<br>
+An autopilot rolls the marble through every gem, waits for the ferry, rides it, jumps for the gem above it, and finishes at the goal.</p>
+<p>It is a list of waypoints and one steering rule.<br>
+The rule reads what a player would see, where the marble is and where the ferry is, and returns what a player would do:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// Steering: decide the velocity we would like (toward the target, slower when close),</span>
 <span class="c1">// then push in proportion to how far the real velocity is from it. On the ferry the</span>
@@ -648,7 +702,8 @@
 </code></pre></div>
 </div>
 
-<p>A demo is pleasant to watch, but that is not why the autopilot exists. Combined with one more option it becomes a test of the whole engine:</p>
+<p>A demo is pleasant to watch, but that is not why the autopilot exists.<br>
+Combined with one more option it becomes a test of the whole engine:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code>swift<span class="w"> </span>run<span class="w"> </span>Marble<span class="w"> </span>--demo<span class="w"> </span>--capture<span class="w"> </span>run.png<span class="w"> </span>--frames<span class="w"> </span><span class="m">2400</span>
 </code></pre></div>
@@ -659,16 +714,22 @@
 </code></pre></div>
 </div>
 
-<p>With <code>--capture</code> the engine opens no window and no sound device. It renders into a texture, advances time by exactly one sixtieth of a second per frame however long the frame really took, and after the given number of frames saves the last one as a PNG. The run is the same every time. The program's exit code then says whether the autopilot made it:</p>
+<p>With <code>--capture</code> the engine opens no window and no sound device.<br>
+It renders into a texture, advances time by exactly one sixtieth of a second per frame however long the frame really took, and after the given number of frames saves the last one as a PNG.<br>
+The run is the same every time.<br>
+The program's exit code then says whether the autopilot made it:</p>
 <div class="lang-swift">
-<div class="codehilite"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="nv">defaults</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">EngineConfig</span><span class="p">()</span>
-<span class="n">defaults</span><span class="p">.</span><span class="n">title</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">"Marble"</span>
-<span class="kd">let</span><span class="w"> </span><span class="nv">engine</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Engine</span><span class="p">(</span><span class="n">config</span><span class="p">:</span><span class="w"> </span><span class="n">EngineConfig</span><span class="p">.</span><span class="n">fromArguments</span><span class="p">(</span><span class="n">CommandLine</span><span class="p">.</span><span class="n">arguments</span><span class="p">,</span><span class="w"> </span><span class="n">defaults</span><span class="p">:</span><span class="w"> </span><span class="n">defaults</span><span class="p">))</span>
-<span class="kd">let</span><span class="w"> </span><span class="nv">game</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MarbleGame</span><span class="p">()</span>
-<span class="kd">var</span><span class="w"> </span><span class="nv">result</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">engine</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="n">game</span><span class="p">)</span>
-<span class="k">if</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">game</span><span class="p">.</span><span class="n">isDemo</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">engine</span><span class="p">.</span><span class="n">window</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">game</span><span class="p">.</span><span class="n">hasWon</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">logError</span><span class="p">(</span><span class="s">"the autopilot did not finish the course"</span><span class="p">)</span>
-<span class="w">    </span><span class="n">result</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">1</span>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">result</span><span class="p">:</span><span class="w"> </span><span class="nb">Int32</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MainActor</span><span class="p">.</span><span class="n">assumeIsolated</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">defaults</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">EngineConfig</span><span class="p">()</span>
+<span class="w">    </span><span class="n">defaults</span><span class="p">.</span><span class="n">title</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">"Marble"</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">engine</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Engine</span><span class="p">(</span><span class="n">config</span><span class="p">:</span><span class="w"> </span><span class="n">EngineConfig</span><span class="p">.</span><span class="n">fromArguments</span><span class="p">(</span><span class="n">CommandLine</span><span class="p">.</span><span class="n">arguments</span><span class="p">,</span><span class="w"> </span><span class="n">defaults</span><span class="p">:</span><span class="w"> </span><span class="n">defaults</span><span class="p">))</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">game</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MarbleGame</span><span class="p">()</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">result</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">engine</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="n">game</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">game</span><span class="p">.</span><span class="n">isDemo</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">engine</span><span class="p">.</span><span class="n">window</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">game</span><span class="p">.</span><span class="n">hasWon</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">logError</span><span class="p">(</span><span class="s">"the autopilot did not finish the course"</span><span class="p">)</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">result</span>
 <span class="p">}</span>
 <span class="n">exit</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </code></pre></div>
@@ -689,11 +750,13 @@
 </code></pre></div>
 </div>
 
-<p>If the physics lets the marble fall through the ferry, if a trigger stops firing, if a platform of the level is moved out of reach, this command fails. The repository's CI workflow runs it on every push, for both languages, and attaches the picture.</p>
+<p>If the physics lets the marble fall through the ferry, if a trigger stops firing, if a platform of the level is moved out of reach, this command fails.<br>
+The repository's CI workflow runs it on every push, for both languages, and attaches the picture.</p>
 <figure><img src="../assets/img/in-practice/engine-complete.webp" alt="The end of an unattended run: the autopilot has collected all eight gems and reached the goal." width="880" height="495" loading="lazy"><figcaption>The end of an unattended run: the autopilot has collected all eight gems and reached the goal.</figcaption></figure>
 
 <h2 id="tests-that-do-not-need-a-gpu">Tests that do not need a GPU<a class="headerlink" href="#tests-that-do-not-need-a-gpu" title="Permanent link">#</a></h2>
-<p>Most of an engine is not graphics, and everything that is not graphics can be tested without a GPU: the math, the scene, input, mesh generation, collisions and physics, the fitting of the shadow cascades, the layout of the shared structs, sound synthesis and the mixer. The engine keeps those parts free of Metal so that they can be.</p>
+<p>Most of an engine is not graphics, and everything that is not graphics can be tested without a GPU: the math, the scene, input, mesh generation, collisions and physics, the fitting of the shadow cascades, the layout of the shared structs, sound synthesis and the mixer.<br>
+The engine keeps those parts free of Metal so that they can be.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">testABallFallsBouncesAndComesToRestOnTheFloor</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">scene</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Scene</span><span class="p">(),</span><span class="w"> </span><span class="n">physics</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Physics</span><span class="p">()</span>
@@ -737,21 +800,31 @@
 </div>
 
 <div class="lang-cpp">
-<p>Run them with <code>ctest --test-dir build -L unit</code>. The C++ tests pass. They were run on Linux against Apple's <code>simd</code> headers, because none of the code they cover needs a Mac.</p>
+<p>Run them with <code>ctest --test-dir build -L unit</code>.</p>
 </div>
 
 <p>Tests like this one are what made it possible to change the physics without fear while Marble's level was being designed around it.</p>
 <h2 id="what-to-build-next">What to build next<a class="headerlink" href="#what-to-build-next" title="Permanent link">#</a></h2>
-<p>The best way to understand an engine is to make it do something it does not do yet. Some ideas, roughly from easy to hard:</p>
+<p>The best way to understand an engine is to make it do something it does not do yet.<br>
+Some ideas, roughly from easy to hard:</p>
 <ul>
-<li><strong>A jump pad.</strong> A trigger that sets the marble's upward velocity. Everything you need is in this chapter.</li>
-<li><strong>A second level.</strong> <code>buildLevel</code> is a list of boxes; write another one and switch to it when the goal is reached.</li>
-<li><strong>A lamp on the ferry.</strong> Make a point light a child of the moving platform, and watch <code>Transform.parent</code> at work.</li>
-<li><strong>Sounds in space.</strong> <code>engine.playSoundAt</code> takes a position and sets volume and pan from where the camera is. Use it for the thump of the crates.</li>
-<li><strong>Shadows for a spot light.</strong> One more shadow map, with a perspective projection, next to the cascades.</li>
-<li><strong>A file format for levels.</strong> Read the boxes from a text file, then make the game reload it when it changes, the way the shaders already do.</li>
+<li><strong>A jump pad.</strong><br>
+A trigger that sets the marble's upward velocity.<br>
+Everything you need is in this chapter.</li>
+<li><strong>A second level.</strong><br>
+<code>buildLevel</code> is a list of boxes; write another one and switch to it when the goal is reached.</li>
+<li><strong>A lamp on the ferry.</strong><br>
+Make a point light a child of the moving platform, and watch <code>Transform.parent</code> at work.</li>
+<li><strong>Sounds in space.</strong><br>
+<code>engine.playSoundAt</code> takes a position and sets volume and pan from where the camera is.<br>
+Use it for the thump of the crates.</li>
+<li><strong>Shadows for a spot light.</strong><br>
+One more shadow map, with a perspective projection, next to the cascades.</li>
+<li><strong>A file format for levels.</strong><br>
+Read the boxes from a text file, then make the game reload it when it changes, the way the shaders already do.</li>
 </ul>
-<p>Each of these touches one part of the engine and leaves the rest alone. That, more than any single technique, is what the arrangement described in these chapters is for.</p>
+<p>Each of these touches one part of the engine and leaves the rest alone.<br>
+That, more than any single technique, is what the arrangement described in these chapters is for.</p>
 <p>The last idea on the list has been taken further than a text file: the <a href="engine-editor.html">next chapter</a> is about the engine's scene editor.</p></article><nav class="pager" id="pager"><a class="prev" href="../in-practice/engine-renderer.html"><small>Previous</small>Engine: The Renderer</a><a class="next" href="../in-practice/engine-editor.html"><small>Next</small>Engine: The Editor</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>

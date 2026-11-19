@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,12 +134,18 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">In pratica</p><h1 id="engine-the-game">Engine: The Game<a class="headerlink" href="#engine-the-game" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
-<p>The <a href="engine-renderer.html">renderer</a> draws whatever is in the scene. This chapter is about what puts things there and makes them move: entities, physics, input, sound, an interface. The example is <strong>Marble</strong>, the game that comes with the LearnMetal Engine. All of it, level included, is about eight hundred lines, and nearly every line is a call into something this chapter explains.</p>
-<figure><img src="../../assets/img/in-practice/engine-gameplay.webp" alt="The whole course. The marble starts in the foreground, crosses the gap on the orange platform and finishes on the far right." width="880" height="495" loading="lazy"><figcaption>The whole course. The marble starts in the foreground, crosses the gap on the orange platform and finishes on the far right.</figcaption></figure>
+<article><p class="crumb">In pratica</p><h1 id="engine-il-gioco">Engine: il gioco<a class="headerlink" href="#engine-il-gioco" title="Permanent link">#</a></h1>
+<p>Il <a href="engine-renderer.html">renderer</a> disegna qualunque cosa ci sia nella scena.<br>
+Questo capitolo parla di ciò che le cose ce le mette e le fa muovere: entità, fisica, input, suono, un'interfaccia.<br>
+L'esempio è <strong>Marble</strong>, il gioco che accompagna il LearnMetal Engine.<br>
+Tutto quanto, livello compreso, sta in circa ottocento righe, e quasi ogni riga è una chiamata a qualcosa che questo capitolo spiega.</p>
+<figure><img src="../../assets/img/in-practice/engine-gameplay.webp" alt="L&#x27;intero percorso. La biglia parte in primo piano, attraversa il vuoto sulla piattaforma arancione e finisce all&#x27;estrema destra." width="880" height="495" loading="lazy"><figcaption>L&#x27;intero percorso. La biglia parte in primo piano, attraversa il vuoto sulla piattaforma arancione e finisce all&#x27;estrema destra.</figcaption></figure>
 
-<h2 id="entities-and-components">Entities and components<a class="headerlink" href="#entities-and-components" title="Permanent link">#</a></h2>
-<p>An entity is nothing but an id. Everything that makes it a marble, a lamp or a wall is in its <strong>components</strong>: plain structs, stored by the scene. The engine brings the ones it has systems for: <code>Transform</code>, <code>Camera</code>, <code>Light</code>, <code>MeshRenderer</code>, <code>RigidBody</code>, <code>Collider</code>, <code>ParticleEmitter</code>. A game adds its own, and the engine does not need to be told about them:</p>
+<h2 id="entita-e-componenti">Entità e componenti<a class="headerlink" href="#entita-e-componenti" title="Permanent link">#</a></h2>
+<p>Un'entità non è altro che un id.<br>
+Tutto ciò che la rende una biglia, una lampada o un muro sta nei suoi <strong>componenti</strong>: semplici struct, conservate dalla scena.<br>
+L'engine porta quelli per cui ha dei sistemi: <code>Transform</code>, <code>Camera</code>, <code>Light</code>, <code>MeshRenderer</code>, <code>RigidBody</code>, <code>Collider</code>, <code>ParticleEmitter</code>.<br>
+Un gioco aggiunge i suoi, e non c'è bisogno di farli conoscere all'engine:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">/// Something to collect. The entity also carries a mesh, a light and a trigger collider.</span>
 <span class="kd">struct</span><span class="w"> </span><span class="nc">Gem</span><span class="w"> </span><span class="p">{</span>
@@ -183,7 +189,8 @@
 </code></pre></div>
 </div>
 
-<p>There is no <code>Gem</code> class with a draw method and an update method. A gem is an entity that is given five components, and each one makes a different part of the engine take notice of it:</p>
+<p>Non esiste una classe <code>Gem</code> con un metodo di disegno e uno di aggiornamento.<br>
+Una gemma è un'entità a cui vengono dati cinque componenti, e ognuno fa sì che una parte diversa dell'engine si accorga di lei:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="k">for</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">gemPositions</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">index</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">level</span><span class="p">.</span><span class="n">gemCount</span>
@@ -222,8 +229,11 @@
 </code></pre></div>
 </div>
 
-<p>The renderer sees a mesh and a light. Physics sees a trigger. Only the game sees a <code>Gem</code>.</p>
-<p>Behavior, then, is a loop over everything that has the right components. This one is the entire animation of the gems:</p>
+<p>Il renderer vede una mesh e una luce.<br>
+La fisica vede un trigger.<br>
+Solo il gioco vede una <code>Gem</code>.</p>
+<p>Il comportamento, quindi, è un ciclo su tutto ciò che ha i componenti giusti.<br>
+Questo è l'intera animazione delle gemme:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// Gems turn and bob; their lights and triggers move with them.</span>
 <span class="kd">let</span><span class="w"> </span><span class="nv">time</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">Float</span><span class="p">(</span><span class="n">engine</span><span class="p">.</span><span class="n">time</span><span class="p">.</span><span class="n">elapsed</span><span class="p">)</span>
@@ -243,17 +253,27 @@
 </code></pre></div>
 </div>
 
-<p>Inside the scene, the components of one type sit back to back in one array, so a loop like this reads memory in order. The <code>Lifetime</code> component works the same way: a loop counts it down and destroys the entity at zero. Destroying is always safe inside a loop, because the entity is only really removed at the end of the step, as the <a href="game-engine.html">first chapter</a> showed.</p>
+<p>Dentro la scena i componenti di uno stesso tipo stanno uno dietro l'altro in un unico array, quindi un ciclo come questo legge la memoria in ordine.<br>
+Il componente <code>Lifetime</code> funziona allo stesso modo: un ciclo lo fa scendere e a zero distrugge l'entità.<br>
+Distruggere dentro un ciclo è sempre sicuro, perché l'entità viene rimossa davvero solo alla fine del passo, come ha mostrato il <a href="game-engine.html">primo capitolo</a>.</p>
 <div class="lang-swift">
-<p>One Swift detail matters everywhere in game code. Components are values. <code>scene[entity, RigidBody.self]</code> gives you a copy, so either change it in place through the subscript, as in <code>scene[cube, Transform.self]?.rotation = ...</code>, or take a copy, change it and store it back. Inside <code>each</code>, the closure's parameters are <code>inout</code>: what you change there is stored.</p>
+<p>C'è un dettaglio di Swift che conta ovunque nel codice di gioco.<br>
+I componenti sono valori.<br>
+<code>scene[entity, RigidBody.self]</code> ti dà una copia, quindi o lo modifichi sul posto attraverso il subscript, come in <code>scene[cube, Transform.self]?.rotation = ...</code>, oppure ne prendi una copia, la modifichi e la salvi di nuovo.<br>
+Dentro <code>each</code> i parametri della closure sono <code>inout</code>: ciò che cambi lì viene salvato.</p>
 </div>
 
 <div class="lang-cpp">
-<p>One C++ detail matters everywhere in game code. <code>scene.get&lt;RigidBody&gt;(entity)</code> returns a pointer into the scene's storage, or <code>nullptr</code>. The pointer stays valid until a component of the same type is added or removed, so use it and let it go; do not keep it in a member variable.</p>
+<p>C'è un dettaglio del C++ che conta ovunque nel codice di gioco.<br>
+<code>scene.get&lt;RigidBody&gt;(entity)</code> restituisce un puntatore dentro la memoria della scena, oppure <code>nullptr</code>.<br>
+Il puntatore resta valido finché non viene aggiunto o rimosso un componente dello stesso tipo, quindi usalo e lascialo andare; non tenerlo in una variabile membro.</p>
 </div>
 
-<h2 id="bodies-colliders-and-triggers">Bodies, colliders and triggers<a class="headerlink" href="#bodies-colliders-and-triggers" title="Permanent link">#</a></h2>
-<p>A <code>Collider</code> gives an entity a shape: a sphere, a box or a capsule. By itself it is a static obstacle, which is all a floor or a wall needs. Add a <code>RigidBody</code> and the entity moves. Marble's level is made of boxes with colliders; the ramp is simply a box that is tilted.</p>
+<h2 id="corpi-collider-e-trigger">Corpi, collider e trigger<a class="headerlink" href="#corpi-collider-e-trigger" title="Permanent link">#</a></h2>
+<p>Un <code>Collider</code> dà a un'entità una forma: una sfera, una scatola o una capsula.<br>
+Da solo è un ostacolo statico, che è tutto ciò che serve a un pavimento o a un muro.<br>
+Aggiungi un <code>RigidBody</code> e l'entità si muove.<br>
+Il livello di Marble è fatto di scatole con collider; la rampa è semplicemente una scatola inclinata.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">scene</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">level</span><span class="p">.</span><span class="n">marble</span><span class="p">,</span><span class="w"> </span><span class="n">Collider</span><span class="p">.</span><span class="n">sphere</span><span class="p">(</span><span class="n">radius</span><span class="p">:</span><span class="w"> </span><span class="n">Level</span><span class="p">.</span><span class="n">marbleRadius</span><span class="p">))</span>
 <span class="kd">var</span><span class="w"> </span><span class="nv">marbleBody</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">RigidBody</span><span class="p">(</span><span class="n">restitution</span><span class="p">:</span><span class="w"> </span><span class="mf">0.35</span><span class="p">,</span><span class="w"> </span><span class="n">friction</span><span class="p">:</span><span class="w"> </span><span class="mf">0.03</span><span class="p">)</span><span class="w">      </span><span class="c1">// a rolling ball barely slows down by itself</span>
@@ -271,8 +291,12 @@
 </code></pre></div>
 </div>
 
-<p>The physics is of the kind most games want, sometimes called arcade physics: gravity, bouncing, friction, things that push each other and stack. It leaves out the hard parts on purpose. Bodies do not spin when they are hit, there are no joints, and a very fast object can pass through a thin one. When a game needs those, a dedicated physics library is the right tool.</p>
-<p>That first omission would look wrong on a marble: a ball that slides without turning. So the game turns it, by exactly the angle a ball of that size rolls through when it travels that far:</p>
+<p>La fisica è del tipo che vuole la maggior parte dei giochi, a volte chiamata fisica arcade: gravità, rimbalzi, attrito, cose che si spingono a vicenda e si impilano.<br>
+Lascia fuori di proposito le parti difficili.<br>
+I corpi non ruotano quando vengono colpiti, non ci sono giunti, e un oggetto molto veloce può attraversarne uno sottile.<br>
+Quando a un gioco servono queste cose, lo strumento giusto è una libreria di fisica dedicata.</p>
+<p>La prima di queste mancanze stonerebbe su una biglia: una palla che scivola senza girare.<br>
+Quindi la fa girare il gioco, esattamente dell'angolo di cui una palla di quella dimensione ruota percorrendo quella distanza:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// The physics moves the marble but does not spin it. Turn it by the angle a ball of</span>
 <span class="c1">// this size rolls through when it travels this far: distance divided by radius.</span>
@@ -297,8 +321,11 @@
 </code></pre></div>
 </div>
 
-<p>Nobody watching can tell that the rotation is decoration. A great deal of game programming is this: simulate what matters, fake the rest convincingly.</p>
-<p>A collider marked as a <strong>trigger</strong> blocks nothing. It only reports what enters it. That is how the game knows a gem was touched or the goal was reached:</p>
+<p>Nessuno, guardando, può capire che la rotazione è decorazione.<br>
+Gran parte della programmazione di giochi è questo: simulare ciò che conta e fingere il resto in modo convincente.</p>
+<p>Un collider marcato come <strong>trigger</strong> non blocca niente.<br>
+Riporta soltanto che cosa gli entra dentro.<br>
+È così che il gioco sa che una gemma è stata toccata o che il traguardo è stato raggiunto:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// Physics events. They arrive at the end of a physics step.</span>
 <span class="n">engine</span><span class="p">.</span><span class="n">physics</span><span class="p">.</span><span class="n">onTriggerEnter</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">[</span><span class="kr">unowned</span><span class="w"> </span><span class="kc">self</span><span class="p">,</span><span class="w"> </span><span class="kr">unowned</span><span class="w"> </span><span class="n">engine</span><span class="p">]</span><span class="w"> </span><span class="n">trigger</span><span class="p">,</span><span class="w"> </span><span class="n">other</span><span class="w"> </span><span class="k">in</span>
@@ -344,9 +371,11 @@
 </code></pre></div>
 </div>
 
-<p>The second event fires when two solid things start touching, and says how fast they met. The game uses it for one thing: a thump whose volume depends on how hard the marble landed.</p>
-<h2 id="input-read-once-use-later">Input: read once, use later<a class="headerlink" href="#input-read-once-use-later" title="Permanent link">#</a></h2>
-<p>The game never asks whether the W key is down. It defines <strong>actions</strong> once, and from then on asks about those:</p>
+<p>Il secondo evento scatta quando due cose solide cominciano a toccarsi, e dice a che velocità si sono incontrate.<br>
+Il gioco lo usa per una cosa sola: un tonfo il cui volume dipende da quanto forte è atterrata la biglia.</p>
+<h2 id="input-leggi-una-volta-usa-dopo">Input: leggi una volta, usa dopo<a class="headerlink" href="#input-leggi-una-volta-usa-dopo" title="Permanent link">#</a></h2>
+<p>Il gioco non chiede mai se il tasto W è premuto.<br>
+Definisce una volta delle <strong>azioni</strong>, e da quel momento chiede di quelle:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// Actions: the game asks "is jump pressed?" and never mentions a key or a button again.</span>
 <span class="kd">let</span><span class="w"> </span><span class="nv">input</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">engine</span><span class="p">.</span><span class="n">input</span>
@@ -372,8 +401,9 @@
 </code></pre></div>
 </div>
 
-<p>Keyboard and gamepad feed the same action, so supporting both costs nothing more.</p>
-<p>The first chapter warned that the fixed step is the wrong place to read input, because it runs zero, one or several times per frame. So <code>update</code> reads, and remembers:</p>
+<p>Tastiera e gamepad alimentano la stessa azione, quindi supportarli entrambi non costa niente di più.</p>
+<p>Il primo capitolo avvertiva che il passo fisso è il posto sbagliato per leggere l'input, perché gira zero, una o più volte per frame.<br>
+Quindi <code>update</code> legge, e ricorda:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// Input is read here, once per frame, and remembered for the fixed steps.</span>
 <span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="n">isDemo</span><span class="w"> </span><span class="p">{</span>
@@ -397,8 +427,10 @@
 </code></pre></div>
 </div>
 
-<p>A jump is not remembered as "yes" but as "yes, for the next 0.15 seconds". Press the button a moment before the marble lands and it still jumps on landing. Players never notice this; they only notice games that do not do it.</p>
-<p><code>fixedUpdate</code> then turns what was remembered into motion:</p>
+<p>Un salto non viene ricordato come "sì" ma come "sì, per i prossimi 0.15 secondi".<br>
+Premi il pulsante un attimo prima che la biglia atterri e salterà comunque all'atterraggio.<br>
+I giocatori non se ne accorgono mai; si accorgono solo dei giochi che non lo fanno.</p>
+<p><code>fixedUpdate</code> trasforma poi in movimento ciò che è stato ricordato:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// Push the marble where the stick points, relative to where the camera looks.</span>
 <span class="c1">// (The autopilot thinks in compass directions instead: east and north.)</span>
@@ -470,9 +502,13 @@
 </code></pre></div>
 </div>
 
-<p>"Forward" means away from the camera, so the controls stay natural while the camera orbits. In the air the marble can still be steered, but only a little. And look at the <code>isDemo</code> branch: the autopilot produces the same two things a player produces, a direction and a jump. Because the game reads its input from two variables and not from the keyboard, replacing the player with a program took a handful of lines.</p>
-<h2 id="a-platform-that-carries-its-passenger">A platform that carries its passenger<a class="headerlink" href="#a-platform-that-carries-its-passenger" title="Permanent link">#</a></h2>
-<p>Halfway through the course a platform ferries the marble across a gap. It is a <strong>kinematic</strong> body: it moves, but nothing can push it.</p>
+<p>"Avanti" significa lontano dalla camera, così i comandi restano naturali mentre la camera orbita.<br>
+In aria la biglia si può ancora dirigere, ma solo di poco.<br>
+E guarda il ramo <code>isDemo</code>: l'autopilota produce le stesse due cose che produce un giocatore, una direzione e un salto.<br>
+Poiché il gioco legge il suo input da due variabili e non dalla tastiera, sostituire il giocatore con un programma ha richiesto una manciata di righe.</p>
+<h2 id="una-piattaforma-che-porta-il-suo-passeggero">Una piattaforma che porta il suo passeggero<a class="headerlink" href="#una-piattaforma-che-porta-il-suo-passeggero" title="Permanent link">#</a></h2>
+<p>A metà percorso una piattaforma traghetta la biglia oltre un vuoto.<br>
+È un corpo <strong>cinematico</strong>: si muove, ma niente può spingerlo.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// The moving platform carries the marble across the gap between terrace and landing.</span>
 <span class="kd">let</span><span class="w"> </span><span class="nv">ferryStart</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Vec3</span><span class="p">(</span><span class="mi">17</span><span class="p">,</span><span class="w"> </span><span class="mf">2.25</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">12.4</span><span class="p">),</span><span class="w"> </span><span class="n">ferryEnd</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Vec3</span><span class="p">(</span><span class="mi">17</span><span class="p">,</span><span class="w"> </span><span class="mf">2.25</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">6.6</span><span class="p">)</span>
@@ -493,7 +529,9 @@
 </code></pre></div>
 </div>
 
-<p>The tempting way to move it is to write a new position every step. The marble would not come along: to the physics the platform would be teleporting, and a body that teleports has no velocity to pass on through friction. A kinematic body has to be moved the way the physics understands, by its velocity:</p>
+<p>Il modo che viene spontaneo per muoverla è scrivere una nuova posizione a ogni passo.<br>
+La biglia non la seguirebbe: per la fisica la piattaforma si starebbe teletrasportando, e un corpo che si teletrasporta non ha una velocità da trasmettere attraverso l'attrito.<br>
+Un corpo cinematico va mosso nel modo che la fisica capisce, con la sua velocità:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// Moving platforms: a kinematic body goes where its velocity takes it, so the</span>
 <span class="c1">// platform is steered by setting the velocity that leads to where it should be next.</span>
@@ -517,9 +555,11 @@
 </code></pre></div>
 </div>
 
-<p>Work out where the platform should be one step from now, and set the velocity that gets it there in exactly one step. The platform follows its path precisely, and the marble on top is carried by friction like any object resting on a moving one.</p>
-<h2 id="sound-without-sound-files">Sound without sound files<a class="headerlink" href="#sound-without-sound-files" title="Permanent link">#</a></h2>
-<p>Marble has six sound effects and not one audio file. Each is computed when the game starts, from a waveform, a pitch that may slide, and a duration:</p>
+<p>Calcola dove deve trovarsi la piattaforma tra un passo, e imposta la velocità che ce la porta in un passo esatto.<br>
+La piattaforma segue con precisione il suo percorso, e la biglia che le sta sopra viene trasportata dall'attrito come qualsiasi oggetto appoggiato su uno in movimento.</p>
+<h2 id="suono-senza-file-audio">Suono senza file audio<a class="headerlink" href="#suono-senza-file-audio" title="Permanent link">#</a></h2>
+<p>Marble ha sei effetti sonori e nemmeno un file audio.<br>
+Ognuno viene calcolato all'avvio del gioco a partire da una forma d'onda, da un'altezza che può scivolare e da una durata:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">note</span><span class="p">(</span><span class="kc">_</span><span class="w"> </span><span class="n">waveform</span><span class="p">:</span><span class="w"> </span><span class="n">Waveform</span><span class="p">,</span><span class="w"> </span><span class="kc">_</span><span class="w"> </span><span class="n">frequency</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">,</span><span class="w"> </span><span class="kc">_</span><span class="w"> </span><span class="n">duration</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">,</span><span class="w"> </span><span class="kc">_</span><span class="w"> </span><span class="n">volume</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="n">SynthParams</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">SynthParams</span><span class="p">(</span><span class="n">waveform</span><span class="p">:</span><span class="w"> </span><span class="n">waveform</span><span class="p">,</span><span class="w"> </span><span class="n">frequency</span><span class="p">:</span><span class="w"> </span><span class="n">frequency</span><span class="p">,</span><span class="w"> </span><span class="n">duration</span><span class="p">:</span><span class="w"> </span><span class="n">duration</span><span class="p">,</span><span class="w"> </span><span class="n">release</span><span class="p">:</span><span class="w"> </span><span class="n">duration</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.6</span><span class="p">,</span><span class="w"> </span><span class="n">volume</span><span class="p">:</span><span class="w"> </span><span class="n">volume</span><span class="p">)</span>
@@ -557,9 +597,16 @@
 </code></pre></div>
 </div>
 
-<p>The engine can load sound files too. But a handful of numbers is enough for the sounds of a small game, and it keeps the repository free of files with unclear licenses.</p>
-<p>Playing a clip hands it to the <strong>mixer</strong>. The operating system asks for audio in small blocks, many times per second, on a thread of its own. Each time, the mixer walks its list of playing sounds, reads the next piece of each clip, scales it by its volume and pan, and adds everything together. That is all a software mixer is.</p>
-<p>The speed at which a clip is read is its <strong>pitch</strong>, and it can change while the sound plays. Two effects in the game are built on that. Every gem plays the same chime a little higher than the one before, so collecting them sounds like climbing. And the rumble of the rolling marble is one second of noise, looped, played at about a tenth of its speed:</p>
+<p>L'engine sa caricare anche i file audio.<br>
+Ma per i suoni di un piccolo gioco basta una manciata di numeri, e così il repository resta libero da file con licenze poco chiare.</p>
+<p>Riprodurre una clip significa consegnarla al <strong>mixer</strong>.<br>
+Il sistema operativo chiede audio a piccoli blocchi, molte volte al secondo, su un thread tutto suo.<br>
+Ogni volta il mixer scorre il suo elenco di suoni in riproduzione, legge il pezzo successivo di ogni clip, lo scala secondo volume e pan, e somma tutto.<br>
+Un mixer software non è altro che questo.</p>
+<p>La velocità a cui una clip viene letta è il suo <strong>pitch</strong>, e può cambiare mentre il suono viene riprodotto.<br>
+Due effetti del gioco si basano su questo.<br>
+Ogni gemma suona lo stesso rintocco un po' più acuto della precedente, così raccoglierle dà la sensazione di salire.<br>
+E il rombo della biglia che rotola è un secondo di rumore, in loop, riprodotto a circa un decimo della sua velocità:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// The rumble gets louder and higher with speed, and stops in the air.</span>
 <span class="kd">let</span><span class="w"> </span><span class="nv">rolling</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">body</span><span class="p">.</span><span class="n">isGrounded</span><span class="w"> </span><span class="p">?</span><span class="w"> </span><span class="n">saturate</span><span class="p">(</span><span class="n">speed</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">maxSpeed</span><span class="p">)</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
@@ -575,9 +622,12 @@
 </code></pre></div>
 </div>
 
-<p>The sound never starts or stops. It plays all the time, and is simply silent while the marble stands still or flies.</p>
-<h2 id="the-interface">The interface<a class="headerlink" href="#the-interface" title="Permanent link">#</a></h2>
-<p>The counter, the clock and the messages are drawn with the engine's 2D <strong>canvas</strong>, which grew out of the <a href="text-rendering.html">Text Rendering</a> and <a href="2d-game.html">A 2D Game</a> chapters. It works in immediate mode: there are no label objects to create and keep up to date. Every frame, <code>draw</code> says what should be on screen:</p>
+<p>Il suono non parte e non si ferma mai.<br>
+Viene riprodotto di continuo, ed è semplicemente muto quando la biglia sta ferma o vola.</p>
+<h2 id="linterfaccia">L'interfaccia<a class="headerlink" href="#linterfaccia" title="Permanent link">#</a></h2>
+<p>Il contatore, l'orologio e i messaggi sono disegnati con il <strong>canvas</strong> 2D dell'engine, nato dai capitoli <a href="text-rendering.html">Rendering del testo</a> e <a href="2d-game.html">Un gioco 2D</a>.<br>
+Lavora in immediate mode: non ci sono oggetti etichetta da creare e tenere aggiornati.<br>
+A ogni frame <code>draw</code> dice che cosa deve esserci a schermo:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// Gems, top left.</span>
 <span class="n">canvas</span><span class="p">.</span><span class="n">rect</span><span class="p">(</span><span class="n">Vec2</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">),</span><span class="w"> </span><span class="n">Vec2</span><span class="p">(</span><span class="mi">132</span><span class="p">,</span><span class="w"> </span><span class="mi">44</span><span class="p">),</span><span class="w"> </span><span class="n">panel</span><span class="p">)</span>
@@ -610,11 +660,15 @@
 </code></pre></div>
 </div>
 
-<p>Positions are in points from the top left corner, and colors are the sRGB values a color picker shows. The canvas turns the calls into triangles, and the renderer draws them at the end of the frame in as few draw calls as the textures allow.</p>
-<p>The text comes from a distance-field font atlas, which is why <code>size</code> can be any number. When a gem is collected, <code>collectPulse</code> jumps to one and fades, and the counter swells from 22 to 30 points and back without ever looking blurred.</p>
-<h2 id="a-game-that-plays-itself">A game that plays itself<a class="headerlink" href="#a-game-that-plays-itself" title="Permanent link">#</a></h2>
-<p>Start the game with <code>--demo</code> and nobody needs to touch it. An autopilot rolls the marble through every gem, waits for the ferry, rides it, jumps for the gem above it, and finishes at the goal.</p>
-<p>It is a list of waypoints and one steering rule. The rule reads what a player would see, where the marble is and where the ferry is, and returns what a player would do:</p>
+<p>Le posizioni sono in punti a partire dall'angolo in alto a sinistra, e i colori sono i valori sRGB che mostra un selettore di colore.<br>
+Il canvas trasforma le chiamate in triangoli, e il renderer li disegna a fine frame con il minor numero di draw call che le texture permettono.</p>
+<p>Il testo viene da un atlas di font a distance field, ed è per questo che <code>size</code> può essere un numero qualsiasi.<br>
+Quando una gemma viene raccolta, <code>collectPulse</code> salta a uno e si spegne, e il contatore si gonfia da 22 a 30 punti e torna indietro senza mai apparire sfocato.</p>
+<h2 id="un-gioco-che-gioca-da-solo">Un gioco che gioca da solo<a class="headerlink" href="#un-gioco-che-gioca-da-solo" title="Permanent link">#</a></h2>
+<p>Avvia il gioco con <code>--demo</code> e nessuno deve toccarlo.<br>
+Un autopilota fa rotolare la biglia attraverso ogni gemma, aspetta il traghetto, ci sale, salta per prendere la gemma sopra di esso e finisce al traguardo.</p>
+<p>È un elenco di waypoint e una sola regola di guida.<br>
+La regola legge ciò che vedrebbe un giocatore, cioè dove sono la biglia e il traghetto, e restituisce ciò che un giocatore farebbe:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// Steering: decide the velocity we would like (toward the target, slower when close),</span>
 <span class="c1">// then push in proportion to how far the real velocity is from it. On the ferry the</span>
@@ -648,7 +702,8 @@
 </code></pre></div>
 </div>
 
-<p>A demo is pleasant to watch, but that is not why the autopilot exists. Combined with one more option it becomes a test of the whole engine:</p>
+<p>Una demo è piacevole da guardare, ma non è per questo che l'autopilota esiste.<br>
+Insieme a un'altra opzione diventa un test dell'intero engine:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code>swift<span class="w"> </span>run<span class="w"> </span>Marble<span class="w"> </span>--demo<span class="w"> </span>--capture<span class="w"> </span>run.png<span class="w"> </span>--frames<span class="w"> </span><span class="m">2400</span>
 </code></pre></div>
@@ -659,16 +714,22 @@
 </code></pre></div>
 </div>
 
-<p>With <code>--capture</code> the engine opens no window and no sound device. It renders into a texture, advances time by exactly one sixtieth of a second per frame however long the frame really took, and after the given number of frames saves the last one as a PNG. The run is the same every time. The program's exit code then says whether the autopilot made it:</p>
+<p>Con <code>--capture</code> l'engine non apre né una finestra né un dispositivo audio.<br>
+Disegna in una texture, fa avanzare il tempo di un sessantesimo di secondo esatto per frame, qualunque sia stata la durata reale del frame, e dopo il numero di frame indicato salva l'ultimo come PNG.<br>
+L'esecuzione è identica ogni volta.<br>
+Il codice di uscita del programma dice poi se l'autopilota ce l'ha fatta:</p>
 <div class="lang-swift">
-<div class="codehilite"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="nv">defaults</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">EngineConfig</span><span class="p">()</span>
-<span class="n">defaults</span><span class="p">.</span><span class="n">title</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">"Marble"</span>
-<span class="kd">let</span><span class="w"> </span><span class="nv">engine</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Engine</span><span class="p">(</span><span class="n">config</span><span class="p">:</span><span class="w"> </span><span class="n">EngineConfig</span><span class="p">.</span><span class="n">fromArguments</span><span class="p">(</span><span class="n">CommandLine</span><span class="p">.</span><span class="n">arguments</span><span class="p">,</span><span class="w"> </span><span class="n">defaults</span><span class="p">:</span><span class="w"> </span><span class="n">defaults</span><span class="p">))</span>
-<span class="kd">let</span><span class="w"> </span><span class="nv">game</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MarbleGame</span><span class="p">()</span>
-<span class="kd">var</span><span class="w"> </span><span class="nv">result</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">engine</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="n">game</span><span class="p">)</span>
-<span class="k">if</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">game</span><span class="p">.</span><span class="n">isDemo</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">engine</span><span class="p">.</span><span class="n">window</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">game</span><span class="p">.</span><span class="n">hasWon</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">logError</span><span class="p">(</span><span class="s">"the autopilot did not finish the course"</span><span class="p">)</span>
-<span class="w">    </span><span class="n">result</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">1</span>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">result</span><span class="p">:</span><span class="w"> </span><span class="nb">Int32</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MainActor</span><span class="p">.</span><span class="n">assumeIsolated</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">defaults</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">EngineConfig</span><span class="p">()</span>
+<span class="w">    </span><span class="n">defaults</span><span class="p">.</span><span class="n">title</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">"Marble"</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">engine</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Engine</span><span class="p">(</span><span class="n">config</span><span class="p">:</span><span class="w"> </span><span class="n">EngineConfig</span><span class="p">.</span><span class="n">fromArguments</span><span class="p">(</span><span class="n">CommandLine</span><span class="p">.</span><span class="n">arguments</span><span class="p">,</span><span class="w"> </span><span class="n">defaults</span><span class="p">:</span><span class="w"> </span><span class="n">defaults</span><span class="p">))</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">game</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MarbleGame</span><span class="p">()</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">result</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">engine</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="n">game</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">game</span><span class="p">.</span><span class="n">isDemo</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">engine</span><span class="p">.</span><span class="n">window</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">game</span><span class="p">.</span><span class="n">hasWon</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">logError</span><span class="p">(</span><span class="s">"the autopilot did not finish the course"</span><span class="p">)</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">result</span>
 <span class="p">}</span>
 <span class="n">exit</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </code></pre></div>
@@ -689,11 +750,13 @@
 </code></pre></div>
 </div>
 
-<p>If the physics lets the marble fall through the ferry, if a trigger stops firing, if a platform of the level is moved out of reach, this command fails. The repository's CI workflow runs it on every push, for both languages, and attaches the picture.</p>
-<figure><img src="../../assets/img/in-practice/engine-complete.webp" alt="The end of an unattended run: the autopilot has collected all eight gems and reached the goal." width="880" height="495" loading="lazy"><figcaption>The end of an unattended run: the autopilot has collected all eight gems and reached the goal.</figcaption></figure>
+<p>Se la fisica lascia cadere la biglia attraverso il traghetto, se un trigger smette di scattare, se una piattaforma del livello viene spostata fuori portata, questo comando fallisce.<br>
+Il workflow di CI del repository lo esegue a ogni push, per entrambi i linguaggi, e allega l'immagine.</p>
+<figure><img src="../../assets/img/in-practice/engine-complete.webp" alt="La fine di un&#x27;esecuzione senza nessuno ai comandi: l&#x27;autopilota ha raccolto tutte e otto le gemme e ha raggiunto il traguardo." width="880" height="495" loading="lazy"><figcaption>La fine di un&#x27;esecuzione senza nessuno ai comandi: l&#x27;autopilota ha raccolto tutte e otto le gemme e ha raggiunto il traguardo.</figcaption></figure>
 
-<h2 id="tests-that-do-not-need-a-gpu">Tests that do not need a GPU<a class="headerlink" href="#tests-that-do-not-need-a-gpu" title="Permanent link">#</a></h2>
-<p>Most of an engine is not graphics, and everything that is not graphics can be tested without a GPU: the math, the scene, input, mesh generation, collisions and physics, the fitting of the shadow cascades, the layout of the shared structs, sound synthesis and the mixer. The engine keeps those parts free of Metal so that they can be.</p>
+<h2 id="test-che-non-hanno-bisogno-di-una-gpu">Test che non hanno bisogno di una GPU<a class="headerlink" href="#test-che-non-hanno-bisogno-di-una-gpu" title="Permanent link">#</a></h2>
+<p>La maggior parte di un engine non è grafica, e tutto ciò che non è grafica si può testare senza una GPU: la matematica, la scena, l'input, la generazione delle mesh, le collisioni e la fisica, l'adattamento delle cascate di ombre, il layout delle struct condivise, la sintesi dei suoni e il mixer.<br>
+L'engine tiene queste parti libere da Metal proprio perché si possano testare.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">testABallFallsBouncesAndComesToRestOnTheFloor</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">scene</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Scene</span><span class="p">(),</span><span class="w"> </span><span class="n">physics</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Physics</span><span class="p">()</span>
@@ -733,32 +796,42 @@
 </div>
 
 <div class="lang-swift">
-<p>Run them with <code>swift test</code>.</p>
+<p>Eseguili con <code>swift test</code>.</p>
 </div>
 
 <div class="lang-cpp">
-<p>Run them with <code>ctest --test-dir build -L unit</code>. The C++ tests pass. They were run on Linux against Apple's <code>simd</code> headers, because none of the code they cover needs a Mac.</p>
+<p>Eseguili con <code>ctest --test-dir build -L unit</code>.</p>
 </div>
 
-<p>Tests like this one are what made it possible to change the physics without fear while Marble's level was being designed around it.</p>
-<h2 id="what-to-build-next">What to build next<a class="headerlink" href="#what-to-build-next" title="Permanent link">#</a></h2>
-<p>The best way to understand an engine is to make it do something it does not do yet. Some ideas, roughly from easy to hard:</p>
+<p>Sono test come questo ad aver permesso di cambiare la fisica senza paura mentre il livello di Marble le veniva progettato intorno.</p>
+<h2 id="che-cosa-costruire-dopo">Che cosa costruire dopo<a class="headerlink" href="#che-cosa-costruire-dopo" title="Permanent link">#</a></h2>
+<p>Il modo migliore di capire un engine è fargli fare qualcosa che ancora non fa.<br>
+Qualche idea, più o meno dalla più facile alla più difficile:</p>
 <ul>
-<li><strong>A jump pad.</strong> A trigger that sets the marble's upward velocity. Everything you need is in this chapter.</li>
-<li><strong>A second level.</strong> <code>buildLevel</code> is a list of boxes; write another one and switch to it when the goal is reached.</li>
-<li><strong>A lamp on the ferry.</strong> Make a point light a child of the moving platform, and watch <code>Transform.parent</code> at work.</li>
-<li><strong>Sounds in space.</strong> <code>engine.playSoundAt</code> takes a position and sets volume and pan from where the camera is. Use it for the thump of the crates.</li>
-<li><strong>Shadows for a spot light.</strong> One more shadow map, with a perspective projection, next to the cascades.</li>
-<li><strong>A file format for levels.</strong> Read the boxes from a text file, then make the game reload it when it changes, the way the shaders already do.</li>
+<li><strong>Un trampolino.</strong><br>
+Un trigger che imposta la velocità verso l'alto della biglia.<br>
+Tutto ciò che ti serve è in questo capitolo.</li>
+<li><strong>Un secondo livello.</strong><br>
+<code>buildLevel</code> è un elenco di scatole; scrivine un altro e passaci quando viene raggiunto il traguardo.</li>
+<li><strong>Una lampada sul traghetto.</strong><br>
+Fai di una luce puntiforme una figlia della piattaforma mobile, e guarda <code>Transform.parent</code> al lavoro.</li>
+<li><strong>Suoni nello spazio.</strong><br>
+<code>engine.playSoundAt</code> prende una posizione e imposta volume e pan in base a dove si trova la camera.<br>
+Usalo per il tonfo delle casse.</li>
+<li><strong>Ombre per uno spot.</strong><br>
+Un'altra shadow map, con una proiezione prospettica, accanto alle cascate.</li>
+<li><strong>Un formato di file per i livelli.</strong><br>
+Leggi le scatole da un file di testo, poi fai in modo che il gioco lo ricarichi quando cambia, come già fanno gli shader.</li>
 </ul>
-<p>Each of these touches one part of the engine and leaves the rest alone. That, more than any single technique, is what the arrangement described in these chapters is for.</p>
-<p>The last idea on the list has been taken further than a text file: the <a href="engine-editor.html">next chapter</a> is about the engine's scene editor.</p></article><nav class="pager" id="pager"><a class="prev" href="../in-practice/engine-renderer.html"><small>Precedente</small>Engine: il renderer</a><a class="next" href="../in-practice/engine-editor.html"><small>Successivo</small>Engine: l&#x27;editor</a></nav>
+<p>Ognuna di queste tocca una parte dell'engine e lascia stare il resto.<br>
+È a questo, più che a qualsiasi singola tecnica, che serve la disposizione descritta in questi capitoli.</p>
+<p>L'ultima idea dell'elenco è stata portata più in là di un file di testo: il <a href="engine-editor.html">prossimo capitolo</a> parla dell'editor di scene dell'engine.</p></article><nav class="pager" id="pager"><a class="prev" href="../in-practice/engine-renderer.html"><small>Precedente</small>Engine: il renderer</a><a class="next" href="../in-practice/engine-editor.html"><small>Successivo</small>Engine: l&#x27;editor</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#entities-and-components">Entities and components</a></li><li><a href="#bodies-colliders-and-triggers">Bodies, colliders and triggers</a></li><li><a href="#input-read-once-use-later">Input: read once, use later</a></li><li><a href="#a-platform-that-carries-its-passenger">A platform that carries its passenger</a></li><li><a href="#sound-without-sound-files">Sound without sound files</a></li><li><a href="#the-interface">The interface</a></li><li><a href="#a-game-that-plays-itself">A game that plays itself</a></li><li><a href="#tests-that-do-not-need-a-gpu">Tests that do not need a GPU</a></li><li><a href="#what-to-build-next">What to build next</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#entita-e-componenti">Entità e componenti</a></li><li><a href="#corpi-collider-e-trigger">Corpi, collider e trigger</a></li><li><a href="#input-leggi-una-volta-usa-dopo">Input: leggi una volta, usa dopo</a></li><li><a href="#una-piattaforma-che-porta-il-suo-passeggero">Una piattaforma che porta il suo passeggero</a></li><li><a href="#suono-senza-file-audio">Suono senza file audio</a></li><li><a href="#linterfaccia">L&#x27;interfaccia</a></li><li><a href="#un-gioco-che-gioca-da-solo">Un gioco che gioca da solo</a></li><li><a href="#test-che-non-hanno-bisogno-di-una-gpu">Test che non hanno bisogno di una GPU</a></li><li><a href="#che-cosa-costruire-dopo">Che cosa costruire dopo</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

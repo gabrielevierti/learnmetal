@@ -135,7 +135,9 @@
 </nav>
 <main class="content" id="main">
 <article><p class="crumb">Getting Started</p><h1 id="review">Review<a class="headerlink" href="#review" title="Permanent link">#</a></h1>
-<p>That was the hard part. You can open a view, push vertices through a pipeline, texture them, move them with matrices, and fly a camera through the result. Everything from here on builds on these pieces.</p>
+<p>That was the hard part.<br>
+You can open a view, push vertices through a pipeline, texture them, move them with matrices, and fly a camera through the result.<br>
+Everything from here on builds on these pieces.</p>
 <h2 id="the-frame-one-more-time">The frame, one more time<a class="headerlink" href="#the-frame-one-more-time" title="Permanent link">#</a></h2>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">draw</span><span class="p">(</span><span class="k">in</span><span class="w"> </span><span class="n">view</span><span class="p">:</span><span class="w"> </span><span class="bp">MTKView</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -197,7 +199,8 @@
 <li><strong>Drawable</strong>: the texture that will be presented on screen this frame.</li>
 <li><strong>Vertex function</strong>: runs per vertex, outputs a clip-space position.</li>
 <li><strong>Fragment function</strong>: runs per covered pixel, outputs a color.</li>
-<li><strong>Render pipeline state</strong>: compiled shaders plus vertex layout and attachment formats. Expensive to create, cheap to use.</li>
+<li><strong>Render pipeline state</strong>: compiled shaders plus vertex layout and attachment formats.<br>
+Expensive to create, cheap to use.</li>
 <li><strong>Vertex descriptor</strong>: maps bytes in vertex buffers to shader attributes.</li>
 <li><strong>Buffer</strong> (<code>MTLBuffer</code>): raw memory visible to the GPU.</li>
 <li><strong>Uniforms</strong>: per-draw constants passed to shaders in a buffer.</li>
@@ -252,7 +255,8 @@
 <li><strong>Geometry vanishing close to the camera</strong>: an OpenGL projection matrix with a -1 to 1 depth range.</li>
 <li><strong>Nothing drawn and no error</strong>: the model is behind the camera, outside the near and far planes, or the depth compare function rejects everything.</li>
 </ul>
-<p>Read validation messages carefully. Metal's are precise and nearly always name the exact property that is wrong.</p></article><nav class="pager" id="pager"><a class="prev" href="../getting-started/camera.html"><small>Previous</small>Camera</a><a class="next" href="../lighting/colors.html"><small>Next</small>Colors</a></nav>
+<p>Read validation messages carefully.<br>
+Metal's are precise and nearly always name the exact property that is wrong.</p></article><nav class="pager" id="pager"><a class="prev" href="../getting-started/camera.html"><small>Previous</small>Camera</a><a class="next" href="../lighting/colors.html"><small>Next</small>Colors</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>

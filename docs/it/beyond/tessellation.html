@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,19 +134,29 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Oltre</p><h1 id="tessellation">Tessellation<a class="headerlink" href="#tessellation" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
-<p>Detailed surfaces need many triangles, but only where the viewer can see the detail. A mountain a kilometer away does not need the triangle density of the ground under your feet. <strong>Tessellation</strong> lets the GPU subdivide coarse geometry on the fly, as finely as you ask, so a mesh can be stored and animated at low resolution and rendered at high resolution.</p>
-<h2 id="patches">Patches<a class="headerlink" href="#patches" title="Permanent link">#</a></h2>
-<p>With tessellation, you no longer submit triangles. You submit <strong>patches</strong>: triangles or quads defined by <strong>control points</strong>. For each patch you provide <strong>tessellation factors</strong> that say how finely to subdivide it. The GPU's tessellator generates the new vertices, and a special vertex function computes the final position of each.</p>
-<p>Metal's design differs from other APIs. There are no separate hull and domain shader stages. Instead:</p>
+<article><p class="crumb">Oltre</p><h1 id="tassellazione">Tassellazione<a class="headerlink" href="#tassellazione" title="Permanent link">#</a></h1>
+<p>Le superfici dettagliate hanno bisogno di molti triangoli, ma solo dove chi guarda può vedere il dettaglio.<br>
+Una montagna a un chilometro di distanza non richiede la densità di triangoli del terreno sotto i tuoi piedi.<br>
+La <strong>tassellazione</strong> permette alla GPU di suddividere al volo una geometria grossolana, finemente quanto chiedi, così una mesh può essere salvata e animata a bassa risoluzione e disegnata ad alta risoluzione.</p>
+<h2 id="patch">Patch<a class="headerlink" href="#patch" title="Permanent link">#</a></h2>
+<p>Con la tassellazione non invii più triangoli.<br>
+Invii <strong>patch</strong>: triangoli o quadrilateri definiti da <strong>punti di controllo</strong>.<br>
+Per ogni patch fornisci dei <strong>fattori di tassellazione</strong> che dicono quanto finemente suddividerla.<br>
+Il tessellator della GPU genera i nuovi vertici, e una vertex function speciale calcola la posizione finale di ciascuno.</p>
+<p>L'impostazione di Metal è diversa da quella di altre API.<br>
+Non ci sono stadi separati di hull shader e domain shader.<br>
+Invece:</p>
 <ol>
-<li>A <strong>compute kernel</strong>, or the CPU, writes tessellation factors into a buffer.</li>
-<li>The tessellator subdivides each patch according to its factors.</li>
-<li>A <strong>post-tessellation vertex function</strong> runs once for every generated vertex.</li>
+<li>Un <strong>compute kernel</strong>, o la CPU, scrive i fattori di tassellazione in un buffer.</li>
+<li>Il tessellator suddivide ogni patch secondo i suoi fattori.</li>
+<li>Una <strong>post-tessellation vertex function</strong> gira una volta per ogni vertice generato.</li>
 </ol>
-<h2 id="tessellation-factors">Tessellation factors<a class="headerlink" href="#tessellation-factors" title="Permanent link">#</a></h2>
-<p>A quad patch has four <strong>edge factors</strong> and two <strong>inside factors</strong>. A triangle patch has three and one. A factor of 1 means no subdivision; 16 means the edge is split into 16 segments. Edge factors are separate from inside factors so that two neighboring patches can agree on their shared edge and leave no cracks, even when their interiors are subdivided differently.</p>
-<p>A kernel that sets the same factor for every patch:</p>
+<h2 id="i-fattori-di-tassellazione">I fattori di tassellazione<a class="headerlink" href="#i-fattori-di-tassellazione" title="Permanent link">#</a></h2>
+<p>Una patch quadrilatera ha quattro <strong>fattori di bordo</strong> e due <strong>fattori interni</strong>.<br>
+Una patch triangolare ne ha tre e uno.<br>
+Un fattore di 1 significa nessuna suddivisione; 16 significa che il bordo viene diviso in 16 segmenti.<br>
+I fattori di bordo sono separati da quelli interni perché due patch vicine possano accordarsi sul bordo in comune e non lasciare crepe, anche quando i loro interni sono suddivisi in modo diverso.</p>
+<p>Un kernel che imposta lo stesso fattore per ogni patch:</p>
 <div class="codehilite"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;metal_stdlib&gt;</span>
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">metal</span><span class="p">;</span>
 
@@ -162,7 +172,7 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p><code>MTLQuadTessellationFactorsHalf</code> is a built-in struct of six half floats, 12 bytes per patch:</p>
+<p><code>MTLQuadTessellationFactorsHalf</code> è una struct predefinita di sei half float, 12 byte per patch:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">factorBuffer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeBuffer</span><span class="p">(</span><span class="n">length</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">patchCount</span><span class="p">,</span><span class="w"> </span><span class="n">options</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">storageModePrivate</span><span class="p">)</span><span class="o">!</span>
 </code></pre></div>
@@ -172,9 +182,12 @@
 </code></pre></div>
 </div>
 
-<p>In a real renderer, the kernel computes each edge's factor from its distance to the camera or its length on screen. That is <strong>adaptive tessellation</strong>. Compute a factor per <em>edge</em> from that edge's own midpoint, so both patches sharing the edge get the same value.</p>
-<h2 id="the-pipeline">The pipeline<a class="headerlink" href="#the-pipeline" title="Permanent link">#</a></h2>
-<p>Control points go in an ordinary vertex buffer. The vertex descriptor says that the data advances per control point:</p>
+<p>In un renderer vero il kernel calcola il fattore di ogni bordo dalla sua distanza dalla camera o dalla sua lunghezza sullo schermo.<br>
+È la <strong>tassellazione adattiva</strong>.<br>
+Calcola un fattore per ogni <em>bordo</em> dal punto medio di quel bordo, così entrambe le patch che lo condividono ottengono lo stesso valore.</p>
+<h2 id="la-pipeline">La pipeline<a class="headerlink" href="#la-pipeline" title="Permanent link">#</a></h2>
+<p>I punti di controllo stanno in un normale vertex buffer.<br>
+Il vertex descriptor dice che i dati avanzano per punto di controllo:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">vertexDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLVertexDescriptor</span><span class="p">()</span>
 <span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">format</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">float3</span>
@@ -220,8 +233,11 @@
 </code></pre></div>
 </div>
 
-<p>The <strong>partition mode</strong> controls how edges are split. <code>.integer</code> and <code>.pow2</code> snap to whole numbers, which causes visible popping as factors change. The fractional modes add new vertices gradually, so detail grows smoothly as the camera approaches. The maximum factor is 16 on older iOS devices and 64 on Macs and recent Apple GPUs.</p>
-<h2 id="the-post-tessellation-vertex-function">The post-tessellation vertex function<a class="headerlink" href="#the-post-tessellation-vertex-function" title="Permanent link">#</a></h2>
+<p>Il <strong>partition mode</strong> controlla come vengono divisi i bordi.<br>
+<code>.integer</code> e <code>.pow2</code> si agganciano a numeri interi, cosa che provoca scatti visibili quando i fattori cambiano.<br>
+I modi frazionari aggiungono i nuovi vertici gradualmente, così il dettaglio cresce con dolcezza mentre la camera si avvicina.<br>
+Il fattore massimo è 16 sui dispositivi iOS più vecchi e 64 sui Mac e sulle GPU Apple recenti.</p>
+<h2 id="la-post-tessellation-vertex-function">La post-tessellation vertex function<a class="headerlink" href="#la-post-tessellation-vertex-function" title="Permanent link">#</a></h2>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">ControlPoint</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="p">[[</span><span class="na">attribute</span><span class="p">(</span><span class="mi">0</span><span class="p">)]];</span>
 <span class="p">};</span>
@@ -261,12 +277,14 @@
 </code></pre></div>
 
 <ul>
-<li><code>[[patch(quad, 4)]]</code> declares a quad patch with four control points.</li>
-<li><code>[[position_in_patch]]</code> is where the generated vertex lies within the patch: a <code>float2</code> from 0 to 1 for quads, and a <code>float3</code> of barycentric weights for triangles.</li>
-<li>Vertex functions cannot compute mip levels automatically, so texture samples name the level.</li>
+<li><code>[[patch(quad, 4)]]</code> dichiara una patch quadrilatera con quattro punti di controllo.</li>
+<li><code>[[position_in_patch]]</code> è il punto in cui il vertice generato si trova dentro la patch: un <code>float2</code> da 0 a 1 per i quadrilateri, e un <code>float3</code> di pesi baricentrici per i triangoli.</li>
+<li>Le vertex function non possono calcolare i livelli di mip in automatico, quindi le letture di texture indicano il livello.</li>
 </ul>
-<p>The function decides what the patch <em>means</em>. Here it is a flat quad displaced by a height map. Interpret sixteen control points as a bicubic Bézier patch and you get smooth curved surfaces from a coarse cage.</p>
-<h2 id="drawing">Drawing<a class="headerlink" href="#drawing" title="Permanent link">#</a></h2>
+<p>È la funzione a decidere che cosa la patch <em>significa</em>.<br>
+Qui è un rettangolo piatto spostato da una height map.<br>
+Interpreta sedici punti di controllo come una patch di Bézier bicubica e ottieni superfici curve e lisce a partire da una gabbia grossolana.</p>
+<h2 id="disegnare">Disegnare<a class="headerlink" href="#disegnare" title="Permanent link">#</a></h2>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// 1. Compute pass: fill the factor buffer.</span>
 <span class="kd">let</span><span class="w"> </span><span class="nv">compute</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">commandBuffer</span><span class="p">.</span><span class="n">makeComputeCommandEncoder</span><span class="p">()</span><span class="o">!</span>
@@ -321,11 +339,12 @@
 </code></pre></div>
 </div>
 
-<p>Textures and samplers for the vertex stage have their own binding calls, <code>setVertexTexture</code> and <code>setVertexSamplerState</code>.</p>
+<p>Le texture e i sampler dello stadio di vertice hanno le loro chiamate di binding, <code>setVertexTexture</code> e <code>setVertexSamplerState</code>.</p>
 <div class="lm-demo" data-demo="tessellation" data-fallback="../../assets/img/beyond/tessellation.webp"></div>
 
-<h2 id="normals-for-displaced-surfaces">Normals for displaced surfaces<a class="headerlink" href="#normals-for-displaced-surfaces" title="Permanent link">#</a></h2>
-<p>Displacement changes the surface, so the original normals are wrong. For a height map, compute the normal from neighboring heights, in the vertex function or per fragment:</p>
+<h2 id="le-normali-delle-superfici-spostate">Le normali delle superfici spostate<a class="headerlink" href="#le-normali-delle-superfici-spostate" title="Permanent link">#</a></h2>
+<p>Lo spostamento cambia la superficie, quindi le normali originali sono sbagliate.<br>
+Per una height map calcola la normale dalle altezze vicine, nella vertex function o per fragment:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float2</span><span class="w"> </span><span class="n">texel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">float2</span><span class="p">(</span><span class="n">heightMap</span><span class="p">.</span><span class="n">get_width</span><span class="p">(),</span><span class="w"> </span><span class="n">heightMap</span><span class="p">.</span><span class="n">get_height</span><span class="p">());</span>
 <span class="kt">float</span><span class="w"> </span><span class="n">left</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">heightMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">uv</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">float2</span><span class="p">(</span><span class="n">texel</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)).</span><span class="n">r</span><span class="p">;</span>
 <span class="kt">float</span><span class="w"> </span><span class="n">right</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">heightMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">uv</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">float2</span><span class="p">(</span><span class="n">texel</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)).</span><span class="n">r</span><span class="p">;</span>
@@ -334,32 +353,39 @@
 <span class="n">float3</span><span class="w"> </span><span class="n">normal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">float3</span><span class="p">(</span><span class="n">left</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">right</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">texel</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">terrainSize</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">heightScale</span><span class="p">,</span><span class="w"> </span><span class="n">down</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">up</span><span class="p">));</span>
 </code></pre></div>
 
-<h2 id="uses">Uses<a class="headerlink" href="#uses" title="Permanent link">#</a></h2>
+<h2 id="usi">Usi<a class="headerlink" href="#usi" title="Permanent link">#</a></h2>
 <ul>
-<li><strong>Terrain</strong> with continuous level of detail.</li>
-<li><strong>Displacement mapping</strong>: real geometric detail with correct silhouettes and shadows, where <a href="../advanced-lighting/parallax-mapping.html">parallax mapping</a> only fakes it.</li>
-<li><strong>Smooth surfaces</strong>: subdivision surfaces and Bézier patches for characters and vehicles.</li>
+<li><strong>Terreno</strong> con livello di dettaglio continuo.</li>
+<li><strong>Displacement mapping</strong>: vero dettaglio geometrico con profili e ombre corretti, dove il <a href="../advanced-lighting/parallax-mapping.html">parallax mapping</a> si limita a fingerlo.</li>
+<li><strong>Superfici lisce</strong>: subdivision surface e patch di Bézier per personaggi e veicoli.</li>
 </ul>
-<p>On recent hardware, mesh shaders offer another route to the same goals with more control. Tessellation remains the simplest way to get adaptive detail and is supported on every Apple GPU.</p>
-<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<p>Sull'hardware recente i mesh shader offrono un'altra strada verso gli stessi obiettivi, con più controllo.<br>
+La tassellazione resta il modo più semplice di ottenere dettaglio adattivo ed è supportata da ogni GPU Apple.</p>
+<h2 id="esercizi">Esercizi<a class="headerlink" href="#esercizi" title="Permanent link">#</a></h2>
 <ul>
-<li>Animate the tessellation level and watch the wireframe refine.<details class="solution"><summary>Mostra la soluzione</summary><p>Pass <code>level = 1.0 + 7.5 * (sin(time) * 0.5 + 0.5)</code> to the factor kernel each frame. With a fractional partition mode the new vertices slide out of existing edges smoothly. The live demo has a slider for the factor.</p></details></li>
-<li>Compute per-edge factors from the camera distance in the kernel.<details class="solution"><summary>Mostra la soluzione</summary><p>Give the kernel the control points and the camera position. For each edge take its midpoint, compute the distance to the camera, and map it to a factor. Use the average of the edge factors for the inside.</p>
+<li>Anima il livello di tassellazione e guarda il wireframe infittirsi.<details class="solution"><summary>Mostra la soluzione</summary><p>Passa al kernel dei fattori <code>level = 1.0 + 7.5 * (sin(time) * 0.5 + 0.5)</code> a ogni frame.<br>
+Con un partition mode frazionario i nuovi vertici escono con dolcezza dai bordi esistenti.<br>
+La demo interattiva ha uno slider per il fattore.</p></details></li>
+<li>Calcola nel kernel i fattori per bordo dalla distanza dalla camera.<details class="solution"><summary>Mostra la soluzione</summary><p>Dai al kernel i punti di controllo e la posizione della camera.<br>
+Per ogni bordo prendi il punto medio, calcola la distanza dalla camera e trasformala in un fattore.<br>
+Per l'interno usa la media dei fattori di bordo.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="nf">edgeFactor</span><span class="p">(</span><span class="n">float3</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="n">eye</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">distance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">length</span><span class="p">((</span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.5</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">eye</span><span class="p">);</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">clamp</span><span class="p">(</span><span class="mf">48.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">distance</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">16.0</span><span class="p">);</span>
 <span class="p">}</span>
 </code></pre></div>
 
-<p>Because the factor depends only on the edge's own endpoints, both patches that share an edge compute the same value and no cracks appear.</p></details></li>
-<li>Compare <code>.integer</code> and <code>.fractionalEven</code> while moving the camera.<details class="solution"><summary>Mostra la soluzione</summary><p>With <code>.integer</code> the factor snaps to whole numbers, so the mesh changes in visible jumps as you move. With <code>.fractionalEven</code> new vertices grow out of existing ones, and the transition is continuous. Fractional modes cost nothing extra and are the right default for anything that moves.</p></details></li>
+<p>Poiché il fattore dipende solo dagli estremi del bordo, entrambe le patch che condividono un bordo calcolano lo stesso valore e non compaiono crepe.</p></details></li>
+<li>Confronta <code>.integer</code> e <code>.fractionalEven</code> mentre muovi la camera.<details class="solution"><summary>Mostra la soluzione</summary><p>Con <code>.integer</code> il fattore si aggancia a numeri interi, quindi la mesh cambia a scatti visibili mentre ti muovi.<br>
+Con <code>.fractionalEven</code> i nuovi vertici crescono da quelli esistenti, e la transizione è continua.<br>
+I modi frazionari non costano niente in più e sono la scelta predefinita giusta per tutto ciò che si muove.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../beyond/compute-shaders.html"><small>Precedente</small>Compute shader</a><a class="next" href="../beyond/ray-tracing.html"><small>Successivo</small>Ray tracing</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#patches">Patches</a></li><li><a href="#tessellation-factors">Tessellation factors</a></li><li><a href="#the-pipeline">The pipeline</a></li><li><a href="#the-post-tessellation-vertex-function">The post-tessellation vertex function</a></li><li><a href="#drawing">Drawing</a></li><li><a href="#normals-for-displaced-surfaces">Normals for displaced surfaces</a></li><li><a href="#uses">Uses</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#patch">Patch</a></li><li><a href="#i-fattori-di-tassellazione">I fattori di tassellazione</a></li><li><a href="#la-pipeline">La pipeline</a></li><li><a href="#la-post-tessellation-vertex-function">La post-tessellation vertex function</a></li><li><a href="#disegnare">Disegnare</a></li><li><a href="#le-normali-delle-superfici-spostate">Le normali delle superfici spostate</a></li><li><a href="#usi">Usi</a></li><li><a href="#esercizi">Esercizi</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

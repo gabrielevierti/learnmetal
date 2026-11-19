@@ -135,35 +135,49 @@
 </nav>
 <main class="content" id="main">
 <article><p class="crumb">PBR</p><h1 id="theory">Theory<a class="headerlink" href="#theory" title="Permanent link">#</a></h1>
-<p><strong>Physically based rendering</strong> (PBR) is a family of techniques that model light in a way that is closer to physics than Phong or Blinn-Phong. The pay-off is practical:</p>
+<p><strong>Physically based rendering</strong> (PBR) is a family of techniques that model light in a way that is closer to physics than Phong or Blinn-Phong.<br>
+The pay-off is practical:</p>
 <ul>
 <li>Materials look right under <strong>any</strong> lighting, without per-scene tweaking.</li>
 <li>Artists author materials with a few intuitive parameters that mean the same thing in every engine.</li>
 </ul>
-<p>A lighting model is usually called physically based when it meets three conditions: it is built on a <strong>microfacet</strong> model of surfaces, it <strong>conserves energy</strong>, and it uses a physically based <strong>BRDF</strong>. This chapter explains each, and the next one turns them into shader code.</p>
+<p>A lighting model is usually called physically based when it meets three conditions: it is built on a <strong>microfacet</strong> model of surfaces, it <strong>conserves energy</strong>, and it uses a physically based <strong>BRDF</strong>.<br>
+This chapter explains each, and the next one turns them into shader code.</p>
 <h2 id="microfacets">Microfacets<a class="headerlink" href="#microfacets" title="Permanent link">#</a></h2>
-<p>At a microscopic scale no surface is smooth. It is made of tiny perfect mirrors called <strong>microfacets</strong>, each pointing in its own direction. On a rough surface their orientations vary wildly, and incoming light scatters widely, producing broad, dim highlights. On a smooth surface they are nearly aligned, and reflections are sharp and bright.</p>
-<p>We cannot model individual microfacets, so we describe them statistically with one number, the <strong>roughness</strong>, from 0 (mirror) to 1 (completely rough). What matters to a highlight is the fraction of microfacets whose normal matches the <strong>halfway vector</strong> between the light and the viewer, the same vector we met in <a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a>.</p>
+<p>At a microscopic scale no surface is smooth.<br>
+It is made of tiny perfect mirrors called <strong>microfacets</strong>, each pointing in its own direction.<br>
+On a rough surface their orientations vary wildly, and incoming light scatters widely, producing broad, dim highlights.<br>
+On a smooth surface they are nearly aligned, and reflections are sharp and bright.</p>
+<p>We cannot model individual microfacets, so we describe them statistically with one number, the <strong>roughness</strong>, from 0 (mirror) to 1 (completely rough).<br>
+What matters to a highlight is the fraction of microfacets whose normal matches the <strong>halfway vector</strong> between the light and the viewer, the same vector we met in <a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a>.</p>
 <h2 id="energy-conservation">Energy conservation<a class="headerlink" href="#energy-conservation" title="Permanent link">#</a></h2>
-<p>Outgoing light can never exceed incoming light, apart from surfaces that emit light themselves. When light hits a surface it splits into two parts:</p>
+<p>Outgoing light can never exceed incoming light, apart from surfaces that emit light themselves.<br>
+When light hits a surface it splits into two parts:</p>
 <ul>
-<li>The <strong>reflected</strong> part bounces off the surface directly. This is <strong>specular</strong> light.</li>
-<li>The <strong>refracted</strong> part enters the material, scatters inside, and is partly absorbed. What comes back out, colored by the material, is <strong>diffuse</strong> light.</li>
+<li>The <strong>reflected</strong> part bounces off the surface directly.<br>
+This is <strong>specular</strong> light.</li>
+<li>The <strong>refracted</strong> part enters the material, scatters inside, and is partly absorbed.<br>
+What comes back out, colored by the material, is <strong>diffuse</strong> light.</li>
 </ul>
-<p>The two are mutually exclusive: light that was reflected cannot also be refracted. So if a fraction <code>kS</code> is reflected, at most <code>1 - kS</code> is left for diffuse.</p>
-<p><strong>Metals</strong> behave differently from non-metals (<strong>dielectrics</strong>). A metal absorbs all refracted light, so it has no diffuse color at all, only tinted specular reflection. This is the basis of the <strong>metalness</strong> parameter.</p>
+<p>The two are mutually exclusive: light that was reflected cannot also be refracted.<br>
+So if a fraction <code>kS</code> is reflected, at most <code>1 - kS</code> is left for diffuse.</p>
+<p><strong>Metals</strong> behave differently from non-metals (<strong>dielectrics</strong>).<br>
+A metal absorbs all refracted light, so it has no diffuse color at all, only tinted specular reflection.<br>
+This is the basis of the <strong>metalness</strong> parameter.</p>
 <h2 id="the-reflectance-equation">The reflectance equation<a class="headerlink" href="#the-reflectance-equation" title="Permanent link">#</a></h2>
 <p>PBR is built on this equation:</p>
 <div class="codehilite"><pre><span></span><code>Lo(p, wo) = ∫Ω  fr(p, wi, wo) · Li(p, wi) · (n · wi)  dwi
 </code></pre></div>
 
-<p>It reads more gently than it looks. The light <code>Lo</code> leaving point <code>p</code> toward the viewer <code>wo</code> is the sum, over every incoming direction <code>wi</code> in the hemisphere <code>Ω</code> above the surface, of:</p>
+<p>It reads more gently than it looks.<br>
+The light <code>Lo</code> leaving point <code>p</code> toward the viewer <code>wo</code> is the sum, over every incoming direction <code>wi</code> in the hemisphere <code>Ω</code> above the surface, of:</p>
 <ul>
 <li><code>Li</code>, the <strong>radiance</strong> arriving from that direction, which is the strength and color of the light,</li>
 <li><code>n · wi</code>, the familiar cosine factor that weakens light arriving at a shallow angle,</li>
 <li><code>fr</code>, the <strong>BRDF</strong>, which says how much of the light from <code>wi</code> is reflected toward <code>wo</code> for this material.</li>
 </ul>
-<p>For a handful of point lights the integral collapses into a simple sum over the lights, which is what the next chapter does. For light arriving from the whole environment we have to actually solve it, and that is the subject of the IBL chapters.</p>
+<p>For a handful of point lights the integral collapses into a simple sum over the lights, which is what the next chapter does.<br>
+For light arriving from the whole environment we have to actually solve it, and that is the subject of the IBL chapters.</p>
 <h2 id="the-cook-torrance-brdf">The Cook-Torrance BRDF<a class="headerlink" href="#the-cook-torrance-brdf" title="Permanent link">#</a></h2>
 <p>The BRDF used by practically every real-time renderer has a diffuse and a specular part:</p>
 <div class="codehilite"><pre><span></span><code>fr = kD · f_lambert + f_cook-torrance
@@ -178,27 +192,35 @@ f_cook-torrance = ─────────────────
 
 <p>with three functions, each approximating one aspect of microfacet behavior.</p>
 <h3 id="d-normal-distribution-function">D: normal distribution function<a class="headerlink" href="#d-normal-distribution-function" title="Permanent link">#</a></h3>
-<p>How many microfacets are aligned with the halfway vector <code>h</code>? The <strong>Trowbridge-Reitz GGX</strong> distribution, with <code>α = roughness²</code>:</p>
+<p>How many microfacets are aligned with the halfway vector <code>h</code>?<br>
+The <strong>Trowbridge-Reitz GGX</strong> distribution, with <code>α = roughness²</code>:</p>
 <div class="codehilite"><pre><span></span><code>              α²
 D = ─────────────────────────
     π ((n · h)² (α² − 1) + 1)²
 </code></pre></div>
 
-<p>Low roughness concentrates the result into a small, intense spot. High roughness spreads it out.</p>
+<p>Low roughness concentrates the result into a small, intense spot.<br>
+High roughness spreads it out.</p>
 <h3 id="g-geometry-function">G: geometry function<a class="headerlink" href="#g-geometry-function" title="Permanent link">#</a></h3>
-<p>Microfacets shadow and mask one another, especially on rough surfaces at grazing angles. The <strong>Schlick-GGX</strong> approximation for one direction is</p>
+<p>Microfacets shadow and mask one another, especially on rough surfaces at grazing angles.<br>
+The <strong>Schlick-GGX</strong> approximation for one direction is</p>
 <div class="codehilite"><pre><span></span><code>              n · v
 G1(v) = ─────────────────
         (n · v)(1 − k) + k
 </code></pre></div>
 
-<p>where <code>k = (roughness + 1)² / 8</code> for direct lighting and <code>k = roughness² / 2</code> for image-based lighting. <strong>Smith's method</strong> combines the view and light directions: <code>G = G1(view) · G1(light)</code>.</p>
+<p>where <code>k = (roughness + 1)² / 8</code> for direct lighting and <code>k = roughness² / 2</code> for image-based lighting.<br>
+<strong>Smith's method</strong> combines the view and light directions: <code>G = G1(view) · G1(light)</code>.</p>
 <h3 id="f-fresnel-equation">F: Fresnel equation<a class="headerlink" href="#f-fresnel-equation" title="Permanent link">#</a></h3>
-<p>Every surface becomes more reflective at grazing angles. Look straight down at a lake and you see the bottom; look across it and you see the sky. The <strong>Fresnel-Schlick</strong> approximation:</p>
+<p>Every surface becomes more reflective at grazing angles.<br>
+Look straight down at a lake and you see the bottom; look across it and you see the sky.<br>
+The <strong>Fresnel-Schlick</strong> approximation:</p>
 <div class="codehilite"><pre><span></span><code>F = F0 + (1 − F0)(1 − (h · v))⁵
 </code></pre></div>
 
-<p><code>F0</code> is the <strong>base reflectivity</strong>, the reflectance when looking straight at the surface. Dielectrics have a low, colorless F0 around 0.04. Metals have a high, colored one:</p>
+<p><code>F0</code> is the <strong>base reflectivity</strong>, the reflectance when looking straight at the surface.<br>
+Dielectrics have a low, colorless F0 around 0.04.<br>
+Metals have a high, colored one:</p>
 <table>
 <thead>
 <tr>
@@ -234,7 +256,8 @@ G1(v) = ─────────────────
 </tbody>
 </table>
 <p>In the metalness workflow, F0 is computed by blending between 0.04 and the albedo color using the metalness value.</p>
-<p>The Fresnel term F <em>is</em> the reflected fraction <code>kS</code>. So <code>kD = (1 − F)(1 − metalness)</code>.</p>
+<p>The Fresnel term F <em>is</em> the reflected fraction <code>kS</code>.<br>
+So <code>kD = (1 − F)(1 − metalness)</code>.</p>
 <figure><img src="../assets/img/pbr/theory.webp" alt="One light on five dielectric spheres. Roughness alone changes the highlight from a sharp point to a broad sheen." width="880" height="260" loading="lazy"><figcaption>One light on five dielectric spheres. Roughness alone changes the highlight from a sharp point to a broad sheen.</figcaption></figure>
 
 <h2 id="material-parameters">Material parameters<a class="headerlink" href="#material-parameters" title="Permanent link">#</a></h2>
@@ -276,7 +299,8 @@ G1(v) = ─────────────────
 </tbody>
 </table>
 <p>This is the material model used by USD's preview surface and by glTF, so the assets Model I/O loads map directly onto it (<code>.baseColor</code>, <code>.metallic</code>, <code>.roughness</code>, <code>.tangentSpaceNormal</code>, <code>.ambientOcclusion</code>).</p>
-<p>Because PBR depends on correct light intensities, it requires the linear workflow and HDR pipeline from the previous section. Check that both are in place before continuing.</p></article><nav class="pager" id="pager"><a class="prev" href="../advanced-lighting/ssao.html"><small>Previous</small>SSAO</a><a class="next" href="../pbr/lighting.html"><small>Next</small>Lighting</a></nav>
+<p>Because PBR depends on correct light intensities, it requires the linear workflow and HDR pipeline from the previous section.<br>
+Check that both are in place before continuing.</p></article><nav class="pager" id="pager"><a class="prev" href="../advanced-lighting/ssao.html"><small>Previous</small>SSAO</a><a class="next" href="../pbr/lighting.html"><small>Next</small>Lighting</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>

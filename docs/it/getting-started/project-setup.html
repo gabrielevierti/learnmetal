@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -135,19 +135,23 @@
 </nav>
 <main class="content" id="main">
 <article><p class="crumb">Per iniziare</p><h1 id="preparare-il-progetto">Preparare il progetto<a class="headerlink" href="#preparare-il-progetto" title="Permanent link">#</a></h1>
-<p>Per preparare un progetto Metal bastano pochi minuti. Metal fa parte del sistema, quindi non c'è niente da compilare prima di poter disegnare.</p>
-<p>Usa il selettore <strong>Swift / C++</strong> in cima alla pagina per scegliere il linguaggio. I capitoli, gli shader e le demo interattive sono uguali per entrambi; cambia solo il codice dell'applicazione.</p>
+<p>Per preparare un progetto Metal bastano pochi minuti.<br>
+Metal fa parte del sistema, quindi non c'è niente da compilare prima di poter disegnare.</p>
+<p>Usa il selettore <strong>Swift / C++</strong> in cima alla pagina per scegliere il linguaggio.<br>
+I capitoli, gli shader e le demo interattive sono uguali per entrambi; cambia solo il codice dell'applicazione.</p>
 <h2 id="che-cosa-serve">Che cosa serve<a class="headerlink" href="#che-cosa-serve" title="Permanent link">#</a></h2>
 <ul>
 <li>Un Mac con una versione recente di macOS.</li>
-<li>Xcode, gratuito sul Mac App Store. A chi usa C++ bastano i command line tools.</li>
+<li>Xcode, gratuito sul Mac App Store.<br>
+A chi usa C++ bastano i command line tools.</li>
 </ul>
 <p>Gli esempi sono per macOS perché è il ciclo più rapido: premi Run e compare una finestra.</p>
 <div class="lang-swift">
 <p>Tutto, tranne le poche righe che ospitano la vista, funziona senza modifiche su iOS, e le differenze sono mostrate qui sotto.</p>
 <div class="admonition note">
 <p class="admonition-title">Simulatore o dispositivo?</p>
-<p>Metal funziona nel Simulatore iOS, ma con funzionalità e prestazioni ridotte. Quando il tuo obiettivo è iPhone o iPad, prova su un dispositivo vero.</p>
+<p>Metal funziona nel Simulatore iOS, ma con funzionalità e prestazioni ridotte.<br>
+Quando il tuo obiettivo è iPhone o iPad, prova su un dispositivo vero.</p>
 </div>
 <h2 id="creare-il-progetto">Creare il progetto<a class="headerlink" href="#creare-il-progetto" title="Permanent link">#</a></h2>
 <ol>
@@ -155,17 +159,22 @@
 <li>Seleziona <strong>macOS → App</strong>.</li>
 <li>Chiamalo <code>LearnMetal</code>, imposta <strong>Interface</strong> su <strong>SwiftUI</strong> e <strong>Language</strong> su <strong>Swift</strong>.</li>
 </ol>
-<p>Xcode offre anche un template <strong>Game</strong> con Metal come tecnologia. Genera un cubo che ruota già funzionante: bello da vedere, ma nasconde proprio le parti che vogliamo scrivere noi, quindi partiamo da un'app vuota.</p>
+<p>Xcode offre anche un template <strong>Game</strong> con Metal come tecnologia.<br>
+Genera un cubo che ruota già funzionante: bello da vedere, ma nasconde proprio le parti che vogliamo scrivere noi, quindi partiamo da un'app vuota.</p>
 <h2 id="metalkit-e-mtkview">MetalKit e MTKView<a class="headerlink" href="#metalkit-e-mtkview" title="Permanent link">#</a></h2>
-<p>Per disegnare con Metal serve una superficie che il sistema possa mettere a schermo. La via di basso livello è un <code>CAMetalLayer</code> con un display link gestito da te. <strong>MetalKit</strong> racchiude entrambi in una vista chiamata <code>MTKView</code> che:</p>
+<p>Per disegnare con Metal serve una superficie che il sistema possa mettere a schermo.<br>
+La via di basso livello è un <code>CAMetalLayer</code> con un display link gestito da te.<br>
+<strong>MetalKit</strong> racchiude entrambi in una vista chiamata <code>MTKView</code> che:</p>
 <ul>
 <li>possiede il layer e a ogni frame ti consegna un nuovo <strong>drawable</strong> (una texture che verrà mostrata a schermo),</li>
 <li>crea per te, su richiesta, le texture di profondità e di multisampling,</li>
 <li>chiama il tuo codice una volta per ogni aggiornamento dello schermo.</li>
 </ul>
-<p>Dici alla vista che cosa disegnare dandole un <strong>delegate</strong>, un oggetto che implementa due metodi di <code>MTKViewDelegate</code>. Quel delegate è il nostro renderer, ed è lì che vivrà quasi tutto il codice di questa serie.</p>
+<p>Dici alla vista che cosa disegnare dandole un <strong>delegate</strong>, un oggetto che implementa due metodi di <code>MTKViewDelegate</code>.<br>
+Quel delegate è il nostro renderer, ed è lì che vivrà quasi tutto il codice di questa serie.</p>
 <h2 id="ospitare-la-vista-in-swiftui">Ospitare la vista in SwiftUI<a class="headerlink" href="#ospitare-la-vista-in-swiftui" title="Permanent link">#</a></h2>
-<p><code>MTKView</code> è una vista AppKit (UIKit su iOS), quindi a SwiftUI serve un piccolo adattatore. Aggiungi un nuovo file Swift <code>MetalView.swift</code>:</p>
+<p><code>MTKView</code> è una vista AppKit (UIKit su iOS), quindi a SwiftUI serve un piccolo adattatore.<br>
+Aggiungi un nuovo file Swift <code>MetalView.swift</code>:</p>
 <div class="codehilite"><pre><span></span><code><span class="kd">import</span><span class="w"> </span><span class="nc">SwiftUI</span>
 <span class="kd">import</span><span class="w"> </span><span class="nc">MetalKit</span>
 
@@ -199,23 +208,31 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>Il progetto non compila ancora perché <code>Renderer</code> non esiste. È l'argomento del prossimo capitolo.</p>
-<figure><img src="../../assets/img/getting-started/project-setup.webp" alt="The pieces of the project. The renderer is where almost all code in this series lives." width="880" height="290" loading="lazy"><figcaption>The pieces of the project. The renderer is where almost all code in this series lives.</figcaption></figure>
+<p>Il progetto non compila ancora perché <code>Renderer</code> non esiste.<br>
+È l'argomento del prossimo capitolo.</p>
+<figure><img src="../../assets/img/getting-started/project-setup.webp" alt="I pezzi del progetto. Il renderer è il posto in cui vive quasi tutto il codice di questa serie." width="880" height="290" loading="lazy"><figcaption>I pezzi del progetto. Il renderer è il posto in cui vive quasi tutto il codice di questa serie.</figcaption></figure>
 
 <h2 id="dove-vanno-gli-shader">Dove vanno gli shader<a class="headerlink" href="#dove-vanno-gli-shader" title="Permanent link">#</a></h2>
-<p>Gli shader stanno in file con estensione <code>.metal</code>. Creane uno con <strong>File → New → File → Metal File</strong> e chiamalo <code>Shaders.metal</code>. Xcode gli dà questo contenuto:</p>
+<p>Gli shader stanno in file con estensione <code>.metal</code>.<br>
+Creane uno con <strong>File → New → File → Metal File</strong> e chiamalo <code>Shaders.metal</code>.<br>
+Xcode gli dà questo contenuto:</p>
 <div class="codehilite"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;metal_stdlib&gt;</span>
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">metal</span><span class="p">;</span>
 </code></pre></div>
 
-<p>Per ora lascialo così. Ogni file <code>.metal</code> che appartiene al target dell'app viene compilato durante la build e incluso automaticamente nell'app.</p>
+<p>Per ora lascialo così.<br>
+Ogni file <code>.metal</code> che appartiene al target dell'app viene compilato durante la build e incluso automaticamente nell'app.</p>
 <h2 id="attivare-le-reti-di-sicurezza">Attivare le reti di sicurezza<a class="headerlink" href="#attivare-le-reti-di-sicurezza" title="Permanent link">#</a></h2>
-<p>Apri <strong>Product → Scheme → Edit Scheme → Run → Diagnostics</strong> (in alcune versioni di Xcode le opzioni di Metal sono sotto <strong>Options</strong>) e controlla che <strong>Metal API Validation</strong> sia attiva. La validazione controlla ogni chiamata a Metal e, quando fai qualcosa di non permesso, si ferma con un messaggio leggibile invece di mostrare uno schermo nero. È attiva in modo predefinito nelle esecuzioni di debug, e conviene lasciarla così. <strong>Shader Validation</strong>, nello stesso posto, intercetta le letture fuori dai limiti e altri errori simili dentro gli shader; attivala ogni volta che uno shader si comporta male.</p>
+<p>Apri <strong>Product → Scheme → Edit Scheme → Run → Diagnostics</strong> (in alcune versioni di Xcode le opzioni di Metal sono sotto <strong>Options</strong>) e controlla che <strong>Metal API Validation</strong> sia attiva.<br>
+La validazione controlla ogni chiamata a Metal e, quando fai qualcosa di non permesso, si ferma con un messaggio leggibile invece di mostrare uno schermo nero.<br>
+È attiva in modo predefinito nelle esecuzioni di debug, e conviene lasciarla così.<br>
+<strong>Shader Validation</strong>, nello stesso posto, intercetta le letture fuori dai limiti e altri errori simili dentro gli shader; attivala ogni volta che uno shader si comporta male.</p>
 </div>
 
 <div class="lang-cpp">
 <h2 id="metal-cpp">metal-cpp<a class="headerlink" href="#metal-cpp" title="Permanent link">#</a></h2>
-<p>Metal è un'API Objective-C. <strong>metal-cpp</strong> è il wrapper C++ ufficiale di Apple, fatto di soli header: ogni classe e ogni metodo di Metal ha un equivalente C++ senza costi aggiuntivi. Scaricalo da <a href="https://developer.apple.com/metal/cpp/">developer.apple.com/metal/cpp</a> e decomprimilo nel progetto in una cartella <code>metal-cpp</code>.</p>
+<p>Metal è un'API Objective-C. <strong>metal-cpp</strong> è il wrapper C++ ufficiale di Apple, fatto di soli header: ogni classe e ogni metodo di Metal ha un equivalente C++ senza costi aggiuntivi.<br>
+Scaricalo da <a href="https://developer.apple.com/metal/cpp/">developer.apple.com/metal/cpp</a> e decomprimilo nel progetto in una cartella <code>metal-cpp</code>.</p>
 <p>La corrispondenza con i nomi Objective-C e Swift è meccanica:</p>
 <table>
 <thead>
@@ -253,11 +270,14 @@
 </table>
 <p>Tre regole coprono la gestione della memoria, perché in C++ non c'è ARC:</p>
 <ul>
-<li>Gli oggetti che ottieni da un metodo che inizia con <code>new</code>, o da <code>alloc()-&gt;init()</code>, sono <strong>tuoi</strong>. Chiama <code>release()</code> quando hai finito.</li>
-<li>Tutto il resto è <strong>autoreleased</strong>: valido finché non viene rilasciato l'<code>NS::AutoreleasePool</code> che lo racchiude. Crea un pool all'inizio di ogni frame.</li>
+<li>Gli oggetti che ottieni da un metodo che inizia con <code>new</code>, o da <code>alloc()-&gt;init()</code>, sono <strong>tuoi</strong>.<br>
+Chiama <code>release()</code> quando hai finito.</li>
+<li>Tutto il resto è <strong>autoreleased</strong>: valido finché non viene rilasciato l'<code>NS::AutoreleasePool</code> che lo racchiude.<br>
+Crea un pool all'inizio di ogni frame.</li>
 <li>Per tenere un oggetto autoreleased, chiama <code>retain()</code>.</li>
 </ul>
-<p>L'implementazione del wrapper va compilata esattamente una volta. Crea <code>metal_impl.cpp</code>:</p>
+<p>L'implementazione del wrapper va compilata esattamente una volta.<br>
+Crea <code>metal_impl.cpp</code>:</p>
 <div class="codehilite"><pre><span></span><code><span class="cp">#define NS_PRIVATE_IMPLEMENTATION</span>
 <span class="cp">#define CA_PRIVATE_IMPLEMENTATION</span>
 <span class="cp">#define MTL_PRIVATE_IMPLEMENTATION</span>
@@ -267,7 +287,10 @@
 </code></pre></div>
 
 <h2 id="una-finestra">Una finestra<a class="headerlink" href="#una-finestra" title="Permanent link">#</a></h2>
-<p>metal-cpp copre Metal, Foundation e QuartzCore. Non copre AppKit né MetalKit, quindi <code>MTKView</code> non c'è. Apriamo una finestra con <strong>GLFW</strong> (<code>brew install glfw cmake</code>) e le agganciamo un <code>CAMetalLayer</code>. Quel singolo passaggio deve toccare AppKit, quindi sta in un minuscolo file Objective-C++, <code>glfw_bridge.mm</code>:</p>
+<p>metal-cpp copre Metal, Foundation e QuartzCore.<br>
+Non copre AppKit né MetalKit, quindi <code>MTKView</code> non c'è.<br>
+Apriamo una finestra con <strong>GLFW</strong> (<code>brew install glfw cmake</code>) e le agganciamo un <code>CAMetalLayer</code>.<br>
+Quel singolo passaggio deve toccare AppKit, quindi sta in un minuscolo file Objective-C++, <code>glfw_bridge.mm</code>:</p>
 <div class="codehilite"><pre><span></span><code><span class="cp">#import &lt;Cocoa/Cocoa.h&gt;</span>
 <span class="cp">#import &lt;Metal/Metal.h&gt;</span>
 <span class="cp">#import &lt;QuartzCore/CAMetalLayer.h&gt;</span>
@@ -320,8 +343,10 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>Il layer fa la parte che in Swift fa <code>MTKView</code>: ogni volta che glielo chiedi ti consegna un <strong>drawable</strong>, una texture che verrà mostrata a schermo. Presentare un drawable aspetta lo schermo, quindi questo ciclo gira alla frequenza di aggiornamento del display.</p>
-<p>Ovunque un capitolo nomini <code>MTKView</code>, l'equivalente C++ è una di tre cose che fai da te: chiedere al layer il prossimo drawable, compilare un render pass descriptor o creare una texture di profondità. Ognuna viene mostrata la prima volta che serve.</p>
+<p>Il layer fa la parte che in Swift fa <code>MTKView</code>: ogni volta che glielo chiedi ti consegna un <strong>drawable</strong>, una texture che verrà mostrata a schermo.<br>
+Presentare un drawable aspetta lo schermo, quindi questo ciclo gira alla frequenza di aggiornamento del display.</p>
+<p>Ovunque un capitolo nomini <code>MTKView</code>, l'equivalente C++ è una di tre cose che fai da te: chiedere al layer il prossimo drawable, compilare un render pass descriptor o creare una texture di profondità.<br>
+Ognuna viene mostrata la prima volta che serve.</p>
 <h2 id="compilare-con-cmake">Compilare con CMake<a class="headerlink" href="#compilare-con-cmake" title="Permanent link">#</a></h2>
 <div class="codehilite"><pre><span></span><code><span class="nb">cmake_minimum_required</span><span class="p">(</span><span class="s">VERSION</span><span class="w"> </span><span class="s">3.20</span><span class="p">)</span>
 <span class="nb">project</span><span class="p">(</span><span class="s">LearnMetal</span><span class="w"> </span><span class="s">LANGUAGES</span><span class="w"> </span><span class="s">CXX</span><span class="w"> </span><span class="s">OBJCXX</span><span class="p">)</span>
@@ -341,14 +366,16 @@
 <div class="codehilite"><pre><span></span><code>cmake<span class="w"> </span>-B<span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>cmake<span class="w"> </span>--build<span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>./LearnMetal
 </code></pre></div>
 
-<p>Il progetto non compila ancora perché <code>Renderer</code> non esiste. È l'argomento del prossimo capitolo.</p>
+<p>Il progetto non compila ancora perché <code>Renderer</code> non esiste.<br>
+È l'argomento del prossimo capitolo.</p>
 <h2 id="dove-vanno-gli-shader">Dove vanno gli shader<a class="headerlink" href="#dove-vanno-gli-shader" title="Permanent link">#</a></h2>
 <p>Gli shader stanno in un file chiamato <code>Shaders.metal</code>:</p>
 <div class="codehilite"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;metal_stdlib&gt;</span>
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">metal</span><span class="p">;</span>
 </code></pre></div>
 
-<p>Xcode compila i file <code>.metal</code> durante la build. Fuori da Xcode la via più semplice è compilare il sorgente all'avvio dell'app, così un errore nello shader viene anche segnalato nel terminale con il numero di riga:</p>
+<p>Xcode compila i file <code>.metal</code> durante la build.<br>
+Fuori da Xcode la via più semplice è compilare il sorgente all'avvio dell'app, così un errore nello shader viene anche segnalato nel terminale con il numero di riga:</p>
 <div class="codehilite"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;fstream&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;sstream&gt;</span>
@@ -371,14 +398,17 @@
 
 <p>Per un'app da distribuire precompileresti con <code>xcrun metal</code> e <code>xcrun metallib</code> e caricheresti il file <code>.metallib</code> risultante.</p>
 <h2 id="attivare-le-reti-di-sicurezza">Attivare le reti di sicurezza<a class="headerlink" href="#attivare-le-reti-di-sicurezza" title="Permanent link">#</a></h2>
-<p>Il livello di validazione di Metal controlla ogni chiamata e, quando fai qualcosa di non permesso, si ferma con un messaggio leggibile invece di mostrare uno schermo nero. Fuori da Xcode si attiva con le variabili d'ambiente:</p>
+<p>Il livello di validazione di Metal controlla ogni chiamata e, quando fai qualcosa di non permesso, si ferma con un messaggio leggibile invece di mostrare uno schermo nero.<br>
+Fuori da Xcode si attiva con le variabili d'ambiente:</p>
 <div class="codehilite"><pre><span></span><code><span class="nv">MTL_DEBUG_LAYER</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="nv">MTL_SHADER_VALIDATION</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>./LearnMetal
 </code></pre></div>
 
-<p>Lascia <code>MTL_DEBUG_LAYER</code> attivo ogni volta che sviluppi. Un progetto di partenza con tutti i file di questo capitolo e dei due successivi è nella cartella <code>examples-cpp</code> del repository.</p>
+<p>Lascia <code>MTL_DEBUG_LAYER</code> attivo ogni volta che sviluppi.<br>
+Un progetto di partenza con tutti i file di questo capitolo e dei due successivi è nella cartella <code>examples-cpp</code> del repository.</p>
 </div>
 
-<p>Il capitolo <a href="../in-practice/debugging.html">Debug</a> tratta questi strumenti a fondo. Puoi leggerlo quando vuoi.</p></article><nav class="pager" id="pager"><a class="prev" href="../getting-started/introduction.html"><small>Precedente</small>Introduzione</a><a class="next" href="../getting-started/hello-view.html"><small>Successivo</small>La prima vista</a></nav>
+<p>Il capitolo <a href="../in-practice/debugging.html">Debug</a> tratta questi strumenti a fondo.<br>
+Puoi leggerlo quando vuoi.</p></article><nav class="pager" id="pager"><a class="prev" href="../getting-started/introduction.html"><small>Precedente</small>Introduzione</a><a class="next" href="../getting-started/hello-view.html"><small>Successivo</small>La prima vista</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>

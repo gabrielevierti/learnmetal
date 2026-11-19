@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,12 +134,14 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Metal avanzato</p><h1 id="instancing">Instancing<a class="headerlink" href="#instancing" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
+<article><p class="crumb">Metal avanzato</p><h1 id="instancing">Instancing<a class="headerlink" href="#instancing" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Progetto di esempio</strong> <code>examples/Sources/13-Instancing</code>, si esegue con <code>swift run Instancing</code>. <a href="../../downloads/learnmetal-examples.zip">Scarica tutti gli esempi</a> oppure guarda <a href="../resources/examples.html">come eseguirli</a>.</div>
 
-<p>A field of grass, a forest, an asteroid belt: thousands of copies of the same mesh, each with a different transform. Issuing one draw call per copy wastes CPU time, because each call has a fixed cost no matter how small the mesh is. <strong>Instancing</strong> draws all copies with a single call.</p>
-<h2 id="instanced-draw-calls">Instanced draw calls<a class="headerlink" href="#instanced-draw-calls" title="Permanent link">#</a></h2>
-<p>Every draw method has a variant with an <code>instanceCount</code>:</p>
+<p>Un prato, una foresta, una fascia di asteroidi: migliaia di copie della stessa mesh, ognuna con una trasformazione diversa.<br>
+Fare una draw call per copia spreca tempo di CPU, perché ogni chiamata ha un costo fisso per quanto piccola sia la mesh.<br>
+L'<strong>instancing</strong> disegna tutte le copie con una sola chiamata.</p>
+<h2 id="draw-call-con-istanze">Draw call con istanze<a class="headerlink" href="#draw-call-con-istanze" title="Permanent link">#</a></h2>
+<p>Ogni metodo di disegno ha una variante con un <code>instanceCount</code>:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">encoder</span><span class="p">.</span><span class="n">drawPrimitives</span><span class="p">(</span><span class="n">type</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">triangle</span><span class="p">,</span>
 <span class="w">                       </span><span class="n">vertexStart</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
@@ -169,9 +171,11 @@
 </code></pre></div>
 </div>
 
-<p>The GPU runs the vertex function for every vertex of every instance. The only difference between instances is the built-in <code>[[instance_id]]</code>, counting from 0. Everything that makes instances look different is derived from that number.</p>
-<h2 id="per-instance-data-in-a-buffer">Per-instance data in a buffer<a class="headerlink" href="#per-instance-data-in-a-buffer" title="Permanent link">#</a></h2>
-<p>Put one struct per instance into a buffer and index it with the instance ID:</p>
+<p>La GPU esegue la vertex function per ogni vertice di ogni istanza.<br>
+L'unica differenza tra le istanze è l'input predefinito <code>[[instance_id]]</code>, che conta da 0.<br>
+Tutto ciò che fa apparire diverse le istanze si ricava da quel numero.</p>
+<h2 id="i-dati-delle-istanze-in-un-buffer">I dati delle istanze in un buffer<a class="headerlink" href="#i-dati-delle-istanze-in-un-buffer" title="Permanent link">#</a></h2>
+<p>Metti in un buffer una struct per istanza e indicizzala con l'ID dell'istanza:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">InstanceData</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float4x4</span><span class="w"> </span><span class="n">model</span><span class="p">;</span>
 <span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">color</span><span class="p">;</span>
@@ -194,7 +198,8 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>Using the model matrix for the normal is only correct for rotations and uniform scales. Store a normal matrix per instance if you need non-uniform scaling.</p>
+<p>Usare la matrice model per la normale è corretto solo con rotazioni e scale uniformi.<br>
+Se ti serve una scala non uniforme, salva una matrice delle normali per ogni istanza.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">InstanceData</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">model</span><span class="p">:</span><span class="w"> </span><span class="n">float4x4</span>
@@ -236,11 +241,13 @@
 </div>
 
 <div class="admonition note">
-<p class="admonition-title">Coming from OpenGL</p>
-<p>There is no need for instanced vertex attributes with divisors, and no limit on the size of per-instance data. A buffer and an index are enough. If you prefer attributes anyway, a vertex descriptor layout can advance once per instance: <code>layouts[1].stepFunction = .perInstance</code>.</p>
+<p class="admonition-title">Se vieni da OpenGL</p>
+<p>Non servono attributi di vertice per istanza con i divisor, e non c'è limite alla dimensione dei dati per istanza.<br>
+Bastano un buffer e un indice.<br>
+Se preferisci comunque gli attributi, un layout del vertex descriptor può avanzare una volta per istanza: <code>layouts[1].stepFunction = .perInstance</code>.</p>
 </div>
-<h2 id="an-asteroid-field">An asteroid field<a class="headerlink" href="#an-asteroid-field" title="Permanent link">#</a></h2>
-<p>Generate a ring of randomly placed, rotated and scaled rocks around a planet:</p>
+<h2 id="un-campo-di-asteroidi">Un campo di asteroidi<a class="headerlink" href="#un-campo-di-asteroidi" title="Permanent link">#</a></h2>
+<p>Genera intorno a un pianeta un anello di rocce disposte, ruotate e scalate a caso:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">makeAsteroidTransforms</span><span class="p">(</span><span class="bp">count</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">,</span><span class="w"> </span><span class="n">radius</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">,</span><span class="w"> </span><span class="n">spread</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="p">[</span><span class="n">float4x4</span><span class="p">]</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="p">(</span><span class="mf">0.</span><span class="p">.&lt;</span><span class="bp">count</span><span class="p">).</span><span class="bp">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span>
@@ -283,16 +290,21 @@
 </code></pre></div>
 </div>
 
-<p>Drawn with one call per rock, a few thousand asteroids already cost real CPU time each frame. Drawn instanced, a hundred thousand run smoothly, and the limit becomes how many triangles the GPU can fill.</p>
+<p>Disegnati con una chiamata per roccia, già poche migliaia di asteroidi costano a ogni frame un tempo di CPU apprezzabile.<br>
+Disegnati con l'instancing ne girano fluidi centomila, e il limite diventa quanti triangoli la GPU riesce a riempire.</p>
 <div class="lm-demo" data-demo="instancing" data-fallback="../../assets/img/advanced-metal/instancing.webp"></div>
 
-<h2 id="animating-instances">Animating instances<a class="headerlink" href="#animating-instances" title="Permanent link">#</a></h2>
-<p>Since the instance buffer is shared memory, updating it is a plain write each frame. Use the ring-buffer scheme from <a href="advanced-data.html">Advanced Data</a> so you do not overwrite data the GPU is still reading. For very large counts, moving the update itself to the GPU with a <a href="../beyond/compute-shaders.html">compute function</a> removes the CPU from the loop entirely.</p>
-<h2 id="culling-and-the-next-step">Culling and the next step<a class="headerlink" href="#culling-and-the-next-step" title="Permanent link">#</a></h2>
-<p>Instancing draws every instance, visible or not. Large worlds cull on the CPU and write only visible instances to the buffer, or let the GPU do it: a compute pass tests each instance against the view frustum and writes the survivors into an <strong>indirect command buffer</strong>, a list of draw calls encoded on the GPU itself (<code>MTLIndirectCommandBuffer</code>). That technique, GPU-driven rendering, is beyond this series, but instancing is its first step.</p>
-<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<h2 id="animare-le-istanze">Animare le istanze<a class="headerlink" href="#animare-le-istanze" title="Permanent link">#</a></h2>
+<p>Dato che il buffer delle istanze è memoria condivisa, aggiornarlo è una semplice scrittura a ogni frame.<br>
+Usa lo schema con l'anello di buffer di <a href="advanced-data.html">Dati avanzati</a>, così non sovrascrivi dati che la GPU sta ancora leggendo.<br>
+Per numeri molto grandi, spostare sulla GPU l'aggiornamento stesso con una <a href="../beyond/compute-shaders.html">compute function</a> toglie del tutto la CPU dal ciclo.</p>
+<h2 id="il-culling-e-il-passo-successivo">Il culling e il passo successivo<a class="headerlink" href="#il-culling-e-il-passo-successivo" title="Permanent link">#</a></h2>
+<p>L'instancing disegna ogni istanza, visibile o no.<br>
+I mondi grandi fanno il culling sulla CPU e scrivono nel buffer solo le istanze visibili, oppure lo lasciano fare alla GPU: un compute pass confronta ogni istanza con il frustum della vista e scrive le sopravvissute in un <strong>indirect command buffer</strong>, un elenco di draw call codificato dalla GPU stessa (<code>MTLIndirectCommandBuffer</code>).<br>
+Quella tecnica, il rendering guidato dalla GPU, va oltre questa serie, ma l'instancing ne è il primo passo.</p>
+<h2 id="esercizi">Esercizi<a class="headerlink" href="#esercizi" title="Permanent link">#</a></h2>
 <ul>
-<li>Draw a 100 × 100 grid of cubes with one call, coloring each by its instance ID.<details class="solution"><summary>Mostra la soluzione</summary><p>Compute the grid position from the instance ID in the vertex function, with no instance buffer at all.</p>
+<li>Disegna una griglia di 100 × 100 cubi con una sola chiamata, colorando ciascuno in base al suo ID di istanza.<details class="solution"><summary>Mostra la soluzione</summary><p>Calcola la posizione nella griglia dall'ID dell'istanza nella vertex function, senza alcun buffer di istanze.</p>
 <div class="codehilite"><pre><span></span><code><span class="kt">float</span><span class="w"> </span><span class="n">column</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">float</span><span class="p">(</span><span class="n">instanceID</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span>
 <span class="kt">float</span><span class="w"> </span><span class="n">row</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">float</span><span class="p">(</span><span class="n">instanceID</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span>
 <span class="n">float3</span><span class="w"> </span><span class="n">offset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float3</span><span class="p">(</span><span class="n">column</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">50.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="n">row</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">50.0</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">1.5</span><span class="p">;</span>
@@ -300,22 +312,23 @@
 <span class="n">out</span><span class="p">.</span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float3</span><span class="p">(</span><span class="n">column</span><span class="p">,</span><span class="w"> </span><span class="n">row</span><span class="p">,</span><span class="w"> </span><span class="mf">50.0</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">100.0</span><span class="p">;</span>
 </code></pre></div>
 
-<p>Draw with an instance count of 10,000.</p></details></li>
-<li>Make the asteroid ring rotate by passing a time uniform and rotating in the vertex function, with no CPU buffer updates.<details class="solution"><summary>Mostra la soluzione</summary><p>Rotate the instance's world position around the y axis by an angle that depends on time. The instance buffer is never rewritten.</p>
+<p>Disegna con un numero di istanze pari a 10.000.</p></details></li>
+<li>Fai ruotare l'anello di asteroidi passando un uniform con il tempo e ruotando nella vertex function, senza aggiornare alcun buffer dalla CPU.<details class="solution"><summary>Mostra la soluzione</summary><p>Ruota la posizione in spazio mondo dell'istanza intorno all'asse y di un angolo che dipende dal tempo.<br>
+Il buffer delle istanze non viene mai riscritto.</p>
 <div class="codehilite"><pre><span></span><code><span class="kt">float</span><span class="w"> </span><span class="n">angle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">time</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.05</span><span class="p">;</span>
 <span class="kt">float</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="p">),</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="p">);</span>
 <span class="n">float4</span><span class="w"> </span><span class="n">world</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">instance</span><span class="p">.</span><span class="n">model</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
 <span class="n">world</span><span class="p">.</span><span class="n">xz</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float2</span><span class="p">(</span><span class="n">world</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">world</span><span class="p">.</span><span class="n">z</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">world</span><span class="p">.</span><span class="n">z</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">world</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">s</span><span class="p">);</span>
 </code></pre></div>
 
-<p>The live demo does this: the ring's angle includes <code>uniforms.time</code>.</p></details></li>
+<p>La demo interattiva fa questo: l'angolo dell'anello comprende <code>uniforms.time</code>.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../advanced-metal/no-geometry-shaders.html"><small>Precedente</small>Vivere senza geometry shader</a><a class="next" href="../advanced-metal/anti-aliasing.html"><small>Successivo</small>Anti-aliasing</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#instanced-draw-calls">Instanced draw calls</a></li><li><a href="#per-instance-data-in-a-buffer">Per-instance data in a buffer</a></li><li><a href="#an-asteroid-field">An asteroid field</a></li><li><a href="#animating-instances">Animating instances</a></li><li><a href="#culling-and-the-next-step">Culling and the next step</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#draw-call-con-istanze">Draw call con istanze</a></li><li><a href="#i-dati-delle-istanze-in-un-buffer">I dati delle istanze in un buffer</a></li><li><a href="#un-campo-di-asteroidi">Un campo di asteroidi</a></li><li><a href="#animare-le-istanze">Animare le istanze</a></li><li><a href="#il-culling-e-il-passo-successivo">Il culling e il passo successivo</a></li><li><a href="#esercizi">Esercizi</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

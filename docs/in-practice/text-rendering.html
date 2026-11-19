@@ -135,15 +135,26 @@
 </nav>
 <main class="content" id="main">
 <article><p class="crumb">In Practice</p><h1 id="text-rendering">Text Rendering<a class="headerlink" href="#text-rendering" title="Permanent link">#</a></h1>
-<p>Sooner or later you want to draw text: a frame counter, a score, a label above an object. Metal has no text support. It draws triangles. Text is therefore rendered as textured quads, one per character, with a texture that contains the shapes of the characters.</p>
+<p>Sooner or later you want to draw text: a frame counter, a score, a label above an object.<br>
+Metal has no text support.<br>
+It draws triangles.<br>
+Text is therefore rendered as textured quads, one per character, with a texture that contains the shapes of the characters.</p>
 <h2 id="options">Options<a class="headerlink" href="#options" title="Permanent link">#</a></h2>
 <ul>
-<li><strong>Let the system do it.</strong> For UI that sits on top of your view, put a SwiftUI or UIKit label over the <code>MTKView</code>. It is free, sharp, localized and accessible. For debug overlays and menus this is usually the right answer.</li>
-<li><strong>Render strings to textures.</strong> Draw a whole string with Core Text into a bitmap and show it on a quad. Good for text that rarely changes.</li>
-<li><strong>A glyph atlas.</strong> Draw every character once into one texture, then compose any string from quads. This is the classic approach for text inside the 3D scene or text that changes every frame, and it is what this chapter builds.</li>
+<li><strong>Let the system do it.</strong><br>
+For UI that sits on top of your view, put a SwiftUI or UIKit label over the <code>MTKView</code>.<br>
+It is free, sharp, localized and accessible.<br>
+For debug overlays and menus this is usually the right answer.</li>
+<li><strong>Render strings to textures.</strong><br>
+Draw a whole string with Core Text into a bitmap and show it on a quad.<br>
+Good for text that rarely changes.</li>
+<li><strong>A glyph atlas.</strong><br>
+Draw every character once into one texture, then compose any string from quads.<br>
+This is the classic approach for text inside the 3D scene or text that changes every frame, and it is what this chapter builds.</li>
 </ul>
 <h2 id="glyphs-and-metrics">Glyphs and metrics<a class="headerlink" href="#glyphs-and-metrics" title="Permanent link">#</a></h2>
-<p>A font is a collection of <strong>glyphs</strong>, the shapes of characters. To place them correctly, we need a few measurements for each glyph, all relative to the <strong>baseline</strong> on which the text sits:</p>
+<p>A font is a collection of <strong>glyphs</strong>, the shapes of characters.<br>
+To place them correctly, we need a few measurements for each glyph, all relative to the <strong>baseline</strong> on which the text sits:</p>
 <ul>
 <li>the <strong>bounding box</strong>: the rectangle the shape occupies, which can extend below the baseline for letters like g and p,</li>
 <li>the <strong>advance</strong>: how far to move the pen to the right before drawing the next glyph.</li>
@@ -308,7 +319,8 @@
 </code></pre></div>
 </div>
 
-<p>The bitmap's memory starts with the top row of the image, which matches Metal's top-left texture origin. Only the glyph positions, which Core Graphics measures from the bottom, need converting.</p>
+<p>The bitmap's memory starts with the top row of the image, which matches Metal's top-left texture origin.<br>
+Only the glyph positions, which Core Graphics measures from the bottom, need converting.</p>
 <h2 id="building-quads-for-a-string">Building quads for a string<a class="headerlink" href="#building-quads-for-a-string" title="Permanent link">#</a></h2>
 <p>For each character, look up its glyph, emit two triangles, and advance the pen:</p>
 <div class="lang-swift">
@@ -429,7 +441,9 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>The atlas stores only coverage. The color comes from a uniform, so one atlas serves text of every color. The pipeline needs <strong>alpha blending</strong> enabled, as in the <a href="../advanced-metal/blending.html">Blending</a> chapter, and text should be drawn last with depth testing off.</p>
+<p>The atlas stores only coverage.<br>
+The color comes from a uniform, so one atlas serves text of every color.<br>
+The pipeline needs <strong>alpha blending</strong> enabled, as in the <a href="../advanced-metal/blending.html">Blending</a> chapter, and text should be drawn last with depth testing off.</p>
 <h2 id="drawing">Drawing<a class="headerlink" href="#drawing" title="Permanent link">#</a></h2>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">vertices</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">makeVertices</span><span class="p">(</span><span class="k">for</span><span class="p">:</span><span class="w"> </span><span class="s">"FPS: </span><span class="si">\(</span><span class="n">fps</span><span class="si">)</span><span class="s">"</span><span class="p">,</span><span class="w"> </span><span class="n">atlas</span><span class="p">:</span><span class="w"> </span><span class="n">atlas</span><span class="p">,</span><span class="w"> </span><span class="n">origin</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">])</span>
@@ -464,18 +478,25 @@
 
 <h2 id="limits-of-this-approach">Limits of this approach<a class="headerlink" href="#limits-of-this-approach" title="Permanent link">#</a></h2>
 <ul>
-<li><strong>Scaling blurs.</strong> A bitmap atlas is sharp at the size it was rendered. Render the atlas at the pixel size you will display, remembering that Retina displays have two or three pixels per point.</li>
-<li><strong>Only simple scripts.</strong> Mapping one character to one glyph ignores kerning, ligatures, combining marks, right-to-left text and complex scripts. For correct layout, let Core Text shape the string (<code>CTLineCreateWithAttributedString</code>, then read its glyph runs) and draw the glyphs and positions it returns from your atlas.</li>
-<li><strong>ASCII only.</strong> A dynamic atlas that adds glyphs on demand removes that limit.</li>
+<li><strong>Scaling blurs.</strong><br>
+A bitmap atlas is sharp at the size it was rendered.<br>
+Render the atlas at the pixel size you will display, remembering that Retina displays have two or three pixels per point.</li>
+<li><strong>Only simple scripts.</strong><br>
+Mapping one character to one glyph ignores kerning, ligatures, combining marks, right-to-left text and complex scripts.<br>
+For correct layout, let Core Text shape the string (<code>CTLineCreateWithAttributedString</code>, then read its glyph runs) and draw the glyphs and positions it returns from your atlas.</li>
+<li><strong>ASCII only.</strong><br>
+A dynamic atlas that adds glyphs on demand removes that limit.</li>
 </ul>
 <h2 id="signed-distance-fields">Signed distance fields<a class="headerlink" href="#signed-distance-fields" title="Permanent link">#</a></h2>
-<p>For text that must stay sharp at any size, especially in 3D, store a <strong>signed distance field</strong> in the atlas instead of coverage: each texel holds the distance to the nearest glyph edge. Bilinear filtering interpolates distances faithfully, so the edge can be reconstructed crisply at any magnification:</p>
+<p>For text that must stay sharp at any size, especially in 3D, store a <strong>signed distance field</strong> in the atlas instead of coverage: each texel holds the distance to the nearest glyph edge.<br>
+Bilinear filtering interpolates distances faithfully, so the edge can be reconstructed crisply at any magnification:</p>
 <div class="codehilite"><pre><span></span><code><span class="kt">float</span><span class="w"> </span><span class="n">distance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">atlas</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">r</span><span class="p">;</span>
 <span class="kt">float</span><span class="w"> </span><span class="n">width</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fwidth</span><span class="p">(</span><span class="n">distance</span><span class="p">);</span>
 <span class="kt">float</span><span class="w"> </span><span class="n">coverage</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">smoothstep</span><span class="p">(</span><span class="mf">0.5</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">distance</span><span class="p">);</span>
 </code></pre></div>
 
-<p>Outlines, glows and drop shadows become one extra <code>smoothstep</code> each. Multi-channel distance fields (MSDF) additionally preserve sharp corners, and are the technique most engines use today.</p></article><nav class="pager" id="pager"><a class="prev" href="../in-practice/debugging.html"><small>Previous</small>Debugging</a><a class="next" href="../in-practice/2d-game.html"><small>Next</small>A 2D Game</a></nav>
+<p>Outlines, glows and drop shadows become one extra <code>smoothstep</code> each.<br>
+Multi-channel distance fields (MSDF) additionally preserve sharp corners, and are the technique most engines use today.</p></article><nav class="pager" id="pager"><a class="prev" href="../in-practice/debugging.html"><small>Previous</small>Debugging</a><a class="next" href="../in-practice/2d-game.html"><small>Next</small>A 2D Game</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>

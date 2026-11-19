@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,25 +134,39 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Per iniziare</p><h1 id="transformations">Transformations<a class="headerlink" href="#transformations" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
+<article><p class="crumb">Per iniziare</p><h1 id="trasformazioni">Trasformazioni<a class="headerlink" href="#trasformazioni" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Progetto di esempio</strong> <code>examples/Sources/05-Transformations</code>, si esegue con <code>swift run Transformations</code>. <a href="../../downloads/learnmetal-examples.zip">Scarica tutti gli esempi</a> oppure guarda <a href="../resources/examples.html">come eseguirli</a>.</div>
 
-<p>So far objects sit wherever their vertices put them. To move, rotate and scale them without rewriting vertex buffers every frame, we multiply each vertex by a <strong>matrix</strong>. This chapter is a compact tour of the math, followed by a small Swift helper file used for the rest of the series.</p>
-<h2 id="vectors">Vectors<a class="headerlink" href="#vectors" title="Permanent link">#</a></h2>
-<p>A vector is a direction with a length. In graphics we also use vectors for positions (a direction from the origin) and colors. The operations that matter:</p>
+<p>Finora gli oggetti stanno dove li mettono i loro vertici.<br>
+Per muoverli, ruotarli e scalarli senza riscrivere i vertex buffer a ogni frame, moltiplichiamo ogni vertice per una <strong>matrice</strong>.<br>
+Questo capitolo è un giro rapido nella matematica, seguito da un piccolo file di supporto in Swift che useremo per il resto della serie.</p>
+<h2 id="vettori">Vettori<a class="headerlink" href="#vettori" title="Permanent link">#</a></h2>
+<p>Un vettore è una direzione con una lunghezza.<br>
+In grafica usiamo i vettori anche per le posizioni (una direzione a partire dall'origine) e per i colori.<br>
+Le operazioni che contano:</p>
 <ul>
-<li><strong>Addition and subtraction</strong> work per component. <code>b - a</code> is the vector pointing from <code>a</code> to <code>b</code>.</li>
-<li><strong>Length</strong>: <code>length(v)</code> is the square root of <code>x² + y² + z²</code>. A vector of length 1 is a <strong>unit vector</strong>, and <code>normalize(v)</code> scales any vector to length 1.</li>
-<li><strong>Dot product</strong>: <code>dot(a, b) = a.x*b.x + a.y*b.y + a.z*b.z</code>. For unit vectors it equals the cosine of the angle between them: 1 when parallel, 0 when perpendicular, -1 when opposite. All of lighting is built on this.</li>
-<li><strong>Cross product</strong>: <code>cross(a, b)</code> is a vector perpendicular to both inputs.</li>
+<li><strong>Somma e sottrazione</strong> lavorano componente per componente.<br>
+<code>b - a</code> è il vettore che punta da <code>a</code> a <code>b</code>.</li>
+<li><strong>Lunghezza</strong>: <code>length(v)</code> è la radice quadrata di <code>x² + y² + z²</code>.<br>
+Un vettore di lunghezza 1 è un <strong>vettore unitario</strong>, e <code>normalize(v)</code> porta qualsiasi vettore a lunghezza 1.</li>
+<li><strong>Prodotto scalare</strong>: <code>dot(a, b) = a.x*b.x + a.y*b.y + a.z*b.z</code>.<br>
+Per vettori unitari è uguale al coseno dell'angolo tra i due: 1 se sono paralleli, 0 se perpendicolari, -1 se opposti.<br>
+Tutta l'illuminazione si costruisce su questo.</li>
+<li><strong>Prodotto vettoriale</strong>: <code>cross(a, b)</code> è un vettore perpendicolare a entrambi.</li>
 </ul>
-<p>Swift's <code>simd</code> module provides all of these, with the same names as in MSL.</p>
-<h2 id="matrices">Matrices<a class="headerlink" href="#matrices" title="Permanent link">#</a></h2>
-<p>A 4×4 matrix can express any combination of scaling, rotation and translation. Multiplying a matrix by a vector applies the transformation.</p>
-<p><strong>Scaling</strong> puts the factors on the diagonal. <strong>Translation</strong> puts the offset in the last column, which is why we need four dimensions: a 3×3 matrix cannot move a point. The fourth component of a vector, <strong>w</strong>, switches translation on and off. Positions use <code>w = 1</code> and are moved; directions use <code>w = 0</code> and are not.</p>
-<p><strong>Rotation</strong> by an angle around an axis fills the upper-left 3×3 block with sines and cosines. You rarely write these by hand.</p>
-<h2 id="order-matters">Order matters<a class="headerlink" href="#order-matters" title="Permanent link">#</a></h2>
-<p>Matrix multiplication is not commutative. With column vectors, the convention in both Metal and <code>simd</code>, the matrix <strong>closest to the vector applies first</strong>:</p>
+<p>Il modulo <code>simd</code> di Swift li fornisce tutti, con gli stessi nomi di MSL.</p>
+<h2 id="matrici">Matrici<a class="headerlink" href="#matrici" title="Permanent link">#</a></h2>
+<p>Una matrice 4×4 può esprimere qualsiasi combinazione di scala, rotazione e traslazione.<br>
+Moltiplicare una matrice per un vettore applica la trasformazione.</p>
+<p>La <strong>scala</strong> mette i fattori sulla diagonale.<br>
+La <strong>traslazione</strong> mette lo spostamento nell'ultima colonna, ed è per questo che servono quattro dimensioni: una matrice 3×3 non può spostare un punto.<br>
+La quarta componente di un vettore, <strong>w</strong>, accende e spegne la traslazione.<br>
+Le posizioni usano <code>w = 1</code> e vengono spostate; le direzioni usano <code>w = 0</code> e no.</p>
+<p>La <strong>rotazione</strong> di un angolo intorno a un asse riempie il blocco 3×3 in alto a sinistra di seni e coseni.<br>
+È raro scriverla a mano.</p>
+<h2 id="lordine-conta">L'ordine conta<a class="headerlink" href="#lordine-conta" title="Permanent link">#</a></h2>
+<p>Il prodotto tra matrici non è commutativo.<br>
+Con i vettori colonna, che è la convenzione sia di Metal sia di <code>simd</code>, la matrice <strong>più vicina al vettore si applica per prima</strong>:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">transform</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">translation</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">rotation</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">scale</span>
 <span class="c1">// applied to a vertex: scale first, then rotate, then translate</span>
@@ -164,9 +178,11 @@
 </code></pre></div>
 </div>
 
-<p>Scale, then rotate, then translate is the order you almost always want. Translating first and rotating afterward swings the object around the origin like a stone on a string.</p>
-<h2 id="a-matrix-helper">A matrix helper<a class="headerlink" href="#a-matrix-helper" title="Permanent link">#</a></h2>
-<p><code>simd</code> gives us the types but few constructors. Add <code>Math.swift</code>:</p>
+<p>Scala, poi ruota, poi trasla: è l'ordine che vuoi quasi sempre.<br>
+Traslare prima e ruotare dopo fa girare l'oggetto intorno all'origine come un sasso legato a una corda.</p>
+<h2 id="un-file-di-supporto-per-le-matrici">Un file di supporto per le matrici<a class="headerlink" href="#un-file-di-supporto-per-le-matrici" title="Permanent link">#</a></h2>
+<p><code>simd</code> ci dà i tipi ma pochi costruttori.<br>
+Aggiungi <code>Math.swift</code>:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">import</span><span class="w"> </span><span class="nc">simd</span>
 
@@ -230,10 +246,13 @@
 </code></pre></div>
 </div>
 
-<p>Angles are in radians everywhere; <code>45.radians</code> converts from degrees. Matrices are stored in <strong>column-major</strong> order: <code>columns.3</code> is the fourth column, where translation lives. MSL's <code>float4x4</code> uses the same layout, so a Swift matrix can be copied into a uniform buffer unchanged.</p>
-<p>The rotation is built from a <strong>quaternion</strong>, a four-number representation of a rotation that is free of the gimbal lock problems that plague chained axis rotations. You do not need the theory to use it.</p>
-<h2 id="transforming-the-rectangle">Transforming the rectangle<a class="headerlink" href="#transforming-the-rectangle" title="Permanent link">#</a></h2>
-<p>Add a matrix to the uniforms and multiply in the vertex function:</p>
+<p>Gli angoli sono ovunque in radianti; <code>45.radians</code> converte dai gradi.<br>
+Le matrici sono memorizzate in ordine <strong>column-major</strong>: <code>columns.3</code> è la quarta colonna, dove vive la traslazione.<br>
+Il <code>float4x4</code> di MSL usa lo stesso layout, quindi una matrice Swift si può copiare tale e quale in un buffer di uniform.</p>
+<p>La rotazione è costruita a partire da un <strong>quaternione</strong>, una rappresentazione della rotazione con quattro numeri che non soffre del gimbal lock, il problema delle rotazioni concatenate attorno agli assi.<br>
+Per usarlo non serve conoscerne la teoria.</p>
+<h2 id="trasformare-il-rettangolo">Trasformare il rettangolo<a class="headerlink" href="#trasformare-il-rettangolo" title="Permanent link">#</a></h2>
+<p>Aggiungi una matrice agli uniform e moltiplica nella vertex function:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">Uniforms</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float4x4</span><span class="w"> </span><span class="n">transform</span><span class="p">;</span>
 <span class="p">};</span>
@@ -247,7 +266,8 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>The uniforms use vertex buffer slot <strong>1</strong> because slot 0 holds the vertex data. From here on that is our convention: slot 0 for vertices, slot 1 for uniforms.</p>
+<p>Gli uniform usano lo slot <strong>1</strong> dei buffer di vertice perché lo slot 0 contiene i dati dei vertici.<br>
+Da qui in avanti è la nostra convenzione: slot 0 per i vertici, slot 1 per gli uniform.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">Uniforms</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">transform</span><span class="p">:</span><span class="w"> </span><span class="n">float4x4</span>
@@ -278,20 +298,28 @@
 </code></pre></div>
 </div>
 
-<p>The rectangle is now half size, in the lower-right corner, spinning around its own center. If the window is not square it looks stretched while rotating. That is expected, and the projection matrix in the next chapter fixes it.</p>
+<p>Ora il rettangolo è grande la metà, sta nell'angolo in basso a destra e gira intorno al proprio centro.<br>
+Se la finestra non è quadrata, mentre ruota appare deformato.<br>
+È previsto, e la matrice di proiezione del prossimo capitolo lo sistema.</p>
 <div class="lm-demo" data-demo="transformations" data-fallback="../../assets/img/getting-started/transformations.webp"></div>
 
-<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<h2 id="esercizi">Esercizi<a class="headerlink" href="#esercizi" title="Permanent link">#</a></h2>
 <ul>
-<li>Swap the translation and rotation and predict the result before running.<details class="solution"><summary>Mostra la soluzione</summary><p>With <code>rotation * translation * scale</code> the quad is scaled, then moved away from the origin, then rotated. The rotation now acts on the moved quad, so it swings around the center of the screen in a circle instead of spinning in place. Try it in the live demo with the order selector.</p></details></li>
-<li>Draw the rectangle a second time in the top-left corner with a scale that follows <code>sin(time)</code>. You only need a second <code>setVertexBytes</code> and a second draw call.<details class="solution"><summary>Mostra la soluzione</summary><p>Build a second matrix, send it with a second <code>setVertexBytes</code>, and issue the draw call again. The vertex buffer, pipeline and texture stay bound. In Swift: <code>float4x4(translation: [-0.5, 0.5, 0]) * float4x4(scale: Float3(repeating: abs(sin(time)) * 0.5))</code>. The scale passes through zero, where the quad vanishes for a frame.</p></details></li>
+<li>Scambia la traslazione con la rotazione e prova a prevedere il risultato prima di eseguire.<details class="solution"><summary>Mostra la soluzione</summary><p>Con <code>rotation * translation * scale</code> il rettangolo viene scalato, poi allontanato dall'origine, poi ruotato.<br>
+Adesso la rotazione agisce sul rettangolo già spostato, che quindi gira in cerchio intorno al centro dello schermo invece di ruotare sul posto.<br>
+Provalo nella demo interattiva con il selettore dell'ordine.</p></details></li>
+<li>Disegna il rettangolo una seconda volta nell'angolo in alto a sinistra, con una scala che segue <code>sin(time)</code>.<br>
+Ti servono solo un secondo <code>setVertexBytes</code> e una seconda draw call.<details class="solution"><summary>Mostra la soluzione</summary><p>Costruisci una seconda matrice, inviala con un secondo <code>setVertexBytes</code> e ripeti la draw call.<br>
+Il vertex buffer, la pipeline e la texture restano collegati.<br>
+In Swift: <code>float4x4(translation: [-0.5, 0.5, 0]) * float4x4(scale: Float3(repeating: abs(sin(time)) * 0.5))</code>.<br>
+La scala passa per lo zero, dove il rettangolo sparisce per un frame.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../getting-started/textures.html"><small>Precedente</small>Texture</a><a class="next" href="../getting-started/coordinate-systems.html"><small>Successivo</small>Sistemi di coordinate</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#vectors">Vectors</a></li><li><a href="#matrices">Matrices</a></li><li><a href="#order-matters">Order matters</a></li><li><a href="#a-matrix-helper">A matrix helper</a></li><li><a href="#transforming-the-rectangle">Transforming the rectangle</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#vettori">Vettori</a></li><li><a href="#matrici">Matrici</a></li><li><a href="#lordine-conta">L&#x27;ordine conta</a></li><li><a href="#un-file-di-supporto-per-le-matrici">Un file di supporto per le matrici</a></li><li><a href="#trasformare-il-rettangolo">Trasformare il rettangolo</a></li><li><a href="#esercizi">Esercizi</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

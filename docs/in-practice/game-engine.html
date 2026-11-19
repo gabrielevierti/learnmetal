@@ -135,12 +135,17 @@
 </nav>
 <main class="content" id="main">
 <article><p class="crumb">In Practice</p><h1 id="a-game-engine">A Game Engine<a class="headerlink" href="#a-game-engine" title="Permanent link">#</a></h1>
-<p>Every chapter so far built one technique in isolation: a shadow map here, a bloom chain there, each in its own small program. This chapter and the next three put them together. The result is the <strong>LearnMetal Engine</strong>: a small game engine made entirely with Metal, written twice, once in Swift and once in C++, with a complete little game on top and an editor to build scenes with.</p>
-<p>It is deliberately small. The engine is between five and six thousand lines in either language, comments included, and it is meant to be read. Nothing in it is a technique you have not met in these pages; what is new is how the pieces are arranged so that they work together.</p>
+<p>Every chapter so far built one technique in isolation: a shadow map here, a bloom chain there, each in its own small program.<br>
+This chapter and the next three put them together.<br>
+The result is the <strong>LearnMetal Engine</strong>: a small game engine made entirely with Metal, written twice, once in Swift and once in C++, with a complete little game on top and an editor to build scenes with.</p>
+<p>It is deliberately small.<br>
+The engine is between five and six thousand lines in either language, comments included, and it is meant to be read.<br>
+Nothing in it is a technique you have not met in these pages; what is new is how the pieces are arranged so that they work together.</p>
 <p><a class="cta" href="https://github.com/gabrielevierti/learnmetal-engine">Get the engine on GitHub</a> <a class="cta ghost" href="https://github.com/gabrielevierti/learnmetal-engine/archive/refs/heads/main.zip">Download it as a .zip</a></p>
 
 <h2 id="get-it-and-run-it">Get it and run it<a class="headerlink" href="#get-it-and-run-it" title="Permanent link">#</a></h2>
-<p>The engine lives in a repository of its own. You need macOS 13 or later and Xcode 15 or later.</p>
+<p>The engine lives in a repository of its own.<br>
+You need macOS 13 or later and Xcode 15 or later.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/gabrielevierti/learnmetal-engine.git
 <span class="nb">cd</span><span class="w"> </span>learnmetal-engine
@@ -151,7 +156,8 @@ swift<span class="w"> </span>run<span class="w"> </span>Marble
 </div>
 
 <div class="lang-cpp">
-<p>The C++ version also needs CMake 3.24 or later. The first configuration downloads the four libraries it uses: GLFW, metal-cpp, stb and miniaudio.</p>
+<p>The C++ version also needs CMake 3.24 or later.<br>
+The first configuration downloads the four libraries it uses: GLFW, metal-cpp, stb and miniaudio.</p>
 <div class="codehilite"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/gabrielevierti/learnmetal-engine.git
 <span class="nb">cd</span><span class="w"> </span>learnmetal-engine
 cmake<span class="w"> </span>-B<span class="w"> </span>build<span class="w"> </span>-DCMAKE_BUILD_TYPE<span class="o">=</span>Release
@@ -160,12 +166,17 @@ cmake<span class="w"> </span>--build<span class="w"> </span>build<span class="w"
 </code></pre></div>
 </div>
 
-<p>That starts <strong>Marble</strong>, the sample game. Roll with W A S D, jump with Space, look around with the arrow keys or by dragging the mouse. Collect the eight gems and reach the glowing disc. A gamepad works too.</p>
+<p>That starts <strong>Marble</strong>, the sample game.<br>
+Roll with W A S D, jump with Space, look around with the arrow keys or by dragging the mouse.<br>
+Collect the eight gems and reach the glowing disc.<br>
+A gamepad works too.</p>
 <p>Press <strong>F1</strong> for statistics and <strong>F2</strong> to see the physics shapes.</p>
 <figure><img src="../assets/img/in-practice/game-engine.webp" alt="Marble, the game that comes with the engine: physically based materials, light from the sky, cascaded shadows, bloom and an interface drawn on top." width="880" height="495" loading="lazy"><figcaption>Marble, the game that comes with the engine: physically based materials, light from the sky, cascaded shadows, bloom and an interface drawn on top.</figcaption></figure>
 
 <h2 id="what-an-engine-adds">What an engine adds<a class="headerlink" href="#what-an-engine-adds" title="Permanent link">#</a></h2>
-<p>The example programs of this site each have a renderer class that knows exactly what it draws: "a cube and a floor", "nine spheres". That stops working the moment the list of things to draw is decided while the program runs. An engine is what you get when you separate <strong>what exists</strong> from <strong>how it is drawn</strong>:</p>
+<p>The example programs of this site each have a renderer class that knows exactly what it draws: "a cube and a floor", "nine spheres".<br>
+That stops working the moment the list of things to draw is decided while the program runs.<br>
+An engine is what you get when you separate <strong>what exists</strong> from <strong>how it is drawn</strong>:</p>
 <ul>
 <li>A <strong>scene</strong> holds the things that exist: entities with a position, a mesh, a light, a physics body.</li>
 <li>A <strong>renderer</strong> draws whatever is in the scene, without knowing what game it is.</li>
@@ -174,7 +185,8 @@ cmake<span class="w"> </span>--build<span class="w"> </span>build<span class="w"
 </ul>
 <p>Around those sit the services a game takes for granted: loading files, input, sound, a way to draw an interface.</p>
 <h2 id="the-shape-of-a-game">The shape of a game<a class="headerlink" href="#the-shape-of-a-game" title="Permanent link">#</a></h2>
-<p>A game is an object with a few functions that the engine calls at the right moments. Here is a complete one: a cube that turns, lit by a sun, with a shadow.</p>
+<p>A game is an object with a few functions that the engine calls at the right moments.<br>
+Here is a complete one: a cube that turns, lit by a sun, with a shadow.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">import</span><span class="w"> </span><span class="nc">Foundation</span>
 <span class="kd">import</span><span class="w"> </span><span class="nc">LMEngine</span>
@@ -204,8 +216,12 @@ cmake<span class="w"> </span>--build<span class="w"> </span>build<span class="w"
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 
-<span class="kd">let</span><span class="w"> </span><span class="nv">engine</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Engine</span><span class="p">(</span><span class="n">config</span><span class="p">:</span><span class="w"> </span><span class="n">EngineConfig</span><span class="p">.</span><span class="n">fromArguments</span><span class="p">(</span><span class="n">CommandLine</span><span class="p">.</span><span class="n">arguments</span><span class="p">))</span>
-<span class="n">exit</span><span class="p">(</span><span class="n">engine</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="n">Spin</span><span class="p">()))</span>
+<span class="c1">// The engine lives on the main actor, so the program's first lines say they run there.</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">result</span><span class="p">:</span><span class="w"> </span><span class="nb">Int32</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MainActor</span><span class="p">.</span><span class="n">assumeIsolated</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">engine</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Engine</span><span class="p">(</span><span class="n">config</span><span class="p">:</span><span class="w"> </span><span class="n">EngineConfig</span><span class="p">.</span><span class="n">fromArguments</span><span class="p">(</span><span class="n">CommandLine</span><span class="p">.</span><span class="n">arguments</span><span class="p">))</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">engine</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="n">Spin</span><span class="p">())</span>
+<span class="p">}</span>
+<span class="n">exit</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </code></pre></div>
 </div>
 <div class="lang-cpp">
@@ -253,10 +269,13 @@ cmake<span class="w"> </span>--build<span class="w"> </span>build<span class="w"
 </code></pre></div>
 </div>
 
-<p>There is no render pass in it, no pipeline state, no buffer. The game says what exists; everything from the earlier chapters happens inside <code>engine.run</code>.</p>
-<p>Notice how the camera and the sun are aimed. Both look down their own negative z axis, like the camera of the <a href="../getting-started/camera.html">Camera</a> chapter, so giving them a rotation is giving them a direction.</p>
+<p>There is no render pass in it, no pipeline state, no buffer.<br>
+The game says what exists; everything from the earlier chapters happens inside <code>engine.run</code>.</p>
+<p>Notice how the camera and the sun are aimed.<br>
+Both look down their own negative z axis, like the camera of the <a href="../getting-started/camera.html">Camera</a> chapter, so giving them a rotation is giving them a direction.</p>
 <h2 id="the-frame">The frame<a class="headerlink" href="#the-frame" title="Permanent link">#</a></h2>
-<p><code>Engine</code> owns the loop. Every frame it does the same things in the same order:</p>
+<p><code>Engine</code> owns the loop.<br>
+Every frame it does the same things in the same order:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">func</span><span class="w"> </span><span class="nf">simulate</span><span class="p">(</span><span class="kc">_</span><span class="w"> </span><span class="n">game</span><span class="p">:</span><span class="w"> </span><span class="n">Game</span><span class="p">,</span><span class="w"> </span><span class="n">realDelta</span><span class="p">:</span><span class="w"> </span><span class="nb">Double</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="c1">// Physics and the game's fixedUpdate advance in steps of constant length.</span>
@@ -311,9 +330,14 @@ cmake<span class="w"> </span>--build<span class="w"> </span>build<span class="w"
 </div>
 
 <p>After this the renderer draws the scene, and then the 2D canvas on top of it.</p>
-<p>The order is not arbitrary. Physics runs before the game's <code>update</code>, so game logic sees where things ended up. World matrices are computed after everything that can move an entity, and before the two systems that need them: particles and the renderer. Entities that were destroyed during the frame are only removed at fixed points, so that no system ever holds a reference to something that vanished halfway through.</p>
+<p>The order is not arbitrary.<br>
+Physics runs before the game's <code>update</code>, so game logic sees where things ended up.<br>
+World matrices are computed after everything that can move an entity, and before the two systems that need them: particles and the renderer.<br>
+Entities that were destroyed during the frame are only removed at fixed points, so that no system ever holds a reference to something that vanished halfway through.</p>
 <h2 id="a-fixed-step-for-physics">A fixed step for physics<a class="headerlink" href="#a-fixed-step-for-physics" title="Permanent link">#</a></h2>
-<p>Rendering takes a different amount of time every frame. If physics advanced by that same varying amount, a ball would bounce a little differently on every machine, and a slow frame could push it through a floor. So physics always advances by exactly one sixtieth of a second, and the engine decides how many such steps fit in the time that has passed:</p>
+<p>Rendering takes a different amount of time every frame.<br>
+If physics advanced by that same varying amount, a ball would bounce a little differently on every machine, and a slow frame could push it through a floor.<br>
+So physics always advances by exactly one sixtieth of a second, and the engine decides how many such steps fit in the time that has passed:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">accumulator</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="nb">Double</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span>
 <span class="kd">var</span><span class="w"> </span><span class="nv">steps</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span>
@@ -337,12 +361,19 @@ cmake<span class="w"> </span>--build<span class="w"> </span>build<span class="w"
 </code></pre></div>
 </div>
 
-<p>Real time is poured into the accumulator and taken out in fixed portions. On a 120 Hz display, every other frame runs no step at all; after a hiccup, one frame runs several, up to a limit.</p>
-<p>What is left in the accumulator is a fraction of a step, <code>alpha</code>. The renderer does not show bodies at their latest physics position, but at a blend between the previous one and the latest one, <code>alpha</code> of the way along. That is what makes motion smooth even though physics only knows sixty moments per second.</p>
-<p>One consequence is worth remembering: a function that runs "zero, one or several times per frame" is the wrong place to ask whether a key was just pressed. Read input in <code>update</code> and remember it; apply forces in <code>fixedUpdate</code>.</p>
+<p>Real time is poured into the accumulator and taken out in fixed portions.<br>
+On a 120 Hz display, every other frame runs no step at all; after a hiccup, one frame runs several, up to a limit.</p>
+<p>What is left in the accumulator is a fraction of a step, <code>alpha</code>.<br>
+The renderer does not show bodies at their latest physics position, but at a blend between the previous one and the latest one, <code>alpha</code> of the way along.<br>
+That is what makes motion smooth even though physics only knows sixty moments per second.</p>
+<p>One consequence is worth remembering: a function that runs "zero, one or several times per frame" is the wrong place to ask whether a key was just pressed.<br>
+Read input in <code>update</code> and remember it; apply forces in <code>fixedUpdate</code>.</p>
 <h2 id="one-source-of-truth-for-the-gpu">One source of truth for the GPU<a class="headerlink" href="#one-source-of-truth-for-the-gpu" title="Permanent link">#</a></h2>
-<p>Every chapter with a uniform buffer had the same warning: the struct in the shader and the struct in the host code must match byte for byte, and nothing checks it. In an engine with a dozen such structs and two host languages, hoping is not enough.</p>
-<p>The engine declares each struct once, in a C header that all three compilers read. Inside a shader the <code>simd</code> names are made to mean the shader's own types. Shortened to one struct, the header looks like this:</p>
+<p>Every chapter with a uniform buffer had the same warning: the struct in the shader and the struct in the host code must match byte for byte, and nothing checks it.<br>
+In an engine with a dozen such structs and two host languages, hoping is not enough.</p>
+<p>The engine declares each struct once, in a C header that all three compilers read.<br>
+Inside a shader the <code>simd</code> names are made to mean the shader's own types.<br>
+Shortened to one struct, the header looks like this:</p>
 <div class="codehilite"><pre><span></span><code><span class="c1">// Shaders/Shared/ShaderTypes.h</span>
 <span class="cp">#ifdef __METAL_VERSION__</span>
 <span class="k">typedef</span><span class="w"> </span><span class="n">float2</span><span class="w"> </span><span class="n">simd_float2</span><span class="p">;</span>
@@ -371,7 +402,8 @@ cmake<span class="w"> </span>--build<span class="w"> </span>build<span class="w"
 <span class="p">}</span><span class="w"> </span><span class="n">InstanceData</span><span class="p">;</span>
 </code></pre></div>
 
-<p>The shaders include it with <code>#include</code>. The host code brings it in like this:</p>
+<p>The shaders include it with <code>#include</code>.<br>
+The host code brings it in like this:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// Package.swift: a C target whose only header is ShaderTypes.h</span>
 <span class="p">.</span><span class="n">target</span><span class="p">(</span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="s">"ShaderTypes"</span><span class="p">,</span><span class="w"> </span><span class="n">path</span><span class="p">:</span><span class="w"> </span><span class="s">"Shaders/Shared"</span><span class="p">,</span><span class="w"> </span><span class="n">publicHeadersPath</span><span class="p">:</span><span class="w"> </span><span class="s">"."</span><span class="p">),</span>
@@ -409,7 +441,9 @@ cmake<span class="w"> </span>--build<span class="w"> </span>build<span class="w"
 </div>
 
 <p>The binding slots live in the same header, so <code>[[buffer(LMBufferInstances)]]</code> in a shader and the index passed to the encoder are the same constant, not two numbers that happen to agree.</p>
-<p>Two rules keep the header safe. No <code>bool</code>, whose size differs between languages. And remember that a <code>float3</code> occupies sixteen bytes in all three languages: the unit tests check the size of every struct, so a mistake fails a test and not a frame.</p>
+<p>Two rules keep the header safe.<br>
+No <code>bool</code>, whose size differs between languages.<br>
+And remember that a <code>float3</code> occupies sixteen bytes in all three languages: the unit tests check the size of every struct, so a mistake fails a test and not a frame.</p>
 <h2 id="where-each-chapter-went">Where each chapter went<a class="headerlink" href="#where-each-chapter-went" title="Permanent link">#</a></h2>
 <table>
 <thead>
@@ -485,7 +519,9 @@ cmake<span class="w"> </span>--build<span class="w"> </span>build<span class="w"
 </tr>
 </tbody>
 </table>
-<p>Not everything made it. There are no <a href="../advanced-metal/stencil-testing.html">stencil outlines</a>, no <a href="../advanced-lighting/deferred-shading.html">deferred path</a>, no <a href="../advanced-lighting/point-shadows.html">shadows from point lights</a>, no <a href="../advanced-lighting/parallax-mapping.html">parallax mapping</a>, and nothing from the Beyond section. A small engine that does a few things well is a better place to add those than a large one that does everything halfway.</p>
+<p>Not everything made it.<br>
+There are no <a href="../advanced-metal/stencil-testing.html">stencil outlines</a>, no <a href="../advanced-lighting/deferred-shading.html">deferred path</a>, no <a href="../advanced-lighting/point-shadows.html">shadows from point lights</a>, no <a href="../advanced-lighting/parallax-mapping.html">parallax mapping</a>, and nothing from the Beyond section.<br>
+A small engine that does a few things well is a better place to add those than a large one that does everything halfway.</p>
 <p>The <a href="engine-renderer.html">next chapter</a> opens the renderer.</p></article><nav class="pager" id="pager"><a class="prev" href="../in-practice/2d-game.html"><small>Previous</small>A 2D Game</a><a class="next" href="../in-practice/engine-renderer.html"><small>Next</small>Engine: The Renderer</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>

@@ -1,0 +1,3 @@
+Con `rotation * translation * scale` il rettangolo viene scalato, poi allontanato dall'origine, poi ruotato. Adesso la rotazione agisce sul rettangolo già spostato, che quindi gira in cerchio intorno al centro dello schermo invece di ruotare sul posto. Provalo nella demo interattiva con il selettore dell'ordine.
+---
+Costruisci una seconda matrice, inviala con un secondo `setVertexBytes` e ripeti la draw call. Il vertex buffer, la pipeline e la texture restano collegati. In Swift: `float4x4(translation: [-0.5, 0.5, 0]) * float4x4(scale: Float3(repeating: abs(sin(time)) * 0.5))`. La scala passa per lo zero, dove il rettangolo sparisce per un frame.

@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,155 +134,179 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">PBR</p><h1 id="theory">Theory<a class="headerlink" href="#theory" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
-<p><strong>Physically based rendering</strong> (PBR) is a family of techniques that model light in a way that is closer to physics than Phong or Blinn-Phong. The pay-off is practical:</p>
+<article><p class="crumb">PBR</p><h1 id="teoria">Teoria<a class="headerlink" href="#teoria" title="Permanent link">#</a></h1>
+<p>Il <strong>rendering fisicamente corretto</strong> (physically based rendering, PBR) è una famiglia di tecniche che modellano la luce in un modo più vicino alla fisica rispetto a Phong o a Blinn-Phong.<br>
+Il vantaggio è pratico:</p>
 <ul>
-<li>Materials look right under <strong>any</strong> lighting, without per-scene tweaking.</li>
-<li>Artists author materials with a few intuitive parameters that mean the same thing in every engine.</li>
+<li>I materiali appaiono giusti sotto <strong>qualsiasi</strong> illuminazione, senza ritocchi scena per scena.</li>
+<li>Gli artisti creano i materiali con pochi parametri intuitivi che hanno lo stesso significato in ogni motore.</li>
 </ul>
-<p>A lighting model is usually called physically based when it meets three conditions: it is built on a <strong>microfacet</strong> model of surfaces, it <strong>conserves energy</strong>, and it uses a physically based <strong>BRDF</strong>. This chapter explains each, and the next one turns them into shader code.</p>
-<h2 id="microfacets">Microfacets<a class="headerlink" href="#microfacets" title="Permanent link">#</a></h2>
-<p>At a microscopic scale no surface is smooth. It is made of tiny perfect mirrors called <strong>microfacets</strong>, each pointing in its own direction. On a rough surface their orientations vary wildly, and incoming light scatters widely, producing broad, dim highlights. On a smooth surface they are nearly aligned, and reflections are sharp and bright.</p>
-<p>We cannot model individual microfacets, so we describe them statistically with one number, the <strong>roughness</strong>, from 0 (mirror) to 1 (completely rough). What matters to a highlight is the fraction of microfacets whose normal matches the <strong>halfway vector</strong> between the light and the viewer, the same vector we met in <a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a>.</p>
-<h2 id="energy-conservation">Energy conservation<a class="headerlink" href="#energy-conservation" title="Permanent link">#</a></h2>
-<p>Outgoing light can never exceed incoming light, apart from surfaces that emit light themselves. When light hits a surface it splits into two parts:</p>
+<p>Di solito un modello di illuminazione si dice fisicamente corretto quando soddisfa tre condizioni: si basa su un modello a <strong>microfaccette</strong> delle superfici, <strong>conserva l'energia</strong> e usa una <strong>BRDF</strong> fisicamente corretta.<br>
+Questo capitolo spiega ciascuna, e il prossimo le trasforma in codice di shader.</p>
+<h2 id="microfaccette">Microfaccette<a class="headerlink" href="#microfaccette" title="Permanent link">#</a></h2>
+<p>A scala microscopica nessuna superficie è liscia.<br>
+È fatta di minuscoli specchi perfetti chiamati <strong>microfaccette</strong>, ognuno rivolto in una sua direzione.<br>
+Su una superficie ruvida i loro orientamenti variano moltissimo, e la luce in arrivo si disperde ampiamente, producendo riflessi larghi e deboli.<br>
+Su una superficie liscia sono quasi allineati, e i riflessi sono netti e brillanti.</p>
+<p>Non possiamo modellare le singole microfaccette, quindi le descriviamo statisticamente con un solo numero, la <strong>roughness</strong>, da 0 (specchio) a 1 (del tutto ruvido).<br>
+Ciò che conta per un riflesso è la frazione di microfaccette la cui normale coincide con il <strong>vettore halfway</strong> tra la luce e chi guarda, lo stesso vettore incontrato in <a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a>.</p>
+<h2 id="conservazione-dellenergia">Conservazione dell'energia<a class="headerlink" href="#conservazione-dellenergia" title="Permanent link">#</a></h2>
+<p>La luce in uscita non può mai superare quella in entrata, a parte le superfici che emettono luce propria.<br>
+Quando la luce colpisce una superficie si divide in due parti:</p>
 <ul>
-<li>The <strong>reflected</strong> part bounces off the surface directly. This is <strong>specular</strong> light.</li>
-<li>The <strong>refracted</strong> part enters the material, scatters inside, and is partly absorbed. What comes back out, colored by the material, is <strong>diffuse</strong> light.</li>
+<li>La parte <strong>riflessa</strong> rimbalza direttamente sulla superficie.<br>
+È la luce <strong>specular</strong>.</li>
+<li>La parte <strong>rifratta</strong> entra nel materiale, si disperde al suo interno e viene in parte assorbita.<br>
+Ciò che ne esce, colorato dal materiale, è la luce <strong>diffuse</strong>.</li>
 </ul>
-<p>The two are mutually exclusive: light that was reflected cannot also be refracted. So if a fraction <code>kS</code> is reflected, at most <code>1 - kS</code> is left for diffuse.</p>
-<p><strong>Metals</strong> behave differently from non-metals (<strong>dielectrics</strong>). A metal absorbs all refracted light, so it has no diffuse color at all, only tinted specular reflection. This is the basis of the <strong>metalness</strong> parameter.</p>
-<h2 id="the-reflectance-equation">The reflectance equation<a class="headerlink" href="#the-reflectance-equation" title="Permanent link">#</a></h2>
-<p>PBR is built on this equation:</p>
+<p>Le due si escludono a vicenda: la luce che è stata riflessa non può essere anche rifratta.<br>
+Quindi, se viene riflessa una frazione <code>kS</code>, per il diffuse resta al massimo <code>1 - kS</code>.</p>
+<p>I <strong>metalli</strong> si comportano in modo diverso dai non metalli (i <strong>dielettrici</strong>).<br>
+Un metallo assorbe tutta la luce rifratta, quindi non ha alcun colore diffuse, solo una riflessione speculare colorata.<br>
+È la base del parametro <strong>metalness</strong>.</p>
+<h2 id="lequazione-della-riflettanza">L'equazione della riflettanza<a class="headerlink" href="#lequazione-della-riflettanza" title="Permanent link">#</a></h2>
+<p>Il PBR si costruisce su questa equazione:</p>
 <div class="codehilite"><pre><span></span><code>Lo(p, wo) = ∫Ω  fr(p, wi, wo) · Li(p, wi) · (n · wi)  dwi
 </code></pre></div>
 
-<p>It reads more gently than it looks. The light <code>Lo</code> leaving point <code>p</code> toward the viewer <code>wo</code> is the sum, over every incoming direction <code>wi</code> in the hemisphere <code>Ω</code> above the surface, of:</p>
+<p>Si legge con più facilità di quanto sembri.<br>
+La luce <code>Lo</code> che lascia il punto <code>p</code> verso chi guarda <code>wo</code> è la somma, su ogni direzione di arrivo <code>wi</code> nell'emisfero <code>Ω</code> sopra la superficie, di:</p>
 <ul>
-<li><code>Li</code>, the <strong>radiance</strong> arriving from that direction, which is the strength and color of the light,</li>
-<li><code>n · wi</code>, the familiar cosine factor that weakens light arriving at a shallow angle,</li>
-<li><code>fr</code>, the <strong>BRDF</strong>, which says how much of the light from <code>wi</code> is reflected toward <code>wo</code> for this material.</li>
+<li><code>Li</code>, la <strong>radianza</strong> in arrivo da quella direzione, cioè l'intensità e il colore della luce,</li>
+<li><code>n · wi</code>, il solito fattore coseno che indebolisce la luce che arriva radente,</li>
+<li><code>fr</code>, la <strong>BRDF</strong>, che dice quanta della luce proveniente da <code>wi</code> viene riflessa verso <code>wo</code> da questo materiale.</li>
 </ul>
-<p>For a handful of point lights the integral collapses into a simple sum over the lights, which is what the next chapter does. For light arriving from the whole environment we have to actually solve it, and that is the subject of the IBL chapters.</p>
-<h2 id="the-cook-torrance-brdf">The Cook-Torrance BRDF<a class="headerlink" href="#the-cook-torrance-brdf" title="Permanent link">#</a></h2>
-<p>The BRDF used by practically every real-time renderer has a diffuse and a specular part:</p>
+<p>Per una manciata di luci puntiformi l'integrale si riduce a una semplice somma sulle luci, ed è ciò che fa il prossimo capitolo.<br>
+Per la luce che arriva dall'intero ambiente dobbiamo risolverlo davvero, ed è l'argomento dei capitoli sull'IBL.</p>
+<h2 id="la-brdf-di-cook-torrance">La BRDF di Cook-Torrance<a class="headerlink" href="#la-brdf-di-cook-torrance" title="Permanent link">#</a></h2>
+<p>La BRDF usata in pratica da ogni renderer in tempo reale ha una parte diffuse e una specular:</p>
 <div class="codehilite"><pre><span></span><code>fr = kD · f_lambert + f_cook-torrance
 </code></pre></div>
 
-<p>The diffuse part is the <strong>Lambertian</strong> term, a constant: <code>albedo / π</code>.</p>
-<p>The specular part is</p>
+<p>La parte diffuse è il termine <strong>lambertiano</strong>, una costante: <code>albedo / π</code>.</p>
+<p>La parte specular è</p>
 <div class="codehilite"><pre><span></span><code>                   D · F · G
 f_cook-torrance = ─────────────────
                   4 (wo · n)(wi · n)
 </code></pre></div>
 
-<p>with three functions, each approximating one aspect of microfacet behavior.</p>
-<h3 id="d-normal-distribution-function">D: normal distribution function<a class="headerlink" href="#d-normal-distribution-function" title="Permanent link">#</a></h3>
-<p>How many microfacets are aligned with the halfway vector <code>h</code>? The <strong>Trowbridge-Reitz GGX</strong> distribution, with <code>α = roughness²</code>:</p>
+<p>con tre funzioni, ognuna delle quali approssima un aspetto del comportamento delle microfaccette.</p>
+<h3 id="d-la-funzione-di-distribuzione-delle-normali">D: la funzione di distribuzione delle normali<a class="headerlink" href="#d-la-funzione-di-distribuzione-delle-normali" title="Permanent link">#</a></h3>
+<p>Quante microfaccette sono allineate con il vettore halfway <code>h</code>?<br>
+La distribuzione <strong>Trowbridge-Reitz GGX</strong>, con <code>α = roughness²</code>:</p>
 <div class="codehilite"><pre><span></span><code>              α²
 D = ─────────────────────────
     π ((n · h)² (α² − 1) + 1)²
 </code></pre></div>
 
-<p>Low roughness concentrates the result into a small, intense spot. High roughness spreads it out.</p>
-<h3 id="g-geometry-function">G: geometry function<a class="headerlink" href="#g-geometry-function" title="Permanent link">#</a></h3>
-<p>Microfacets shadow and mask one another, especially on rough surfaces at grazing angles. The <strong>Schlick-GGX</strong> approximation for one direction is</p>
+<p>Una roughness bassa concentra il risultato in una macchia piccola e intensa.<br>
+Una alta lo distribuisce.</p>
+<h3 id="g-la-funzione-di-geometria">G: la funzione di geometria<a class="headerlink" href="#g-la-funzione-di-geometria" title="Permanent link">#</a></h3>
+<p>Le microfaccette si fanno ombra e si coprono a vicenda, soprattutto sulle superfici ruvide ad angoli radenti.<br>
+L'approssimazione <strong>Schlick-GGX</strong> per una direzione è</p>
 <div class="codehilite"><pre><span></span><code>              n · v
 G1(v) = ─────────────────
         (n · v)(1 − k) + k
 </code></pre></div>
 
-<p>where <code>k = (roughness + 1)² / 8</code> for direct lighting and <code>k = roughness² / 2</code> for image-based lighting. <strong>Smith's method</strong> combines the view and light directions: <code>G = G1(view) · G1(light)</code>.</p>
-<h3 id="f-fresnel-equation">F: Fresnel equation<a class="headerlink" href="#f-fresnel-equation" title="Permanent link">#</a></h3>
-<p>Every surface becomes more reflective at grazing angles. Look straight down at a lake and you see the bottom; look across it and you see the sky. The <strong>Fresnel-Schlick</strong> approximation:</p>
+<p>dove <code>k = (roughness + 1)² / 8</code> per l'illuminazione diretta e <code>k = roughness² / 2</code> per l'illuminazione basata su immagini.<br>
+Il <strong>metodo di Smith</strong> combina le direzioni di vista e di luce: <code>G = G1(vista) · G1(luce)</code>.</p>
+<h3 id="f-lequazione-di-fresnel">F: l'equazione di Fresnel<a class="headerlink" href="#f-lequazione-di-fresnel" title="Permanent link">#</a></h3>
+<p>Ogni superficie diventa più riflettente agli angoli radenti.<br>
+Guarda un lago dritto dall'alto e vedi il fondo; guardalo di taglio e vedi il cielo.<br>
+L'approssimazione <strong>Fresnel-Schlick</strong>:</p>
 <div class="codehilite"><pre><span></span><code>F = F0 + (1 − F0)(1 − (h · v))⁵
 </code></pre></div>
 
-<p><code>F0</code> is the <strong>base reflectivity</strong>, the reflectance when looking straight at the surface. Dielectrics have a low, colorless F0 around 0.04. Metals have a high, colored one:</p>
+<p><code>F0</code> è la <strong>riflettività di base</strong>, la riflettanza quando si guarda la superficie di fronte.<br>
+I dielettrici hanno una F0 bassa e senza colore, intorno a 0.04.<br>
+I metalli ne hanno una alta e colorata:</p>
 <table>
 <thead>
 <tr>
-<th>Material</th>
-<th>F0 (linear RGB)</th>
+<th>Materiale</th>
+<th>F0 (RGB lineare)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Water</td>
+<td>Acqua</td>
 <td>0.02, 0.02, 0.02</td>
 </tr>
 <tr>
-<td>Plastic, glass</td>
+<td>Plastica, vetro</td>
 <td>0.04, 0.04, 0.04</td>
 </tr>
 <tr>
-<td>Iron</td>
+<td>Ferro</td>
 <td>0.56, 0.57, 0.58</td>
 </tr>
 <tr>
-<td>Copper</td>
+<td>Rame</td>
 <td>0.95, 0.64, 0.54</td>
 </tr>
 <tr>
-<td>Gold</td>
+<td>Oro</td>
 <td>1.00, 0.71, 0.29</td>
 </tr>
 <tr>
-<td>Aluminium</td>
+<td>Alluminio</td>
 <td>0.91, 0.92, 0.92</td>
 </tr>
 </tbody>
 </table>
-<p>In the metalness workflow, F0 is computed by blending between 0.04 and the albedo color using the metalness value.</p>
-<p>The Fresnel term F <em>is</em> the reflected fraction <code>kS</code>. So <code>kD = (1 − F)(1 − metalness)</code>.</p>
-<figure><img src="../../assets/img/pbr/theory.webp" alt="One light on five dielectric spheres. Roughness alone changes the highlight from a sharp point to a broad sheen." width="880" height="260" loading="lazy"><figcaption>One light on five dielectric spheres. Roughness alone changes the highlight from a sharp point to a broad sheen.</figcaption></figure>
+<p>Nel flusso di lavoro con la metalness, F0 si calcola mescolando 0.04 e il colore dell'albedo in base al valore di metalness.</p>
+<p>Il termine di Fresnel F <em>è</em> la frazione riflessa <code>kS</code>.<br>
+Quindi <code>kD = (1 − F)(1 − metalness)</code>.</p>
+<figure><img src="../../assets/img/pbr/theory.webp" alt="Una luce su cinque sfere dielettriche. La sola roughness trasforma il riflesso da un punto netto a una lucentezza ampia." width="880" height="260" loading="lazy"><figcaption>Una luce su cinque sfere dielettriche. La sola roughness trasforma il riflesso da un punto netto a una lucentezza ampia.</figcaption></figure>
 
-<h2 id="material-parameters">Material parameters<a class="headerlink" href="#material-parameters" title="Permanent link">#</a></h2>
-<p>A PBR material in the common <strong>metallic-roughness</strong> workflow consists of:</p>
+<h2 id="i-parametri-del-materiale">I parametri del materiale<a class="headerlink" href="#i-parametri-del-materiale" title="Permanent link">#</a></h2>
+<p>Un materiale PBR nel diffuso flusso di lavoro <strong>metallic-roughness</strong> è composto da:</p>
 <table>
 <thead>
 <tr>
-<th>Map</th>
-<th>Color space</th>
-<th>Meaning</th>
+<th>Mappa</th>
+<th>Spazio colore</th>
+<th>Significato</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><strong>Albedo</strong></td>
 <td>sRGB</td>
-<td>Base color, with no lighting or shadows baked in. For metals, the F0 color.</td>
+<td>Colore di base, senza luci né ombre già dipinte. Per i metalli, il colore di F0.</td>
 </tr>
 <tr>
 <td><strong>Normal</strong></td>
-<td>linear</td>
-<td>Tangent-space normal, as in normal mapping.</td>
+<td>lineare</td>
+<td>Normale in spazio tangente, come nel normal mapping.</td>
 </tr>
 <tr>
 <td><strong>Metallic</strong></td>
-<td>linear</td>
-<td>0 for dielectrics, 1 for metals. Rarely in between.</td>
+<td>lineare</td>
+<td>0 per i dielettrici, 1 per i metalli. Raramente valori intermedi.</td>
 </tr>
 <tr>
 <td><strong>Roughness</strong></td>
-<td>linear</td>
-<td>Microfacet roughness.</td>
+<td>lineare</td>
+<td>Ruvidità delle microfaccette.</td>
 </tr>
 <tr>
 <td><strong>Ambient occlusion</strong></td>
-<td>linear</td>
-<td>Pre-baked occlusion of crevices.</td>
+<td>lineare</td>
+<td>Occlusione delle fessure già calcolata.</td>
 </tr>
 </tbody>
 </table>
-<p>This is the material model used by USD's preview surface and by glTF, so the assets Model I/O loads map directly onto it (<code>.baseColor</code>, <code>.metallic</code>, <code>.roughness</code>, <code>.tangentSpaceNormal</code>, <code>.ambientOcclusion</code>).</p>
-<p>Because PBR depends on correct light intensities, it requires the linear workflow and HDR pipeline from the previous section. Check that both are in place before continuing.</p></article><nav class="pager" id="pager"><a class="prev" href="../advanced-lighting/ssao.html"><small>Precedente</small>SSAO</a><a class="next" href="../pbr/lighting.html"><small>Successivo</small>Illuminazione</a></nav>
+<p>È il modello di materiale usato dalla preview surface di USD e da glTF, quindi gli asset che Model I/O carica vi corrispondono direttamente (<code>.baseColor</code>, <code>.metallic</code>, <code>.roughness</code>, <code>.tangentSpaceNormal</code>, <code>.ambientOcclusion</code>).</p>
+<p>Poiché il PBR dipende da intensità di luce corrette, richiede il flusso di lavoro lineare e la pipeline HDR della sezione precedente.<br>
+Verifica che ci siano entrambi prima di continuare.</p></article><nav class="pager" id="pager"><a class="prev" href="../advanced-lighting/ssao.html"><small>Precedente</small>SSAO</a><a class="next" href="../pbr/lighting.html"><small>Successivo</small>Illuminazione</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#microfacets">Microfacets</a></li><li><a href="#energy-conservation">Energy conservation</a></li><li><a href="#the-reflectance-equation">The reflectance equation</a></li><li><a href="#the-cook-torrance-brdf">The Cook-Torrance BRDF</a></li><li><a href="#material-parameters">Material parameters</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#microfaccette">Microfaccette</a></li><li><a href="#conservazione-dellenergia">Conservazione dell&#x27;energia</a></li><li><a href="#lequazione-della-riflettanza">L&#x27;equazione della riflettanza</a></li><li><a href="#la-brdf-di-cook-torrance">La BRDF di Cook-Torrance</a></li><li><a href="#i-parametri-del-materiale">I parametri del materiale</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

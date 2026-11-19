@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,50 +134,59 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Illuminazione</p><h1 id="review">Review<a class="headerlink" href="#review" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
-<p>You can now light a scene. The model is simple, and it is the foundation that every later technique refines.</p>
-<h2 id="glossary">Glossary<a class="headerlink" href="#glossary" title="Permanent link">#</a></h2>
+<article><p class="crumb">Illuminazione</p><h1 id="riepilogo">Riepilogo<a class="headerlink" href="#riepilogo" title="Permanent link">#</a></h1>
+<p>Ora sai illuminare una scena.<br>
+Il modello è semplice, ed è la base che ogni tecnica successiva raffina.</p>
+<h2 id="glossario">Glossario<a class="headerlink" href="#glossario" title="Permanent link">#</a></h2>
 <ul>
-<li><strong>Color vector</strong>: red, green and blue intensities. Reflection is a component-wise multiplication of light color and surface color.</li>
-<li><strong>Phong lighting model</strong>: ambient + diffuse + specular.</li>
-<li><strong>Ambient</strong>: a constant term that fakes indirect light.</li>
-<li><strong>Diffuse</strong>: brightness from the angle between the normal and the direction to the light: <code>max(dot(N, L), 0)</code>.</li>
-<li><strong>Specular</strong>: a highlight from the angle between the reflected light and the direction to the viewer, raised to the shininess exponent.</li>
-<li><strong>Normal</strong>: a unit vector perpendicular to the surface.</li>
-<li><strong>Normal matrix</strong>: the inverse transpose of the model matrix's upper-left 3×3, used to transform normals correctly.</li>
-<li><strong>Material</strong>: the set of values describing how a surface reacts to light.</li>
-<li><strong>Diffuse map / specular map</strong>: textures that supply the material's color and shininess per pixel.</li>
-<li><strong>Directional light</strong>: parallel rays with a direction and no position.</li>
-<li><strong>Point light</strong>: a position, shining in all directions, with attenuation over distance.</li>
-<li><strong>Attenuation</strong>: the fall-off of light with distance.</li>
-<li><strong>Spotlight</strong>: a point light limited to a cone, with a soft edge between an inner and outer cutoff.</li>
+<li><strong>Vettore colore</strong>: le intensità di rosso, verde e blu.<br>
+La riflessione è una moltiplicazione componente per componente tra il colore della luce e quello della superficie.</li>
+<li><strong>Modello di illuminazione di Phong</strong>: ambient + diffuse + specular.</li>
+<li><strong>Ambient</strong>: un termine costante che imita la luce indiretta.</li>
+<li><strong>Diffuse</strong>: la luminosità data dall'angolo tra la normale e la direzione verso la luce: <code>max(dot(N, L), 0)</code>.</li>
+<li><strong>Specular</strong>: un riflesso dato dall'angolo tra la luce riflessa e la direzione verso chi guarda, elevato all'esponente di shininess.</li>
+<li><strong>Normale</strong>: un vettore unitario perpendicolare alla superficie.</li>
+<li><strong>Matrice delle normali</strong>: la trasposta dell'inversa del blocco 3×3 in alto a sinistra della matrice model, usata per trasformare correttamente le normali.</li>
+<li><strong>Materiale</strong>: l'insieme dei valori che descrivono come una superficie reagisce alla luce.</li>
+<li><strong>Diffuse map / specular map</strong>: texture che forniscono pixel per pixel il colore e la lucentezza del materiale.</li>
+<li><strong>Luce direzionale</strong>: raggi paralleli, con una direzione e nessuna posizione.</li>
+<li><strong>Luce puntiforme</strong>: una posizione, luce in tutte le direzioni e attenuazione con la distanza.</li>
+<li><strong>Attenuazione</strong>: il calo della luce con la distanza.</li>
+<li><strong>Spot</strong>: una luce puntiforme limitata a un cono, con un bordo morbido tra un cutoff interno e uno esterno.</li>
 </ul>
 <figure><img src="../../assets/img/lighting/review.webp" alt="review" width="880" height="270" loading="lazy"></figure>
 
-<h2 id="what-changed-in-the-renderer">What changed in the renderer<a class="headerlink" href="#what-changed-in-the-renderer" title="Permanent link">#</a></h2>
+<h2 id="che-cosa-e-cambiato-nel-renderer">Che cosa è cambiato nel renderer<a class="headerlink" href="#che-cosa-e-cambiato-nel-renderer" title="Permanent link">#</a></h2>
 <ul>
-<li><code>VertexOut</code> carries the world-space position and normal to the fragment function.</li>
-<li>Vertex uniforms gained a normal matrix.</li>
-<li>A second uniform struct, bound to fragment buffer slot 1, holds lights, the camera position and material values.</li>
-<li>Lights that come in variable numbers live in their own buffer and are indexed through a pointer.</li>
-<li>Two pipeline states share one vertex function: a lit one for objects and an unlit one for lamps.</li>
+<li><code>VertexOut</code> porta alla fragment function la posizione e la normale in spazio mondo.</li>
+<li>Gli uniform del vertice hanno guadagnato una matrice delle normali.</li>
+<li>Una seconda struct di uniform, collegata allo slot 1 dei buffer del fragment, contiene le luci, la posizione della camera e i valori del materiale.</li>
+<li>Le luci presenti in numero variabile vivono in un loro buffer e si indicizzano attraverso un puntatore.</li>
+<li>Due pipeline state condividono una sola vertex function: uno illuminato per gli oggetti e uno senza illuminazione per le lampade.</li>
 </ul>
-<h2 id="where-the-model-falls-short">Where the model falls short<a class="headerlink" href="#where-the-model-falls-short" title="Permanent link">#</a></h2>
-<p>Phong lighting is an artistic approximation. Its weaknesses point straight at later chapters:</p>
+<h2 id="dove-il-modello-non-basta">Dove il modello non basta<a class="headerlink" href="#dove-il-modello-non-basta" title="Permanent link">#</a></h2>
+<p>L'illuminazione di Phong è un'approssimazione artistica.<br>
+I suoi punti deboli indicano direttamente i capitoli che verranno:</p>
 <ul>
-<li>Highlights break down at grazing angles. See <a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a>.</li>
-<li>The colors are computed in the wrong color space. See <a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a>.</li>
-<li>Nothing casts a shadow. See <a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a>.</li>
-<li>Flat surfaces look flat. See <a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a>.</li>
-<li>Materials do not conserve energy and need hand tuning per scene. See <a href="../pbr/theory.html">PBR</a>.</li>
+<li>I riflessi si rompono agli angoli radenti.<br>
+Vedi <a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a>.</li>
+<li>I colori sono calcolati nello spazio colore sbagliato.<br>
+Vedi <a href="../advanced-lighting/gamma-correction.html">Correzione gamma</a>.</li>
+<li>Niente proietta ombra.<br>
+Vedi <a href="../advanced-lighting/shadow-mapping.html">Shadow mapping</a>.</li>
+<li>Le superfici piatte sembrano piatte.<br>
+Vedi <a href="../advanced-lighting/normal-mapping.html">Normal mapping</a>.</li>
+<li>I materiali non conservano l'energia e vanno regolati a mano scena per scena.<br>
+Vedi <a href="../pbr/theory.html">PBR</a>.</li>
 </ul>
-<p>Before any of that, cubes are getting boring. The next section loads real models.</p></article><nav class="pager" id="pager"><a class="prev" href="../lighting/multiple-lights.html"><small>Precedente</small>Più luci</a><a class="next" href="../model-loading/model-io.html"><small>Successivo</small>Model I/O</a></nav>
+<p>Prima di tutto questo, però, i cubi stanno diventando noiosi.<br>
+La prossima sezione carica modelli veri.</p></article><nav class="pager" id="pager"><a class="prev" href="../lighting/multiple-lights.html"><small>Precedente</small>Più luci</a><a class="next" href="../model-loading/model-io.html"><small>Successivo</small>Model I/O</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#glossary">Glossary</a></li><li><a href="#what-changed-in-the-renderer">What changed in the renderer</a></li><li><a href="#where-the-model-falls-short">Where the model falls short</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#glossario">Glossario</a></li><li><a href="#che-cosa-e-cambiato-nel-renderer">Che cosa è cambiato nel renderer</a></li><li><a href="#dove-il-modello-non-basta">Dove il modello non basta</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

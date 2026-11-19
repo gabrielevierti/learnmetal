@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,15 +134,17 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Illuminazione avanzata</p><h1 id="point-shadows">Point Shadows<a class="headerlink" href="#point-shadows" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
-<p>A directional shadow map covers one direction. A point light shines in all directions, so one flat map cannot hold its shadows. The answer is a <strong>cube</strong> shadow map: six depth maps arranged around the light, sampled with the direction from the light to the fragment.</p>
-<h2 id="the-plan">The plan<a class="headerlink" href="#the-plan" title="Permanent link">#</a></h2>
+<article><p class="crumb">Illuminazione avanzata</p><h1 id="ombre-da-luci-puntiformi">Ombre da luci puntiformi<a class="headerlink" href="#ombre-da-luci-puntiformi" title="Permanent link">#</a></h1>
+<p>Una shadow map direzionale copre una sola direzione.<br>
+Una luce puntiforme illumina in tutte le direzioni, quindi una mappa piatta non può contenere le sue ombre.<br>
+La risposta è una shadow map a <strong>cubo</strong>: sei mappe di profondità disposte intorno alla luce, lette con la direzione che va dalla luce al fragment.</p>
+<h2 id="il-piano">Il piano<a class="headerlink" href="#il-piano" title="Permanent link">#</a></h2>
 <ol>
-<li>Render the scene six times from the light's position, once per cube face, storing each fragment's <strong>distance to the light</strong>.</li>
-<li>In the main pass, sample the cube with the vector from the light to the fragment and compare the stored distance with the actual one.</li>
+<li>Disegna la scena sei volte dalla posizione della luce, una per ogni faccia del cubo, salvando per ogni fragment la <strong>distanza dalla luce</strong>.</li>
+<li>Nel pass principale leggi il cubo con il vettore dalla luce al fragment e confronta la distanza salvata con quella reale.</li>
 </ol>
-<p>Storing linear distance instead of projected depth makes the comparison trivial and the bias easy to choose.</p>
-<h2 id="the-cube-depth-texture">The cube depth texture<a class="headerlink" href="#the-cube-depth-texture" title="Permanent link">#</a></h2>
+<p>Salvare la distanza lineare invece della profondità proiettata rende il confronto banale e il bias facile da scegliere.</p>
+<h2 id="la-texture-di-profondita-a-cubo">La texture di profondità a cubo<a class="headerlink" href="#la-texture-di-profondita-a-cubo" title="Permanent link">#</a></h2>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">size</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">1024</span>
 <span class="kd">let</span><span class="w"> </span><span class="nv">descriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLTextureDescriptor</span><span class="p">.</span><span class="n">textureCubeDescriptor</span><span class="p">(</span><span class="n">pixelFormat</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">depth32Float</span><span class="p">,</span>
@@ -163,8 +165,9 @@
 </code></pre></div>
 </div>
 
-<h2 id="six-views">Six views<a class="headerlink" href="#six-views" title="Permanent link">#</a></h2>
-<p>Use the left-handed helpers and the face table from the <a href="../advanced-metal/cubemaps.html">Cubemaps</a> chapter. Each face has a 90 degree field of view and an aspect ratio of 1, so the six frustums fit together exactly:</p>
+<h2 id="sei-viste">Sei viste<a class="headerlink" href="#sei-viste" title="Permanent link">#</a></h2>
+<p>Usa le funzioni sinistrorse e la tabella delle facce del capitolo <a href="../advanced-metal/cubemaps.html">Cubemap</a>.<br>
+Ogni faccia ha un campo visivo di 90 gradi e un rapporto d'aspetto di 1, così i sei frustum combaciano esattamente:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">farPlane</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">25</span>
 <span class="kd">let</span><span class="w"> </span><span class="nv">projection</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">float4x4</span><span class="p">(</span><span class="n">perspectiveLHFov</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">pi</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">aspect</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">near</span><span class="p">:</span><span class="w"> </span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="n">far</span><span class="p">:</span><span class="w"> </span><span class="n">farPlane</span><span class="p">)</span>
@@ -206,7 +209,7 @@
 </code></pre></div>
 </div>
 
-<p>Render one pass per face, selecting the face through the attachment's <code>slice</code>:</p>
+<p>Disegna un pass per faccia, scegliendo la faccia con lo <code>slice</code> dell'attachment:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="k">for</span><span class="w"> </span><span class="n">face</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mf">0.</span><span class="p">.&lt;</span><span class="mi">6</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">pass</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLRenderPassDescriptor</span><span class="p">()</span>
@@ -249,9 +252,10 @@
 </code></pre></div>
 </div>
 
-<p>Six passes can be merged into one with layered rendering, as described in <a href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a>. Start with the loop; it is easier to debug.</p>
-<h2 id="writing-distance-as-depth">Writing distance as depth<a class="headerlink" href="#writing-distance-as-depth" title="Permanent link">#</a></h2>
-<p>The fragment function overrides the depth value with the linear distance to the light, scaled into the 0 to 1 range:</p>
+<p>I sei pass si possono fondere in uno solo con il layered rendering, come descritto in <a href="../advanced-metal/no-geometry-shaders.html">Vivere senza geometry shader</a>.<br>
+Comincia dal ciclo; è più facile da mettere a punto.</p>
+<h2 id="scrivere-la-distanza-come-profondita">Scrivere la distanza come profondità<a class="headerlink" href="#scrivere-la-distanza-come-profondita" title="Permanent link">#</a></h2>
+<p>La fragment function sostituisce il valore di profondità con la distanza lineare dalla luce, scalata nell'intervallo da 0 a 1:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">PointShadowOut</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="p">[[</span><span class="na">position</span><span class="p">]];</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">worldPosition</span><span class="p">;</span>
@@ -278,9 +282,10 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p><code>[[depth(any)]]</code> lets a fragment function replace the depth computed by the rasterizer. The pipeline has a fragment function this time, but still no color attachment.</p>
-<h2 id="sampling-the-cube">Sampling the cube<a class="headerlink" href="#sampling-the-cube" title="Permanent link">#</a></h2>
-<p>In the main pass:</p>
+<p><code>[[depth(any)]]</code> permette a una fragment function di rimpiazzare la profondità calcolata dal rasterizer.<br>
+Questa volta la pipeline ha una fragment function, ma ancora nessun attachment di colore.</p>
+<h2 id="leggere-il-cubo">Leggere il cubo<a class="headerlink" href="#leggere-il-cubo" title="Permanent link">#</a></h2>
+<p>Nel pass principale:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="nf">calcPointShadow</span><span class="p">(</span><span class="n">float3</span><span class="w"> </span><span class="n">worldPosition</span><span class="p">,</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="n">lightPosition</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">farPlane</span><span class="p">,</span>
 <span class="w">                             </span><span class="n">depthcube</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">shadowCube</span><span class="p">,</span><span class="w"> </span><span class="n">sampler</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">lightToFragment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">worldPosition</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">lightPosition</span><span class="p">;</span>
@@ -292,9 +297,13 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>The direction does not need to be normalized. The cube picks the face and texel by itself. With a comparison sampler you can write it as <code>shadowCube.sample_compare(s, lightToFragment, currentDepth - bias)</code> and get hardware filtering as a bonus.</p>
-<h2 id="soft-edges">Soft edges<a class="headerlink" href="#soft-edges" title="Permanent link">#</a></h2>
-<p>For a 2D map we averaged neighboring texels. For a cube, offset the sample <strong>direction</strong> instead. Twenty well-spread offsets give a good result:</p>
+<p>La direzione non ha bisogno di essere normalizzata.<br>
+Il cubo sceglie da solo la faccia e il texel.<br>
+Con un sampler di confronto puoi scriverlo come <code>shadowCube.sample_compare(s, lightToFragment, currentDepth - bias)</code> e avere in più il filtro dell'hardware.</p>
+<h2 id="bordi-morbidi">Bordi morbidi<a class="headerlink" href="#bordi-morbidi" title="Permanent link">#</a></h2>
+<p>Per una mappa 2D facevamo la media dei texel vicini.<br>
+Per un cubo sposta invece la <strong>direzione</strong> di lettura.<br>
+Venti spostamenti ben distribuiti danno un buon risultato:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">const</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="n">offsets</span><span class="p">[</span><span class="mi">20</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mi">-1</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">},</span>
 <span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mi">-1</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">},</span>
@@ -312,22 +321,25 @@
 <span class="n">lit</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="mf">20.0</span><span class="p">;</span>
 </code></pre></div>
 
-<p>Scaling the radius with distance makes shadows sharper near the caster and softer farther away, which is how real shadows behave.</p>
-<figure><img src="../../assets/img/advanced-lighting/point-shadows.webp" alt="A point light in the middle of a room casts shadows in every direction." width="880" height="495" loading="lazy"><figcaption>A point light in the middle of a room casts shadows in every direction.</figcaption></figure>
+<p>Far crescere il raggio con la distanza rende le ombre più nette vicino a chi le proietta e più morbide lontano, che è come si comportano le ombre vere.</p>
+<figure><img src="../../assets/img/advanced-lighting/point-shadows.webp" alt="Una luce puntiforme al centro di una stanza proietta ombre in ogni direzione." width="880" height="495" loading="lazy"><figcaption>Una luce puntiforme al centro di una stanza proietta ombre in ogni direzione.</figcaption></figure>
 
-<h2 id="cost">Cost<a class="headerlink" href="#cost" title="Permanent link">#</a></h2>
-<p>Point shadows render the scene six extra times per light. Keep the number of shadow-casting point lights small, cull objects per face, and update the map only when the light or the objects near it move.</p>
-<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<h2 id="il-costo">Il costo<a class="headerlink" href="#il-costo" title="Permanent link">#</a></h2>
+<p>Le ombre delle luci puntiformi disegnano la scena sei volte in più per ogni luce.<br>
+Tieni basso il numero di luci puntiformi che proiettano ombre, fai il culling degli oggetti faccia per faccia e aggiorna la mappa solo quando la luce o gli oggetti vicini si muovono.</p>
+<h2 id="esercizi">Esercizi<a class="headerlink" href="#esercizi" title="Permanent link">#</a></h2>
 <ul>
-<li>Visualize the stored distance by returning <code>float4(float3(closestDepth), 1)</code>.<details class="solution"><summary>Mostra la soluzione</summary><p>Return the sampled value as a gray color from the main fragment function. Surfaces close to the light are dark and far ones bright, and each object is surrounded by a darker halo of the same shape on the walls behind it, which is its shadow before the comparison.</p></details></li>
-<li>Convert the six passes into a single layered pass.<details class="solution"><summary>Mostra la soluzione</summary><p>Set <code>renderTargetArrayLength = 6</code> on the pass, set <code>inputPrimitiveTopology = .triangle</code> on the pipeline, and draw every object with an instance count of 6. In the vertex function use <code>instanceID % 6</code> as the face: pick that face's matrix and write the face index to an output marked <code>[[render_target_array_index]]</code>.</p></details></li>
+<li>Visualizza la distanza salvata restituendo <code>float4(float3(closestDepth), 1)</code>.<details class="solution"><summary>Mostra la soluzione</summary><p>Restituisci il valore letto come colore grigio dalla fragment function principale.<br>
+Le superfici vicine alla luce sono scure e quelle lontane chiare, e ogni oggetto è circondato, sulle pareti dietro di lui, da un alone più scuro della stessa forma: è la sua ombra prima del confronto.</p></details></li>
+<li>Converti i sei pass in un solo pass a strati.<details class="solution"><summary>Mostra la soluzione</summary><p>Imposta <code>renderTargetArrayLength = 6</code> sul pass, imposta <code>inputPrimitiveTopology = .triangle</code> sulla pipeline e disegna ogni oggetto con un numero di istanze pari a 6.<br>
+Nella vertex function usa <code>instanceID % 6</code> come faccia: scegli la matrice di quella faccia e scrivi l'indice della faccia in un output marcato <code>[[render_target_array_index]]</code>.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../advanced-lighting/shadow-mapping.html"><small>Precedente</small>Shadow mapping</a><a class="next" href="../advanced-lighting/normal-mapping.html"><small>Successivo</small>Normal mapping</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#the-plan">The plan</a></li><li><a href="#the-cube-depth-texture">The cube depth texture</a></li><li><a href="#six-views">Six views</a></li><li><a href="#writing-distance-as-depth">Writing distance as depth</a></li><li><a href="#sampling-the-cube">Sampling the cube</a></li><li><a href="#soft-edges">Soft edges</a></li><li><a href="#cost">Cost</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#il-piano">Il piano</a></li><li><a href="#la-texture-di-profondita-a-cubo">La texture di profondità a cubo</a></li><li><a href="#sei-viste">Sei viste</a></li><li><a href="#scrivere-la-distanza-come-profondita">Scrivere la distanza come profondità</a></li><li><a href="#leggere-il-cubo">Leggere il cubo</a></li><li><a href="#bordi-morbidi">Bordi morbidi</a></li><li><a href="#il-costo">Il costo</a></li><li><a href="#esercizi">Esercizi</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

@@ -135,13 +135,18 @@
 </nav>
 <main class="content" id="main">
 <article><p class="crumb">Advanced Lighting</p><h1 id="parallax-mapping">Parallax Mapping<a class="headerlink" href="#parallax-mapping" title="Permanent link">#</a></h1>
-<p>Normal mapping changes how a surface is lit, but not what you see where. At a shallow angle a normal-mapped brick wall still looks like a painted board, because the bricks do not hide the mortar behind them. <strong>Parallax mapping</strong> shifts the texture coordinates based on a height map and the viewing angle, so that high parts appear to cover low parts.</p>
+<p>Normal mapping changes how a surface is lit, but not what you see where.<br>
+At a shallow angle a normal-mapped brick wall still looks like a painted board, because the bricks do not hide the mortar behind them.<br>
+<strong>Parallax mapping</strong> shifts the texture coordinates based on a height map and the viewing angle, so that high parts appear to cover low parts.</p>
 <h2 id="the-idea">The idea<a class="headerlink" href="#the-idea" title="Permanent link">#</a></h2>
-<p>Alongside the color and normal maps we need a <strong>height map</strong>, a grayscale texture describing the surface's relief. It is more convenient to store <strong>depth</strong>, the inverse of height: 0 at the top surface, 1 at the deepest point.</p>
-<p>Picture the viewer looking at a point A on the flat polygon. On the real, bumpy surface, the line of sight would have hit the relief earlier, at some point B, and the viewer should see the texture at B. Parallax mapping estimates how far to slide the texture coordinate from A toward B.</p>
+<p>Alongside the color and normal maps we need a <strong>height map</strong>, a grayscale texture describing the surface's relief.<br>
+It is more convenient to store <strong>depth</strong>, the inverse of height: 0 at the top surface, 1 at the deepest point.</p>
+<p>Picture the viewer looking at a point A on the flat polygon.<br>
+On the real, bumpy surface, the line of sight would have hit the relief earlier, at some point B, and the viewer should see the texture at B. Parallax mapping estimates how far to slide the texture coordinate from A toward B.</p>
 <p>All of this is done in <strong>tangent space</strong>, where the surface is the xy plane and the texture's u and v run along x and y. So the view direction must be converted into tangent space first.</p>
 <h2 id="view-direction-in-tangent-space">View direction in tangent space<a class="headerlink" href="#view-direction-in-tangent-space" title="Permanent link">#</a></h2>
-<p>The TBN matrix from the previous chapter converts tangent to world. Its transpose does the opposite, since the matrix is orthonormal:</p>
+<p>The TBN matrix from the previous chapter converts tangent to world.<br>
+Its transpose does the opposite, since the matrix is orthonormal:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float3x3</span><span class="w"> </span><span class="n">TBN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float3x3</span><span class="p">(</span><span class="n">T</span><span class="p">,</span><span class="w"> </span><span class="n">B</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="p">);</span>
 <span class="n">float3</span><span class="w"> </span><span class="n">viewDirTangent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">transpose</span><span class="p">(</span><span class="n">TBN</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">uniforms</span><span class="p">.</span><span class="n">viewPosition</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">worldPosition</span><span class="p">));</span>
 </code></pre></div>
@@ -156,7 +161,9 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p><code>scale</code> controls the strength; values around 0.05 to 0.1 are typical. The division by <code>viewDir.z</code> makes the shift larger at shallow angles. Then use the shifted coordinate for <strong>every</strong> texture lookup of the fragment: color, normal, specular.</p>
+<p><code>scale</code> controls the strength; values around 0.05 to 0.1 are typical.<br>
+The division by <code>viewDir.z</code> makes the shift larger at shallow angles.<br>
+Then use the shifted coordinate for <strong>every</strong> texture lookup of the fragment: color, normal, specular.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float2</span><span class="w"> </span><span class="n">uv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">parallaxSimple</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">,</span><span class="w"> </span><span class="n">viewDirTangent</span><span class="p">,</span><span class="w"> </span><span class="n">depthMap</span><span class="p">,</span><span class="w"> </span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1</span><span class="p">);</span>
 <span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">uv</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.0</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">uv</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">uv</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.0</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">uv</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">1.0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">discard_fragment</span><span class="p">();</span>
@@ -165,12 +172,15 @@
 <span class="n">float3</span><span class="w"> </span><span class="n">tangentNormal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">uv</span><span class="p">).</span><span class="n">xyz</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
 </code></pre></div>
 
-<p>The discard trims the edges of a single quad, where shifted coordinates would leave the texture. On tiling surfaces you would leave it out.</p>
+<p>The discard trims the edges of a single quad, where shifted coordinates would leave the texture.<br>
+On tiling surfaces you would leave it out.</p>
 <div class="admonition note">
 <p class="admonition-title">Sign conventions</p>
-<p>Whether the offset is subtracted or added, and whether its y needs negating, depends on the direction of your v axis and bitangent. If the effect seems to bulge inward or slide the wrong way when you move the camera, flip the sign of the y component.</p>
+<p>Whether the offset is subtracted or added, and whether its y needs negating, depends on the direction of your v axis and bitangent.<br>
+If the effect seems to bulge inward or slide the wrong way when you move the camera, flip the sign of the y component.</p>
 </div>
-<p>This one-sample version works for gentle relief. On steep height changes or at very low angles the estimate is poor and the surface seems to swim.</p>
+<p>This one-sample version works for gentle relief.<br>
+On steep height changes or at very low angles the estimate is poor and the surface seems to swim.</p>
 <h2 id="steep-parallax-mapping">Steep parallax mapping<a class="headerlink" href="#steep-parallax-mapping" title="Permanent link">#</a></h2>
 <p>A better estimate comes from marching along the view ray in small steps through a number of depth layers until the ray goes below the surface:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="n">float2</span><span class="w"> </span><span class="nf">parallaxSteep</span><span class="p">(</span><span class="n">float2</span><span class="w"> </span><span class="n">uv</span><span class="p">,</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="n">viewDir</span><span class="p">,</span>
@@ -192,7 +202,8 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>Inside a loop the GPU cannot compute automatic mip levels reliably, so the samples name level 0 explicitly. The result is far more convincing, but the discrete layers show up as visible steps.</p>
+<p>Inside a loop the GPU cannot compute automatic mip levels reliably, so the samples name level 0 explicitly.<br>
+The result is far more convincing, but the discrete layers show up as visible steps.</p>
 <h2 id="parallax-occlusion-mapping">Parallax occlusion mapping<a class="headerlink" href="#parallax-occlusion-mapping" title="Permanent link">#</a></h2>
 <p>The steps disappear if, instead of taking the first layer below the surface, we interpolate between the last point above the surface and the first one below it:</p>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="c1">// ...after the loop in parallaxSteep</span>
@@ -205,20 +216,25 @@
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">mix</span><span class="p">(</span><span class="n">currentUV</span><span class="p">,</span><span class="w"> </span><span class="n">previousUV</span><span class="p">,</span><span class="w"> </span><span class="n">weight</span><span class="p">);</span>
 </code></pre></div>
 
-<p>This is <strong>parallax occlusion mapping</strong> (POM). The two depths tell us how far each point is from the true surface, and a linear blend lands very close to the real intersection.</p>
+<p>This is <strong>parallax occlusion mapping</strong> (POM).<br>
+The two depths tell us how far each point is from the true surface, and a linear blend lands very close to the real intersection.</p>
 <div class="lm-demo" data-demo="parallax-mapping" data-fallback="../assets/img/advanced-lighting/parallax-mapping.webp"></div>
 
 <h2 id="limits">Limits<a class="headerlink" href="#limits" title="Permanent link">#</a></h2>
 <ul>
-<li>It is an illusion inside the polygon. The silhouette stays flat, and the effect breaks at glancing angles.</li>
-<li>It is expensive: dozens of texture reads per fragment. Reduce the layer count with distance.</li>
+<li>It is an illusion inside the polygon.<br>
+The silhouette stays flat, and the effect breaks at glancing angles.</li>
+<li>It is expensive: dozens of texture reads per fragment.<br>
+Reduce the layer count with distance.</li>
 <li>The relief casts no shadows on itself unless you march a second ray toward the light.</li>
 </ul>
 <p>When you need real geometry, with real silhouettes and shadows, displace vertices using <a href="../beyond/tessellation.html">tessellation</a>.</p>
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
-<li>Switch between the three variants with a uniform and compare at a low viewing angle.<details class="solution"><summary>Show solution</summary><p>Add an integer uniform and branch on it when computing the texture coordinate. At a low angle the simple version swims and distorts, the steep version is stable but shows layered steps on slopes, and occlusion mapping removes the steps.</p></details></li>
-<li>Implement self-shadowing by marching from the found point toward the light in tangent space.<details class="solution"><summary>Show solution</summary><p>From the final texture coordinate and depth, march toward the light in tangent space. If the height map rises above the ray at any step, the point is in shadow.</p>
+<li>Switch between the three variants with a uniform and compare at a low viewing angle.<details class="solution"><summary>Show solution</summary><p>Add an integer uniform and branch on it when computing the texture coordinate.<br>
+At a low angle the simple version swims and distorts, the steep version is stable but shows layered steps on slopes, and occlusion mapping removes the steps.</p></details></li>
+<li>Implement self-shadowing by marching from the found point toward the light in tangent space.<details class="solution"><summary>Show solution</summary><p>From the final texture coordinate and depth, march toward the light in tangent space.<br>
+If the height map rises above the ray at any step, the point is in shadow.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">lightDir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">transpose</span><span class="p">(</span><span class="n">TBN</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">uniforms</span><span class="p">.</span><span class="n">lightPosition</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">worldPosition</span><span class="p">));</span>
 <span class="n">float2</span><span class="w"> </span><span class="n">stepUV</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float2</span><span class="p">(</span><span class="n">lightDir</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">lightDir</span><span class="p">.</span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">lightDir</span><span class="p">.</span><span class="n">z</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">heightScale</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">16.0</span><span class="p">;</span>
 <span class="kt">float</span><span class="w"> </span><span class="n">rayDepth</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mapDepth</span><span class="p">;</span>

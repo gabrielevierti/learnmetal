@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,24 +134,32 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Illuminazione avanzata</p><h1 id="normal-mapping">Normal Mapping<a class="headerlink" href="#normal-mapping" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
-<p>A brick wall rendered as a flat quad looks flat, however good the texture is. The lighting gives it away, because every fragment has the same normal. <strong>Normal mapping</strong> stores a different normal for every texel, so light reacts to bumps and grooves that are not there in the geometry.</p>
-<h2 id="normal-maps">Normal maps<a class="headerlink" href="#normal-maps" title="Permanent link">#</a></h2>
-<p>A normal is a vector with components from -1 to 1. Stored in an image, each component is remapped to the 0 to 1 range, and the shader undoes it:</p>
+<article><p class="crumb">Illuminazione avanzata</p><h1 id="normal-mapping">Normal mapping<a class="headerlink" href="#normal-mapping" title="Permanent link">#</a></h1>
+<p>Un muro di mattoni disegnato come un rettangolo piatto sembra piatto, per quanto sia buona la texture.<br>
+Lo tradisce l'illuminazione, perché ogni fragment ha la stessa normale.<br>
+Il <strong>normal mapping</strong> salva una normale diversa per ogni texel, così la luce reagisce a rilievi e scanalature che nella geometria non esistono.</p>
+<h2 id="le-normal-map">Le normal map<a class="headerlink" href="#le-normal-map" title="Permanent link">#</a></h2>
+<p>Una normale è un vettore con componenti da -1 a 1.<br>
+Salvata in un'immagine, ogni componente viene riportata nell'intervallo da 0 a 1, e lo shader fa l'operazione inversa:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">normal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">xyz</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
 </code></pre></div>
 
-<p>Normal maps look bluish because most normals point straight out of the surface, along +z, which is stored as the color (0.5, 0.5, 1.0). Load normal maps as <strong>linear</strong> data, never sRGB.</p>
-<h2 id="tangent-space">Tangent space<a class="headerlink" href="#tangent-space" title="Permanent link">#</a></h2>
-<p>The normals in the map are expressed relative to the surface itself, in <strong>tangent space</strong>, where +z points away from the surface. That is what makes one map usable on a wall facing any direction, or wrapped around a curved model. To light with them, we need a way to rotate them from tangent space into world space.</p>
-<p>That rotation is the <strong>TBN matrix</strong>, built from three perpendicular unit vectors at each vertex:</p>
+<p>Le normal map appaiono bluastre perché la maggior parte delle normali punta dritta fuori dalla superficie, lungo +z, che viene salvato come il colore (0.5, 0.5, 1.0).<br>
+Carica le normal map come dati <strong>lineari</strong>, mai come sRGB.</p>
+<h2 id="lo-spazio-tangente">Lo spazio tangente<a class="headerlink" href="#lo-spazio-tangente" title="Permanent link">#</a></h2>
+<p>Le normali della mappa sono espresse rispetto alla superficie stessa, in <strong>spazio tangente</strong>, dove +z punta fuori dalla superficie.<br>
+È questo che rende una mappa utilizzabile su un muro rivolto in qualsiasi direzione, o avvolta intorno a un modello curvo.<br>
+Per usarle nei calcoli della luce ci serve un modo di ruotarle dallo spazio tangente allo spazio mondo.</p>
+<p>Quella rotazione è la <strong>matrice TBN</strong>, costruita con tre vettori unitari perpendicolari in ogni vertice:</p>
 <ul>
-<li><strong>N</strong>, the vertex normal,</li>
-<li><strong>T</strong>, the <strong>tangent</strong>, pointing along the surface in the direction of increasing u,</li>
-<li><strong>B</strong>, the <strong>bitangent</strong>, pointing along the surface in the direction of increasing v.</li>
+<li><strong>N</strong>, la normale del vertice,</li>
+<li><strong>T</strong>, la <strong>tangente</strong>, che corre lungo la superficie nella direzione in cui u cresce,</li>
+<li><strong>B</strong>, la <strong>bitangente</strong>, che corre lungo la superficie nella direzione in cui v cresce.</li>
 </ul>
-<h2 id="getting-tangents">Getting tangents<a class="headerlink" href="#getting-tangents" title="Permanent link">#</a></h2>
-<p>Tangents are computed from positions and texture coordinates. Model I/O does it for you. Add a tangent attribute to the vertex descriptor and ask for the basis after loading:</p>
+<h2 id="ottenere-le-tangenti">Ottenere le tangenti<a class="headerlink" href="#ottenere-le-tangenti" title="Permanent link">#</a></h2>
+<p>Le tangenti si calcolano dalle posizioni e dalle coordinate di texture.<br>
+Model I/O lo fa per te.<br>
+Aggiungi al vertex descriptor un attributo per la tangente e chiedi la base dopo il caricamento:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">3</span><span class="p">].</span><span class="n">format</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">float3</span><span class="w">   </span><span class="c1">// tangent</span>
 <span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">3</span><span class="p">].</span><span class="n">offset</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">32</span>
@@ -200,8 +208,8 @@
 </code></pre></div>
 </div>
 
-<p>Assigning the descriptor again makes Model I/O repack the buffers with the new attribute.</p>
-<p>For hand-built geometry, the tangent of a triangle with edges <code>e1</code>, <code>e2</code> and texture coordinate differences <code>(du1, dv1)</code>, <code>(du2, dv2)</code> is:</p>
+<p>Assegnare di nuovo il descriptor fa sì che Model I/O ricomponga i buffer con il nuovo attributo.</p>
+<p>Per la geometria costruita a mano, la tangente di un triangolo con lati <code>e1</code>, <code>e2</code> e differenze di coordinate di texture <code>(du1, dv1)</code>, <code>(du2, dv2)</code> è:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">f</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">du1</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">dv2</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">du2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">dv1</span><span class="p">)</span>
 <span class="kd">let</span><span class="w"> </span><span class="nv">tangent</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">f</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">dv2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">e1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">dv1</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">e2</span><span class="p">))</span>
@@ -213,8 +221,8 @@
 </code></pre></div>
 </div>
 
-<h2 id="the-shader">The shader<a class="headerlink" href="#the-shader" title="Permanent link">#</a></h2>
-<p>The vertex function transforms the normal and the tangent into world space:</p>
+<h2 id="lo-shader">Lo shader<a class="headerlink" href="#lo-shader" title="Permanent link">#</a></h2>
+<p>La vertex function porta la normale e la tangente in spazio mondo:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">VertexIn</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="p">[[</span><span class="na">attribute</span><span class="p">(</span><span class="mi">0</span><span class="p">)]];</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">normal</span><span class="w">   </span><span class="p">[[</span><span class="na">attribute</span><span class="p">(</span><span class="mi">1</span><span class="p">)]];</span>
@@ -243,7 +251,7 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>The fragment function rebuilds an exactly perpendicular basis, then rotates the sampled normal with it:</p>
+<p>La fragment function ricostruisce una base esattamente perpendicolare, poi ruota con essa la normale letta:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="nf">perturbedNormal</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">normalMap</span><span class="p">,</span><span class="w"> </span><span class="n">sampler</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">normal</span><span class="p">);</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">tangent</span><span class="p">);</span>
@@ -256,26 +264,38 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p><code>float3x3(T, B, N)</code> builds a matrix with those vectors as columns, so multiplying takes a tangent-space vector into world space. Use the returned normal in place of <code>normalize(in.normal)</code> everywhere in the lighting code. Nothing else changes.</p>
+<p><code>float3x3(T, B, N)</code> costruisce una matrice con quei vettori come colonne, quindi la moltiplicazione porta un vettore dallo spazio tangente allo spazio mondo.<br>
+Usa la normale restituita al posto di <code>normalize(in.normal)</code> in tutto il codice di illuminazione.<br>
+Non cambia nient'altro.</p>
 <div class="lm-demo" data-demo="normal-mapping" data-fallback="../../assets/img/advanced-lighting/normal-mapping.webp"></div>
 
-<h2 id="green-channel-and-handedness">Green channel and handedness<a class="headerlink" href="#green-channel-and-handedness" title="Permanent link">#</a></h2>
-<p>Two things commonly make a normal-mapped surface look "inside out", with bumps lit as dents:</p>
+<h2 id="il-canale-verde-e-la-mano">Il canale verde e la mano<a class="headerlink" href="#il-canale-verde-e-la-mano" title="Permanent link">#</a></h2>
+<p>Due cose fanno spesso apparire "rivoltata" una superficie con normal map, con i rilievi illuminati come incavi:</p>
 <ul>
-<li><strong>Normal map convention.</strong> Maps come in two flavors that differ in the sign of the green channel, usually labeled OpenGL (+Y) and DirectX (-Y). Which one is right depends on which way your v coordinate and bitangent run. If bumps look inverted, negate <code>tangentNormal.y</code>.</li>
-<li><strong>Mirrored texture coordinates.</strong> Symmetric models often mirror their UVs, which flips the bitangent on one half. Exporters encode this as a sign in the tangent's fourth component. Model I/O offers <code>addTangentBasis(forTextureCoordinateAttributeNamed:tangentAttributeNamed:bitangentAttributeNamed:)</code> to store an explicit bitangent if you need to support it.</li>
+<li><strong>La convenzione della normal map.</strong><br>
+Le mappe esistono in due varianti che differiscono per il segno del canale verde, di solito etichettate OpenGL (+Y) e DirectX (-Y).<br>
+Quale sia quella giusta dipende dal verso della tua coordinata v e della bitangente.<br>
+Se i rilievi appaiono invertiti, cambia segno a <code>tangentNormal.y</code>.</li>
+<li><strong>Coordinate di texture specchiate.</strong><br>
+I modelli simmetrici spesso specchiano le loro UV, cosa che inverte la bitangente su una metà.<br>
+Gli esportatori lo codificano come un segno nella quarta componente della tangente.<br>
+Se ti serve gestirlo, Model I/O offre <code>addTangentBasis(forTextureCoordinateAttributeNamed:tangentAttributeNamed:bitangentAttributeNamed:)</code> per salvare una bitangente esplicita.</li>
 </ul>
-<p>A quick sanity check for any model: output <code>N * 0.5 + 0.5</code> as the color. Smoothly changing pastel colors mean the basis is healthy.</p>
-<h2 id="two-channel-normal-maps">Two-channel normal maps<a class="headerlink" href="#two-channel-normal-maps" title="Permanent link">#</a></h2>
-<p>Since a unit normal's z can be recomputed from x and y, normal maps are often stored with two channels in a compressed format, for example BC5 on Mac or EAC RG11 and ASTC on Apple GPUs:</p>
+<p>Un controllo rapido per qualsiasi modello: manda in uscita come colore <code>N * 0.5 + 0.5</code>.<br>
+Colori pastello che cambiano con dolcezza significano che la base è sana.</p>
+<h2 id="normal-map-a-due-canali">Normal map a due canali<a class="headerlink" href="#normal-map-a-due-canali" title="Permanent link">#</a></h2>
+<p>Poiché la z di una normale unitaria si può ricalcolare da x e y, le normal map vengono spesso salvate con due canali in un formato compresso, per esempio BC5 sui Mac o EAC RG11 e ASTC sulle GPU Apple:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float2</span><span class="w"> </span><span class="n">xy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">rg</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
 <span class="n">float3</span><span class="w"> </span><span class="n">tangentNormal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float3</span><span class="p">(</span><span class="n">xy</span><span class="p">,</span><span class="w"> </span><span class="n">sqrt</span><span class="p">(</span><span class="n">saturate</span><span class="p">(</span><span class="mf">1.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">dot</span><span class="p">(</span><span class="n">xy</span><span class="p">,</span><span class="w"> </span><span class="n">xy</span><span class="p">))));</span>
 </code></pre></div>
 
-<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<h2 id="esercizi">Esercizi<a class="headerlink" href="#esercizi" title="Permanent link">#</a></h2>
 <ul>
-<li>Rotate a normal-mapped quad over time and confirm the lighting stays consistent with a fixed light.<details class="solution"><summary>Mostra la soluzione</summary><p>Because the normal and tangent are transformed with the normal matrix, the TBN basis rotates with the quad, and the sampled normals end up in world space. With a fixed light, the bright side of each brick should stay on the side facing the light while the quad turns. If the shading rotates with the quad instead, the tangent is not being transformed.</p></details></li>
-<li>Scale the x and y of the tangent normal by a "bump strength" uniform before normalizing.<details class="solution"><summary>Mostra la soluzione</summary><p>Scale before normalizing. The live demo has this as a slider.</p>
+<li>Fai ruotare nel tempo un rettangolo con normal map e verifica che l'illuminazione resti coerente con una luce fissa.<details class="solution"><summary>Mostra la soluzione</summary><p>Poiché la normale e la tangente vengono trasformate con la matrice delle normali, la base TBN ruota insieme al rettangolo e le normali lette finiscono in spazio mondo.<br>
+Con una luce fissa il lato chiaro di ogni mattone deve restare dalla parte rivolta verso la luce mentre il rettangolo gira.<br>
+Se invece l'ombreggiatura ruota con il rettangolo, la tangente non viene trasformata.</p></details></li>
+<li>Scala x e y della normale in spazio tangente con un uniform di "intensità del rilievo" prima di normalizzare.<details class="solution"><summary>Mostra la soluzione</summary><p>Scala prima di normalizzare.<br>
+La demo interattiva lo offre come slider.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">tangentNormal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">xyz</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
 <span class="n">tangentNormal</span><span class="p">.</span><span class="n">xy</span><span class="w"> </span><span class="o">*=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">strength</span><span class="p">;</span><span class="w">      </span><span class="c1">// 0 is flat, above 1 exaggerates</span>
 <span class="n">float3</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">TBN</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">tangentNormal</span><span class="p">);</span>
@@ -286,7 +306,7 @@
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#normal-maps">Normal maps</a></li><li><a href="#tangent-space">Tangent space</a></li><li><a href="#getting-tangents">Getting tangents</a></li><li><a href="#the-shader">The shader</a></li><li><a href="#green-channel-and-handedness">Green channel and handedness</a></li><li><a href="#two-channel-normal-maps">Two-channel normal maps</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#le-normal-map">Le normal map</a></li><li><a href="#lo-spazio-tangente">Lo spazio tangente</a></li><li><a href="#ottenere-le-tangenti">Ottenere le tangenti</a></li><li><a href="#lo-shader">Lo shader</a></li><li><a href="#il-canale-verde-e-la-mano">Il canale verde e la mano</a></li><li><a href="#normal-map-a-due-canali">Normal map a due canali</a></li><li><a href="#esercizi">Esercizi</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

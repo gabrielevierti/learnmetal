@@ -135,17 +135,25 @@
 </nav>
 <main class="content" id="main">
 <article><p class="crumb">Getting Started</p><h1 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">#</a></h1>
-<p>Before drawing anything, it helps to know what Metal is, what it is not, and how its pieces fit together. This chapter is all concepts and no code. The next one opens Xcode.</p>
+<p>Before drawing anything, it helps to know what Metal is, what it is not, and how its pieces fit together.<br>
+This chapter is all concepts and no code.<br>
+The next one opens Xcode.</p>
 <h2 id="what-metal-is">What Metal is<a class="headerlink" href="#what-metal-is" title="Permanent link">#</a></h2>
-<p>Metal is Apple's low-level API for talking to the GPU. It covers two jobs:</p>
+<p>Metal is Apple's low-level API for talking to the GPU.<br>
+It covers two jobs:</p>
 <ul>
 <li><strong>Rendering</strong>: turning triangles into pixels, which is what most of this site is about.</li>
 <li><strong>Compute</strong>: running general-purpose parallel code on the GPU, which we reach in the <a href="../beyond/compute-shaders.html">Beyond</a> section.</li>
 </ul>
-<p>It runs on macOS, iOS, iPadOS, tvOS and visionOS, and it is the only first-class graphics API on those platforms. OpenGL and OpenCL have been deprecated there since 2018. SceneKit, RealityKit, SpriteKit, Core Animation, and game engines like Unity and Unreal all sit on top of Metal when running on Apple hardware.</p>
-<p>Metal is <em>low-level</em> in the sense that it exposes how a GPU really works: you allocate buffers, describe pipelines, and record commands yourself. It is also noticeably friendlier than Vulkan or Direct3D 12. There is far less boilerplate, sensible defaults exist, and the debugging tools in Xcode are excellent.</p>
+<p>It runs on macOS, iOS, iPadOS, tvOS and visionOS, and it is the only first-class graphics API on those platforms.<br>
+OpenGL and OpenCL have been deprecated there since 2018.<br>
+SceneKit, RealityKit, SpriteKit, Core Animation, and game engines like Unity and Unreal all sit on top of Metal when running on Apple hardware.</p>
+<p>Metal is <em>low-level</em> in the sense that it exposes how a GPU really works: you allocate buffers, describe pipelines, and record commands yourself.<br>
+It is also noticeably friendlier than Vulkan or Direct3D 12.<br>
+There is far less boilerplate, sensible defaults exist, and the debugging tools in Xcode are excellent.</p>
 <h2 id="the-objects-you-will-meet">The objects you will meet<a class="headerlink" href="#the-objects-you-will-meet" title="Permanent link">#</a></h2>
-<p>Almost everything in Metal is created from one object, the <strong>device</strong>, and nearly every type name starts with <code>MTL</code>. The cast is small:</p>
+<p>Almost everything in Metal is created from one object, the <strong>device</strong>, and nearly every type name starts with <code>MTL</code>.<br>
+The cast is small:</p>
 <table>
 <thead>
 <tr>
@@ -207,24 +215,40 @@
 <li>Set state (pipeline, buffers, textures) and issue draw calls.</li>
 <li>End encoding, ask to present the result on screen, and commit the command buffer.</li>
 </ol>
-<p>Nothing reaches the GPU until you commit. Encoding is just writing a to-do list.</p>
+<p>Nothing reaches the GPU until you commit.<br>
+Encoding is just writing a to-do list.</p>
 <figure><img src="../assets/img/getting-started/introduction.webp" alt="Everything is created from the device, and nothing reaches the GPU until the command buffer is committed." width="880" height="300" loading="lazy"><figcaption>Everything is created from the device, and nothing reaches the GPU until the command buffer is committed.</figcaption></figure>
 
 <h2 id="state-objects-instead-of-a-state-machine">State objects instead of a state machine<a class="headerlink" href="#state-objects-instead-of-a-state-machine" title="Permanent link">#</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Coming from OpenGL</p>
-<p>OpenGL is one big global state machine: you bind things to a context and flip switches with <code>glEnable</code>. Metal has no global state at all. Expensive configuration is baked ahead of time into immutable objects (pipeline states, depth-stencil states, sampler states), and cheap per-draw state is set on an encoder that only lives for one pass. When an encoder ends, its state is gone.</p>
+<p>OpenGL is one big global state machine: you bind things to a context and flip switches with <code>glEnable</code>.<br>
+Metal has no global state at all.<br>
+Expensive configuration is baked ahead of time into immutable objects (pipeline states, depth-stencil states, sampler states), and cheap per-draw state is set on an encoder that only lives for one pass.<br>
+When an encoder ends, its state is gone.</p>
 </div>
-<p>This design is the main reason Metal is fast and predictable. Compiling shaders and validating configuration happen once when you create a state object, not unpredictably in the middle of a frame.</p>
+<p>This design is the main reason Metal is fast and predictable.<br>
+Compiling shaders and validating configuration happen once when you create a state object, not unpredictably in the middle of a frame.</p>
 <h2 id="shaders">Shaders<a class="headerlink" href="#shaders" title="Permanent link">#</a></h2>
-<p>Shaders are small programs that run on the GPU. In Metal they are written in the <strong>Metal Shading Language</strong> (MSL), which is C++14 with some features removed and vector, matrix and texture types added. If you have written GLSL or HLSL, you can read MSL immediately.</p>
+<p>Shaders are small programs that run on the GPU.<br>
+In Metal they are written in the <strong>Metal Shading Language</strong> (MSL), which is C++14 with some features removed and vector, matrix and texture types added.<br>
+If you have written GLSL or HLSL, you can read MSL immediately.</p>
 <p>Xcode compiles every <code>.metal</code> file in your project at build time into a single <code>default.metallib</code>, so shader syntax errors show up as ordinary build errors.</p>
 <h2 id="apple-gpus">Apple GPUs<a class="headerlink" href="#apple-gpus" title="Permanent link">#</a></h2>
-<p>Every current Apple device uses Apple silicon, whose GPUs are <strong>tile-based deferred renderers</strong> with <strong>unified memory</strong> shared by the CPU and GPU. You do not need to understand either yet, but they explain a few Metal features you will meet later: load and store actions, memoryless textures, and shared storage mode. Older Intel Macs with AMD or Intel GPUs also run Metal, with a few differences that are pointed out where they matter.</p>
+<p>Every current Apple device uses Apple silicon, whose GPUs are <strong>tile-based deferred renderers</strong> with <strong>unified memory</strong> shared by the CPU and GPU.<br>
+You do not need to understand either yet, but they explain a few Metal features you will meet later: load and store actions, memoryless textures, and shared storage mode.<br>
+Older Intel Macs with AMD or Intel GPUs also run Metal, with a few differences that are pointed out where they matter.</p>
 <h2 id="versions">Versions<a class="headerlink" href="#versions" title="Permanent link">#</a></h2>
-<p>The Metal API has grown through numbered generations. Everything in this series uses the long-established core API (<code>MTLCommandQueue</code>, <code>MTLRenderCommandEncoder</code>, and friends), which runs on all Metal-capable devices and is what almost all existing code, samples and answers online use. Apple has also introduced a newer set of interfaces under the name Metal 4, with types prefixed <code>MTL4</code>, aimed at engines that need explicit control. The concepts carry over directly, so learn the core API first; the <a href="../apple-platforms/metal-4.html">Metal 4</a> chapter shows what changes.</p>
+<p>The Metal API has grown through numbered generations.<br>
+Everything in this series uses the long-established core API (<code>MTLCommandQueue</code>, <code>MTLRenderCommandEncoder</code>, and friends), which runs on all Metal-capable devices and is what almost all existing code, samples and answers online use.<br>
+Apple has also introduced a newer set of interfaces under the name Metal 4, with types prefixed <code>MTL4</code>, aimed at engines that need explicit control.<br>
+The concepts carry over directly, so learn the core API first; the <a href="../apple-platforms/metal-4.html">Metal 4</a> chapter shows what changes.</p>
 <h2 id="how-to-read-this-series">How to read this series<a class="headerlink" href="#how-to-read-this-series" title="Permanent link">#</a></h2>
-<p>Go in order. Every chapter assumes the code from the previous one. Type the code yourself instead of pasting it. Change numbers and break things on purpose, then read what Xcode tells you. The official <a href="https://developer.apple.com/documentation/metal">Metal documentation</a> and the <a href="https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf">Metal Shading Language Specification</a> are the references to keep open in another tab.</p></article><nav class="pager" id="pager"><span></span><a class="next" href="../getting-started/project-setup.html"><small>Next</small>Project Setup</a></nav>
+<p>Go in order.<br>
+Every chapter assumes the code from the previous one.<br>
+Type the code yourself instead of pasting it.<br>
+Change numbers and break things on purpose, then read what Xcode tells you.<br>
+The official <a href="https://developer.apple.com/documentation/metal">Metal documentation</a> and the <a href="https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf">Metal Shading Language Specification</a> are the references to keep open in another tab.</p></article><nav class="pager" id="pager"><span></span><a class="next" href="../getting-started/project-setup.html"><small>Next</small>Project Setup</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>

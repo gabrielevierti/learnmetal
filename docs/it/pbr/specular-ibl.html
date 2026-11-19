@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,21 +134,29 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">PBR</p><h1 id="specular-ibl">Specular IBL<a class="headerlink" href="#specular-ibl" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
-<p>The diffuse half of image-based lighting depended only on the normal, so one small cubemap solved it. The specular half is harder:</p>
+<article><p class="crumb">PBR</p><h1 id="ibl-speculare">IBL speculare<a class="headerlink" href="#ibl-speculare" title="Permanent link">#</a></h1>
+<p>La metà diffuse dell'illuminazione basata su immagini dipendeva solo dalla normale, quindi una piccola cubemap la risolveva.<br>
+La metà specular è più difficile:</p>
 <div class="codehilite"><pre><span></span><code>Lo = ∫Ω  (D·F·G / (4 (wo·n)(wi·n))) · Li(wi) · (n · wi) dwi
 </code></pre></div>
 
-<p>It depends on the normal, the view direction, the roughness and F0. Precomputing every combination is impossible. Epic Games' <strong>split-sum approximation</strong> breaks the integral into two parts that <em>can</em> be precomputed:</p>
+<p>Dipende dalla normale, dalla direzione di vista, dalla roughness e da F0.<br>
+Precalcolare ogni combinazione è impossibile.<br>
+La <strong>split-sum approximation</strong> di Epic Games spezza l'integrale in due parti che <em>si possono</em> precalcolare:</p>
 <ol>
-<li>A <strong>prefiltered environment map</strong>: the environment blurred by the right amount for each roughness level.</li>
-<li>A <strong>BRDF lookup table</strong>: a 2D texture that holds the rest of the BRDF's response.</li>
+<li>Una <strong>environment map prefiltrata</strong>: l'ambiente sfocato della quantità giusta per ogni livello di roughness.</li>
+<li>Una <strong>tabella di lookup della BRDF</strong>: una texture 2D che contiene il resto della risposta della BRDF.</li>
 </ol>
-<h2 id="part-1-the-prefiltered-environment-map">Part 1: the prefiltered environment map<a class="headerlink" href="#part-1-the-prefiltered-environment-map" title="Permanent link">#</a></h2>
-<p>A rough surface reflects a wide cone of the environment, a smooth one a narrow cone. We store increasingly blurred versions of the environment in the <strong>mip levels</strong> of a cubemap: level 0 for roughness 0, the last level for roughness 1. At render time, the reflection vector and the roughness select the direction and the mip level.</p>
-<p>The approximation assumes the view direction equals the reflection direction equals the normal, since the view direction is unknown at precompute time. This costs some stretching of reflections at grazing angles and is otherwise hard to notice.</p>
+<h2 id="parte-1-lenvironment-map-prefiltrata">Parte 1: l'environment map prefiltrata<a class="headerlink" href="#parte-1-lenvironment-map-prefiltrata" title="Permanent link">#</a></h2>
+<p>Una superficie ruvida riflette un cono ampio dell'ambiente, una liscia un cono stretto.<br>
+Salviamo versioni sempre più sfocate dell'ambiente nei <strong>livelli di mip</strong> di una cubemap: il livello 0 per la roughness 0, l'ultimo per la roughness 1.<br>
+Al momento del rendering il vettore di riflessione e la roughness scelgono la direzione e il livello di mip.</p>
+<p>L'approssimazione suppone che la direzione di vista coincida con la direzione di riflessione e con la normale, perché al momento del precalcolo la direzione di vista non è nota.<br>
+Il prezzo è un certo allungamento dei riflessi agli angoli radenti, per il resto difficile da notare.</p>
 <h3 id="importance-sampling">Importance sampling<a class="headerlink" href="#importance-sampling" title="Permanent link">#</a></h3>
-<p>Averaging the environment uniformly would need thousands of samples. <strong>Importance sampling</strong> generates sample directions concentrated where the GGX distribution is large, so a few dozen suffice. It needs well-distributed quasi-random numbers, for which the <strong>Hammersley sequence</strong> is the usual choice:</p>
+<p>Fare la media dell'ambiente in modo uniforme richiederebbe migliaia di campioni.<br>
+L'<strong>importance sampling</strong> genera direzioni di campionamento concentrate dove la distribuzione GGX è grande, e ne bastano poche decine.<br>
+Servono numeri quasi casuali ben distribuiti, per i quali la scelta abituale è la <strong>sequenza di Hammersley</strong>:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="nf">radicalInverse</span><span class="p">(</span><span class="n">uint</span><span class="w"> </span><span class="n">bits</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">bits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">bits</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mi">16u</span><span class="p">)</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="p">(</span><span class="n">bits</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="mi">16u</span><span class="p">);</span>
 <span class="w">    </span><span class="n">bits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">((</span><span class="n">bits</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="mh">0x55555555u</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mi">1u</span><span class="p">)</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="p">((</span><span class="n">bits</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="mh">0xAAAAAAAAu</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="mi">1u</span><span class="p">);</span>
@@ -177,7 +185,7 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<h3 id="the-prefilter-shader">The prefilter shader<a class="headerlink" href="#the-prefilter-shader" title="Permanent link">#</a></h3>
+<h3 id="lo-shader-di-prefiltro">Lo shader di prefiltro<a class="headerlink" href="#lo-shader-di-prefiltro" title="Permanent link">#</a></h3>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">PrefilterUniforms</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">roughness</span><span class="p">;</span>
 <span class="p">};</span>
@@ -218,8 +226,8 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<h3 id="rendering-the-mip-chain">Rendering the mip chain<a class="headerlink" href="#rendering-the-mip-chain" title="Permanent link">#</a></h3>
-<p>Create a cube texture with mipmaps, around 128 or 256 per face, and render each mip level with a different roughness, using the attachment's <code>level</code>:</p>
+<h3 id="disegnare-la-catena-di-mip">Disegnare la catena di mip<a class="headerlink" href="#disegnare-la-catena-di-mip" title="Permanent link">#</a></h3>
+<p>Crea una texture a cubo con le mipmap, intorno a 128 o 256 per faccia, e disegna ogni livello di mip con una roughness diversa, usando il <code>level</code> dell'attachment:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">descriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLTextureDescriptor</span><span class="p">.</span><span class="n">textureCubeDescriptor</span><span class="p">(</span><span class="n">pixelFormat</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">rgba16Float</span><span class="p">,</span>
 <span class="w">                                                            </span><span class="n">size</span><span class="p">:</span><span class="w"> </span><span class="mi">128</span><span class="p">,</span><span class="w"> </span><span class="n">mipmapped</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">)</span>
@@ -260,10 +268,13 @@
 </code></pre></div>
 </div>
 
-<p>Each mip level is half the size of the one before, and the viewport follows the attachment size automatically. Use a sampler with linear mip filtering, or the per-sample mip selection in the shader has no effect.</p>
-<p>Cubemap filtering in Metal is seamless across faces, so there are no visible seams at face edges in the blurred levels.</p>
-<h2 id="part-2-the-brdf-lookup-table">Part 2: the BRDF lookup table<a class="headerlink" href="#part-2-the-brdf-lookup-table" title="Permanent link">#</a></h2>
-<p>The second half of the split sum depends on only two numbers: <code>n · v</code> and the roughness. Its result, a <strong>scale</strong> and a <strong>bias</strong> to apply to F0, fits in the red and green channels of a 2D texture. The table is the same for every environment, so compute it once, or even ship it as an image.</p>
+<p>Ogni livello di mip è grande la metà del precedente, e il viewport segue da solo la dimensione dell'attachment.<br>
+Usa un sampler con filtro lineare sui mip, altrimenti la scelta del mip per ogni campione nello shader non ha effetto.</p>
+<p>In Metal il filtro delle cubemap è continuo da una faccia all'altra, quindi nei livelli sfocati non si vedono giunture sui bordi delle facce.</p>
+<h2 id="parte-2-la-tabella-di-lookup-della-brdf">Parte 2: la tabella di lookup della BRDF<a class="headerlink" href="#parte-2-la-tabella-di-lookup-della-brdf" title="Permanent link">#</a></h2>
+<p>La seconda metà della split sum dipende da due soli numeri: <code>n · v</code> e la roughness.<br>
+Il suo risultato, una <strong>scala</strong> e un <strong>bias</strong> da applicare a F0, sta nei canali rosso e verde di una texture 2D.<br>
+La tabella è la stessa per ogni ambiente, quindi calcolala una volta sola, o addirittura distribuiscila come immagine.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="nf">geometrySchlickGGX_IBL</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">NdotV</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">roughness</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">roughness</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">roughness</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">2.0</span><span class="p">;</span><span class="w">      </span><span class="c1">// note: a different k for IBL</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">NdotV</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">NdotV</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mf">1.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">k</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">k</span><span class="p">);</span>
@@ -303,10 +314,11 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>Render it with the full-screen triangle into a 512 × 512 <code>.rg16Float</code> texture. The result is a smooth red-to-yellow gradient.</p>
-<figure><img src="../../assets/img/pbr/prefilter.webp" alt="The two precomputed halves of the split-sum approximation." width="880" height="365" loading="lazy"><figcaption>The two precomputed halves of the split-sum approximation.</figcaption></figure>
+<p>Disegnala con il triangolo a tutto schermo in una texture <code>.rg16Float</code> da 512 × 512.<br>
+Il risultato è una sfumatura morbida dal rosso al giallo.</p>
+<figure><img src="../../assets/img/pbr/prefilter.webp" alt="Le due metà precalcolate della split-sum approximation." width="880" height="365" loading="lazy"><figcaption>Le due metà precalcolate della split-sum approximation.</figcaption></figure>
 
-<h2 id="putting-it-together">Putting it together<a class="headerlink" href="#putting-it-together" title="Permanent link">#</a></h2>
+<h2 id="mettere-tutto-insieme">Mettere tutto insieme<a class="headerlink" href="#mettere-tutto-insieme" title="Permanent link">#</a></h2>
 <div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">R</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">reflect</span><span class="p">(</span><span class="o">-</span><span class="n">V</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="p">);</span>
 <span class="k">const</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">maxReflectionLevel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">4.0</span><span class="p">;</span><span class="w">      </span><span class="c1">// mipCount - 1</span>
 
@@ -323,28 +335,38 @@
 <span class="n">float3</span><span class="w"> </span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ambient</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">Lo</span><span class="p">;</span>
 </code></pre></div>
 
-<p>Sample the lookup table with a clamping sampler. The texture coordinate for roughness must match how you rendered the table: here row 0, the top, is roughness 0.</p>
-<p>Now the metal spheres come alive. Smooth ones mirror the environment, rough ones show a soft, blurred version of it, and everything is tinted correctly by F0. Together with the direct lighting from point lights, this is a complete PBR pipeline.</p>
-<figure><img src="../../assets/img/pbr/specular-ibl.webp" alt="Full image-based lighting: smooth metals mirror the environment, rough ones show a blurred version of it." width="880" height="495" loading="lazy"><figcaption>Full image-based lighting: smooth metals mirror the environment, rough ones show a blurred version of it.</figcaption></figure>
+<p>Leggi la tabella di lookup con un sampler in clamp.<br>
+La coordinata di texture per la roughness deve corrispondere a come hai disegnato la tabella: qui la riga 0, quella in alto, è la roughness 0.</p>
+<p>Adesso le sfere di metallo prendono vita.<br>
+Quelle lisce rispecchiano l'ambiente, quelle ruvide ne mostrano una versione morbida e sfocata, e tutto è colorato correttamente da F0.<br>
+Insieme all'illuminazione diretta delle luci puntiformi, questa è una pipeline PBR completa.</p>
+<figure><img src="../../assets/img/pbr/specular-ibl.webp" alt="Illuminazione basata su immagini completa: i metalli lisci rispecchiano l&#x27;ambiente, quelli ruvidi ne mostrano una versione sfocata." width="880" height="495" loading="lazy"><figcaption>Illuminazione basata su immagini completa: i metalli lisci rispecchiano l&#x27;ambiente, quelli ruvidi ne mostrano una versione sfocata.</figcaption></figure>
 
-<h2 id="beyond-a-single-probe">Beyond a single probe<a class="headerlink" href="#beyond-a-single-probe" title="Permanent link">#</a></h2>
-<p>One environment map describes the light at one point. Inside a building, a sphere would reflect the sky through the walls. Engines place many <strong>reflection probes</strong> around a level, each with its own prefiltered map, and blend between the nearest ones. <strong>Screen-space reflections</strong> and, on capable hardware, <a href="../beyond/ray-tracing.html">ray traced</a> reflections add what probes cannot capture: nearby, moving objects.</p>
-<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<h2 id="oltre-una-sola-probe">Oltre una sola probe<a class="headerlink" href="#oltre-una-sola-probe" title="Permanent link">#</a></h2>
+<p>Una environment map descrive la luce in un punto solo.<br>
+Dentro un edificio una sfera rifletterebbe il cielo attraverso i muri.<br>
+I motori dispongono in un livello molte <strong>reflection probe</strong>, ognuna con la sua mappa prefiltrata, e mescolano le più vicine.<br>
+Le <strong>screen-space reflection</strong> e, sull'hardware che lo permette, i riflessi in <a href="../beyond/ray-tracing.html">ray tracing</a> aggiungono ciò che le probe non possono catturare: gli oggetti vicini e in movimento.</p>
+<h2 id="esercizi">Esercizi<a class="headerlink" href="#esercizi" title="Permanent link">#</a></h2>
 <ul>
-<li>Display each mip level of the prefiltered map as a skybox.<details class="solution"><summary>Mostra la soluzione</summary><p>Sample the prefiltered cubemap in the skybox shader at a fixed level.</p>
+<li>Mostra come skybox ogni livello di mip della mappa prefiltrata.<details class="solution"><summary>Mostra la soluzione</summary><p>Nello shader dello skybox leggi la cubemap prefiltrata a un livello fisso.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">return</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">prefilterMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">direction</span><span class="p">,</span><span class="w"> </span><span class="n">level</span><span class="p">(</span><span class="n">uniforms</span><span class="p">.</span><span class="n">mip</span><span class="p">)).</span><span class="n">rgb</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
 </code></pre></div>
 
-<p>Level 0 is the sharp environment and each higher level is blurrier.</p></details></li>
-<li>Precompute the three IBL textures once and cache them on disk.<details class="solution"><summary>Mostra la soluzione</summary><p>The irradiance map, the prefiltered map and the lookup table depend only on the environment, and the table not even on that. After generating them, read each mip level and face back with a blit into a buffer and write the bytes to a file; at the next launch fill the textures with <code>replace</code>. A common container for this is KTX.</p></details></li>
-<li>Load a full PBR model and place it in three different environments without changing its material.<details class="solution"><summary>Mostra la soluzione</summary><p>Nothing about the material changes. Regenerate the irradiance and prefiltered maps for each environment and bind them. The same object looks blue-tinted under an open sky and warm in a sunset, which is the practical benefit of physically based materials.</p></details></li>
+<p>Il livello 0 è l'ambiente nitido e ogni livello superiore è più sfocato.</p></details></li>
+<li>Precalcola una volta le tre texture dell'IBL e tienile in cache su disco.<details class="solution"><summary>Mostra la soluzione</summary><p>La irradiance map, la mappa prefiltrata e la tabella di lookup dipendono solo dall'ambiente, e la tabella nemmeno da quello.<br>
+Dopo averle generate, rileggi ogni livello di mip e ogni faccia con un blit in un buffer e scrivi i byte in un file; all'avvio successivo riempi le texture con <code>replace</code>.<br>
+Un contenitore diffuso per questo scopo è KTX.</p></details></li>
+<li>Carica un modello PBR completo e mettilo in tre ambienti diversi senza cambiarne il materiale.<details class="solution"><summary>Mostra la soluzione</summary><p>Del materiale non cambia niente.<br>
+Rigenera la irradiance map e la mappa prefiltrata per ogni ambiente e collegale.<br>
+Lo stesso oggetto appare tinto di blu sotto un cielo aperto e caldo in un tramonto, ed è questo il vantaggio pratico dei materiali fisicamente corretti.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../pbr/diffuse-irradiance.html"><small>Precedente</small>Irradianza diffusa</a><a class="next" href="../in-practice/debugging.html"><small>Successivo</small>Debug</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#part-1-the-prefiltered-environment-map">Part 1: the prefiltered environment map</a></li><li><a href="#part-2-the-brdf-lookup-table">Part 2: the BRDF lookup table</a></li><li><a href="#putting-it-together">Putting it together</a></li><li><a href="#beyond-a-single-probe">Beyond a single probe</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#parte-1-lenvironment-map-prefiltrata">Parte 1: l&#x27;environment map prefiltrata</a></li><li><a href="#parte-2-la-tabella-di-lookup-della-brdf">Parte 2: la tabella di lookup della BRDF</a></li><li><a href="#mettere-tutto-insieme">Mettere tutto insieme</a></li><li><a href="#oltre-una-sola-probe">Oltre una sola probe</a></li><li><a href="#esercizi">Esercizi</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

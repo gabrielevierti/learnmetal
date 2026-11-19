@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,31 +134,47 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Piattaforme Apple</p><h1 id="tile-based-gpus">Tile-Based GPUs<a class="headerlink" href="#tile-based-gpus" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
-<p>Every Apple GPU, from the iPhone to the Mac Studio, is a <strong>tile-based deferred renderer</strong> (TBDR). It draws a frame in a different order than the immediate-mode desktop GPUs most tutorials assume, and several Metal features exist only because of that. Knowing how it works turns a list of odd-looking rules into common sense.</p>
-<h2 id="how-a-tile-based-gpu-draws-a-pass">How a tile-based GPU draws a pass<a class="headerlink" href="#how-a-tile-based-gpu-draws-a-pass" title="Permanent link">#</a></h2>
-<p>An immediate-mode GPU takes each triangle as it arrives and shades it straight into the framebuffer in memory. An Apple GPU works in two phases per render pass.</p>
+<article><p class="crumb">Piattaforme Apple</p><h1 id="gpu-tile-based">GPU tile-based<a class="headerlink" href="#gpu-tile-based" title="Permanent link">#</a></h1>
+<p>Ogni GPU Apple, dall'iPhone al Mac Studio, è un <strong>tile-based deferred renderer</strong> (TBDR).<br>
+Disegna un frame in un ordine diverso da quello delle GPU desktop in immediate mode che la maggior parte dei tutorial dà per scontate, e diverse funzioni di Metal esistono solo per questo.<br>
+Sapere come funziona trasforma un elenco di regole dall'aria strana in buon senso.</p>
+<h2 id="come-una-gpu-tile-based-disegna-un-pass">Come una GPU tile-based disegna un pass<a class="headerlink" href="#come-una-gpu-tile-based-disegna-un-pass" title="Permanent link">#</a></h2>
+<p>Una GPU in immediate mode prende ogni triangolo man mano che arriva e lo calcola direttamente nel framebuffer in memoria.<br>
+Una GPU Apple lavora in due fasi per ogni render pass.</p>
 <ol>
-<li><strong>Tiling.</strong> It runs the vertex functions of every draw call in the pass, splits the screen into small tiles (for example 32 × 32 pixels), and records which triangles touch each tile.</li>
-<li><strong>Rendering.</strong> For each tile it loads the tile's pixels into a small, very fast memory inside the GPU, the <strong>tile memory</strong>; finds which triangle is visible at each pixel; shades only those; and writes the finished tile back to the texture.</li>
+<li><strong>Tiling.</strong><br>
+Esegue le vertex function di ogni draw call del pass, divide lo schermo in piccoli tile (per esempio da 32 × 32 pixel) e annota quali triangoli toccano ciascun tile.</li>
+<li><strong>Rendering.</strong><br>
+Per ogni tile carica i pixel del tile in una memoria piccola e velocissima dentro la GPU, la <strong>memoria dei tile</strong>; trova quale triangolo è visibile in ogni pixel; calcola solo quelli; e riscrive nella texture il tile finito.</li>
 </ol>
-<p>Two consequences follow, and they explain the rest of this chapter.</p>
+<p>Ne seguono due conseguenze, che spiegano il resto di questo capitolo.</p>
 <ul>
-<li><strong>Hidden surface removal.</strong> For opaque geometry the GPU knows the visible triangle of each pixel before it runs any fragment function. Hidden fragments cost nothing, whatever the draw order.</li>
-<li><strong>Reading and writing textures is the expensive part.</strong> Work inside tile memory is cheap. Moving a tile between tile memory and system memory costs bandwidth, power and time.</li>
+<li><strong>Hidden surface removal.</strong><br>
+Per la geometria opaca la GPU conosce il triangolo visibile di ogni pixel prima di eseguire qualsiasi fragment function.<br>
+I fragment nascosti non costano nulla, qualunque sia l'ordine di disegno.</li>
+<li><strong>Leggere e scrivere le texture è la parte costosa.</strong><br>
+Il lavoro dentro la memoria dei tile costa poco.<br>
+Spostare un tile tra la memoria dei tile e la memoria di sistema costa banda, energia e tempo.</li>
 </ul>
 <div class="admonition note">
-<p class="admonition-title">Coming from OpenGL</p>
-<p>On a desktop GPU you sort opaque objects front to back to save fragment work. On Apple GPUs hidden surface removal does that for you, as long as the pipeline is opaque. What you manage instead is passes: how many there are, and what each one loads and stores.</p>
+<p class="admonition-title">Se vieni da OpenGL</p>
+<p>Su una GPU desktop ordini gli oggetti opachi da davanti a dietro per risparmiare lavoro sui fragment.<br>
+Sulle GPU Apple lo fa per te la hidden surface removal, purché la pipeline sia opaca.<br>
+Ciò che gestisci tu sono invece i pass: quanti sono, e che cosa ciascuno carica e salva.</p>
 </div>
-<h2 id="load-and-store-actions">Load and store actions<a class="headerlink" href="#load-and-store-actions" title="Permanent link">#</a></h2>
-<p>Each attachment of a pass has a load action, applied when a tile starts, and a store action, applied when it ends.</p>
+<h2 id="load-e-store-action">Load e store action<a class="headerlink" href="#load-e-store-action" title="Permanent link">#</a></h2>
+<p>Ogni attachment di un pass ha una load action, applicata quando un tile comincia, e una store action, applicata quando finisce.</p>
 <ul>
-<li><code>.load</code> copies the old contents from memory into every tile. Use it only when you draw on top of an earlier result.</li>
-<li><code>.clear</code> fills the tile with a value, with no memory traffic. <code>.dontCare</code> does nothing at all.</li>
-<li><code>.store</code> writes the tile back. <code>.dontCare</code> discards it.</li>
+<li><code>.load</code> copia in ogni tile il vecchio contenuto dalla memoria.<br>
+Usala solo quando disegni sopra un risultato precedente.</li>
+<li><code>.clear</code> riempie il tile con un valore, senza traffico di memoria.<br>
+<code>.dontCare</code> non fa proprio niente.</li>
+<li><code>.store</code> riscrive il tile.<br>
+<code>.dontCare</code> lo scarta.</li>
 </ul>
-<p>The rule: <strong>load only what you need to keep, store only what you will read later.</strong> A depth texture used by a single pass should be <code>.clear</code> and <code>.dontCare</code>. A multisampled color texture should be <code>.multisampleResolve</code>, without storing the samples.</p>
+<p>La regola: <strong>carica solo ciò che devi conservare, salva solo ciò che leggerai dopo.</strong><br>
+Una texture di profondità usata da un solo pass deve essere <code>.clear</code> e <code>.dontCare</code>.<br>
+Una texture di colore multisample deve essere <code>.multisampleResolve</code>, senza salvare i campioni.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">pass</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLRenderPassDescriptor</span><span class="p">()</span>
 <span class="n">pass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">texture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">drawable</span><span class="p">.</span><span class="n">texture</span>
@@ -182,8 +198,10 @@
 </code></pre></div>
 </div>
 
-<h2 id="memoryless-textures">Memoryless textures<a class="headerlink" href="#memoryless-textures" title="Permanent link">#</a></h2>
-<p>If an attachment is never loaded and never stored, it only ever lives in tile memory, so it does not need memory of its own. Give it the <strong>memoryless</strong> storage mode and Metal allocates nothing for it. At 4K, a depth texture and a 4× multisampled color texture add up to hundreds of megabytes saved.</p>
+<h2 id="texture-memoryless">Texture memoryless<a class="headerlink" href="#texture-memoryless" title="Permanent link">#</a></h2>
+<p>Se un attachment non viene mai caricato e mai salvato, vive soltanto nella memoria dei tile, quindi non ha bisogno di memoria propria.<br>
+Dagli lo storage mode <strong>memoryless</strong> e Metal non gli alloca niente.<br>
+In 4K una texture di profondità e una texture di colore multisample 4× fanno insieme centinaia di megabyte risparmiati.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">descriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLTextureDescriptor</span><span class="p">.</span><span class="n">texture2DDescriptor</span><span class="p">(</span>
 <span class="w">    </span><span class="n">pixelFormat</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">depth32Float</span><span class="p">,</span><span class="w"> </span><span class="n">width</span><span class="p">:</span><span class="w"> </span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">:</span><span class="w"> </span><span class="n">height</span><span class="p">,</span><span class="w"> </span><span class="n">mipmapped</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
@@ -201,10 +219,12 @@
 </code></pre></div>
 </div>
 
-<p>With MetalKit, <code>MTKView</code> already does this for its own depth and multisample textures on Apple silicon.</p>
-<h2 id="do-more-in-one-pass">Do more in one pass<a class="headerlink" href="#do-more-in-one-pass" title="Permanent link">#</a></h2>
-<p>Starting a new pass means storing the tiles of the old one and loading them again. The deferred renderer of the <a href="../advanced-lighting/deferred-shading.html">Deferred Shading</a> chapter does exactly that: one pass stores three G-buffer textures, a second pass samples them. On a tile-based GPU both steps can run in <strong>one</strong> pass, with the G-buffer never leaving tile memory.</p>
-<p>The tool is <strong>programmable blending</strong>: a fragment function may read the current value of the color attachments it is drawing to, by taking them as parameters.</p>
+<p>Con MetalKit, su Apple silicon <code>MTKView</code> lo fa già per le proprie texture di profondità e multisample.</p>
+<h2 id="fare-di-piu-in-un-solo-pass">Fare di più in un solo pass<a class="headerlink" href="#fare-di-piu-in-un-solo-pass" title="Permanent link">#</a></h2>
+<p>Cominciare un nuovo pass significa salvare i tile di quello vecchio e ricaricarli.<br>
+Il renderer deferred del capitolo <a href="../advanced-lighting/deferred-shading.html">Deferred shading</a> fa esattamente questo: un pass salva tre texture di G-buffer, un secondo pass le legge.<br>
+Su una GPU tile-based entrambi i passi possono girare in <strong>un solo</strong> pass, con il G-buffer che non lascia mai la memoria dei tile.</p>
+<p>Lo strumento è il <strong>programmable blending</strong>: una fragment function può leggere il valore attuale degli attachment di colore su cui sta disegnando, ricevendoli come parametri.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">LightingOut</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">lit</span><span class="w"> </span><span class="p">[[</span><span class="na">color</span><span class="p">(</span><span class="mi">0</span><span class="p">)]];</span>
 <span class="p">};</span>
@@ -222,37 +242,57 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>The G-buffer attachments become memoryless, with <code>.clear</code> and <code>.dontCare</code>; only the lit color is stored. The depth is written to an extra <code>r32Float</code> color attachment, because the depth attachment itself cannot be read this way. The cost of deferred shading drops to little more than that of forward rendering, which is why this pattern is the standard on iPhone.</p>
-<p>Programmable blending also gives you custom blend equations and order-independent transparency. For per-pixel data that does not fit a pixel format, <strong>image blocks</strong> and <strong>tile shaders</strong> let you define your own layout of tile memory and run a compute-like function on each tile in the middle of a render pass.</p>
-<h2 id="keep-hidden-surface-removal-working">Keep hidden surface removal working<a class="headerlink" href="#keep-hidden-surface-removal-working" title="Permanent link">#</a></h2>
-<p>Hidden surface removal can only skip fragments it knows to be covered by opaque ones. Three things defeat it.</p>
+<p>Gli attachment del G-buffer diventano memoryless, con <code>.clear</code> e <code>.dontCare</code>; viene salvato solo il colore illuminato.<br>
+La profondità viene scritta in un attachment di colore <code>r32Float</code> in più, perché l'attachment di profondità vero e proprio non si può leggere in questo modo.<br>
+Il costo del deferred shading scende a poco più di quello del forward rendering, ed è per questo che su iPhone questo schema è la norma.</p>
+<p>Il programmable blending ti dà anche equazioni di blending personalizzate e la order-independent transparency.<br>
+Per i dati per pixel che non entrano in un formato di pixel, gli <strong>image block</strong> e i <strong>tile shader</strong> ti permettono di definire un tuo layout della memoria dei tile e di eseguire su ogni tile, nel mezzo di un render pass, una funzione simile a quelle di compute.</p>
+<h2 id="mantenere-attiva-la-hidden-surface-removal">Mantenere attiva la hidden surface removal<a class="headerlink" href="#mantenere-attiva-la-hidden-surface-removal" title="Permanent link">#</a></h2>
+<p>La hidden surface removal può saltare solo i fragment che sa essere coperti da fragment opachi.<br>
+Tre cose la mettono fuori gioco.</p>
 <ul>
-<li><strong>Blending.</strong> A blended fragment needs what is behind it.</li>
-<li><strong><code>discard_fragment</code></strong> and alpha testing: the GPU cannot know the pixel is covered until the function has run.</li>
-<li><strong>Writing depth from the fragment function</strong>, or reading the attachment with programmable blending.</li>
+<li><strong>Il blending.</strong><br>
+Un fragment con blending ha bisogno di ciò che gli sta dietro.</li>
+<li><strong><code>discard_fragment</code></strong> e l'alpha test: la GPU non può sapere che il pixel è coperto finché la funzione non è stata eseguita.</li>
+<li><strong>Scrivere la profondità dalla fragment function</strong>, o leggere l'attachment con il programmable blending.</li>
 </ul>
-<p>So draw in this order: <strong>opaque</strong> first, then <strong>alpha-tested</strong>, then <strong>translucent</strong>. Sorting opaque objects is not needed. Keep <code>discard_fragment</code> out of shaders that do not need it, since its presence alone, even if never executed, moves the draw out of the opaque group.</p>
-<h2 id="other-habits-that-matter">Other habits that matter<a class="headerlink" href="#other-habits-that-matter" title="Permanent link">#</a></h2>
+<p>Quindi disegna in quest'ordine: prima l'<strong>opaco</strong>, poi ciò che usa l'<strong>alpha test</strong>, poi il <strong>traslucido</strong>.<br>
+Ordinare gli oggetti opachi non serve.<br>
+Tieni <code>discard_fragment</code> fuori dagli shader che non ne hanno bisogno, perché la sua sola presenza, anche se non viene mai eseguito, toglie la draw call dal gruppo degli opachi.</p>
+<h2 id="altre-abitudini-che-contano">Altre abitudini che contano<a class="headerlink" href="#altre-abitudini-che-contano" title="Permanent link">#</a></h2>
 <ul>
-<li><strong>Do not split a pass.</strong> Ending an encoder and starting another with the same attachments forces a store and a load. Encode everything that targets the same textures in one encoder.</li>
-<li><strong>Avoid reading your own render target</strong> with a texture sample in the same frame when programmable blending would do.</li>
-<li><strong>Compress textures</strong> with ASTC and generate mipmaps; bandwidth, not arithmetic, is usually the limit on mobile.</li>
-<li><strong>Use smaller formats.</strong> <code>rgba16Float</code> costs twice the bandwidth of <code>rg11b10Float</code> and is rarely needed for HDR color.</li>
-<li><strong>Use half precision</strong> (<code>half</code>, <code>half3</code>) in fragment functions for colors and normals. On Apple GPUs it is faster and uses fewer registers.</li>
-<li><strong>Measure.</strong> The Metal debugger in Xcode shows the load and store actions of every pass, and the memory report flags textures that could be memoryless. Metal System Trace in Instruments shows the tiling and rendering time of each pass separately.</li>
+<li><strong>Non spezzare un pass.</strong><br>
+Chiudere un encoder e aprirne un altro con gli stessi attachment obbliga a un salvataggio e a un caricamento.<br>
+Codifica in un solo encoder tutto ciò che disegna sulle stesse texture.</li>
+<li><strong>Evita di leggere il tuo stesso render target</strong> con una lettura di texture nello stesso frame, quando basterebbe il programmable blending.</li>
+<li><strong>Comprimi le texture</strong> con ASTC e genera le mipmap; sui dispositivi mobili il limite di solito è la banda, non l'aritmetica.</li>
+<li><strong>Usa formati più piccoli.</strong><br>
+<code>rgba16Float</code> costa il doppio della banda di <code>rg11b10Float</code> e per il colore HDR serve di rado.</li>
+<li><strong>Usa la mezza precisione</strong> (<code>half</code>, <code>half3</code>) nelle fragment function per colori e normali.<br>
+Sulle GPU Apple è più veloce e usa meno registri.</li>
+<li><strong>Misura.</strong><br>
+Il debugger di Metal in Xcode mostra le load e store action di ogni pass, e il report della memoria segnala le texture che potrebbero essere memoryless.<br>
+Metal System Trace in Instruments mostra separatamente il tempo di tiling e quello di rendering di ogni pass.</li>
 </ul>
-<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<h2 id="esercizi">Esercizi<a class="headerlink" href="#esercizi" title="Permanent link">#</a></h2>
 <ul>
-<li>Find a depth texture in one of your renderers that could be memoryless, and change it.<details class="solution"><summary>Mostra la soluzione</summary><p>Any depth or multisample texture whose load action is <code>.clear</code> or <code>.dontCare</code> and whose store action is <code>.dontCare</code> (or <code>.multisampleResolve</code> for the multisampled color) qualifies. Set <code>storageMode = .memoryless</code> on its descriptor. If Metal's validation layer complains, some pass still loads or stores it. A shadow map does not qualify: the main pass samples it later.</p></details></li>
-<li>Set the store action of the color attachment to <code>.dontCare</code> and explain what you see.<details class="solution"><summary>Mostra la soluzione</summary><p>The pass renders correctly inside tile memory and the result is thrown away, so the texture keeps undefined contents: usually garbage, a previous frame, or black. Nothing is displayed, yet the GPU did all the shading. It is the mirror image of a needless <code>.store</code>: there you pay bandwidth for pixels nobody reads.</p></details></li>
-<li>Add an unused <code>discard_fragment</code> behind an always-false uniform condition and compare the fragment time of a scene with heavy overdraw.<details class="solution"><summary>Mostra la soluzione</summary><p>The uniform is false, so the image is identical. But the compiler cannot know that, and the pipeline is no longer treated as opaque: every fragment of every overlapping layer now runs its fragment function, where before only the visible one did. In a scene with five layers of overdraw the fragment time grows several times over.</p></details></li>
+<li>Trova in uno dei tuoi renderer una texture di profondità che potrebbe essere memoryless, e cambiala.<details class="solution"><summary>Mostra la soluzione</summary><p>Va bene qualsiasi texture di profondità o multisample la cui load action sia <code>.clear</code> o <code>.dontCare</code> e la cui store action sia <code>.dontCare</code> (o <code>.multisampleResolve</code> per il colore multisample).<br>
+Imposta <code>storageMode = .memoryless</code> nel suo descriptor.<br>
+Se il livello di validazione di Metal protesta, qualche pass la sta ancora caricando o salvando.<br>
+Una shadow map non va bene: il pass principale la legge dopo.</p></details></li>
+<li>Imposta a <code>.dontCare</code> la store action dell'attachment di colore e spiega ciò che vedi.<details class="solution"><summary>Mostra la soluzione</summary><p>Il pass disegna correttamente dentro la memoria dei tile e il risultato viene buttato via, quindi la texture conserva un contenuto indefinito: di solito spazzatura, un frame precedente oppure nero.<br>
+Non viene mostrato niente, eppure la GPU ha fatto tutti i calcoli.<br>
+È l'immagine speculare di uno <code>.store</code> inutile: lì paghi banda per pixel che nessuno legge.</p></details></li>
+<li>Aggiungi un <code>discard_fragment</code> inutilizzato dietro una condizione su un uniform sempre falsa, e confronta il tempo dei fragment in una scena con molto overdraw.<details class="solution"><summary>Mostra la soluzione</summary><p>L'uniform è falso, quindi l'immagine è identica.<br>
+Ma il compilatore non può saperlo, e la pipeline non viene più trattata come opaca: adesso ogni fragment di ogni strato sovrapposto esegue la sua fragment function, mentre prima lo faceva solo quello visibile.<br>
+In una scena con cinque strati di overdraw il tempo dei fragment cresce di diverse volte.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../beyond/mesh-shaders.html"><small>Precedente</small>Mesh shader</a><a class="next" href="../apple-platforms/metalfx.html"><small>Successivo</small>Upscaling con MetalFX</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#how-a-tile-based-gpu-draws-a-pass">How a tile-based GPU draws a pass</a></li><li><a href="#load-and-store-actions">Load and store actions</a></li><li><a href="#memoryless-textures">Memoryless textures</a></li><li><a href="#do-more-in-one-pass">Do more in one pass</a></li><li><a href="#keep-hidden-surface-removal-working">Keep hidden surface removal working</a></li><li><a href="#other-habits-that-matter">Other habits that matter</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#come-una-gpu-tile-based-disegna-un-pass">Come una GPU tile-based disegna un pass</a></li><li><a href="#load-e-store-action">Load e store action</a></li><li><a href="#texture-memoryless">Texture memoryless</a></li><li><a href="#fare-di-piu-in-un-solo-pass">Fare di più in un solo pass</a></li><li><a href="#mantenere-attiva-la-hidden-surface-removal">Mantenere attiva la hidden surface removal</a></li><li><a href="#altre-abitudini-che-contano">Altre abitudini che contano</a></li><li><a href="#esercizi">Esercizi</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

@@ -1,0 +1,5 @@
+Un campo visivo più ampio fa entrare nella vista una parte maggiore della scena: gli oggetti appaiono più piccoli e la prospettiva si accentua verso i bordi. Uno stretto si comporta come un teleobiettivo. Un rapporto d'aspetto che non coincide con quello della vista deforma l'immagine: troppo grande schiaccia tutto in orizzontale, troppo piccolo lo allarga. Per questo il rapporto d'aspetto va ricalcolato quando la vista cambia dimensione.
+---
+Quando costruisci la matrice model di un cubo ogni tre, somma il tempo al suo angolo: in Swift, `var angle = (20 * Float(i)).radians; if i % 3 == 0 { angle += time }`. Non cambia nient'altro, perché ogni cubo riceve già la propria matrice.
+---
+Con `.always` ogni fragment passa, quindi il risultato dipende dall'ordine di disegno: i cubi disegnati dopo coprono quelli di prima anche quando sono più lontani. Con `.greater` un fragment passa solo se è più lontano di ciò che è salvato. Il depth buffer viene pulito a 1, il valore più lontano, quindi non passa niente e la vista resta vuota, a meno di pulire anche la profondità a 0.

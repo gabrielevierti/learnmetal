@@ -135,14 +135,21 @@
 </nav>
 <main class="content" id="main">
 <article><p class="crumb">Apple Platforms</p><h1 id="metal-4">Metal 4<a class="headerlink" href="#metal-4" title="Permanent link">#</a></h1>
-<p>Metal 4, introduced in 2025, is the first large revision of Metal's core API. Nothing you have learned is obsolete: shaders, pipelines, textures, render passes and the frame structure are the same ideas. What changes is who is responsible for what. Metal 4 does less behind your back, so a large renderer spends less CPU time and memory, and so that engines written for Direct3D 12 or Vulkan map onto it directly.</p>
-<p>It runs on Apple silicon: Macs with M1 or later and iPhones and iPads with A14 or later, on the 2025 systems (macOS 26, iOS 26) and newer. Check at runtime, and keep the classic path as a fallback.</p>
+<p>Metal 4, introduced in 2025, is the first large revision of Metal's core API.<br>
+Nothing you have learned is obsolete: shaders, pipelines, textures, render passes and the frame structure are the same ideas.<br>
+What changes is who is responsible for what.<br>
+Metal 4 does less behind your back, so a large renderer spends less CPU time and memory, and so that engines written for Direct3D 12 or Vulkan map onto it directly.</p>
+<p>It runs on Apple silicon: Macs with M1 or later and iPhones and iPads with A14 or later, on the 2025 systems (macOS 26, iOS 26) and newer.<br>
+Check at runtime, and keep the classic path as a fallback.</p>
 <div class="admonition warning">
 <p class="admonition-title">Read this as a map</p>
-<p>This chapter explains the model and shows the shape of the code. The names follow Apple's documentation at the time of writing, and this part of Metal is young. Start real work from Apple's sample <em>Drawing a triangle with Metal 4</em>.</p>
+<p>This chapter explains the model and shows the shape of the code.<br>
+The names follow Apple's documentation at the time of writing, and this part of Metal is young.<br>
+Start real work from Apple's sample <em>Drawing a triangle with Metal 4</em>.</p>
 </div>
 <h2 id="side-by-side-with-the-metal-you-know">Side by side with the Metal you know<a class="headerlink" href="#side-by-side-with-the-metal-you-know" title="Permanent link">#</a></h2>
-<p>The new types carry an <code>MTL4</code> prefix and live next to the old ones. The device, textures, buffers, libraries and render pipeline states are shared.</p>
+<p>The new types carry an <code>MTL4</code> prefix and live next to the old ones.<br>
+The device, textures, buffers, libraries and render pipeline states are shared.</p>
 <table>
 <thead>
 <tr>
@@ -187,7 +194,10 @@
 </table>
 <p>You can adopt it gradually: one part of a renderer can submit to an <code>MTL4CommandQueue</code> while the rest keeps its <code>MTLCommandQueue</code>, with events to order the work between them.</p>
 <h2 id="command-buffers-and-allocators">Command buffers and allocators<a class="headerlink" href="#command-buffers-and-allocators" title="Permanent link">#</a></h2>
-<p>A Metal 4 command buffer is a long-lived object. You begin it with an <strong>allocator</strong>, which supplies the memory the encoded commands are written into, end it, and commit it to a queue. Then you begin it again. Keep one allocator per frame in flight and reset it when you come back to it.</p>
+<p>A Metal 4 command buffer is a long-lived object.<br>
+You begin it with an <strong>allocator</strong>, which supplies the memory the encoded commands are written into, end it, and commit it to a queue.<br>
+Then you begin it again.<br>
+Keep one allocator per frame in flight and reset it when you come back to it.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">commandQueue</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeMTL4CommandQueue</span><span class="p">()</span><span class="o">!</span>
 <span class="kd">let</span><span class="w"> </span><span class="nv">commandBuffer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeCommandBuffer</span><span class="p">()</span><span class="o">!</span><span class="w">                       </span><span class="c1">// an MTL4CommandBuffer</span>
@@ -237,9 +247,14 @@
 </code></pre></div>
 </div>
 
-<p>The pass descriptor is an <code>MTL4RenderPassDescriptor</code>; <code>MTKView</code> offers one through <code>currentMTL4RenderPassDescriptor</code>. Because committing takes an array, several threads can each encode into their own command buffer, with their own allocator, and the buffers are submitted together. A render pass can even be suspended at the end of one encoder and resumed in the next, which replaces the parallel render encoder.</p>
+<p>The pass descriptor is an <code>MTL4RenderPassDescriptor</code>; <code>MTKView</code> offers one through <code>currentMTL4RenderPassDescriptor</code>.<br>
+Because committing takes an array, several threads can each encode into their own command buffer, with their own allocator, and the buffers are submitted together.<br>
+A render pass can even be suspended at the end of one encoder and resumed in the next, which replaces the parallel render encoder.</p>
 <h2 id="argument-tables">Argument tables<a class="headerlink" href="#argument-tables" title="Permanent link">#</a></h2>
-<p>In classic Metal every encoder keeps a table of bindings for every stage, and you fill it with <code>setVertexBuffer</code>, <code>setFragmentTexture</code> and their relatives. In Metal 4 the table is an object of its own. You size it for what your shaders use, fill it, and attach it to the stages that need it. The same table can serve many encoders and many frames.</p>
+<p>In classic Metal every encoder keeps a table of bindings for every stage, and you fill it with <code>setVertexBuffer</code>, <code>setFragmentTexture</code> and their relatives.<br>
+In Metal 4 the table is an object of its own.<br>
+You size it for what your shaders use, fill it, and attach it to the stages that need it.<br>
+The same table can serve many encoders and many frames.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">tableDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MTL4ArgumentTableDescriptor</span><span class="p">()</span>
 <span class="n">tableDescriptor</span><span class="p">.</span><span class="n">maxBufferBindCount</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">2</span>
@@ -281,9 +296,13 @@
 </code></pre></div>
 </div>
 
-<p>A binding is an address or a resource ID, not an object, and an offset is plain arithmetic on the address. The shader does not change: <code>[[buffer(1)]]</code> still means slot 1. This pairs naturally with the argument buffers of the <a href="../advanced-metal/advanced-msl.html">Advanced MSL</a> chapter: put a whole scene's textures in one buffer, and bind that single buffer.</p>
+<p>A binding is an address or a resource ID, not an object, and an offset is plain arithmetic on the address.<br>
+The shader does not change: <code>[[buffer(1)]]</code> still means slot 1.<br>
+This pairs naturally with the argument buffers of the <a href="../advanced-metal/advanced-msl.html">Advanced MSL</a> chapter: put a whole scene's textures in one buffer, and bind that single buffer.</p>
 <h2 id="residency-sets">Residency sets<a class="headerlink" href="#residency-sets" title="Permanent link">#</a></h2>
-<p>Classic command buffers retain every resource they use and make sure it is available to the GPU. Metal 4 does neither. You keep your resources alive yourself, and you tell Metal which ones the GPU needs with a <strong>residency set</strong>.</p>
+<p>Classic command buffers retain every resource they use and make sure it is available to the GPU.<br>
+Metal 4 does neither.<br>
+You keep your resources alive yourself, and you tell Metal which ones the GPU needs with a <strong>residency set</strong>.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">residencyDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MTLResidencySetDescriptor</span><span class="p">()</span>
 <span class="n">residencyDescriptor</span><span class="p">.</span><span class="n">initialCapacity</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">64</span>
@@ -311,9 +330,14 @@
 </code></pre></div>
 </div>
 
-<p>Build the set when you load a level, not every frame. A resource missing from every set is the classic Metal 4 mistake, and the result is undefined: a black object, or garbage.</p>
+<p>Build the set when you load a level, not every frame.<br>
+A resource missing from every set is the classic Metal 4 mistake, and the result is undefined: a black object, or garbage.</p>
 <h2 id="barriers">Barriers<a class="headerlink" href="#barriers" title="Permanent link">#</a></h2>
-<p>Metal 4 does not track which pass writes a resource and which reads it. Inside one command buffer, stages of different passes may overlap. Where a later stage reads what an earlier one wrote, for example a fragment function sampling a texture a compute pass just filled, you add a <strong>barrier</strong> on the consuming encoder: it names the stages that must finish and the stages that must wait. Rendering to a texture in one pass and sampling it in the next is the everyday case. Metal's validation layer reports missing barriers, so keep it on while porting.</p>
+<p>Metal 4 does not track which pass writes a resource and which reads it.<br>
+Inside one command buffer, stages of different passes may overlap.<br>
+Where a later stage reads what an earlier one wrote, for example a fragment function sampling a texture a compute pass just filled, you add a <strong>barrier</strong> on the consuming encoder: it names the stages that must finish and the stages that must wait.<br>
+Rendering to a texture in one pass and sampling it in the next is the everyday case.<br>
+Metal's validation layer reports missing barriers, so keep it on while porting.</p>
 <h2 id="compiling-pipelines">Compiling pipelines<a class="headerlink" href="#compiling-pipelines" title="Permanent link">#</a></h2>
 <p>Pipeline states are created by a compiler object that you own, from descriptors that name functions without loading them first.</p>
 <div class="lang-swift">
@@ -354,7 +378,8 @@
 </code></pre></div>
 </div>
 
-<p>The result is an ordinary <code>MTLRenderPipelineState</code>. Three additions make shader compilation easier to control: asynchronous variants that return a task you can prioritize; <strong>flexible pipeline states</strong>, where one compiled pipeline is specialized cheaply for different blend and attachment settings; and ahead-of-time compilation, where pipelines harvested from a play session are compiled at build time into an archive, so players never wait for a shader.</p>
+<p>The result is an ordinary <code>MTLRenderPipelineState</code>.<br>
+Three additions make shader compilation easier to control: asynchronous variants that return a task you can prioritize; <strong>flexible pipeline states</strong>, where one compiled pipeline is specialized cheaply for different blend and attachment settings; and ahead-of-time compilation, where pipelines harvested from a play session are compiled at build time into an archive, so players never wait for a shader.</p>
 <h2 id="what-else-arrived-with-it">What else arrived with it<a class="headerlink" href="#what-else-arrived-with-it" title="Permanent link">#</a></h2>
 <ul>
 <li><strong>One compute encoder</strong> for kernels, blits and acceleration structure builds.</li>
@@ -364,11 +389,21 @@
 <li>Tessellation is not part of the Metal 4 encoder; use <a href="../beyond/mesh-shaders.html">mesh shaders</a>.</li>
 </ul>
 <h2 id="should-you-use-it">Should you use it?<a class="headerlink" href="#should-you-use-it" title="Permanent link">#</a></h2>
-<p>For learning, and for an app with a few hundred draw calls, classic Metal is simpler and exactly as fast on the GPU. Its automatic retains, tracking and residency cost little at that scale and prevent a whole class of bugs. Metal 4 pays off when the CPU cost of encoding matters: thousands of draws, many threads, large streaming scenes, or an engine that already thinks in descriptor tables and barriers. Every concept in this book carries over unchanged, which is the reason to learn them first.</p>
+<p>For learning, and for an app with a few hundred draw calls, classic Metal is simpler and exactly as fast on the GPU.<br>
+Its automatic retains, tracking and residency cost little at that scale and prevent a whole class of bugs.<br>
+Metal 4 pays off when the CPU cost of encoding matters: thousands of draws, many threads, large streaming scenes, or an engine that already thinks in descriptor tables and barriers.<br>
+Every concept in this book carries over unchanged, which is the reason to learn them first.</p>
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
-<li>List what <code>setFragmentTexture</code> did for you that an argument table does not.<details class="solution"><summary>Show solution</summary><p>Four things. It stored the binding in the encoder's own table, which Metal 4 replaces with a table you size and own. It retained the texture until the command buffer completed; now you must keep it alive. It made the texture resident for the GPU; now a residency set does. And through hazard tracking it made sure an earlier pass that wrote the texture finished first; now you add a barrier. Each is a small cost per call that Metal 4 lets you pay once, or not at all.</p></details></li>
-<li>Port the Hello Triangle renderer to Metal 4, starting from Apple's sample project.<details class="solution"><summary>Show solution</summary><p>The order that works: create the <code>MTL4CommandQueue</code>, the command buffer and three allocators; build the pipeline with an <code>MTL4Compiler</code>; create an argument table with one buffer binding and set the vertex buffer's address; create a residency set with the vertex buffer and add it, and the layer's own set, to the queue. In the draw method take <code>currentMTL4RenderPassDescriptor</code>, begin the command buffer, encode, end, and commit between <code>waitForDrawable</code> and <code>signalDrawable</code>. If the triangle is missing, check the residency set first.</p></details></li>
+<li>List what <code>setFragmentTexture</code> did for you that an argument table does not.<details class="solution"><summary>Show solution</summary><p>Four things.<br>
+It stored the binding in the encoder's own table, which Metal 4 replaces with a table you size and own.<br>
+It retained the texture until the command buffer completed; now you must keep it alive.<br>
+It made the texture resident for the GPU; now a residency set does.<br>
+And through hazard tracking it made sure an earlier pass that wrote the texture finished first; now you add a barrier.<br>
+Each is a small cost per call that Metal 4 lets you pay once, or not at all.</p></details></li>
+<li>Port the Hello Triangle renderer to Metal 4, starting from Apple's sample project.<details class="solution"><summary>Show solution</summary><p>The order that works: create the <code>MTL4CommandQueue</code>, the command buffer and three allocators; build the pipeline with an <code>MTL4Compiler</code>; create an argument table with one buffer binding and set the vertex buffer's address; create a residency set with the vertex buffer and add it, and the layer's own set, to the queue.<br>
+In the draw method take <code>currentMTL4RenderPassDescriptor</code>, begin the command buffer, encode, end, and commit between <code>waitForDrawable</code> and <code>signalDrawable</code>.<br>
+If the triangle is missing, check the residency set first.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../apple-platforms/metalfx.html"><small>Previous</small>MetalFX Upscaling</a><a class="next" href="../apple-platforms/visionos.html"><small>Next</small>visionOS</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>

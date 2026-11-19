@@ -137,10 +137,15 @@
 <article><p class="crumb">Advanced Metal</p><h1 id="life-without-geometry-shaders">Life Without Geometry Shaders<a class="headerlink" href="#life-without-geometry-shaders" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Example project</strong> <code>examples/Sources/17-ComputeParticles</code>, run with <code>swift run ComputeParticles</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
 
-<p>Other APIs have a <strong>geometry shader</strong> stage between the vertex and fragment stages. It receives a whole primitive and can emit new ones: turn a point into a quad, a triangle into three lines, one triangle into six for the faces of a cubemap.</p>
-<p>Metal has no geometry shaders, by design. They fit poorly on GPU hardware, especially on tile-based architectures, and they are slow nearly everywhere. Each of their classic uses has a better replacement in Metal. This chapter walks through them.</p>
+<p>Other APIs have a <strong>geometry shader</strong> stage between the vertex and fragment stages.<br>
+It receives a whole primitive and can emit new ones: turn a point into a quad, a triangle into three lines, one triangle into six for the faces of a cubemap.</p>
+<p>Metal has no geometry shaders, by design.<br>
+They fit poorly on GPU hardware, especially on tile-based architectures, and they are slow nearly everywhere.<br>
+Each of their classic uses has a better replacement in Metal.<br>
+This chapter walks through them.</p>
 <h2 id="points-into-quads-instancing">Points into quads: instancing<a class="headerlink" href="#points-into-quads-instancing" title="Permanent link">#</a></h2>
-<p>The standard geometry shader demo expands points into camera-facing quads, or billboards, for particles. In Metal, draw a four-vertex quad with one <strong>instance</strong> per particle, and build the corners in the vertex function:</p>
+<p>The standard geometry shader demo expands points into camera-facing quads, or billboards, for particles.<br>
+In Metal, draw a four-vertex quad with one <strong>instance</strong> per particle, and build the corners in the vertex function:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">Particle</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">packed_float3</span><span class="w"> </span><span class="n">position</span><span class="p">;</span>
 <span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">size</span><span class="p">;</span>
@@ -191,11 +196,13 @@
 </div>
 
 <p>No vertex buffer for the quad, no vertex descriptor, and one draw call for any number of particles.</p>
-<p>For particles that are always small, Metal can also draw <code>.point</code> primitives directly. Write the size to a <code>[[point_size]]</code> output and use <code>[[point_coord]]</code> in the fragment function as the texture coordinate.</p>
+<p>For particles that are always small, Metal can also draw <code>.point</code> primitives directly.<br>
+Write the size to a <code>[[point_size]]</code> output and use <code>[[point_coord]]</code> in the fragment function as the texture coordinate.</p>
 <figure><img src="../assets/img/advanced-metal/no-geometry-shaders.webp" alt="Hundreds of camera-facing quads from one instanced draw call, with additive blending." width="880" height="495" loading="lazy"><figcaption>Hundreds of camera-facing quads from one instanced draw call, with additive blending.</figcaption></figure>
 
 <h2 id="visualizing-normals-lines-from-vertex-ids">Visualizing normals: lines from vertex IDs<a class="headerlink" href="#visualizing-normals-lines-from-vertex-ids" title="Permanent link">#</a></h2>
-<p>Another favorite: draw a short line along every vertex normal to debug a mesh. Draw <code>.line</code> primitives with twice as many vertices as the mesh has, and derive both the source vertex and which end of the line you are from the vertex ID:</p>
+<p>Another favorite: draw a short line along every vertex normal to debug a mesh.<br>
+Draw <code>.line</code> primitives with twice as many vertices as the mesh has, and derive both the source vertex and which end of the line you are from the vertex ID:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">vertex</span><span class="w"> </span><span class="n">LineOut</span><span class="w"> </span><span class="n">vertex_normals</span><span class="p">(</span><span class="n">uint</span><span class="w"> </span><span class="n">vertexID</span><span class="w"> </span><span class="p">[[</span><span class="na">vertex_id</span><span class="p">]],</span>
 <span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">device</span><span class="w"> </span><span class="n">MeshVertex</span><span class="w"> </span><span class="o">*</span><span class="n">vertices</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
 <span class="w">                              </span><span class="n">constant</span><span class="w"> </span><span class="n">Uniforms</span><span class="w"> </span><span class="o">&amp;</span><span class="n">uniforms</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">1</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
@@ -219,10 +226,13 @@
 </code></pre></div>
 </div>
 
-<p>This pattern, fetching from a buffer with a computed index, replaces most geometry shaders that emit a fixed amount of geometry per input. The same idea gives exploding meshes: use <code>vertexID / 3</code> to find the triangle, compute its face normal from the three vertices, and push the vertex outward.</p>
+<p>This pattern, fetching from a buffer with a computed index, replaces most geometry shaders that emit a fixed amount of geometry per input.<br>
+The same idea gives exploding meshes: use <code>vertexID / 3</code> to find the triangle, compute its face normal from the three vertices, and push the vertex outward.</p>
 <h2 id="rendering-to-many-targets-at-once-layered-rendering">Rendering to many targets at once: layered rendering<a class="headerlink" href="#rendering-to-many-targets-at-once-layered-rendering" title="Permanent link">#</a></h2>
-<p>Geometry shaders are also used to send one draw call to all six faces of a cubemap or to several layers of a texture array. Metal covers this with two features.</p>
-<p><strong>Layered rendering</strong>: the vertex function selects the destination layer by writing <code>[[render_target_array_index]]</code>. Combined with instancing, one draw call renders the scene into every face:</p>
+<p>Geometry shaders are also used to send one draw call to all six faces of a cubemap or to several layers of a texture array.<br>
+Metal covers this with two features.</p>
+<p><strong>Layered rendering</strong>: the vertex function selects the destination layer by writing <code>[[render_target_array_index]]</code>.<br>
+Combined with instancing, one draw call renders the scene into every face:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">LayeredOut</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="p">[[</span><span class="na">position</span><span class="p">]];</span>
 <span class="w">    </span><span class="n">uint</span><span class="w"> </span><span class="n">layer</span><span class="w"> </span><span class="p">[[</span><span class="na">render_target_array_index</span><span class="p">]];</span>
@@ -240,11 +250,18 @@
 </code></pre></div>
 
 <p>The render pass descriptor must set <code>renderTargetArrayLength = 6</code>, and the pipeline descriptor needs <code>inputPrimitiveTopology = .triangle</code>.</p>
-<p><strong>Vertex amplification</strong>: the GPU runs the vertex function once per vertex and replicates the output to several layers or viewports, with a per-view index available as <code>[[amplification_id]]</code>. It was introduced for stereo rendering, where each eye needs its own view matrix, and it is cheaper than instancing because shared work is done once. Set <code>maxVertexAmplificationCount</code> on the pipeline descriptor and call <code>setVertexAmplificationCount</code> on the encoder.</p>
+<p><strong>Vertex amplification</strong>: the GPU runs the vertex function once per vertex and replicates the output to several layers or viewports, with a per-view index available as <code>[[amplification_id]]</code>.<br>
+It was introduced for stereo rendering, where each eye needs its own view matrix, and it is cheaper than instancing because shared work is done once.<br>
+Set <code>maxVertexAmplificationCount</code> on the pipeline descriptor and call <code>setVertexAmplificationCount</code> on the encoder.</p>
 <h2 id="generating-geometry-compute-and-mesh-shaders">Generating geometry: compute and mesh shaders<a class="headerlink" href="#generating-geometry-compute-and-mesh-shaders" title="Permanent link">#</a></h2>
 <p>When the amount of output geometry is truly dynamic, there are two tools.</p>
-<p>A <strong>compute function</strong> can write vertices into a buffer that a later render pass draws. This is the general-purpose answer for procedural meshes, marching cubes, and particle simulation. See <a href="../beyond/compute-shaders.html">Compute Shaders</a>.</p>
-<p><strong>Mesh shaders</strong>, available on recent Apple GPUs and OS versions, replace the vertex stage with two programmable stages. An <strong>object function</strong> decides how many groups of geometry to emit, for example culling invisible clusters, and a <strong>mesh function</strong> outputs small batches of vertices and primitives directly to the rasterizer. They do everything geometry shaders did, efficiently, and are the foundation of modern GPU-driven rendering. Check support with <code>device.supportsFamily(.metal3)</code>.</p>
+<p>A <strong>compute function</strong> can write vertices into a buffer that a later render pass draws.<br>
+This is the general-purpose answer for procedural meshes, marching cubes, and particle simulation.<br>
+See <a href="../beyond/compute-shaders.html">Compute Shaders</a>.</p>
+<p><strong>Mesh shaders</strong>, available on recent Apple GPUs and OS versions, replace the vertex stage with two programmable stages.<br>
+An <strong>object function</strong> decides how many groups of geometry to emit, for example culling invisible clusters, and a <strong>mesh function</strong> outputs small batches of vertices and primitives directly to the rasterizer.<br>
+They do everything geometry shaders did, efficiently, and are the foundation of modern GPU-driven rendering.<br>
+Check support with <code>device.supportsFamily(.metal3)</code>.</p>
 <h2 id="subdividing-tessellation">Subdividing: tessellation<a class="headerlink" href="#subdividing-tessellation" title="Permanent link">#</a></h2>
 <p>If the goal is to add detail to a surface, by subdividing triangles or displacing terrain, the right tool is the tessellator, covered in <a href="../beyond/tessellation.html">Tessellation</a>.</p>
 <h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">#</a></h2>

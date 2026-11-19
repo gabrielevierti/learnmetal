@@ -137,7 +137,9 @@
 <article><p class="crumb">Advanced Metal</p><h1 id="instancing">Instancing<a class="headerlink" href="#instancing" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Example project</strong> <code>examples/Sources/13-Instancing</code>, run with <code>swift run Instancing</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
 
-<p>A field of grass, a forest, an asteroid belt: thousands of copies of the same mesh, each with a different transform. Issuing one draw call per copy wastes CPU time, because each call has a fixed cost no matter how small the mesh is. <strong>Instancing</strong> draws all copies with a single call.</p>
+<p>A field of grass, a forest, an asteroid belt: thousands of copies of the same mesh, each with a different transform.<br>
+Issuing one draw call per copy wastes CPU time, because each call has a fixed cost no matter how small the mesh is.<br>
+<strong>Instancing</strong> draws all copies with a single call.</p>
 <h2 id="instanced-draw-calls">Instanced draw calls<a class="headerlink" href="#instanced-draw-calls" title="Permanent link">#</a></h2>
 <p>Every draw method has a variant with an <code>instanceCount</code>:</p>
 <div class="lang-swift">
@@ -169,7 +171,9 @@
 </code></pre></div>
 </div>
 
-<p>The GPU runs the vertex function for every vertex of every instance. The only difference between instances is the built-in <code>[[instance_id]]</code>, counting from 0. Everything that makes instances look different is derived from that number.</p>
+<p>The GPU runs the vertex function for every vertex of every instance.<br>
+The only difference between instances is the built-in <code>[[instance_id]]</code>, counting from 0.<br>
+Everything that makes instances look different is derived from that number.</p>
 <h2 id="per-instance-data-in-a-buffer">Per-instance data in a buffer<a class="headerlink" href="#per-instance-data-in-a-buffer" title="Permanent link">#</a></h2>
 <p>Put one struct per instance into a buffer and index it with the instance ID:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">InstanceData</span><span class="w"> </span><span class="p">{</span>
@@ -194,7 +198,8 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>Using the model matrix for the normal is only correct for rotations and uniform scales. Store a normal matrix per instance if you need non-uniform scaling.</p>
+<p>Using the model matrix for the normal is only correct for rotations and uniform scales.<br>
+Store a normal matrix per instance if you need non-uniform scaling.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">InstanceData</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">model</span><span class="p">:</span><span class="w"> </span><span class="n">float4x4</span>
@@ -237,7 +242,9 @@
 
 <div class="admonition note">
 <p class="admonition-title">Coming from OpenGL</p>
-<p>There is no need for instanced vertex attributes with divisors, and no limit on the size of per-instance data. A buffer and an index are enough. If you prefer attributes anyway, a vertex descriptor layout can advance once per instance: <code>layouts[1].stepFunction = .perInstance</code>.</p>
+<p>There is no need for instanced vertex attributes with divisors, and no limit on the size of per-instance data.<br>
+A buffer and an index are enough.<br>
+If you prefer attributes anyway, a vertex descriptor layout can advance once per instance: <code>layouts[1].stepFunction = .perInstance</code>.</p>
 </div>
 <h2 id="an-asteroid-field">An asteroid field<a class="headerlink" href="#an-asteroid-field" title="Permanent link">#</a></h2>
 <p>Generate a ring of randomly placed, rotated and scaled rocks around a planet:</p>
@@ -283,13 +290,18 @@
 </code></pre></div>
 </div>
 
-<p>Drawn with one call per rock, a few thousand asteroids already cost real CPU time each frame. Drawn instanced, a hundred thousand run smoothly, and the limit becomes how many triangles the GPU can fill.</p>
+<p>Drawn with one call per rock, a few thousand asteroids already cost real CPU time each frame.<br>
+Drawn instanced, a hundred thousand run smoothly, and the limit becomes how many triangles the GPU can fill.</p>
 <div class="lm-demo" data-demo="instancing" data-fallback="../assets/img/advanced-metal/instancing.webp"></div>
 
 <h2 id="animating-instances">Animating instances<a class="headerlink" href="#animating-instances" title="Permanent link">#</a></h2>
-<p>Since the instance buffer is shared memory, updating it is a plain write each frame. Use the ring-buffer scheme from <a href="advanced-data.html">Advanced Data</a> so you do not overwrite data the GPU is still reading. For very large counts, moving the update itself to the GPU with a <a href="../beyond/compute-shaders.html">compute function</a> removes the CPU from the loop entirely.</p>
+<p>Since the instance buffer is shared memory, updating it is a plain write each frame.<br>
+Use the ring-buffer scheme from <a href="advanced-data.html">Advanced Data</a> so you do not overwrite data the GPU is still reading.<br>
+For very large counts, moving the update itself to the GPU with a <a href="../beyond/compute-shaders.html">compute function</a> removes the CPU from the loop entirely.</p>
 <h2 id="culling-and-the-next-step">Culling and the next step<a class="headerlink" href="#culling-and-the-next-step" title="Permanent link">#</a></h2>
-<p>Instancing draws every instance, visible or not. Large worlds cull on the CPU and write only visible instances to the buffer, or let the GPU do it: a compute pass tests each instance against the view frustum and writes the survivors into an <strong>indirect command buffer</strong>, a list of draw calls encoded on the GPU itself (<code>MTLIndirectCommandBuffer</code>). That technique, GPU-driven rendering, is beyond this series, but instancing is its first step.</p>
+<p>Instancing draws every instance, visible or not.<br>
+Large worlds cull on the CPU and write only visible instances to the buffer, or let the GPU do it: a compute pass tests each instance against the view frustum and writes the survivors into an <strong>indirect command buffer</strong>, a list of draw calls encoded on the GPU itself (<code>MTLIndirectCommandBuffer</code>).<br>
+That technique, GPU-driven rendering, is beyond this series, but instancing is its first step.</p>
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
 <li>Draw a 100 × 100 grid of cubes with one call, coloring each by its instance ID.<details class="solution"><summary>Show solution</summary><p>Compute the grid position from the instance ID in the vertex function, with no instance buffer at all.</p>
@@ -301,7 +313,8 @@
 </code></pre></div>
 
 <p>Draw with an instance count of 10,000.</p></details></li>
-<li>Make the asteroid ring rotate by passing a time uniform and rotating in the vertex function, with no CPU buffer updates.<details class="solution"><summary>Show solution</summary><p>Rotate the instance's world position around the y axis by an angle that depends on time. The instance buffer is never rewritten.</p>
+<li>Make the asteroid ring rotate by passing a time uniform and rotating in the vertex function, with no CPU buffer updates.<details class="solution"><summary>Show solution</summary><p>Rotate the instance's world position around the y axis by an angle that depends on time.<br>
+The instance buffer is never rewritten.</p>
 <div class="codehilite"><pre><span></span><code><span class="kt">float</span><span class="w"> </span><span class="n">angle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">time</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.05</span><span class="p">;</span>
 <span class="kt">float</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="p">),</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="p">);</span>
 <span class="n">float4</span><span class="w"> </span><span class="n">world</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">instance</span><span class="p">.</span><span class="n">model</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>

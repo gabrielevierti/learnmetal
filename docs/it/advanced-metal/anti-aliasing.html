@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,23 +134,31 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Metal avanzato</p><h1 id="anti-aliasing">Anti-Aliasing<a class="headerlink" href="#anti-aliasing" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
-<p>Look closely at the edge of any cube we have rendered and you see a staircase. A pixel is either inside a triangle or outside it, and nothing in between. That stair-step pattern is <strong>aliasing</strong>, and techniques that hide it are called <strong>anti-aliasing</strong>.</p>
-<h2 id="why-edges-alias">Why edges alias<a class="headerlink" href="#why-edges-alias" title="Permanent link">#</a></h2>
-<p>The rasterizer tests one point per pixel, its center, against each triangle. If the center is covered, the fragment function runs and the whole pixel takes the color. A slanted edge therefore advances in whole-pixel steps.</p>
-<p>Rendering at a higher resolution and scaling down (<strong>supersampling</strong>) solves it, but shading four times as many pixels is expensive.</p>
+<article><p class="crumb">Metal avanzato</p><h1 id="anti-aliasing">Anti-aliasing<a class="headerlink" href="#anti-aliasing" title="Permanent link">#</a></h1>
+<p>Guarda da vicino il bordo di uno qualsiasi dei cubi che abbiamo disegnato e vedrai una scaletta.<br>
+Un pixel è o dentro un triangolo o fuori, senza vie di mezzo.<br>
+Quel motivo a gradini è l'<strong>aliasing</strong>, e le tecniche che lo nascondono si chiamano <strong>anti-aliasing</strong>.</p>
+<h2 id="perche-i-bordi-fanno-aliasing">Perché i bordi fanno aliasing<a class="headerlink" href="#perche-i-bordi-fanno-aliasing" title="Permanent link">#</a></h2>
+<p>Il rasterizer controlla per ogni triangolo un solo punto per pixel, il suo centro.<br>
+Se il centro è coperto, la fragment function viene eseguita e l'intero pixel prende quel colore.<br>
+Un bordo inclinato avanza quindi a passi di un pixel intero.</p>
+<p>Disegnare a una risoluzione più alta e poi ridurre (<strong>supersampling</strong>) risolve il problema, ma calcolare quattro volte tanti pixel costa caro.</p>
 <h2 id="multisampling">Multisampling<a class="headerlink" href="#multisampling" title="Permanent link">#</a></h2>
-<p><strong>Multisample anti-aliasing</strong> (MSAA) gets most of the benefit at a fraction of the cost. Each pixel has several <strong>sample points</strong>, typically four, at different positions inside it. For every triangle:</p>
+<p>Il <strong>multisample anti-aliasing</strong> (MSAA) dà la maggior parte del beneficio a una frazione del costo.<br>
+Ogni pixel ha più <strong>punti di campionamento</strong>, di solito quattro, in posizioni diverse al suo interno.<br>
+Per ogni triangolo:</p>
 <ul>
-<li>coverage and depth are tested at <strong>every sample</strong>,</li>
-<li>the fragment function still runs only <strong>once per pixel</strong>,</li>
-<li>its result is stored in each sample that the triangle covers.</li>
+<li>copertura e profondità vengono controllate in <strong>ogni campione</strong>,</li>
+<li>la fragment function viene comunque eseguita <strong>una volta sola per pixel</strong>,</li>
+<li>il suo risultato viene salvato in ogni campione che il triangolo copre.</li>
 </ul>
-<p>At the end, the samples of each pixel are averaged in a step called the <strong>resolve</strong>. A pixel half covered by a triangle ends up as an even mix of the triangle's color and the background.</p>
-<figure><img src="../../assets/img/advanced-metal/anti-aliasing.webp" alt="A magnified triangle edge. With four samples per pixel, partially covered pixels get intermediate colors." width="880" height="246" loading="lazy"><figcaption>A magnified triangle edge. With four samples per pixel, partially covered pixels get intermediate colors.</figcaption></figure>
+<p>Alla fine i campioni di ogni pixel vengono mediati in un passo chiamato <strong>resolve</strong>.<br>
+Un pixel coperto per metà da un triangolo finisce come una miscela in parti uguali del colore del triangolo e dello sfondo.</p>
+<figure><img src="../../assets/img/advanced-metal/anti-aliasing.webp" alt="Il bordo di un triangolo ingrandito. Con quattro campioni per pixel i pixel coperti in parte prendono colori intermedi." width="880" height="246" loading="lazy"><figcaption>Il bordo di un triangolo ingrandito. Con quattro campioni per pixel i pixel coperti in parte prendono colori intermedi.</figcaption></figure>
 
-<h2 id="msaa-with-mtkview">MSAA with MTKView<a class="headerlink" href="#msaa-with-mtkview" title="Permanent link">#</a></h2>
-<p><code>MTKView</code> manages the multisample texture and the resolve for you. Two lines are needed:</p>
+<h2 id="msaa-con-mtkview">MSAA con MTKView<a class="headerlink" href="#msaa-con-mtkview" title="Permanent link">#</a></h2>
+<p><code>MTKView</code> gestisce al posto tuo la texture multisample e il resolve.<br>
+Servono due righe:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">view</span><span class="p">.</span><span class="n">sampleCount</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">4</span>
 </code></pre></div>
@@ -171,10 +179,13 @@
 </code></pre></div>
 </div>
 
-<p>Every pipeline state used in the pass must have the same sample count as the attachments. Run it and the edges are smooth.</p>
-<p>A sample count of 4 is supported on all Metal devices. Check others with <code>device.supportsTextureSampleCount(8)</code>.</p>
-<h2 id="msaa-in-your-own-render-passes">MSAA in your own render passes<a class="headerlink" href="#msaa-in-your-own-render-passes" title="Permanent link">#</a></h2>
-<p>For offscreen passes you create the textures yourself. You need two color textures: a multisample texture to render into, and an ordinary texture to receive the resolved image.</p>
+<p>Ogni pipeline state usato nel pass deve avere lo stesso numero di campioni degli attachment.<br>
+Eseguilo e i bordi sono lisci.</p>
+<p>Un numero di campioni pari a 4 è supportato da tutti i dispositivi Metal.<br>
+Gli altri controllali con <code>device.supportsTextureSampleCount(8)</code>.</p>
+<h2 id="msaa-nei-tuoi-render-pass">MSAA nei tuoi render pass<a class="headerlink" href="#msaa-nei-tuoi-render-pass" title="Permanent link">#</a></h2>
+<p>Per i pass offscreen le texture le crei tu.<br>
+Ti servono due texture di colore: una multisample in cui disegnare e una normale che riceve l'immagine risolta.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">msaaDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLTextureDescriptor</span><span class="p">.</span><span class="n">texture2DDescriptor</span><span class="p">(</span>
 <span class="w">    </span><span class="n">pixelFormat</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">bgra8Unorm</span><span class="p">,</span><span class="w"> </span><span class="n">width</span><span class="p">:</span><span class="w"> </span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">:</span><span class="w"> </span><span class="n">height</span><span class="p">,</span><span class="w"> </span><span class="n">mipmapped</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
@@ -196,7 +207,8 @@
 </code></pre></div>
 </div>
 
-<p>The depth texture must be multisampled in the same way. Then connect them in the render pass descriptor:</p>
+<p>La texture di profondità deve essere multisample allo stesso modo.<br>
+Poi collegale nel render pass descriptor:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">pass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">texture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">msaaColor</span>
 <span class="n">pass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">resolveTexture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">sceneColor</span><span class="w">       </span><span class="c1">// ordinary texture</span>
@@ -216,16 +228,20 @@
 </code></pre></div>
 </div>
 
-<p>The store action <code>.multisampleResolve</code> averages the samples into <code>resolveTexture</code> at the end of the pass and discards the multisample data. Because the samples are never needed afterward, the multisample textures can be <strong>memoryless</strong> on Apple GPUs: 4× MSAA then costs no extra memory at all, only some extra work inside each tile. This is a real advantage of tile-based GPUs and makes MSAA unusually cheap on Apple devices.</p>
-<h2 id="limits-of-msaa">Limits of MSAA<a class="headerlink" href="#limits-of-msaa" title="Permanent link">#</a></h2>
-<p>MSAA smooths <strong>geometry edges</strong> only. The fragment function runs once per pixel, so it does nothing for:</p>
+<p>La store action <code>.multisampleResolve</code> media i campioni in <code>resolveTexture</code> alla fine del pass e scarta i dati multisample.<br>
+Poiché dopo i campioni non servono più, sulle GPU Apple le texture multisample possono essere <strong>memoryless</strong>: l'MSAA 4× allora non costa alcuna memoria in più, solo un po' di lavoro extra dentro ogni tile.<br>
+È un vero vantaggio delle GPU tile-based, e rende l'MSAA insolitamente economico sui dispositivi Apple.</p>
+<h2 id="i-limiti-dellmsaa">I limiti dell'MSAA<a class="headerlink" href="#i-limiti-dellmsaa" title="Permanent link">#</a></h2>
+<p>L'MSAA liscia solo i <strong>bordi della geometria</strong>.<br>
+La fragment function gira una volta per pixel, quindi non fa niente per:</p>
 <ul>
-<li>shimmering inside a surface from high-frequency textures or sharp specular highlights,</li>
-<li>edges created by <code>discard_fragment</code> in alpha-tested textures. For those, enable <code>isAlphaToCoverageEnabled</code> on the pipeline descriptor, which converts the fragment's alpha into a sample coverage mask.</li>
+<li>lo sfarfallio all'interno di una superficie dovuto a texture ad alta frequenza o a riflessi speculari netti,</li>
+<li>i bordi creati da <code>discard_fragment</code> nelle texture con alpha test.<br>
+Per quelli attiva <code>isAlphaToCoverageEnabled</code> nel pipeline descriptor, che converte l'alpha del fragment in una maschera di copertura dei campioni.</li>
 </ul>
-<p>MSAA also clashes with <a href="../advanced-lighting/deferred-shading.html">deferred shading</a>, where lighting happens after geometry has been flattened into textures.</p>
-<h2 id="reading-individual-samples">Reading individual samples<a class="headerlink" href="#reading-individual-samples" title="Permanent link">#</a></h2>
-<p>A shader can read a multisample texture directly through the <code>texture2d_ms&lt;float&gt;</code> type, one sample at a time:</p>
+<p>L'MSAA inoltre va poco d'accordo con il <a href="../advanced-lighting/deferred-shading.html">deferred shading</a>, dove l'illuminazione avviene dopo che la geometria è stata appiattita in texture.</p>
+<h2 id="leggere-i-singoli-campioni">Leggere i singoli campioni<a class="headerlink" href="#leggere-i-singoli-campioni" title="Permanent link">#</a></h2>
+<p>Uno shader può leggere direttamente una texture multisample attraverso il tipo <code>texture2d_ms&lt;float&gt;</code>, un campione alla volta:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_customResolve</span><span class="p">(</span><span class="n">ScreenOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
 <span class="w">                                       </span><span class="n">texture2d_ms</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">scene</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">uint2</span><span class="w"> </span><span class="n">pixel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uint2</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">xy</span><span class="p">);</span>
@@ -237,24 +253,32 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>A custom resolve matters for HDR rendering, where tone mapping each sample before averaging gives much cleaner bright edges. The multisample texture then needs <code>.shaderRead</code> usage and cannot be memoryless.</p>
-<h2 id="other-approaches">Other approaches<a class="headerlink" href="#other-approaches" title="Permanent link">#</a></h2>
+<p>Un resolve personalizzato conta nel rendering HDR, dove fare il tone mapping di ogni campione prima della media dà bordi luminosi molto più puliti.<br>
+In quel caso la texture multisample ha bisogno dell'uso <code>.shaderRead</code> e non può essere memoryless.</p>
+<h2 id="altri-approcci">Altri approcci<a class="headerlink" href="#altri-approcci" title="Permanent link">#</a></h2>
 <ul>
-<li><strong>FXAA and SMAA</strong> are post-processing filters that find edges in the finished image and blur along them. They are cheap and work with any renderer, at the cost of some sharpness.</li>
-<li><strong>Temporal anti-aliasing</strong> (TAA) shifts the camera by a sub-pixel amount each frame and blends with previous frames. It handles shading aliasing too, but needs motion vectors and care to avoid ghosting.</li>
-<li><strong>MetalFX</strong> is Apple's upscaling framework. You render at a lower resolution, and it reconstructs a sharp, anti-aliased image at full resolution with either a spatial or a temporal method. The temporal upscaler doubles as high-quality anti-aliasing.</li>
+<li><strong>FXAA e SMAA</strong> sono filtri di post-processing che trovano i bordi nell'immagine finita e sfocano lungo di essi.<br>
+Costano poco e funzionano con qualsiasi renderer, a prezzo di un po' di nitidezza.</li>
+<li>Il <strong>temporal anti-aliasing</strong> (TAA) sposta la camera di una frazione di pixel a ogni frame e mescola con i frame precedenti.<br>
+Gestisce anche l'aliasing dello shading, ma ha bisogno dei motion vector e di attenzione per evitare il ghosting.</li>
+<li><strong>MetalFX</strong> è il framework di upscaling di Apple.<br>
+Disegni a una risoluzione più bassa e lui ricostruisce un'immagine nitida e senza aliasing a piena risoluzione, con un metodo spaziale o temporale.<br>
+L'upscaler temporale fa anche da anti-aliasing di alta qualità.</li>
 </ul>
-<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<h2 id="esercizi">Esercizi<a class="headerlink" href="#esercizi" title="Permanent link">#</a></h2>
 <ul>
-<li>Compare sample counts 1, 2 and 4 on a thin, nearly horizontal triangle.<details class="solution"><summary>Mostra la soluzione</summary><p>With 1 sample the long edge is a staircase with steps several pixels long. With 2 samples each step gets one intermediate shade; with 4 there are three, and the edge reads as a smooth line. Nearly horizontal and nearly vertical edges show the difference most, because their steps are the longest.</p></details></li>
-<li>Draw alpha-tested grass with and without alpha-to-coverage under 4× MSAA.<details class="solution"><summary>Mostra la soluzione</summary><p>Without alpha-to-coverage, <code>discard_fragment</code> decides per pixel, so MSAA cannot smooth the cut-out edges inside the quad. With <code>isAlphaToCoverageEnabled</code> the alpha value turns into a coverage mask: an alpha of 0.5 covers two of four samples, and the resolve averages them into a soft edge, with no sorting needed.</p></details></li>
+<li>Confronta i numeri di campioni 1, 2 e 4 su un triangolo sottile e quasi orizzontale.<details class="solution"><summary>Mostra la soluzione</summary><p>Con 1 campione il bordo lungo è una scaletta con gradini lunghi diversi pixel.<br>
+Con 2 campioni ogni gradino guadagna una sfumatura intermedia; con 4 ce ne sono tre, e il bordo si legge come una linea liscia.<br>
+I bordi quasi orizzontali e quasi verticali mostrano di più la differenza, perché i loro gradini sono i più lunghi.</p></details></li>
+<li>Disegna dell'erba con alpha test con e senza alpha-to-coverage, con MSAA 4×.<details class="solution"><summary>Mostra la soluzione</summary><p>Senza alpha-to-coverage <code>discard_fragment</code> decide pixel per pixel, quindi l'MSAA non può lisciare i bordi ritagliati all'interno del rettangolo.<br>
+Con <code>isAlphaToCoverageEnabled</code> il valore di alpha diventa una maschera di copertura: un alpha di 0.5 copre due campioni su quattro, e il resolve li media in un bordo morbido, senza bisogno di ordinamento.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../advanced-metal/instancing.html"><small>Precedente</small>Instancing</a><a class="next" href="../advanced-lighting/blinn-phong.html"><small>Successivo</small>Blinn-Phong</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#why-edges-alias">Why edges alias</a></li><li><a href="#multisampling">Multisampling</a></li><li><a href="#msaa-with-mtkview">MSAA with MTKView</a></li><li><a href="#msaa-in-your-own-render-passes">MSAA in your own render passes</a></li><li><a href="#limits-of-msaa">Limits of MSAA</a></li><li><a href="#reading-individual-samples">Reading individual samples</a></li><li><a href="#other-approaches">Other approaches</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#perche-i-bordi-fanno-aliasing">Perché i bordi fanno aliasing</a></li><li><a href="#multisampling">Multisampling</a></li><li><a href="#msaa-con-mtkview">MSAA con MTKView</a></li><li><a href="#msaa-nei-tuoi-render-pass">MSAA nei tuoi render pass</a></li><li><a href="#i-limiti-dellmsaa">I limiti dell&#x27;MSAA</a></li><li><a href="#leggere-i-singoli-campioni">Leggere i singoli campioni</a></li><li><a href="#altri-approcci">Altri approcci</a></li><li><a href="#esercizi">Esercizi</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

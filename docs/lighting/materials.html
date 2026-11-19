@@ -137,7 +137,8 @@
 <article><p class="crumb">Lighting</p><h1 id="materials">Materials<a class="headerlink" href="#materials" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Example project</strong> <code>examples/Sources/08-BasicLighting</code>, run with <code>swift run BasicLighting</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
 
-<p>Steel, wood and plastic react to the same light in different ways. To describe that, we stop using a single object color and give each surface a <strong>material</strong>: separate colors for the three Phong terms, plus a shininess.</p>
+<p>Steel, wood and plastic react to the same light in different ways.<br>
+To describe that, we stop using a single object color and give each surface a <strong>material</strong>: separate colors for the three Phong terms, plus a shininess.</p>
 <h2 id="material-and-light-structs">Material and light structs<a class="headerlink" href="#material-and-light-structs" title="Permanent link">#</a></h2>
 <p>MSL structs can nest, which keeps the uniforms readable:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">Material</span><span class="w"> </span><span class="p">{</span>
@@ -167,7 +168,8 @@
 <li><code>specular</code> is the color of its highlight.</li>
 <li><code>shininess</code> controls how tight the highlight is.</li>
 </ul>
-<p>The light gets its own intensities per term as well. Ambient light should be weak, diffuse light is the light's actual color, and specular is usually full white.</p>
+<p>The light gets its own intensities per term as well.<br>
+Ambient light should be weak, diffuse light is the light's actual color, and specular is usually full white.</p>
 <h2 id="the-shader">The shader<a class="headerlink" href="#the-shader" title="Permanent link">#</a></h2>
 <div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_main</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
 <span class="w">                              </span><span class="n">constant</span><span class="w"> </span><span class="n">FragmentUniforms</span><span class="w"> </span><span class="o">&amp;</span><span class="n">uniforms</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">1</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
@@ -268,7 +270,11 @@
 
 <div class="admonition warning">
 <p class="admonition-title">Check the layout</p>
-<p><code>Material</code> ends with a lone <code>Float</code> after three 16-byte vectors, so its size is 52 bytes and its stride is 64. Here the next member, <code>light</code>, is 16-byte aligned and starts at offset 64 in both languages. There is one trap with nested structs: Swift is allowed to place a small following member, such as a <code>Float</code>, inside the unused tail of the previous struct (at offset 52), while MSL never does. To stay safe, follow a nested struct with a 16-byte-aligned member, or end every nested struct on a 16-byte boundary. When values look wrong, print <code>MemoryLayout&lt;FragmentUniforms&gt;.offset(of: \.viewPosition)</code> and compare offsets by hand.</p>
+<p><code>Material</code> ends with a lone <code>Float</code> after three 16-byte vectors, so its size is 52 bytes and its stride is 64.<br>
+Here the next member, <code>light</code>, is 16-byte aligned and starts at offset 64 in both languages.<br>
+There is one trap with nested structs: Swift is allowed to place a small following member, such as a <code>Float</code>, inside the unused tail of the previous struct (at offset 52), while MSL never does.<br>
+To stay safe, follow a nested struct with a 16-byte-aligned member, or end every nested struct on a 16-byte boundary.<br>
+When values look wrong, print <code>MemoryLayout&lt;FragmentUniforms&gt;.offset(of: \.viewPosition)</code> and compare offsets by hand.</p>
 </div>
 <h2 id="playing-with-light-colors">Playing with light colors<a class="headerlink" href="#playing-with-light-colors" title="Permanent link">#</a></h2>
 <p>Because the light has separate terms, changing the light changes the whole mood:</p>
@@ -288,7 +294,8 @@
 <div class="lm-demo" data-demo="materials" data-fallback="../assets/img/lighting/materials.webp"></div>
 
 <h2 id="real-materials">Real materials<a class="headerlink" href="#real-materials" title="Permanent link">#</a></h2>
-<p>Tables of measured Phong values for real substances have circulated for decades. A few to try, with all light terms set to white:</p>
+<p>Tables of measured Phong values for real substances have circulated for decades.<br>
+A few to try, with all light terms set to white:</p>
 <table>
 <thead>
 <tr>
@@ -330,11 +337,17 @@
 </tr>
 </tbody>
 </table>
-<p>Phong materials are a rough approximation. The <a href="../pbr/theory.html">PBR</a> section replaces them with a model based on physics.</p>
+<p>Phong materials are a rough approximation.<br>
+The <a href="../pbr/theory.html">PBR</a> section replaces them with a model based on physics.</p>
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
-<li>Reproduce each material in the table.<details class="solution"><summary>Show solution</summary><p>Copy the four values of a row into the material uniform and set the light's ambient, diffuse and specular to white. The live demo above has the presets; switch between them and compare how wide and how colored the highlight is.</p></details></li>
-<li>Why does a metal look more convincing when its specular color matches its diffuse color?<details class="solution"><summary>Show solution</summary><p>A metal has no diffuse reflection of its own. All the light it returns is reflected at the surface, and that reflection is tinted by the metal: gold reflects yellow light. So its highlight has the metal's color. A plastic's highlight comes from its clear outer layer and stays white, whatever the color underneath. This is the idea the PBR section later makes precise with the metalness parameter.</p></details></li>
+<li>Reproduce each material in the table.<details class="solution"><summary>Show solution</summary><p>Copy the four values of a row into the material uniform and set the light's ambient, diffuse and specular to white.<br>
+The live demo above has the presets; switch between them and compare how wide and how colored the highlight is.</p></details></li>
+<li>Why does a metal look more convincing when its specular color matches its diffuse color?<details class="solution"><summary>Show solution</summary><p>A metal has no diffuse reflection of its own.<br>
+All the light it returns is reflected at the surface, and that reflection is tinted by the metal: gold reflects yellow light.<br>
+So its highlight has the metal's color.<br>
+A plastic's highlight comes from its clear outer layer and stays white, whatever the color underneath.<br>
+This is the idea the PBR section later makes precise with the metalness parameter.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../lighting/basic-lighting.html"><small>Previous</small>Basic Lighting</a><a class="next" href="../lighting/lighting-maps.html"><small>Next</small>Lighting Maps</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>

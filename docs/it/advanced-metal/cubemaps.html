@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,11 +134,13 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Metal avanzato</p><h1 id="cubemaps">Cubemaps<a class="headerlink" href="#cubemaps" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
-<p>A <strong>cubemap</strong> is a texture made of six square images arranged as the faces of a cube. It is sampled with a 3D direction instead of a 2D coordinate: imagine standing at the center of the cube and looking along the direction, and you get the color that you see. Cubemaps are used for skies, reflections, and, later, for omnidirectional shadows and image-based lighting.</p>
-<h2 id="creating-a-cubemap">Creating a cubemap<a class="headerlink" href="#creating-a-cubemap" title="Permanent link">#</a></h2>
-<p>The six faces are stored as six <strong>slices</strong> of one texture of type <code>.typeCube</code>, in the order +X, -X, +Y, -Y, +Z, -Z (right, left, top, bottom, front, back).</p>
-<p><strong>From six image files</strong>, the shortest route is through Model I/O:</p>
+<article><p class="crumb">Metal avanzato</p><h1 id="cubemap">Cubemap<a class="headerlink" href="#cubemap" title="Permanent link">#</a></h1>
+<p>Una <strong>cubemap</strong> è una texture fatta di sei immagini quadrate disposte come le facce di un cubo.<br>
+Si legge con una direzione 3D invece che con una coordinata 2D: immagina di stare al centro del cubo e di guardare lungo quella direzione, e ottieni il colore che vedi.<br>
+Le cubemap si usano per i cieli, per i riflessi e, più avanti, per le ombre omnidirezionali e per l'illuminazione basata su immagini.</p>
+<h2 id="creare-una-cubemap">Creare una cubemap<a class="headerlink" href="#creare-una-cubemap" title="Permanent link">#</a></h2>
+<p>Le sei facce sono salvate come sei <strong>slice</strong> di una sola texture di tipo <code>.typeCube</code>, nell'ordine +X, -X, +Y, -Y, +Z, -Z (destra, sinistra, alto, basso, davanti, dietro).</p>
+<p><strong>Da sei file immagine</strong>, la strada più breve passa per Model I/O:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">names</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="s">"right.jpg"</span><span class="p">,</span><span class="w"> </span><span class="s">"left.jpg"</span><span class="p">,</span><span class="w"> </span><span class="s">"top.jpg"</span><span class="p">,</span><span class="w"> </span><span class="s">"bottom.jpg"</span><span class="p">,</span><span class="w"> </span><span class="s">"front.jpg"</span><span class="p">,</span><span class="w"> </span><span class="s">"back.jpg"</span><span class="p">]</span>
 <span class="kd">let</span><span class="w"> </span><span class="nv">mdlTexture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MDLTexture</span><span class="p">(</span><span class="n">cubeWithImagesNamed</span><span class="p">:</span><span class="w"> </span><span class="n">names</span><span class="p">)</span><span class="o">!</span>
@@ -163,7 +165,7 @@
 </code></pre></div>
 </div>
 
-<p><strong>From one image</strong> containing the six faces stacked top to bottom, the texture loader can split it:</p>
+<p><strong>Da una sola immagine</strong> che contiene le sei facce impilate dall'alto in basso, il texture loader la può dividere:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">skybox</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="w"> </span><span class="n">loader</span><span class="p">.</span><span class="n">newTexture</span><span class="p">(</span><span class="n">URL</span><span class="p">:</span><span class="w"> </span><span class="n">url</span><span class="p">,</span><span class="w"> </span><span class="n">options</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">.</span><span class="n">cubeLayout</span><span class="p">:</span><span class="w"> </span><span class="bp">MTKTextureLoader</span><span class="p">.</span><span class="n">CubeLayout</span><span class="p">.</span><span class="n">vertical</span><span class="p">,</span>
@@ -186,7 +188,7 @@
 </code></pre></div>
 </div>
 
-<p><strong>By hand</strong>, when you generate or decode the faces yourself:</p>
+<p><strong>A mano</strong>, quando le facce le generi o le decodifichi tu:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">descriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLTextureDescriptor</span><span class="p">.</span><span class="n">textureCubeDescriptor</span><span class="p">(</span><span class="n">pixelFormat</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">rgba8Unorm</span><span class="p">,</span>
 <span class="w">                                                            </span><span class="n">size</span><span class="p">:</span><span class="w"> </span><span class="mi">1024</span><span class="p">,</span>
@@ -217,8 +219,9 @@
 </code></pre></div>
 </div>
 
-<h2 id="a-skybox">A skybox<a class="headerlink" href="#a-skybox" title="Permanent link">#</a></h2>
-<p>A skybox is a cube drawn around the camera and textured with a cubemap, giving the illusion of a vast environment. Its texture coordinate is simply the cube's local position, used as a direction.</p>
+<h2 id="uno-skybox">Uno skybox<a class="headerlink" href="#uno-skybox" title="Permanent link">#</a></h2>
+<p>Uno skybox è un cubo disegnato intorno alla camera con una cubemap come texture, e dà l'illusione di un ambiente immenso.<br>
+La sua coordinata di texture è semplicemente la posizione locale del cubo, usata come direzione.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">SkyOut</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="p">[[</span><span class="na">position</span><span class="p">]];</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">direction</span><span class="p">;</span>
@@ -240,12 +243,15 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>Two tricks are packed into the vertex function:</p>
+<p>Nella vertex function ci sono due trucchi:</p>
 <ul>
-<li>The position is multiplied with <strong>w = 0</strong>, which removes the translation of the view matrix. The sky rotates with the camera but never gets closer.</li>
-<li>The output is <code>clip.xyww</code>. After the perspective divide, z becomes w / w = <strong>1</strong>, the far plane. The sky ends up behind everything.</li>
+<li>La posizione viene moltiplicata con <strong>w = 0</strong>, che elimina la traslazione della matrice view.<br>
+Il cielo ruota con la camera ma non si avvicina mai.</li>
+<li>L'uscita è <code>clip.xyww</code>.<br>
+Dopo la divisione prospettica z diventa w / w = <strong>1</strong>, il far plane.<br>
+Il cielo finisce dietro a tutto.</li>
 </ul>
-<p>Draw the sky <strong>last</strong>, after all opaque objects, with a depth state that uses <code>.lessEqual</code> and does not write depth:</p>
+<p>Disegna il cielo <strong>per ultimo</strong>, dopo tutti gli oggetti opachi, con un depth state che usa <code>.lessEqual</code> e non scrive la profondità:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">skyDepth</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLDepthStencilDescriptor</span><span class="p">()</span>
 <span class="n">skyDepth</span><span class="p">.</span><span class="n">depthCompareFunction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">lessEqual</span>
@@ -259,13 +265,16 @@
 </code></pre></div>
 </div>
 
-<p>Drawn last, the sky's fragments are rejected wherever something else was drawn, so the sky costs only the pixels where it is visible. <code>.lessEqual</code> is needed because the sky's depth equals the cleared value of 1. The camera is inside the cube, so disable culling for this draw.</p>
+<p>Disegnato per ultimo, i fragment del cielo vengono scartati ovunque sia stato disegnato qualcos'altro, quindi il cielo costa solo i pixel in cui è visibile.<br>
+<code>.lessEqual</code> serve perché la profondità del cielo è uguale al valore di pulizia, 1.<br>
+La camera sta dentro il cubo, quindi disattiva il culling per questa draw call.</p>
 <div class="admonition note">
-<p class="admonition-title">Handedness</p>
-<p>Cubemaps use a left-handed convention, a historical quirk shared by all graphics APIs. If a skybox looks mirrored in your right-handed world, negate the x or z component of the direction in the shader.</p>
+<p class="admonition-title">Sinistrorso o destrorso</p>
+<p>Le cubemap usano una convenzione sinistrorsa, una stranezza storica comune a tutte le API grafiche.<br>
+Se nel tuo mondo destrorso uno skybox appare specchiato, cambia segno alla componente x o z della direzione nello shader.</p>
 </div>
-<h2 id="reflection">Reflection<a class="headerlink" href="#reflection" title="Permanent link">#</a></h2>
-<p>With the environment in a cubemap, a mirror-like surface is easy: reflect the view direction around the normal and use the result to sample the sky.</p>
+<h2 id="riflessione">Riflessione<a class="headerlink" href="#riflessione" title="Permanent link">#</a></h2>
+<p>Con l'ambiente in una cubemap una superficie a specchio è facile: rifletti la direzione di vista intorno alla normale e usa il risultato per leggere il cielo.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_reflect</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
 <span class="w">                                 </span><span class="n">constant</span><span class="w"> </span><span class="n">FragmentUniforms</span><span class="w"> </span><span class="o">&amp;</span><span class="n">uniforms</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
 <span class="w">                                 </span><span class="n">texturecube</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">sky</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]],</span>
@@ -276,31 +285,32 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>Combine it with a specular map to make only parts of a model reflective.</p>
-<h2 id="refraction">Refraction<a class="headerlink" href="#refraction" title="Permanent link">#</a></h2>
-<p>Light bends when it passes from one medium into another. <code>refract</code> computes the bent direction from the ratio of the two <strong>refractive indices</strong>:</p>
+<p>Combinala con una specular map per rendere riflettenti solo alcune parti di un modello.</p>
+<h2 id="rifrazione">Rifrazione<a class="headerlink" href="#rifrazione" title="Permanent link">#</a></h2>
+<p>La luce si piega quando passa da un mezzo a un altro.<br>
+<code>refract</code> calcola la direzione piegata dal rapporto tra i due <strong>indici di rifrazione</strong>:</p>
 <table>
 <thead>
 <tr>
-<th>Material</th>
-<th>Index</th>
+<th>Materiale</th>
+<th>Indice</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Air</td>
+<td>Aria</td>
 <td>1.00</td>
 </tr>
 <tr>
-<td>Water</td>
+<td>Acqua</td>
 <td>1.33</td>
 </tr>
 <tr>
-<td>Glass</td>
+<td>Vetro</td>
 <td>1.52</td>
 </tr>
 <tr>
-<td>Diamond</td>
+<td>Diamante</td>
 <td>2.42</td>
 </tr>
 </tbody>
@@ -310,11 +320,14 @@
 <span class="k">return</span><span class="w"> </span><span class="n">sky</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">refracted</span><span class="p">);</span>
 </code></pre></div>
 
-<p>This is a single refraction at the surface. It is physically incomplete, but it looks convincingly glassy.</p>
+<p>È una sola rifrazione alla superficie.<br>
+Fisicamente è incompleta, ma dà un aspetto di vetro convincente.</p>
 <div class="lm-demo" data-demo="cubemaps" data-fallback="../../assets/img/advanced-metal/cubemaps.webp"></div>
 
-<h2 id="rendering-into-a-cubemap">Rendering into a cubemap<a class="headerlink" href="#rendering-into-a-cubemap" title="Permanent link">#</a></h2>
-<p>A static sky cannot reflect moving objects. For dynamic reflections, render the scene six times from the object's position, once into each face, with a 90 degree field of view and an aspect ratio of 1. Select the face with the attachment's <code>slice</code>:</p>
+<h2 id="disegnare-dentro-una-cubemap">Disegnare dentro una cubemap<a class="headerlink" href="#disegnare-dentro-una-cubemap" title="Permanent link">#</a></h2>
+<p>Un cielo statico non può riflettere oggetti in movimento.<br>
+Per i riflessi dinamici disegna la scena sei volte dalla posizione dell'oggetto, una per faccia, con un campo visivo di 90 gradi e un rapporto d'aspetto di 1.<br>
+Scegli la faccia con lo <code>slice</code> dell'attachment:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">pass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">texture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">environmentCube</span>
 <span class="n">pass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">slice</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">face</span>
@@ -326,12 +339,12 @@
 </code></pre></div>
 </div>
 
-<p>Because of the cubemap convention, these six views must be built with a <strong>left-handed</strong> view and projection matrix, and the up vectors are fixed:</p>
+<p>Per via della convenzione delle cubemap queste sei viste vanno costruite con matrici view e projection <strong>sinistrorse</strong>, e i vettori up sono fissati:</p>
 <table>
 <thead>
 <tr>
-<th>Face</th>
-<th>Look direction</th>
+<th>Faccia</th>
+<th>Direzione di vista</th>
 <th>Up</th>
 </tr>
 </thead>
@@ -417,23 +430,27 @@
 </code></pre></div>
 </div>
 
-<p>A left-handed view mirrors the scene, which reverses triangle winding, so use <code>setFrontFacing(.clockwise)</code> while rendering the faces. We reuse these helpers for <a href="../advanced-lighting/point-shadows.html">Point Shadows</a> and for image-based lighting. Six scene renders per frame are expensive; engines update such probes rarely or one face per frame.</p>
-<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<p>Una vista sinistrorsa specchia la scena, e questo inverte il winding dei triangoli, quindi usa <code>setFrontFacing(.clockwise)</code> mentre disegni le facce.<br>
+Riuseremo queste funzioni per le <a href="../advanced-lighting/point-shadows.html">Ombre da luci puntiformi</a> e per l'illuminazione basata su immagini.<br>
+Sei rendering della scena per frame costano molto; i motori aggiornano queste probe di rado, o una faccia per frame.</p>
+<h2 id="esercizi">Esercizi<a class="headerlink" href="#esercizi" title="Permanent link">#</a></h2>
 <ul>
-<li>Draw the skybox first instead of last, with depth writes off, and measure the difference in the Xcode GPU report on a heavy scene.<details class="solution"><summary>Mostra la soluzione</summary><p>Drawn first, the sky's fragment function runs for every pixel of the screen, and most of those pixels are then overdrawn by the scene. Drawn last with <code>.lessEqual</code>, it runs only where nothing else was drawn. On Apple GPUs hidden surface removal narrows the gap for opaque draws, but drawing the sky last is never slower.</p></details></li>
-<li>Blend reflection and refraction by a factor that depends on the viewing angle.<details class="solution"><summary>Mostra la soluzione</summary><p>Use the Fresnel effect: more reflection at grazing angles.</p>
+<li>Disegna lo skybox per primo invece che per ultimo, con la scrittura della profondità spenta, e misura la differenza nel GPU report di Xcode su una scena pesante.<details class="solution"><summary>Mostra la soluzione</summary><p>Disegnato per primo, la fragment function del cielo gira per ogni pixel dello schermo, e la maggior parte di quei pixel viene poi ricoperta dalla scena.<br>
+Disegnato per ultimo con <code>.lessEqual</code>, gira solo dove non è stato disegnato altro.<br>
+Sulle GPU Apple la hidden surface removal riduce la differenza per i disegni opachi, ma disegnare il cielo per ultimo non è mai più lento.</p></details></li>
+<li>Mescola riflessione e rifrazione con un fattore che dipende dall'angolo di vista.<details class="solution"><summary>Mostra la soluzione</summary><p>Usa l'effetto Fresnel: più riflessione agli angoli radenti.</p>
 <div class="codehilite"><pre><span></span><code><span class="kt">float</span><span class="w"> </span><span class="n">fresnel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pow</span><span class="p">(</span><span class="mf">1.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">max</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="o">-</span><span class="n">incident</span><span class="p">,</span><span class="w"> </span><span class="n">normal</span><span class="p">),</span><span class="w"> </span><span class="mf">0.0</span><span class="p">),</span><span class="w"> </span><span class="mf">5.0</span><span class="p">);</span>
 <span class="n">float3</span><span class="w"> </span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mix</span><span class="p">(</span><span class="n">refracted</span><span class="p">,</span><span class="w"> </span><span class="n">reflected</span><span class="p">,</span><span class="w"> </span><span class="n">saturate</span><span class="p">(</span><span class="mf">0.04</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.96</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fresnel</span><span class="p">));</span>
 </code></pre></div>
 
-<p>In the live demo, replace the last line of the shader with this to get a glass ball with reflective edges.</p></details></li>
+<p>Nella demo interattiva sostituisci l'ultima riga dello shader con questa per avere una sfera di vetro dai bordi riflettenti.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../advanced-metal/render-targets.html"><small>Precedente</small>Render target</a><a class="next" href="../advanced-metal/advanced-data.html"><small>Successivo</small>Dati avanzati</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#creating-a-cubemap">Creating a cubemap</a></li><li><a href="#a-skybox">A skybox</a></li><li><a href="#reflection">Reflection</a></li><li><a href="#refraction">Refraction</a></li><li><a href="#rendering-into-a-cubemap">Rendering into a cubemap</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#creare-una-cubemap">Creare una cubemap</a></li><li><a href="#uno-skybox">Uno skybox</a></li><li><a href="#riflessione">Riflessione</a></li><li><a href="#rifrazione">Rifrazione</a></li><li><a href="#disegnare-dentro-una-cubemap">Disegnare dentro una cubemap</a></li><li><a href="#esercizi">Esercizi</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

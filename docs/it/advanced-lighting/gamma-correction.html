@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,27 +134,34 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Illuminazione avanzata</p><h1 id="gamma-correction">Gamma Correction<a class="headerlink" href="#gamma-correction" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
-<p>There is a mistake in every image we have rendered so far. Lighting math assumes that a value of 0.5 is half as bright as 1.0. On a display, it is not.</p>
-<h2 id="displays-are-not-linear">Displays are not linear<a class="headerlink" href="#displays-are-not-linear" title="Permanent link">#</a></h2>
-<p>Displays follow the <strong>sRGB</strong> standard, which is close to a power curve with an exponent of 2.2, called <strong>gamma</strong>. A pixel value of 0.5 is shown at about 0.5^2.2 ≈ 0.22 of full brightness. This is not a defect. Human vision is more sensitive to differences between dark tones than between bright ones, and the curve spends more of the 256 available steps on the dark end, where we notice them.</p>
-<p>The consequence: image files are stored already <strong>encoded</strong> for this curve, and whatever we write to the screen is treated as encoded too.</p>
-<h2 id="what-goes-wrong">What goes wrong<a class="headerlink" href="#what-goes-wrong" title="Permanent link">#</a></h2>
-<p>If we do lighting directly on encoded values:</p>
+<article><p class="crumb">Illuminazione avanzata</p><h1 id="correzione-gamma">Correzione gamma<a class="headerlink" href="#correzione-gamma" title="Permanent link">#</a></h1>
+<p>C'è un errore in ogni immagine che abbiamo disegnato finora.<br>
+I calcoli della luce danno per scontato che un valore di 0.5 sia luminoso la metà di 1.0.<br>
+Su uno schermo non è così.</p>
+<h2 id="gli-schermi-non-sono-lineari">Gli schermi non sono lineari<a class="headerlink" href="#gli-schermi-non-sono-lineari" title="Permanent link">#</a></h2>
+<p>Gli schermi seguono lo standard <strong>sRGB</strong>, che è vicino a una curva di potenza con un esponente di 2.2, chiamato <strong>gamma</strong>.<br>
+Un pixel di valore 0.5 viene mostrato a circa 0.5^2.2 ≈ 0.22 della luminosità piena.<br>
+Non è un difetto.<br>
+La vista umana è più sensibile alle differenze tra toni scuri che tra toni chiari, e la curva spende una parte maggiore dei 256 livelli disponibili sulla zona scura, dove li notiamo.</p>
+<p>La conseguenza: i file immagine sono salvati già <strong>codificati</strong> per questa curva, e anche tutto ciò che scriviamo sullo schermo viene trattato come codificato.</p>
+<h2 id="che-cosa-va-storto">Che cosa va storto<a class="headerlink" href="#che-cosa-va-storto" title="Permanent link">#</a></h2>
+<p>Se calcoliamo la luce direttamente sui valori codificati:</p>
 <ul>
-<li>Adding two lights does not double the brightness on screen.</li>
-<li>Gradients from light to dark fall off too fast, so shading has harsh, dark terminators.</li>
-<li>Colors shift toward oversaturation, and attenuation looks wrong.</li>
+<li>Sommare due luci non raddoppia la luminosità a schermo.</li>
+<li>Le sfumature dal chiaro allo scuro cadono troppo in fretta, e l'ombreggiatura ha terminatori duri e scuri.</li>
+<li>I colori scivolano verso la sovrasaturazione, e l'attenuazione appare sbagliata.</li>
 </ul>
-<p>The fix is a <strong>linear workflow</strong>: convert inputs to linear space, do all math there, and convert the result back to sRGB at the very end.</p>
-<h2 id="metal-does-both-conversions-for-you">Metal does both conversions for you<a class="headerlink" href="#metal-does-both-conversions-for-you" title="Permanent link">#</a></h2>
-<p>Pixel formats ending in <code>_srgb</code> tell Metal that a texture holds sRGB-encoded data:</p>
+<p>La soluzione è un <strong>flusso di lavoro lineare</strong>: convertire gli input in spazio lineare, fare lì tutti i calcoli e riconvertire il risultato in sRGB soltanto alla fine.</p>
+<h2 id="metal-fa-entrambe-le-conversioni-per-te">Metal fa entrambe le conversioni per te<a class="headerlink" href="#metal-fa-entrambe-le-conversioni-per-te" title="Permanent link">#</a></h2>
+<p>I formati dei pixel che finiscono in <code>_srgb</code> dicono a Metal che una texture contiene dati codificati in sRGB:</p>
 <ul>
-<li><strong>Sampling</strong> an sRGB texture returns <strong>linear</strong> values. The conversion happens before filtering, which is the correct order.</li>
-<li><strong>Writing</strong> to an sRGB render target converts <strong>linear</strong> shader output to sRGB. Blending is also performed in linear space.</li>
+<li><strong>Leggere</strong> una texture sRGB restituisce valori <strong>lineari</strong>.<br>
+La conversione avviene prima del filtro, che è l'ordine corretto.</li>
+<li><strong>Scrivere</strong> in un render target sRGB converte in sRGB l'uscita <strong>lineare</strong> dello shader.<br>
+Anche il blending viene fatto in spazio lineare.</li>
 </ul>
-<p>So gamma correction is two configuration changes and zero shader code.</p>
-<p><strong>1. Make the view's drawable sRGB:</strong></p>
+<p>La correzione gamma si riduce quindi a due modifiche di configurazione e a zero righe di shader.</p>
+<p><strong>1. Rendi sRGB il drawable della vista:</strong></p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">view</span><span class="p">.</span><span class="n">colorPixelFormat</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">bgra8Unorm_srgb</span>
 </code></pre></div>
@@ -164,8 +171,8 @@
 </code></pre></div>
 </div>
 
-<p>and use the same format in the pipeline descriptors that render to it.</p>
-<p><strong>2. Load color textures as sRGB:</strong></p>
+<p>e usa lo stesso formato nei pipeline descriptor che disegnano su di esso.</p>
+<p><strong>2. Carica le texture di colore come sRGB:</strong></p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">colorOptions</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="bp">MTKTextureLoader</span><span class="p">.</span><span class="n">Option</span><span class="p">:</span><span class="w"> </span><span class="nb">Any</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[.</span><span class="n">generateMipmaps</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="p">.</span><span class="n">SRGB</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">]</span>
 <span class="kd">let</span><span class="w"> </span><span class="nv">dataOptions</span><span class="p">:</span><span class="w">  </span><span class="p">[</span><span class="bp">MTKTextureLoader</span><span class="p">.</span><span class="n">Option</span><span class="p">:</span><span class="w"> </span><span class="nb">Any</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[.</span><span class="n">generateMipmaps</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="p">.</span><span class="n">SRGB</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">]</span>
@@ -185,18 +192,24 @@
 </div>
 
 <div class="admonition warning">
-<p class="admonition-title">Only colors are sRGB</p>
-<p>Textures that hold <strong>colors</strong> made by an artist looking at a screen are sRGB: diffuse, albedo, emissive. Textures that hold <strong>data</strong> are linear: normal maps, specular, roughness, metalness, height, ambient occlusion. Decoding a normal map as sRGB bends every normal and produces subtly wrong lighting that is hard to diagnose.</p>
+<p class="admonition-title">Solo i colori sono sRGB</p>
+<p>Le texture che contengono <strong>colori</strong> creati da un artista guardando uno schermo sono sRGB: diffuse, albedo, emissive.<br>
+Le texture che contengono <strong>dati</strong> sono lineari: normal map, specular, roughness, metalness, height, ambient occlusion.<br>
+Decodificare una normal map come sRGB piega ogni normale e produce un'illuminazione leggermente sbagliata, difficile da diagnosticare.</p>
 </div>
-<p>If you leave out the <code>.SRGB</code> option, the loader decides from the image file's metadata, which may or may not be what you want. Being explicit avoids surprises.</p>
-<h2 id="doing-it-by-hand">Doing it by hand<a class="headerlink" href="#doing-it-by-hand" title="Permanent link">#</a></h2>
-<p>If you cannot use an sRGB target, apply the curve at the end of the fragment function:</p>
+<p>Se ometti l'opzione <code>.SRGB</code>, il loader decide in base ai metadati del file immagine, che può essere o non essere ciò che vuoi.<br>
+Essere espliciti evita sorprese.</p>
+<h2 id="farlo-a-mano">Farlo a mano<a class="headerlink" href="#farlo-a-mano" title="Permanent link">#</a></h2>
+<p>Se non puoi usare un target sRGB, applica la curva alla fine della fragment function:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">encoded</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pow</span><span class="p">(</span><span class="n">color</span><span class="p">,</span><span class="w"> </span><span class="n">float3</span><span class="p">(</span><span class="mf">1.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">2.2</span><span class="p">));</span>
 </code></pre></div>
 
-<p>and decode textures on read with <code>pow(texel, float3(2.2))</code>. The automatic route is more accurate, since the true sRGB curve is not a pure power function, and it filters and blends correctly. Do one or the other, never both, or the image comes out washed out.</p>
-<h2 id="constant-colors">Constant colors<a class="headerlink" href="#constant-colors" title="Permanent link">#</a></h2>
-<p>Colors typed into code or picked in a color picker are sRGB values. In a linear workflow they should be converted before use:</p>
+<p>e decodifica le texture in lettura con <code>pow(texel, float3(2.2))</code>.<br>
+La strada automatica è più accurata, perché la vera curva sRGB non è una pura funzione di potenza, e filtra e mescola nel modo corretto.<br>
+Fai l'una o l'altra cosa, mai entrambe, altrimenti l'immagine viene slavata.</p>
+<h2 id="colori-costanti">Colori costanti<a class="headerlink" href="#colori-costanti" title="Permanent link">#</a></h2>
+<p>I colori scritti nel codice o scelti con un selettore di colore sono valori sRGB.<br>
+In un flusso di lavoro lineare vanno convertiti prima dell'uso:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">linear</span><span class="p">(</span><span class="kc">_</span><span class="w"> </span><span class="n">srgb</span><span class="p">:</span><span class="w"> </span><span class="n">Float3</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="n">Float3</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">Float3</span><span class="p">(</span><span class="n">pow</span><span class="p">(</span><span class="n">srgb</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mf">2.2</span><span class="p">),</span><span class="w"> </span><span class="n">pow</span><span class="p">(</span><span class="n">srgb</span><span class="p">.</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="mf">2.2</span><span class="p">),</span><span class="w"> </span><span class="n">pow</span><span class="p">(</span><span class="n">srgb</span><span class="p">.</span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="mf">2.2</span><span class="p">))</span>
@@ -210,25 +223,31 @@
 </code></pre></div>
 </div>
 
-<p>The view's <code>clearColor</code> is given in linear space when the drawable format is sRGB, so the same numbers now look brighter than before.</p>
-<h2 id="attenuation">Attenuation<a class="headerlink" href="#attenuation" title="Permanent link">#</a></h2>
-<p>Physically, light intensity falls with the <strong>square</strong> of the distance:</p>
+<p>Quando il formato del drawable è sRGB, il <code>clearColor</code> della vista è espresso in spazio lineare, quindi gli stessi numeri ora appaiono più luminosi di prima.</p>
+<h2 id="attenuazione">Attenuazione<a class="headerlink" href="#attenuazione" title="Permanent link">#</a></h2>
+<p>Fisicamente l'intensità della luce cala con il <strong>quadrato</strong> della distanza:</p>
 <div class="codehilite"><pre><span></span><code><span class="kt">float</span><span class="w"> </span><span class="n">attenuation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">distance</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">distance</span><span class="p">);</span>
 </code></pre></div>
 
-<p>Without gamma correction this looks far too harsh, because the display's curve squares the falloff once more. That is why older tutorials use linear falloff or the three-term formula from <a href="../lighting/light-casters.html">Light Casters</a>, which were tuned by eye on uncorrected output. With a linear workflow, inverse-square falloff looks right, and from here on we use it.</p>
-<h2 id="what-to-expect">What to expect<a class="headerlink" href="#what-to-expect" title="Permanent link">#</a></h2>
-<p>After the switch, the scene looks brighter and flatter in the mid-tones, and light and material values tuned earlier will need adjusting. This is normal. What you gain is lighting that adds up correctly, which every chapter from here to the end of the PBR section depends on.</p>
-<figure><img src="../../assets/img/advanced-lighting/gamma-correction.webp" alt="The same lights with inverse-square falloff. Without gamma correction the falloff is far too harsh." width="880" height="246" loading="lazy"><figcaption>The same lights with inverse-square falloff. Without gamma correction the falloff is far too harsh.</figcaption></figure>
+<p>Senza correzione gamma il risultato è fin troppo duro, perché la curva dello schermo eleva al quadrato il calo un'altra volta.<br>
+Ecco perché i tutorial più vecchi usano un calo lineare o la formula a tre termini di <a href="../lighting/light-casters.html">Tipi di luce</a>, tarati a occhio su un'uscita non corretta.<br>
+Con un flusso di lavoro lineare il calo con l'inverso del quadrato appare giusto, e da qui in avanti lo usiamo.</p>
+<h2 id="che-cosa-aspettarsi">Che cosa aspettarsi<a class="headerlink" href="#che-cosa-aspettarsi" title="Permanent link">#</a></h2>
+<p>Dopo il cambio la scena appare più luminosa e più piatta nei mezzitoni, e i valori di luci e materiali tarati in precedenza andranno ritoccati.<br>
+È normale.<br>
+Ciò che guadagni è un'illuminazione che si somma correttamente, da cui dipende ogni capitolo da qui alla fine della sezione PBR.</p>
+<figure><img src="../../assets/img/advanced-lighting/gamma-correction.webp" alt="Le stesse luci con il calo secondo l&#x27;inverso del quadrato. Senza correzione gamma il calo è fin troppo duro." width="880" height="246" loading="lazy"><figcaption>Le stesse luci con il calo secondo l&#x27;inverso del quadrato. Senza correzione gamma il calo è fin troppo duro.</figcaption></figure>
 
 <h2 id="wide-color">Wide color<a class="headerlink" href="#wide-color" title="Permanent link">#</a></h2>
-<p>Apple displays cover the Display P3 gamut, which is larger than sRGB. <code>MTKView</code> has a <code>colorspace</code> property (through its layer on iOS) and extended-range pixel formats such as <code>.bgra10_xr_srgb</code> for rendering colors outside sRGB. It is an advanced topic and unnecessary for learning, but good to know it exists when a designer asks why a red looks duller in your renderer than in Photos.</p></article><nav class="pager" id="pager"><a class="prev" href="../advanced-lighting/blinn-phong.html"><small>Precedente</small>Blinn-Phong</a><a class="next" href="../advanced-lighting/shadow-mapping.html"><small>Successivo</small>Shadow mapping</a></nav>
+<p>Gli schermi Apple coprono il gamut Display P3, più ampio di sRGB.<br>
+<code>MTKView</code> ha una proprietà <code>colorspace</code> (su iOS attraverso il suo layer) e formati dei pixel a gamma estesa come <code>.bgra10_xr_srgb</code> per disegnare colori fuori da sRGB.<br>
+È un argomento avanzato e non serve per imparare, ma è utile sapere che esiste quando un designer chiede perché un rosso appare più spento nel tuo renderer che in Foto.</p></article><nav class="pager" id="pager"><a class="prev" href="../advanced-lighting/blinn-phong.html"><small>Precedente</small>Blinn-Phong</a><a class="next" href="../advanced-lighting/shadow-mapping.html"><small>Successivo</small>Shadow mapping</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#displays-are-not-linear">Displays are not linear</a></li><li><a href="#what-goes-wrong">What goes wrong</a></li><li><a href="#metal-does-both-conversions-for-you">Metal does both conversions for you</a></li><li><a href="#doing-it-by-hand">Doing it by hand</a></li><li><a href="#constant-colors">Constant colors</a></li><li><a href="#attenuation">Attenuation</a></li><li><a href="#what-to-expect">What to expect</a></li><li><a href="#wide-color">Wide color</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#gli-schermi-non-sono-lineari">Gli schermi non sono lineari</a></li><li><a href="#che-cosa-va-storto">Che cosa va storto</a></li><li><a href="#metal-fa-entrambe-le-conversioni-per-te">Metal fa entrambe le conversioni per te</a></li><li><a href="#farlo-a-mano">Farlo a mano</a></li><li><a href="#colori-costanti">Colori costanti</a></li><li><a href="#attenuazione">Attenuazione</a></li><li><a href="#che-cosa-aspettarsi">Che cosa aspettarsi</a></li><li><a href="#wide-color">Wide color</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

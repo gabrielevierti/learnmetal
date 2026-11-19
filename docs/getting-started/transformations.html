@@ -137,22 +137,36 @@
 <article><p class="crumb">Getting Started</p><h1 id="transformations">Transformations<a class="headerlink" href="#transformations" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Example project</strong> <code>examples/Sources/05-Transformations</code>, run with <code>swift run Transformations</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
 
-<p>So far objects sit wherever their vertices put them. To move, rotate and scale them without rewriting vertex buffers every frame, we multiply each vertex by a <strong>matrix</strong>. This chapter is a compact tour of the math, followed by a small Swift helper file used for the rest of the series.</p>
+<p>So far objects sit wherever their vertices put them.<br>
+To move, rotate and scale them without rewriting vertex buffers every frame, we multiply each vertex by a <strong>matrix</strong>.<br>
+This chapter is a compact tour of the math, followed by a small Swift helper file used for the rest of the series.</p>
 <h2 id="vectors">Vectors<a class="headerlink" href="#vectors" title="Permanent link">#</a></h2>
-<p>A vector is a direction with a length. In graphics we also use vectors for positions (a direction from the origin) and colors. The operations that matter:</p>
+<p>A vector is a direction with a length.<br>
+In graphics we also use vectors for positions (a direction from the origin) and colors.<br>
+The operations that matter:</p>
 <ul>
-<li><strong>Addition and subtraction</strong> work per component. <code>b - a</code> is the vector pointing from <code>a</code> to <code>b</code>.</li>
-<li><strong>Length</strong>: <code>length(v)</code> is the square root of <code>x² + y² + z²</code>. A vector of length 1 is a <strong>unit vector</strong>, and <code>normalize(v)</code> scales any vector to length 1.</li>
-<li><strong>Dot product</strong>: <code>dot(a, b) = a.x*b.x + a.y*b.y + a.z*b.z</code>. For unit vectors it equals the cosine of the angle between them: 1 when parallel, 0 when perpendicular, -1 when opposite. All of lighting is built on this.</li>
+<li><strong>Addition and subtraction</strong> work per component.<br>
+<code>b - a</code> is the vector pointing from <code>a</code> to <code>b</code>.</li>
+<li><strong>Length</strong>: <code>length(v)</code> is the square root of <code>x² + y² + z²</code>.<br>
+A vector of length 1 is a <strong>unit vector</strong>, and <code>normalize(v)</code> scales any vector to length 1.</li>
+<li><strong>Dot product</strong>: <code>dot(a, b) = a.x*b.x + a.y*b.y + a.z*b.z</code>.<br>
+For unit vectors it equals the cosine of the angle between them: 1 when parallel, 0 when perpendicular, -1 when opposite.<br>
+All of lighting is built on this.</li>
 <li><strong>Cross product</strong>: <code>cross(a, b)</code> is a vector perpendicular to both inputs.</li>
 </ul>
 <p>Swift's <code>simd</code> module provides all of these, with the same names as in MSL.</p>
 <h2 id="matrices">Matrices<a class="headerlink" href="#matrices" title="Permanent link">#</a></h2>
-<p>A 4×4 matrix can express any combination of scaling, rotation and translation. Multiplying a matrix by a vector applies the transformation.</p>
-<p><strong>Scaling</strong> puts the factors on the diagonal. <strong>Translation</strong> puts the offset in the last column, which is why we need four dimensions: a 3×3 matrix cannot move a point. The fourth component of a vector, <strong>w</strong>, switches translation on and off. Positions use <code>w = 1</code> and are moved; directions use <code>w = 0</code> and are not.</p>
-<p><strong>Rotation</strong> by an angle around an axis fills the upper-left 3×3 block with sines and cosines. You rarely write these by hand.</p>
+<p>A 4×4 matrix can express any combination of scaling, rotation and translation.<br>
+Multiplying a matrix by a vector applies the transformation.</p>
+<p><strong>Scaling</strong> puts the factors on the diagonal.<br>
+<strong>Translation</strong> puts the offset in the last column, which is why we need four dimensions: a 3×3 matrix cannot move a point.<br>
+The fourth component of a vector, <strong>w</strong>, switches translation on and off.<br>
+Positions use <code>w = 1</code> and are moved; directions use <code>w = 0</code> and are not.</p>
+<p><strong>Rotation</strong> by an angle around an axis fills the upper-left 3×3 block with sines and cosines.<br>
+You rarely write these by hand.</p>
 <h2 id="order-matters">Order matters<a class="headerlink" href="#order-matters" title="Permanent link">#</a></h2>
-<p>Matrix multiplication is not commutative. With column vectors, the convention in both Metal and <code>simd</code>, the matrix <strong>closest to the vector applies first</strong>:</p>
+<p>Matrix multiplication is not commutative.<br>
+With column vectors, the convention in both Metal and <code>simd</code>, the matrix <strong>closest to the vector applies first</strong>:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">transform</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">translation</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">rotation</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">scale</span>
 <span class="c1">// applied to a vertex: scale first, then rotate, then translate</span>
@@ -164,9 +178,11 @@
 </code></pre></div>
 </div>
 
-<p>Scale, then rotate, then translate is the order you almost always want. Translating first and rotating afterward swings the object around the origin like a stone on a string.</p>
+<p>Scale, then rotate, then translate is the order you almost always want.<br>
+Translating first and rotating afterward swings the object around the origin like a stone on a string.</p>
 <h2 id="a-matrix-helper">A matrix helper<a class="headerlink" href="#a-matrix-helper" title="Permanent link">#</a></h2>
-<p><code>simd</code> gives us the types but few constructors. Add <code>Math.swift</code>:</p>
+<p><code>simd</code> gives us the types but few constructors.<br>
+Add <code>Math.swift</code>:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">import</span><span class="w"> </span><span class="nc">simd</span>
 
@@ -230,8 +246,11 @@
 </code></pre></div>
 </div>
 
-<p>Angles are in radians everywhere; <code>45.radians</code> converts from degrees. Matrices are stored in <strong>column-major</strong> order: <code>columns.3</code> is the fourth column, where translation lives. MSL's <code>float4x4</code> uses the same layout, so a Swift matrix can be copied into a uniform buffer unchanged.</p>
-<p>The rotation is built from a <strong>quaternion</strong>, a four-number representation of a rotation that is free of the gimbal lock problems that plague chained axis rotations. You do not need the theory to use it.</p>
+<p>Angles are in radians everywhere; <code>45.radians</code> converts from degrees.<br>
+Matrices are stored in <strong>column-major</strong> order: <code>columns.3</code> is the fourth column, where translation lives.<br>
+MSL's <code>float4x4</code> uses the same layout, so a Swift matrix can be copied into a uniform buffer unchanged.</p>
+<p>The rotation is built from a <strong>quaternion</strong>, a four-number representation of a rotation that is free of the gimbal lock problems that plague chained axis rotations.<br>
+You do not need the theory to use it.</p>
 <h2 id="transforming-the-rectangle">Transforming the rectangle<a class="headerlink" href="#transforming-the-rectangle" title="Permanent link">#</a></h2>
 <p>Add a matrix to the uniforms and multiply in the vertex function:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">Uniforms</span><span class="w"> </span><span class="p">{</span>
@@ -247,7 +266,8 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>The uniforms use vertex buffer slot <strong>1</strong> because slot 0 holds the vertex data. From here on that is our convention: slot 0 for vertices, slot 1 for uniforms.</p>
+<p>The uniforms use vertex buffer slot <strong>1</strong> because slot 0 holds the vertex data.<br>
+From here on that is our convention: slot 0 for vertices, slot 1 for uniforms.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">Uniforms</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">transform</span><span class="p">:</span><span class="w"> </span><span class="n">float4x4</span>
@@ -278,13 +298,21 @@
 </code></pre></div>
 </div>
 
-<p>The rectangle is now half size, in the lower-right corner, spinning around its own center. If the window is not square it looks stretched while rotating. That is expected, and the projection matrix in the next chapter fixes it.</p>
+<p>The rectangle is now half size, in the lower-right corner, spinning around its own center.<br>
+If the window is not square it looks stretched while rotating.<br>
+That is expected, and the projection matrix in the next chapter fixes it.</p>
 <div class="lm-demo" data-demo="transformations" data-fallback="../assets/img/getting-started/transformations.webp"></div>
 
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
-<li>Swap the translation and rotation and predict the result before running.<details class="solution"><summary>Show solution</summary><p>With <code>rotation * translation * scale</code> the quad is scaled, then moved away from the origin, then rotated. The rotation now acts on the moved quad, so it swings around the center of the screen in a circle instead of spinning in place. Try it in the live demo with the order selector.</p></details></li>
-<li>Draw the rectangle a second time in the top-left corner with a scale that follows <code>sin(time)</code>. You only need a second <code>setVertexBytes</code> and a second draw call.<details class="solution"><summary>Show solution</summary><p>Build a second matrix, send it with a second <code>setVertexBytes</code>, and issue the draw call again. The vertex buffer, pipeline and texture stay bound. In Swift: <code>float4x4(translation: [-0.5, 0.5, 0]) * float4x4(scale: Float3(repeating: abs(sin(time)) * 0.5))</code>. The scale passes through zero, where the quad vanishes for a frame.</p></details></li>
+<li>Swap the translation and rotation and predict the result before running.<details class="solution"><summary>Show solution</summary><p>With <code>rotation * translation * scale</code> the quad is scaled, then moved away from the origin, then rotated.<br>
+The rotation now acts on the moved quad, so it swings around the center of the screen in a circle instead of spinning in place.<br>
+Try it in the live demo with the order selector.</p></details></li>
+<li>Draw the rectangle a second time in the top-left corner with a scale that follows <code>sin(time)</code>.<br>
+You only need a second <code>setVertexBytes</code> and a second draw call.<details class="solution"><summary>Show solution</summary><p>Build a second matrix, send it with a second <code>setVertexBytes</code>, and issue the draw call again.<br>
+The vertex buffer, pipeline and texture stay bound.<br>
+In Swift: <code>float4x4(translation: [-0.5, 0.5, 0]) * float4x4(scale: Float3(repeating: abs(sin(time)) * 0.5))</code>.<br>
+The scale passes through zero, where the quad vanishes for a frame.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../getting-started/textures.html"><small>Previous</small>Textures</a><a class="next" href="../getting-started/coordinate-systems.html"><small>Next</small>Coordinate Systems</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>

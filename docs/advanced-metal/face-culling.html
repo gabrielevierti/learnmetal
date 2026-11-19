@@ -135,9 +135,14 @@
 </nav>
 <main class="content" id="main">
 <article><p class="crumb">Advanced Metal</p><h1 id="face-culling">Face Culling<a class="headerlink" href="#face-culling" title="Permanent link">#</a></h1>
-<p>Look at a closed object such as a cube from any angle, and you can see at most half of its faces. The faces pointing away from you are always hidden by the ones in front. <strong>Face culling</strong> tells the GPU to skip those triangles before rasterizing them, which saves roughly half of the fragment work for closed meshes.</p>
+<p>Look at a closed object such as a cube from any angle, and you can see at most half of its faces.<br>
+The faces pointing away from you are always hidden by the ones in front.<br>
+<strong>Face culling</strong> tells the GPU to skip those triangles before rasterizing them, which saves roughly half of the fragment work for closed meshes.</p>
 <h2 id="winding-order">Winding order<a class="headerlink" href="#winding-order" title="Permanent link">#</a></h2>
-<p>How does the GPU know which side of a triangle is the front? By the order in which its three vertices appear on screen: clockwise or counter-clockwise. That order is the triangle's <strong>winding</strong>. When you turn a triangle around, its winding as seen from the camera flips.</p>
+<p>How does the GPU know which side of a triangle is the front?<br>
+By the order in which its three vertices appear on screen: clockwise or counter-clockwise.<br>
+That order is the triangle's <strong>winding</strong>.<br>
+When you turn a triangle around, its winding as seen from the camera flips.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">vertices</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="nb">Float</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w">   </span><span class="c1">// 1</span>
@@ -159,7 +164,8 @@
 <figure><img src="../assets/img/advanced-metal/face-culling.webp" alt="The same triangle seen from the front and from behind." width="880" height="280" loading="lazy"><figcaption>The same triangle seen from the front and from behind.</figcaption></figure>
 
 <h2 id="enabling-culling">Enabling culling<a class="headerlink" href="#enabling-culling" title="Permanent link">#</a></h2>
-<p>Culling is render encoder state. It is not part of the pipeline state:</p>
+<p>Culling is render encoder state.<br>
+It is not part of the pipeline state:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">encoder</span><span class="p">.</span><span class="n">setFrontFacing</span><span class="p">(.</span><span class="n">counterClockwise</span><span class="p">)</span>
 <span class="n">encoder</span><span class="p">.</span><span class="n">setCullMode</span><span class="p">(.</span><span class="n">back</span><span class="p">)</span>
@@ -195,17 +201,23 @@
 </table>
 <div class="admonition warning">
 <p class="admonition-title">Metal's default front face is clockwise</p>
-<p><code>MTLWinding.clockwise</code> is the default front-facing winding in Metal, the opposite of OpenGL. Our cube, and most model files, use counter-clockwise fronts, so always call <code>setFrontFacing(.counterClockwise)</code> together with <code>setCullMode</code>. If a model appears inside out, with only its far walls visible, this is the cause.</p>
+<p><code>MTLWinding.clockwise</code> is the default front-facing winding in Metal, the opposite of OpenGL.<br>
+Our cube, and most model files, use counter-clockwise fronts, so always call <code>setFrontFacing(.counterClockwise)</code> together with <code>setCullMode</code>.<br>
+If a model appears inside out, with only its far walls visible, this is the cause.</p>
 </div>
 <p>Encoder state resets with every new encoder, so set both at the start of each pass.</p>
 <h2 id="when-not-to-cull">When not to cull<a class="headerlink" href="#when-not-to-cull" title="Permanent link">#</a></h2>
 <ul>
-<li><strong>Flat, two-sided geometry</strong>: grass quads, leaves, cloth, windows. Disable culling for those draws with <code>setCullMode(.none)</code>.</li>
-<li><strong>Transparent closed objects</strong>: you may want the inside faces visible through the outside ones. Draw the back faces first (<code>.front</code> culling), then the front faces.</li>
-<li><strong>Mirrored transforms</strong>: a model matrix with a negative scale on one axis flips the winding of everything it draws. Flip the front-face setting for those objects.</li>
+<li><strong>Flat, two-sided geometry</strong>: grass quads, leaves, cloth, windows.<br>
+Disable culling for those draws with <code>setCullMode(.none)</code>.</li>
+<li><strong>Transparent closed objects</strong>: you may want the inside faces visible through the outside ones.<br>
+Draw the back faces first (<code>.front</code> culling), then the front faces.</li>
+<li><strong>Mirrored transforms</strong>: a model matrix with a negative scale on one axis flips the winding of everything it draws.<br>
+Flip the front-face setting for those objects.</li>
 </ul>
 <h2 id="culling-front-faces">Culling front faces<a class="headerlink" href="#culling-front-faces" title="Permanent link">#</a></h2>
-<p>Culling the <em>front</em> faces is occasionally useful on purpose. Rendering only back faces into a shadow map reduces a self-shadowing artifact, as you will see in <a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a>, and a skybox cube seen from the inside can be drawn with front culling or simply with culling off.</p>
+<p>Culling the <em>front</em> faces is occasionally useful on purpose.<br>
+Rendering only back faces into a shadow map reduces a self-shadowing artifact, as you will see in <a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a>, and a skybox cube seen from the inside can be drawn with front culling or simply with culling off.</p>
 <h2 id="which-side-am-i-on">Which side am I on?<a class="headerlink" href="#which-side-am-i-on" title="Permanent link">#</a></h2>
 <p>A fragment function can ask whether it belongs to a front-facing triangle, using a built-in input:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_main</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
@@ -223,9 +235,13 @@
 
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
-<li>Enable back-face culling and fly inside a cube.<details class="solution"><summary>Show solution</summary><p>From outside nothing changes. Once the camera is inside the cube you only see the clear color: every face is now seen from behind, and all of them are culled. The live demo shows the reverse case when you choose <code>.front</code>.</p></details></li>
-<li>Reverse the winding of one cube face in the vertex data and observe which face disappears.<details class="solution"><summary>Show solution</summary><p>Swap two of the three vertices of each triangle on that face. From outside that face is now clockwise, so it is treated as a back face and culled, leaving a hole through which you see the inside of the cube, which is culled as well.</p></details></li>
-<li>Color front faces green and back faces red using <code>[[front_facing]]</code> with culling off.<details class="solution"><summary>Show solution</summary><p>This is the shader of the live demo above: take a <code>bool</code> parameter marked <code>[[front_facing]]</code> and choose the color from it. Flip the normal for back faces if you light them.</p></details></li>
+<li>Enable back-face culling and fly inside a cube.<details class="solution"><summary>Show solution</summary><p>From outside nothing changes.<br>
+Once the camera is inside the cube you only see the clear color: every face is now seen from behind, and all of them are culled.<br>
+The live demo shows the reverse case when you choose <code>.front</code>.</p></details></li>
+<li>Reverse the winding of one cube face in the vertex data and observe which face disappears.<details class="solution"><summary>Show solution</summary><p>Swap two of the three vertices of each triangle on that face.<br>
+From outside that face is now clockwise, so it is treated as a back face and culled, leaving a hole through which you see the inside of the cube, which is culled as well.</p></details></li>
+<li>Color front faces green and back faces red using <code>[[front_facing]]</code> with culling off.<details class="solution"><summary>Show solution</summary><p>This is the shader of the live demo above: take a <code>bool</code> parameter marked <code>[[front_facing]]</code> and choose the color from it.<br>
+Flip the normal for back faces if you light them.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../advanced-metal/blending.html"><small>Previous</small>Blending</a><a class="next" href="../advanced-metal/render-targets.html"><small>Next</small>Render Targets</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>

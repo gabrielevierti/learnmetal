@@ -1,0 +1,3 @@
+Alloca tre buffer, ognuno abbastanza grande per dieci `Uniforms`. A ogni frame aspetta il semaforo, scegli il buffer successivo, scrivi le dieci struct attraverso `contents()`, collega il buffer una volta sola con `setVertexBuffer` all'indice 1, e prima di ogni draw call chiama `setVertexBufferOffset(stride * i, index: 1)`. Segnala il semaforo nel completion handler del command buffer.
+---
+Copia la texture con un blit in un buffer shared, come mostrato sopra. Nel completion handler avvolgi i byte in un `CGContext` (8 bit per componente, 4 byte per pixel, premoltiplicato, con `byteOrder32Little` per una texture BGRA), chiama `makeImage()` e scrivila con `CGImageDestination` usando il tipo PNG. Fai la scrittura del file fuori dal thread di rendering.

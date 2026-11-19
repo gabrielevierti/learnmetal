@@ -135,9 +135,12 @@
 </nav>
 <main class="content" id="main">
 <article><p class="crumb">Advanced Metal</p><h1 id="advanced-data">Advanced Data<a class="headerlink" href="#advanced-data" title="Permanent link">#</a></h1>
-<p>Buffers and textures have been black boxes created with one call. This chapter opens them up: where their memory lives, how to update it efficiently every frame, and how to copy data around on the GPU.</p>
+<p>Buffers and textures have been black boxes created with one call.<br>
+This chapter opens them up: where their memory lives, how to update it efficiently every frame, and how to copy data around on the GPU.</p>
 <h2 id="buffers-are-just-memory">Buffers are just memory<a class="headerlink" href="#buffers-are-just-memory" title="Permanent link">#</a></h2>
-<p>An <code>MTLBuffer</code> is an untyped block of bytes. Metal attaches no meaning to it. The same buffer can hold vertices in its first half and uniforms in its second, and you say which part to use through the <code>offset</code> parameter when binding.</p>
+<p>An <code>MTLBuffer</code> is an untyped block of bytes.<br>
+Metal attaches no meaning to it.<br>
+The same buffer can hold vertices in its first half and uniforms in its second, and you say which part to use through the <code>offset</code> parameter when binding.</p>
 <p>Create an empty buffer and fill it later:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">buffer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeBuffer</span><span class="p">(</span><span class="n">length</span><span class="p">:</span><span class="w"> </span><span class="mi">1024</span><span class="p">,</span><span class="w"> </span><span class="n">options</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">storageModeShared</span><span class="p">)</span><span class="o">!</span>
@@ -148,7 +151,8 @@
 </code></pre></div>
 </div>
 
-<p><code>buffer.contents()</code> returns a raw pointer to the memory. Writing through it is the fastest way to update data:</p>
+<p><code>buffer.contents()</code> returns a raw pointer to the memory.<br>
+Writing through it is the fastest way to update data:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">pointer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">buffer</span><span class="p">.</span><span class="n">contents</span><span class="p">().</span><span class="n">bindMemory</span><span class="p">(</span><span class="n">to</span><span class="p">:</span><span class="w"> </span><span class="n">Uniforms</span><span class="p">.</span><span class="kc">self</span><span class="p">,</span><span class="w"> </span><span class="n">capacity</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
 <span class="n">pointer</span><span class="p">.</span><span class="n">pointee</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">uniforms</span>
@@ -209,14 +213,19 @@
 </tr>
 </tbody>
 </table>
-<p>Apple silicon has <strong>unified memory</strong>: the CPU and GPU share the same physical RAM. A shared buffer is not copied when the GPU uses it, so "uploading" data is nothing more than writing to memory. Rules of thumb:</p>
+<p>Apple silicon has <strong>unified memory</strong>: the CPU and GPU share the same physical RAM.<br>
+A shared buffer is not copied when the GPU uses it, so "uploading" data is nothing more than writing to memory.<br>
+Rules of thumb:</p>
 <ul>
 <li>Data you rewrite every frame: <code>.shared</code>.</li>
 <li>Textures you render into and static meshes you never touch again: <code>.private</code>.</li>
 <li>Depth or multisample attachments that you do not keep: <code>.memoryless</code>.</li>
 </ul>
 <h2 id="updating-uniforms-safely">Updating uniforms safely<a class="headerlink" href="#updating-uniforms-safely" title="Permanent link">#</a></h2>
-<p><code>setVertexBytes</code> is convenient but limited to 4 KB per call and copies the data each time. A real renderer keeps uniforms in buffers. There is one hazard: the GPU runs behind the CPU. If you overwrite a buffer for frame N+1 while the GPU is still drawing frame N, frame N reads the wrong data.</p>
+<p><code>setVertexBytes</code> is convenient but limited to 4 KB per call and copies the data each time.<br>
+A real renderer keeps uniforms in buffers.<br>
+There is one hazard: the GPU runs behind the CPU.<br>
+If you overwrite a buffer for frame N+1 while the GPU is still drawing frame N, frame N reads the wrong data.</p>
 <p>The standard cure is a small <strong>ring of buffers</strong>, one per frame in flight, with a semaphore that stops the CPU from getting too far ahead:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">maxFramesInFlight</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">3</span>
@@ -305,7 +314,9 @@
 </code></pre></div>
 </div>
 
-<p><code>setVertexBufferOffset</code> is much cheaper than rebinding a buffer. One large buffer with per-object offsets is how thousands of draws stay fast. Make sure every early return after <code>wait()</code> signals the semaphore, or the app freezes after three frames.</p>
+<p><code>setVertexBufferOffset</code> is much cheaper than rebinding a buffer.<br>
+One large buffer with per-object offsets is how thousands of draws stay fast.<br>
+Make sure every early return after <code>wait()</code> signals the semaphore, or the app freezes after three frames.</p>
 <figure><img src="../assets/img/advanced-metal/advanced-data.webp" alt="advanced data" width="880" height="270" loading="lazy"></figure>
 
 <h2 id="copying-on-the-gpu-the-blit-encoder">Copying on the GPU: the blit encoder<a class="headerlink" href="#copying-on-the-gpu-the-blit-encoder" title="Permanent link">#</a></h2>
@@ -385,7 +396,8 @@
 </code></pre></div>
 </div>
 
-<p>Never block the render loop with <code>waitUntilCompleted()</code> to get results. Use the completion handler.</p>
+<p>Never block the render loop with <code>waitUntilCompleted()</code> to get results.<br>
+Use the completion handler.</p>
 <h2 id="texture-descriptors-in-full">Texture descriptors in full<a class="headerlink" href="#texture-descriptors-in-full" title="Permanent link">#</a></h2>
 <p><code>MTLTextureDescriptor</code> has more to offer than width and height:</p>
 <table>
@@ -426,11 +438,16 @@
 </tr>
 </tbody>
 </table>
-<p><strong>Texture arrays</strong> stack many same-sized images in one texture, indexed by layer in the shader with <code>texture2d_array&lt;float&gt;</code>. They replace texture atlases without the bleeding problems.</p>
+<p><strong>Texture arrays</strong> stack many same-sized images in one texture, indexed by layer in the shader with <code>texture2d_array&lt;float&gt;</code>.<br>
+They replace texture atlases without the bleeding problems.</p>
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
-<li>Convert the ten-cube scene from <code>setVertexBytes</code> to the ring-buffer scheme.<details class="solution"><summary>Show solution</summary><p>Allocate three buffers, each large enough for ten <code>Uniforms</code>. Each frame wait on the semaphore, pick the next buffer, write the ten structs through <code>contents()</code>, bind the buffer once with <code>setVertexBuffer</code> at index 1, and before each draw call <code>setVertexBufferOffset(stride * i, index: 1)</code>. Signal the semaphore in the command buffer's completion handler.</p></details></li>
-<li>Render the scene to a texture, read it back, and save it as a PNG with Core Graphics.<details class="solution"><summary>Show solution</summary><p>Blit the texture into a shared buffer as shown above. In the completion handler wrap the bytes in a <code>CGContext</code> (8 bits per component, 4 bytes per pixel, premultiplied, with <code>byteOrder32Little</code> for a BGRA texture), call <code>makeImage()</code>, and write it with <code>CGImageDestination</code> using the PNG type. Do the file writing off the render thread.</p></details></li>
+<li>Convert the ten-cube scene from <code>setVertexBytes</code> to the ring-buffer scheme.<details class="solution"><summary>Show solution</summary><p>Allocate three buffers, each large enough for ten <code>Uniforms</code>.<br>
+Each frame wait on the semaphore, pick the next buffer, write the ten structs through <code>contents()</code>, bind the buffer once with <code>setVertexBuffer</code> at index 1, and before each draw call <code>setVertexBufferOffset(stride * i, index: 1)</code>.<br>
+Signal the semaphore in the command buffer's completion handler.</p></details></li>
+<li>Render the scene to a texture, read it back, and save it as a PNG with Core Graphics.<details class="solution"><summary>Show solution</summary><p>Blit the texture into a shared buffer as shown above.<br>
+In the completion handler wrap the bytes in a <code>CGContext</code> (8 bits per component, 4 bytes per pixel, premultiplied, with <code>byteOrder32Little</code> for a BGRA texture), call <code>makeImage()</code>, and write it with <code>CGImageDestination</code> using the PNG type.<br>
+Do the file writing off the render thread.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../advanced-metal/cubemaps.html"><small>Previous</small>Cubemaps</a><a class="next" href="../advanced-metal/advanced-msl.html"><small>Next</small>Advanced MSL</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>

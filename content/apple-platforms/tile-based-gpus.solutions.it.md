@@ -1,0 +1,5 @@
+Va bene qualsiasi texture di profondità o multisample la cui load action sia `.clear` o `.dontCare` e la cui store action sia `.dontCare` (o `.multisampleResolve` per il colore multisample). Imposta `storageMode = .memoryless` nel suo descriptor. Se il livello di validazione di Metal protesta, qualche pass la sta ancora caricando o salvando. Una shadow map non va bene: il pass principale la legge dopo.
+---
+Il pass disegna correttamente dentro la memoria dei tile e il risultato viene buttato via, quindi la texture conserva un contenuto indefinito: di solito spazzatura, un frame precedente oppure nero. Non viene mostrato niente, eppure la GPU ha fatto tutti i calcoli. È l'immagine speculare di uno `.store` inutile: lì paghi banda per pixel che nessuno legge.
+---
+L'uniform è falso, quindi l'immagine è identica. Ma il compilatore non può saperlo, e la pipeline non viene più trattata come opaca: adesso ogni fragment di ogni strato sovrapposto esegue la sua fragment function, mentre prima lo faceva solo quello visibile. In una scena con cinque strati di overdraw il tempo dei fragment cresce di diverse volte.

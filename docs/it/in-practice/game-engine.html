@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,24 +134,30 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">In pratica</p><h1 id="a-game-engine">A Game Engine<a class="headerlink" href="#a-game-engine" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
-<p>Every chapter so far built one technique in isolation: a shadow map here, a bloom chain there, each in its own small program. This chapter and the next three put them together. The result is the <strong>LearnMetal Engine</strong>: a small game engine made entirely with Metal, written twice, once in Swift and once in C++, with a complete little game on top and an editor to build scenes with.</p>
-<p>It is deliberately small. The engine is between five and six thousand lines in either language, comments included, and it is meant to be read. Nothing in it is a technique you have not met in these pages; what is new is how the pieces are arranged so that they work together.</p>
-<p><a class="cta" href="https://github.com/gabrielevierti/learnmetal-engine">Get the engine on GitHub</a> <a class="cta ghost" href="https://github.com/gabrielevierti/learnmetal-engine/archive/refs/heads/main.zip">Download it as a .zip</a></p>
+<article><p class="crumb">In pratica</p><h1 id="un-game-engine">Un game engine<a class="headerlink" href="#un-game-engine" title="Permanent link">#</a></h1>
+<p>Finora ogni capitolo ha costruito una tecnica isolata: una shadow map qui, una catena di bloom là, ognuna nel suo piccolo programma.<br>
+Questo capitolo e i tre successivi le mettono insieme.<br>
+Il risultato è il <strong>LearnMetal Engine</strong>: un piccolo game engine fatto interamente con Metal, scritto due volte, una in Swift e una in C++, con sopra un piccolo gioco completo e un editor con cui costruire le scene.</p>
+<p>È piccolo di proposito.<br>
+L'engine sta tra le cinque e le seimila righe in ciascun linguaggio, commenti compresi, ed è fatto per essere letto.<br>
+Non contiene nessuna tecnica che tu non abbia incontrato in queste pagine; di nuovo c'è il modo in cui i pezzi sono disposti perché lavorino insieme.</p>
+<p><a class="cta" href="https://github.com/gabrielevierti/learnmetal-engine">Prendi l'engine su GitHub</a> <a class="cta ghost" href="https://github.com/gabrielevierti/learnmetal-engine/archive/refs/heads/main.zip">Scaricalo come .zip</a></p>
 
-<h2 id="get-it-and-run-it">Get it and run it<a class="headerlink" href="#get-it-and-run-it" title="Permanent link">#</a></h2>
-<p>The engine lives in a repository of its own. You need macOS 13 or later and Xcode 15 or later.</p>
+<h2 id="scaricarlo-ed-eseguirlo">Scaricarlo ed eseguirlo<a class="headerlink" href="#scaricarlo-ed-eseguirlo" title="Permanent link">#</a></h2>
+<p>L'engine vive in un repository tutto suo.<br>
+Ti servono macOS 13 o successivo e Xcode 15 o successivo.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/gabrielevierti/learnmetal-engine.git
 <span class="nb">cd</span><span class="w"> </span>learnmetal-engine
 swift<span class="w"> </span>run<span class="w"> </span>Marble
 </code></pre></div>
 
-<p>Open <code>Package.swift</code> in Xcode instead if you want the debugger and the GPU tools.</p>
+<p>Se vuoi il debugger e gli strumenti per la GPU, apri invece <code>Package.swift</code> in Xcode.</p>
 </div>
 
 <div class="lang-cpp">
-<p>The C++ version also needs CMake 3.24 or later. The first configuration downloads the four libraries it uses: GLFW, metal-cpp, stb and miniaudio.</p>
+<p>La versione C++ ha bisogno anche di CMake 3.24 o successivo.<br>
+La prima configurazione scarica le quattro librerie che usa: GLFW, metal-cpp, stb e miniaudio.</p>
 <div class="codehilite"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/gabrielevierti/learnmetal-engine.git
 <span class="nb">cd</span><span class="w"> </span>learnmetal-engine
 cmake<span class="w"> </span>-B<span class="w"> </span>build<span class="w"> </span>-DCMAKE_BUILD_TYPE<span class="o">=</span>Release
@@ -160,21 +166,27 @@ cmake<span class="w"> </span>--build<span class="w"> </span>build<span class="w"
 </code></pre></div>
 </div>
 
-<p>That starts <strong>Marble</strong>, the sample game. Roll with W A S D, jump with Space, look around with the arrow keys or by dragging the mouse. Collect the eight gems and reach the glowing disc. A gamepad works too.</p>
-<p>Press <strong>F1</strong> for statistics and <strong>F2</strong> to see the physics shapes.</p>
-<figure><img src="../../assets/img/in-practice/game-engine.webp" alt="Marble, the game that comes with the engine: physically based materials, light from the sky, cascaded shadows, bloom and an interface drawn on top." width="880" height="495" loading="lazy"><figcaption>Marble, the game that comes with the engine: physically based materials, light from the sky, cascaded shadows, bloom and an interface drawn on top.</figcaption></figure>
+<p>Così parte <strong>Marble</strong>, il gioco di esempio.<br>
+Rotola con W A S D, salta con Spazio, guardati intorno con le frecce o trascinando il mouse.<br>
+Raccogli le otto gemme e raggiungi il disco luminoso.<br>
+Funziona anche un gamepad.</p>
+<p>Premi <strong>F1</strong> per le statistiche e <strong>F2</strong> per vedere le forme della fisica.</p>
+<figure><img src="../../assets/img/in-practice/game-engine.webp" alt="Marble, il gioco che accompagna l&#x27;engine: materiali fisicamente corretti, luce del cielo, ombre a cascata, bloom e un&#x27;interfaccia disegnata sopra." width="880" height="495" loading="lazy"><figcaption>Marble, il gioco che accompagna l&#x27;engine: materiali fisicamente corretti, luce del cielo, ombre a cascata, bloom e un&#x27;interfaccia disegnata sopra.</figcaption></figure>
 
-<h2 id="what-an-engine-adds">What an engine adds<a class="headerlink" href="#what-an-engine-adds" title="Permanent link">#</a></h2>
-<p>The example programs of this site each have a renderer class that knows exactly what it draws: "a cube and a floor", "nine spheres". That stops working the moment the list of things to draw is decided while the program runs. An engine is what you get when you separate <strong>what exists</strong> from <strong>how it is drawn</strong>:</p>
+<h2 id="che-cosa-aggiunge-un-engine">Che cosa aggiunge un engine<a class="headerlink" href="#che-cosa-aggiunge-un-engine" title="Permanent link">#</a></h2>
+<p>I programmi di esempio di questo sito hanno ciascuno una classe renderer che sa esattamente che cosa disegna: "un cubo e un pavimento", "nove sfere".<br>
+Questo smette di funzionare nel momento in cui l'elenco delle cose da disegnare viene deciso mentre il programma gira.<br>
+Un engine è ciò che ottieni quando separi <strong>ciò che esiste</strong> da <strong>come viene disegnato</strong>:</p>
 <ul>
-<li>A <strong>scene</strong> holds the things that exist: entities with a position, a mesh, a light, a physics body.</li>
-<li>A <strong>renderer</strong> draws whatever is in the scene, without knowing what game it is.</li>
-<li><strong>Systems</strong> change the scene over time: physics, particles, the game's own logic.</li>
-<li>A <strong>loop</strong> runs all of them in a fixed order, every frame.</li>
+<li>Una <strong>scena</strong> contiene le cose che esistono: entità con una posizione, una mesh, una luce, un corpo fisico.</li>
+<li>Un <strong>renderer</strong> disegna qualunque cosa ci sia nella scena, senza sapere di che gioco si tratta.</li>
+<li>I <strong>sistemi</strong> cambiano la scena nel tempo: la fisica, le particelle, la logica propria del gioco.</li>
+<li>Un <strong>ciclo</strong> li esegue tutti in un ordine fisso, a ogni frame.</li>
 </ul>
-<p>Around those sit the services a game takes for granted: loading files, input, sound, a way to draw an interface.</p>
-<h2 id="the-shape-of-a-game">The shape of a game<a class="headerlink" href="#the-shape-of-a-game" title="Permanent link">#</a></h2>
-<p>A game is an object with a few functions that the engine calls at the right moments. Here is a complete one: a cube that turns, lit by a sun, with a shadow.</p>
+<p>Intorno a questi stanno i servizi che un gioco dà per scontati: caricare file, l'input, il suono, un modo di disegnare un'interfaccia.</p>
+<h2 id="la-forma-di-un-gioco">La forma di un gioco<a class="headerlink" href="#la-forma-di-un-gioco" title="Permanent link">#</a></h2>
+<p>Un gioco è un oggetto con poche funzioni che l'engine chiama al momento giusto.<br>
+Eccone uno completo: un cubo che gira, illuminato da un sole, con un'ombra.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">import</span><span class="w"> </span><span class="nc">Foundation</span>
 <span class="kd">import</span><span class="w"> </span><span class="nc">LMEngine</span>
@@ -204,8 +216,12 @@ cmake<span class="w"> </span>--build<span class="w"> </span>build<span class="w"
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 
-<span class="kd">let</span><span class="w"> </span><span class="nv">engine</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Engine</span><span class="p">(</span><span class="n">config</span><span class="p">:</span><span class="w"> </span><span class="n">EngineConfig</span><span class="p">.</span><span class="n">fromArguments</span><span class="p">(</span><span class="n">CommandLine</span><span class="p">.</span><span class="n">arguments</span><span class="p">))</span>
-<span class="n">exit</span><span class="p">(</span><span class="n">engine</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="n">Spin</span><span class="p">()))</span>
+<span class="c1">// The engine lives on the main actor, so the program's first lines say they run there.</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">result</span><span class="p">:</span><span class="w"> </span><span class="nb">Int32</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">MainActor</span><span class="p">.</span><span class="n">assumeIsolated</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">engine</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Engine</span><span class="p">(</span><span class="n">config</span><span class="p">:</span><span class="w"> </span><span class="n">EngineConfig</span><span class="p">.</span><span class="n">fromArguments</span><span class="p">(</span><span class="n">CommandLine</span><span class="p">.</span><span class="n">arguments</span><span class="p">))</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">engine</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="n">Spin</span><span class="p">())</span>
+<span class="p">}</span>
+<span class="n">exit</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </code></pre></div>
 </div>
 <div class="lang-cpp">
@@ -253,10 +269,13 @@ cmake<span class="w"> </span>--build<span class="w"> </span>build<span class="w"
 </code></pre></div>
 </div>
 
-<p>There is no render pass in it, no pipeline state, no buffer. The game says what exists; everything from the earlier chapters happens inside <code>engine.run</code>.</p>
-<p>Notice how the camera and the sun are aimed. Both look down their own negative z axis, like the camera of the <a href="../getting-started/camera.html">Camera</a> chapter, so giving them a rotation is giving them a direction.</p>
-<h2 id="the-frame">The frame<a class="headerlink" href="#the-frame" title="Permanent link">#</a></h2>
-<p><code>Engine</code> owns the loop. Every frame it does the same things in the same order:</p>
+<p>Dentro non c'è alcun render pass, alcun pipeline state, alcun buffer.<br>
+Il gioco dice che cosa esiste; tutto ciò che viene dai capitoli precedenti avviene dentro <code>engine.run</code>.</p>
+<p>Nota come vengono puntati la camera e il sole.<br>
+Entrambi guardano lungo il proprio asse z negativo, come la camera del capitolo <a href="../getting-started/camera.html">Camera</a>, quindi dare loro una rotazione significa dare loro una direzione.</p>
+<h2 id="il-frame">Il frame<a class="headerlink" href="#il-frame" title="Permanent link">#</a></h2>
+<p><code>Engine</code> possiede il ciclo.<br>
+A ogni frame fa le stesse cose nello stesso ordine:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">func</span><span class="w"> </span><span class="nf">simulate</span><span class="p">(</span><span class="kc">_</span><span class="w"> </span><span class="n">game</span><span class="p">:</span><span class="w"> </span><span class="n">Game</span><span class="p">,</span><span class="w"> </span><span class="n">realDelta</span><span class="p">:</span><span class="w"> </span><span class="nb">Double</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="c1">// Physics and the game's fixedUpdate advance in steps of constant length.</span>
@@ -310,10 +329,15 @@ cmake<span class="w"> </span>--build<span class="w"> </span>build<span class="w"
 </code></pre></div>
 </div>
 
-<p>After this the renderer draws the scene, and then the 2D canvas on top of it.</p>
-<p>The order is not arbitrary. Physics runs before the game's <code>update</code>, so game logic sees where things ended up. World matrices are computed after everything that can move an entity, and before the two systems that need them: particles and the renderer. Entities that were destroyed during the frame are only removed at fixed points, so that no system ever holds a reference to something that vanished halfway through.</p>
-<h2 id="a-fixed-step-for-physics">A fixed step for physics<a class="headerlink" href="#a-fixed-step-for-physics" title="Permanent link">#</a></h2>
-<p>Rendering takes a different amount of time every frame. If physics advanced by that same varying amount, a ball would bounce a little differently on every machine, and a slow frame could push it through a floor. So physics always advances by exactly one sixtieth of a second, and the engine decides how many such steps fit in the time that has passed:</p>
+<p>Dopo, il renderer disegna la scena, e sopra di essa il canvas 2D.</p>
+<p>L'ordine non è arbitrario.<br>
+La fisica gira prima dell'<code>update</code> del gioco, così la logica di gioco vede dove sono finite le cose.<br>
+Le matrici di mondo vengono calcolate dopo tutto ciò che può spostare un'entità, e prima dei due sistemi che ne hanno bisogno: le particelle e il renderer.<br>
+Le entità distrutte durante il frame vengono rimosse solo in punti fissi, così nessun sistema tiene mai un riferimento a qualcosa che è sparito a metà strada.</p>
+<h2 id="un-passo-fisso-per-la-fisica">Un passo fisso per la fisica<a class="headerlink" href="#un-passo-fisso-per-la-fisica" title="Permanent link">#</a></h2>
+<p>Il rendering impiega un tempo diverso a ogni frame.<br>
+Se la fisica avanzasse di quella stessa quantità variabile, una palla rimbalzerebbe in modo un po' diverso su ogni macchina, e un frame lento potrebbe farla passare attraverso un pavimento.<br>
+Quindi la fisica avanza sempre di un sessantesimo di secondo esatto, e l'engine decide quanti di questi passi stanno nel tempo trascorso:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">accumulator</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="nb">Double</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span>
 <span class="kd">var</span><span class="w"> </span><span class="nv">steps</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span>
@@ -337,12 +361,19 @@ cmake<span class="w"> </span>--build<span class="w"> </span>build<span class="w"
 </code></pre></div>
 </div>
 
-<p>Real time is poured into the accumulator and taken out in fixed portions. On a 120 Hz display, every other frame runs no step at all; after a hiccup, one frame runs several, up to a limit.</p>
-<p>What is left in the accumulator is a fraction of a step, <code>alpha</code>. The renderer does not show bodies at their latest physics position, but at a blend between the previous one and the latest one, <code>alpha</code> of the way along. That is what makes motion smooth even though physics only knows sixty moments per second.</p>
-<p>One consequence is worth remembering: a function that runs "zero, one or several times per frame" is the wrong place to ask whether a key was just pressed. Read input in <code>update</code> and remember it; apply forces in <code>fixedUpdate</code>.</p>
-<h2 id="one-source-of-truth-for-the-gpu">One source of truth for the GPU<a class="headerlink" href="#one-source-of-truth-for-the-gpu" title="Permanent link">#</a></h2>
-<p>Every chapter with a uniform buffer had the same warning: the struct in the shader and the struct in the host code must match byte for byte, and nothing checks it. In an engine with a dozen such structs and two host languages, hoping is not enough.</p>
-<p>The engine declares each struct once, in a C header that all three compilers read. Inside a shader the <code>simd</code> names are made to mean the shader's own types. Shortened to one struct, the header looks like this:</p>
+<p>Il tempo reale viene versato nell'accumulatore e prelevato in porzioni fisse.<br>
+Su uno schermo a 120 Hz un frame su due non esegue alcun passo; dopo un intoppo un frame ne esegue diversi, fino a un limite.</p>
+<p>Ciò che resta nell'accumulatore è una frazione di passo, <code>alpha</code>.<br>
+Il renderer non mostra i corpi nella loro ultima posizione fisica, ma in una miscela tra la precedente e l'ultima, a <code>alpha</code> del percorso.<br>
+È questo che rende fluido il movimento anche se la fisica conosce solo sessanta istanti al secondo.</p>
+<p>Vale la pena ricordare una conseguenza: una funzione che gira "zero, una o più volte per frame" è il posto sbagliato per chiedere se un tasto è stato appena premuto.<br>
+Leggi l'input in <code>update</code> e ricordalo; applica le forze in <code>fixedUpdate</code>.</p>
+<h2 id="ununica-fonte-di-verita-per-la-gpu">Un'unica fonte di verità per la GPU<a class="headerlink" href="#ununica-fonte-di-verita-per-la-gpu" title="Permanent link">#</a></h2>
+<p>Ogni capitolo con un buffer di uniform aveva lo stesso avvertimento: la struct nello shader e la struct nel codice host devono coincidere byte per byte, e nessuno lo controlla.<br>
+In un engine con una dozzina di struct del genere e due linguaggi host, sperare non basta.</p>
+<p>L'engine dichiara ogni struct una volta sola, in un header C letto da tutti e tre i compilatori.<br>
+Dentro uno shader i nomi di <code>simd</code> vengono fatti corrispondere ai tipi propri dello shader.<br>
+Ridotto a una sola struct, l'header è così:</p>
 <div class="codehilite"><pre><span></span><code><span class="c1">// Shaders/Shared/ShaderTypes.h</span>
 <span class="cp">#ifdef __METAL_VERSION__</span>
 <span class="k">typedef</span><span class="w"> </span><span class="n">float2</span><span class="w"> </span><span class="n">simd_float2</span><span class="p">;</span>
@@ -371,7 +402,8 @@ cmake<span class="w"> </span>--build<span class="w"> </span>build<span class="w"
 <span class="p">}</span><span class="w"> </span><span class="n">InstanceData</span><span class="p">;</span>
 </code></pre></div>
 
-<p>The shaders include it with <code>#include</code>. The host code brings it in like this:</p>
+<p>Gli shader lo includono con <code>#include</code>.<br>
+Il codice host lo importa così:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// Package.swift: a C target whose only header is ShaderTypes.h</span>
 <span class="p">.</span><span class="n">target</span><span class="p">(</span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="s">"ShaderTypes"</span><span class="p">,</span><span class="w"> </span><span class="n">path</span><span class="p">:</span><span class="w"> </span><span class="s">"Shaders/Shared"</span><span class="p">,</span><span class="w"> </span><span class="n">publicHeadersPath</span><span class="p">:</span><span class="w"> </span><span class="s">"."</span><span class="p">),</span>
@@ -408,91 +440,95 @@ cmake<span class="w"> </span>--build<span class="w"> </span>build<span class="w"
 </code></pre></div>
 </div>
 
-<p>The binding slots live in the same header, so <code>[[buffer(LMBufferInstances)]]</code> in a shader and the index passed to the encoder are the same constant, not two numbers that happen to agree.</p>
-<p>Two rules keep the header safe. No <code>bool</code>, whose size differs between languages. And remember that a <code>float3</code> occupies sixteen bytes in all three languages: the unit tests check the size of every struct, so a mistake fails a test and not a frame.</p>
-<h2 id="where-each-chapter-went">Where each chapter went<a class="headerlink" href="#where-each-chapter-went" title="Permanent link">#</a></h2>
+<p>Gli slot di binding stanno nello stesso header, quindi <code>[[buffer(LMBufferInstances)]]</code> in uno shader e l'indice passato all'encoder sono la stessa costante, non due numeri che per caso coincidono.</p>
+<p>Due regole tengono al sicuro l'header.<br>
+Niente <code>bool</code>, la cui dimensione cambia da un linguaggio all'altro.<br>
+E ricorda che un <code>float3</code> occupa sedici byte in tutti e tre i linguaggi: i test unitari controllano la dimensione di ogni struct, quindi un errore fa fallire un test e non un frame.</p>
+<h2 id="dove-e-finito-ogni-capitolo">Dove è finito ogni capitolo<a class="headerlink" href="#dove-e-finito-ogni-capitolo" title="Permanent link">#</a></h2>
 <table>
 <thead>
 <tr>
-<th>Chapter</th>
-<th>In the engine</th>
+<th>Capitolo</th>
+<th>Nell'engine</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><a href="../getting-started/shaders.html">Shaders</a></td>
-<td><code>Rendering/ShaderLibrary</code>, which compiles the <code>.metal</code> files at startup and reloads them when they change</td>
+<td><a href="../getting-started/shaders.html">Shader</a></td>
+<td><code>Rendering/ShaderLibrary</code>, che compila i file <code>.metal</code> all'avvio e li ricarica quando cambiano</td>
 </tr>
 <tr>
-<td><a href="../getting-started/textures.html">Textures</a></td>
+<td><a href="../getting-started/textures.html">Texture</a></td>
 <td><code>Rendering/Texture</code>, <code>Assets/Assets</code></td>
 </tr>
 <tr>
-<td><a href="../getting-started/transformations.html">Transformations</a>, <a href="../getting-started/camera.html">Camera</a></td>
+<td><a href="../getting-started/transformations.html">Trasformazioni</a>, <a href="../getting-started/camera.html">Camera</a></td>
 <td><code>Math/Math</code>, <code>Scene/Scene</code></td>
 </tr>
 <tr>
-<td><a href="../lighting/multiple-lights.html">Multiple Lights</a></td>
+<td><a href="../lighting/multiple-lights.html">Più luci</a></td>
 <td><code>Shaders/Lighting.metal</code></td>
 </tr>
 <tr>
-<td><a href="../model-loading/model.html">Model</a></td>
-<td><code>Assets/MeshData</code>, with its own reader for OBJ files</td>
+<td><a href="../model-loading/model.html">Modello</a></td>
+<td><code>Assets/MeshData</code>, con un suo lettore di file OBJ</td>
 </tr>
 <tr>
-<td><a href="../advanced-metal/blending.html">Blending</a>, <a href="../advanced-metal/face-culling.html">Face Culling</a></td>
-<td>transparent and cut-out materials in <code>Rendering/RenderPasses</code></td>
+<td><a href="../advanced-metal/blending.html">Blending</a>, <a href="../advanced-metal/face-culling.html">Face culling</a></td>
+<td>materiali trasparenti e ritagliati in <code>Rendering/RenderPasses</code></td>
 </tr>
 <tr>
-<td><a href="../advanced-metal/render-targets.html">Render Targets</a>, <a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></td>
-<td>the HDR, multisampled main pass</td>
+<td><a href="../advanced-metal/render-targets.html">Render target</a>, <a href="../advanced-metal/anti-aliasing.html">Anti-aliasing</a></td>
+<td>il pass principale in HDR e multisample</td>
 </tr>
 <tr>
-<td><a href="../advanced-metal/cubemaps.html">Cubemaps</a></td>
+<td><a href="../advanced-metal/cubemaps.html">Cubemap</a></td>
 <td><code>Rendering/Environment</code>, <code>Shaders/Sky.metal</code></td>
 </tr>
 <tr>
 <td><a href="../advanced-metal/instancing.html">Instancing</a></td>
-<td>automatic, in <code>Renderer.makeBatches</code></td>
+<td>automatico, in <code>Renderer.makeBatches</code></td>
 </tr>
 <tr>
-<td><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></td>
-<td><code>Rendering/Cascades</code>: four shadow maps instead of one</td>
+<td><a href="../advanced-lighting/shadow-mapping.html">Shadow mapping</a></td>
+<td><code>Rendering/Cascades</code>: quattro shadow map invece di una</td>
 </tr>
 <tr>
-<td><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></td>
-<td>tangents in <code>Assets/MeshData</code>, <code>Shaders/Forward.metal</code></td>
+<td><a href="../advanced-lighting/normal-mapping.html">Normal mapping</a></td>
+<td>tangenti in <code>Assets/MeshData</code>, <code>Shaders/Forward.metal</code></td>
 </tr>
 <tr>
 <td><a href="../advanced-lighting/hdr.html">HDR</a>, <a href="../advanced-lighting/bloom.html">Bloom</a>, <a href="../advanced-lighting/ssao.html">SSAO</a></td>
 <td><code>Shaders/Post.metal</code></td>
 </tr>
 <tr>
-<td><a href="../pbr/lighting.html">PBR</a>, <a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a>, <a href="../pbr/specular-ibl.html">Specular IBL</a></td>
+<td><a href="../pbr/lighting.html">PBR</a>, <a href="../pbr/diffuse-irradiance.html">Irradianza diffusa</a>, <a href="../pbr/specular-ibl.html">IBL speculare</a></td>
 <td><code>Shaders/Lighting.metal</code>, <code>Shaders/IBL.metal</code></td>
 </tr>
 <tr>
-<td><a href="debugging.html">Debugging</a></td>
-<td>labels on every pass, <code>Rendering/DebugDraw</code></td>
+<td><a href="debugging.html">Debug</a></td>
+<td>etichette su ogni pass, <code>Rendering/DebugDraw</code></td>
 </tr>
 <tr>
-<td><a href="text-rendering.html">Text Rendering</a>, <a href="2d-game.html">A 2D Game</a></td>
-<td><code>Rendering/Canvas</code>, with distance-field fonts</td>
+<td><a href="text-rendering.html">Rendering del testo</a>, <a href="2d-game.html">Un gioco 2D</a></td>
+<td><code>Rendering/Canvas</code>, con font a distance field</td>
 </tr>
 <tr>
-<td><a href="../apple-platforms/tile-based-gpus.html">Tile-Based GPUs</a></td>
-<td>memoryless targets, load and store actions chosen per pass</td>
+<td><a href="../apple-platforms/tile-based-gpus.html">GPU tile-based</a></td>
+<td>target memoryless, load e store action scelte pass per pass</td>
 </tr>
 </tbody>
 </table>
-<p>Not everything made it. There are no <a href="../advanced-metal/stencil-testing.html">stencil outlines</a>, no <a href="../advanced-lighting/deferred-shading.html">deferred path</a>, no <a href="../advanced-lighting/point-shadows.html">shadows from point lights</a>, no <a href="../advanced-lighting/parallax-mapping.html">parallax mapping</a>, and nothing from the Beyond section. A small engine that does a few things well is a better place to add those than a large one that does everything halfway.</p>
-<p>The <a href="engine-renderer.html">next chapter</a> opens the renderer.</p></article><nav class="pager" id="pager"><a class="prev" href="../in-practice/2d-game.html"><small>Precedente</small>Un gioco 2D</a><a class="next" href="../in-practice/engine-renderer.html"><small>Successivo</small>Engine: il renderer</a></nav>
+<p>Non è entrato tutto.<br>
+Non ci sono i <a href="../advanced-metal/stencil-testing.html">contorni con lo stencil</a>, né un <a href="../advanced-lighting/deferred-shading.html">percorso deferred</a>, né le <a href="../advanced-lighting/point-shadows.html">ombre delle luci puntiformi</a>, né il <a href="../advanced-lighting/parallax-mapping.html">parallax mapping</a>, né niente della sezione Oltre.<br>
+Un engine piccolo che fa bene poche cose è un posto migliore per aggiungerle di uno grande che fa tutto a metà.</p>
+<p>Il <a href="engine-renderer.html">prossimo capitolo</a> apre il renderer.</p></article><nav class="pager" id="pager"><a class="prev" href="../in-practice/2d-game.html"><small>Precedente</small>Un gioco 2D</a><a class="next" href="../in-practice/engine-renderer.html"><small>Successivo</small>Engine: il renderer</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#get-it-and-run-it">Get it and run it</a></li><li><a href="#what-an-engine-adds">What an engine adds</a></li><li><a href="#the-shape-of-a-game">The shape of a game</a></li><li><a href="#the-frame">The frame</a></li><li><a href="#a-fixed-step-for-physics">A fixed step for physics</a></li><li><a href="#one-source-of-truth-for-the-gpu">One source of truth for the GPU</a></li><li><a href="#where-each-chapter-went">Where each chapter went</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#scaricarlo-ed-eseguirlo">Scaricarlo ed eseguirlo</a></li><li><a href="#che-cosa-aggiunge-un-engine">Che cosa aggiunge un engine</a></li><li><a href="#la-forma-di-un-gioco">La forma di un gioco</a></li><li><a href="#il-frame">Il frame</a></li><li><a href="#un-passo-fisso-per-la-fisica">Un passo fisso per la fisica</a></li><li><a href="#ununica-fonte-di-verita-per-la-gpu">Un&#x27;unica fonte di verità per la GPU</a></li><li><a href="#dove-e-finito-ogni-capitolo">Dove è finito ogni capitolo</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

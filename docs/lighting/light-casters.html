@@ -137,9 +137,11 @@
 <article><p class="crumb">Lighting</p><h1 id="light-casters">Light Casters<a class="headerlink" href="#light-casters" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Example project</strong> <code>examples/Sources/10-MultipleLights</code>, run with <code>swift run MultipleLights</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
 
-<p>Until now the light has been a single point shining equally in all directions forever. Real scenes have three common kinds of light source: directional lights, point lights and spotlights.</p>
+<p>Until now the light has been a single point shining equally in all directions forever.<br>
+Real scenes have three common kinds of light source: directional lights, point lights and spotlights.</p>
 <h2 id="directional-light">Directional light<a class="headerlink" href="#directional-light" title="Permanent link">#</a></h2>
-<p>A light that is extremely far away, like the sun, has rays that are effectively parallel. Its position is irrelevant; only its <strong>direction</strong> matters, and it is the same for every fragment.</p>
+<p>A light that is extremely far away, like the sun, has rays that are effectively parallel.<br>
+Its position is irrelevant; only its <strong>direction</strong> matters, and it is the same for every fragment.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">DirectionalLight</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">direction</span><span class="p">;</span><span class="w">   </span><span class="c1">// the direction the light travels</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">ambient</span><span class="p">;</span>
@@ -152,13 +154,18 @@
 <div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">lightDir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="o">-</span><span class="n">light</span><span class="p">.</span><span class="n">direction</span><span class="p">);</span>
 </code></pre></div>
 
-<p>Everything else stays the same. With <code>direction = (-0.2, -1.0, -0.3)</code> all ten cubes are lit from above at the same angle.</p>
+<p>Everything else stays the same.<br>
+With <code>direction = (-0.2, -1.0, -0.3)</code> all ten cubes are lit from above at the same angle.</p>
 <h2 id="point-light">Point light<a class="headerlink" href="#point-light" title="Permanent link">#</a></h2>
-<p>A point light has a position and shines in all directions, but it fades with distance. That fading is called <strong>attenuation</strong>. A formula that looks good and is cheap:</p>
+<p>A point light has a position and shines in all directions, but it fades with distance.<br>
+That fading is called <strong>attenuation</strong>.<br>
+A formula that looks good and is cheap:</p>
 <div class="codehilite"><pre><span></span><code>attenuation = 1 / (constant + linear * d + quadratic * d²)
 </code></pre></div>
 
-<p>where <code>d</code> is the distance from the light. The constant term is normally 1 so the result never exceeds 1. The linear and quadratic terms set how fast the light dies off.</p>
+<p>where <code>d</code> is the distance from the light.<br>
+The constant term is normally 1 so the result never exceeds 1.<br>
+The linear and quadratic terms set how fast the light dies off.</p>
 <table>
 <thead>
 <tr>
@@ -217,8 +224,11 @@
 </code></pre></div>
 
 <h2 id="spotlight">Spotlight<a class="headerlink" href="#spotlight" title="Permanent link">#</a></h2>
-<p>A spotlight is a point light that only shines inside a cone. It needs a position, a direction, and a <strong>cutoff</strong> angle. For each fragment, compare the angle between the spotlight's direction and the direction from the light to the fragment against the cutoff.</p>
-<p>Comparing angles would require an expensive inverse cosine, so we compare cosines instead. Pass the cosine of the cutoff from Swift:</p>
+<p>A spotlight is a point light that only shines inside a cone.<br>
+It needs a position, a direction, and a <strong>cutoff</strong> angle.<br>
+For each fragment, compare the angle between the spotlight's direction and the direction from the light to the fragment against the cutoff.</p>
+<p>Comparing angles would require an expensive inverse cosine, so we compare cosines instead.<br>
+Pass the cosine of the cutoff from Swift:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">light</span><span class="p">.</span><span class="n">cutOff</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">cos</span><span class="p">(</span><span class="nb">Float</span><span class="p">(</span><span class="mf">12.5</span><span class="p">).</span><span class="n">radians</span><span class="p">)</span>
 <span class="n">light</span><span class="p">.</span><span class="n">outerCutOff</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">cos</span><span class="p">(</span><span class="nb">Float</span><span class="p">(</span><span class="mf">17.5</span><span class="p">).</span><span class="n">radians</span><span class="p">)</span>
@@ -230,7 +240,8 @@
 </code></pre></div>
 </div>
 
-<p>A hard cutoff gives an ugly sharp circle. Two cones, an inner and a slightly larger outer one, give a soft edge: full brightness inside the inner cone, none outside the outer cone, and a smooth blend between.</p>
+<p>A hard cutoff gives an ugly sharp circle.<br>
+Two cones, an inner and a slightly larger outer one, give a soft edge: full brightness inside the inner cone, none outside the outer cone, and a smooth blend between.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">SpotLight</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">position</span><span class="p">;</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">direction</span><span class="p">;</span>
@@ -251,7 +262,9 @@
 <span class="n">specular</span><span class="w"> </span><span class="o">*=</span><span class="w"> </span><span class="n">intensity</span><span class="p">;</span>
 </code></pre></div>
 
-<p><code>saturate(x)</code> clamps to the 0 to 1 range. Ambient is left alone so that the scene outside the cone is not pitch black. Remember that a <em>larger</em> cosine means a <em>smaller</em> angle, which is why the comparison looks reversed.</p>
+<p><code>saturate(x)</code> clamps to the 0 to 1 range.<br>
+Ambient is left alone so that the scene outside the cone is not pitch black.<br>
+Remember that a <em>larger</em> cosine means a <em>smaller</em> angle, which is why the comparison looks reversed.</p>
 <h2 id="a-flashlight">A flashlight<a class="headerlink" href="#a-flashlight" title="Permanent link">#</a></h2>
 <p>A flashlight is a spotlight attached to the camera:</p>
 <div class="lang-swift">
@@ -270,9 +283,13 @@
 
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
-<li>Give the directional light a warm color and a low angle for a sunset.<details class="solution"><summary>Show solution</summary><p>Use a direction close to horizontal, such as (-1.0, -0.15, -0.3), and a diffuse color like (1.0, 0.55, 0.25) with a dim bluish ambient such as (0.05, 0.06, 0.1). Long shading gradients and warm highlights do the rest.</p></details></li>
-<li>Experiment with the attenuation terms until a point light reaches exactly the nearest cubes.<details class="solution"><summary>Show solution</summary><p>Start from the table: for a range of about 13 units use linear 0.35 and quadratic 0.44. Raise the quadratic term to make the light die sooner without darkening what is close; raise the linear term to darken everything more evenly.</p></details></li>
-<li>Project a texture from the spotlight, like a slide projector: use the fragment's position within the cone as a texture coordinate.<details class="solution"><summary>Show solution</summary><p>Build a view-projection matrix for the spotlight, as for a camera at the light looking along its direction. Transform the fragment's world position with it, divide by w, and map from -1...1 to 0...1 to get a texture coordinate. Multiply the light's color by the sampled image.</p>
+<li>Give the directional light a warm color and a low angle for a sunset.<details class="solution"><summary>Show solution</summary><p>Use a direction close to horizontal, such as (-1.0, -0.15, -0.3), and a diffuse color like (1.0, 0.55, 0.25) with a dim bluish ambient such as (0.05, 0.06, 0.1).<br>
+Long shading gradients and warm highlights do the rest.</p></details></li>
+<li>Experiment with the attenuation terms until a point light reaches exactly the nearest cubes.<details class="solution"><summary>Show solution</summary><p>Start from the table: for a range of about 13 units use linear 0.35 and quadratic 0.44.<br>
+Raise the quadratic term to make the light die sooner without darkening what is close; raise the linear term to darken everything more evenly.</p></details></li>
+<li>Project a texture from the spotlight, like a slide projector: use the fragment's position within the cone as a texture coordinate.<details class="solution"><summary>Show solution</summary><p>Build a view-projection matrix for the spotlight, as for a camera at the light looking along its direction.<br>
+Transform the fragment's world position with it, divide by w, and map from -1...1 to 0...1 to get a texture coordinate.<br>
+Multiply the light's color by the sampled image.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float4</span><span class="w"> </span><span class="n">lightClip</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">lightViewProjection</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">worldPosition</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
 <span class="n">float2</span><span class="w"> </span><span class="n">slideUV</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lightClip</span><span class="p">.</span><span class="n">xy</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">lightClip</span><span class="p">.</span><span class="n">w</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">float2</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.5</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.5</span><span class="p">;</span>
 <span class="n">float3</span><span class="w"> </span><span class="n">slide</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">slideTexture</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">clampSampler</span><span class="p">,</span><span class="w"> </span><span class="n">slideUV</span><span class="p">).</span><span class="n">rgb</span><span class="p">;</span>

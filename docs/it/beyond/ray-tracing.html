@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,18 +134,26 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Oltre</p><h1 id="ray-tracing">Ray Tracing<a class="headerlink" href="#ray-tracing" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
-<p>Rasterization answers one question very quickly: which triangle covers this pixel? Everything else, including shadows, reflections and ambient occlusion, has been an approximation layered on top: shadow maps, environment maps, screen-space tricks. Each breaks down somewhere.</p>
-<p><strong>Ray tracing</strong> answers a more general question: what does a ray starting <em>here</em> and going <em>that way</em> hit first? With that one operation, shadows, reflections and occlusion become exact and almost trivial to express. Metal has a ray tracing API that runs on all Apple silicon, with hardware acceleration on recent chips.</p>
-<p>This chapter is an introduction. The goal is to understand the pieces and trace your first rays, then add ray traced shadows to the rasterized renderer you already have.</p>
-<h2 id="acceleration-structures">Acceleration structures<a class="headerlink" href="#acceleration-structures" title="Permanent link">#</a></h2>
-<p>Testing a ray against every triangle in a scene is hopeless. An <strong>acceleration structure</strong> organizes the triangles in a tree of bounding boxes, so a ray can skip almost all of them. Metal builds and traverses this structure for you.</p>
-<p>There are two levels:</p>
+<article><p class="crumb">Oltre</p><h1 id="ray-tracing">Ray tracing<a class="headerlink" href="#ray-tracing" title="Permanent link">#</a></h1>
+<p>La rasterizzazione risponde molto in fretta a una domanda: quale triangolo copre questo pixel?<br>
+Tutto il resto, comprese ombre, riflessi e ambient occlusion, è stato finora un'approssimazione costruita sopra: shadow map, environment map, trucchi in screen space.<br>
+Ognuna da qualche parte cede.</p>
+<p>Il <strong>ray tracing</strong> risponde a una domanda più generale: che cosa colpisce per primo un raggio che parte <em>da qui</em> e va <em>da quella parte</em>?<br>
+Con questa sola operazione ombre, riflessi e occlusione diventano esatti e quasi banali da esprimere.<br>
+Metal ha un'API di ray tracing che gira su tutto Apple silicon, con accelerazione hardware sui chip recenti.</p>
+<p>Questo capitolo è un'introduzione.<br>
+Lo scopo è capire i pezzi e tracciare i tuoi primi raggi, poi aggiungere ombre in ray tracing al renderer rasterizzato che hai già.</p>
+<h2 id="acceleration-structure">Acceleration structure<a class="headerlink" href="#acceleration-structure" title="Permanent link">#</a></h2>
+<p>Confrontare un raggio con ogni triangolo di una scena è senza speranza.<br>
+Una <strong>acceleration structure</strong> organizza i triangoli in un albero di bounding box, così un raggio può saltarne quasi tutti.<br>
+Metal costruisce e attraversa questa struttura per te.</p>
+<p>I livelli sono due:</p>
 <ul>
-<li>A <strong>primitive acceleration structure</strong> holds the triangles of one mesh.</li>
-<li>An <strong>instance acceleration structure</strong> holds many instances of primitive structures, each with its own transform. Moving an object means updating a matrix and refitting the top level, not rebuilding the mesh.</li>
+<li>Una <strong>primitive acceleration structure</strong> contiene i triangoli di una mesh.</li>
+<li>Una <strong>instance acceleration structure</strong> contiene molte istanze di strutture primitive, ognuna con la sua trasformazione.<br>
+Muovere un oggetto significa aggiornare una matrice e riadattare il livello superiore, non ricostruire la mesh.</li>
 </ul>
-<p>Check for support first:</p>
+<p>Prima controlla il supporto:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="k">guard</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">supportsRaytracing</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* fall back to shadow maps */</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
@@ -155,8 +163,8 @@
 </code></pre></div>
 </div>
 
-<h2 id="building-a-primitive-structure">Building a primitive structure<a class="headerlink" href="#building-a-primitive-structure" title="Permanent link">#</a></h2>
-<p>Describe the geometry using the vertex and index buffers you already have:</p>
+<h2 id="costruire-una-struttura-primitiva">Costruire una struttura primitiva<a class="headerlink" href="#costruire-una-struttura-primitiva" title="Permanent link">#</a></h2>
+<p>Descrivi la geometria usando i vertex buffer e gli index buffer che hai già:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">geometry</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLAccelerationStructureTriangleGeometryDescriptor</span><span class="p">()</span>
 <span class="n">geometry</span><span class="p">.</span><span class="n">vertexBuffer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">vertexBuffers</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">buffer</span>
@@ -188,7 +196,7 @@
 </code></pre></div>
 </div>
 
-<p>Building happens on the GPU, through a dedicated encoder:</p>
+<p>La costruzione avviene sulla GPU, attraverso un encoder dedicato:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">sizes</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">accelerationStructureSizes</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span><span class="w"> </span><span class="n">descriptor</span><span class="p">)</span>
 <span class="kd">let</span><span class="w"> </span><span class="nv">accelerationStructure</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">makeAccelerationStructure</span><span class="p">(</span><span class="n">size</span><span class="p">:</span><span class="w"> </span><span class="n">sizes</span><span class="p">.</span><span class="n">accelerationStructureSize</span><span class="p">)</span><span class="o">!</span>
@@ -218,9 +226,11 @@
 </code></pre></div>
 </div>
 
-<p>Build static geometry once at load time. The same encoder can <strong>compact</strong> a structure to save memory and <strong>refit</strong> one after vertices move.</p>
-<h2 id="intersecting-rays-in-a-shader">Intersecting rays in a shader<a class="headerlink" href="#intersecting-rays-in-a-shader" title="Permanent link">#</a></h2>
-<p>Ray tracing in Metal is not a separate pipeline. Any shader, whether a kernel or a fragment function, can receive an acceleration structure and shoot rays into it.</p>
+<p>Costruisci la geometria statica una volta sola, al caricamento.<br>
+Lo stesso encoder può <strong>compattare</strong> una struttura per risparmiare memoria e <strong>riadattarla</strong> dopo che i vertici si sono mossi.</p>
+<h2 id="intersecare-i-raggi-in-uno-shader">Intersecare i raggi in uno shader<a class="headerlink" href="#intersecare-i-raggi-in-uno-shader" title="Permanent link">#</a></h2>
+<p>In Metal il ray tracing non è una pipeline separata.<br>
+Qualsiasi shader, che sia un kernel o una fragment function, può ricevere una acceleration structure e lanciarvi dei raggi.</p>
 <div class="codehilite"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;metal_stdlib&gt;</span>
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">metal</span><span class="p">;</span>
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">raytracing</span><span class="p">;</span>
@@ -264,11 +274,16 @@
 </code></pre></div>
 </div>
 
-<p>The intersection result tells you the distance to the hit, which primitive and which geometry were hit, and the barycentric coordinates of the hit point within the triangle. With the primitive index you look up the triangle's vertices in your own buffers and interpolate normals and texture coordinates. Metal can also store small per-primitive data inside the structure to make that lookup cheaper.</p>
-<p>Run this kernel, show the output texture with the full-screen triangle, and you have a ray traced image of your mesh with no rasterization involved.</p>
-<h2 id="hybrid-rendering-ray-traced-shadows">Hybrid rendering: ray traced shadows<a class="headerlink" href="#hybrid-rendering-ray-traced-shadows" title="Permanent link">#</a></h2>
-<p>A full path tracer is a project of its own. The most practical use of ray tracing is <strong>hybrid</strong>: rasterize the scene as before, and use rays only for the effects that rasterization does badly.</p>
-<p>Shadows are the easiest win. In the lighting fragment function, shoot one ray from the surface toward the light. If it hits anything, the point is in shadow:</p>
+<p>Il risultato dell'intersezione ti dice la distanza dal punto colpito, quale primitiva e quale geometria sono state colpite e le coordinate baricentriche del punto dentro il triangolo.<br>
+Con l'indice della primitiva cerchi i vertici del triangolo nei tuoi buffer e interpoli normali e coordinate di texture.<br>
+Metal può anche conservare dentro la struttura piccoli dati per primitiva, per rendere più economica questa ricerca.</p>
+<p>Esegui questo kernel, mostra la texture di uscita con il triangolo a tutto schermo, e hai un'immagine in ray tracing della tua mesh senza alcuna rasterizzazione.</p>
+<h2 id="rendering-ibrido-ombre-in-ray-tracing">Rendering ibrido: ombre in ray tracing<a class="headerlink" href="#rendering-ibrido-ombre-in-ray-tracing" title="Permanent link">#</a></h2>
+<p>Un path tracer completo è un progetto a sé.<br>
+L'uso più pratico del ray tracing è quello <strong>ibrido</strong>: rasterizza la scena come prima e usa i raggi solo per gli effetti che la rasterizzazione fa male.</p>
+<p>Le ombre sono il guadagno più facile.<br>
+Nella fragment function di illuminazione lancia un raggio dalla superficie verso la luce.<br>
+Se colpisce qualcosa, il punto è in ombra:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="nf">traceShadow</span><span class="p">(</span><span class="n">float3</span><span class="w"> </span><span class="n">worldPosition</span><span class="p">,</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="n">normal</span><span class="p">,</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="n">lightPosition</span><span class="p">,</span>
 <span class="w">                         </span><span class="n">primitive_acceleration_structure</span><span class="w"> </span><span class="n">scene</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">toLight</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lightPosition</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">worldPosition</span><span class="p">;</span>
@@ -303,31 +318,42 @@
 </code></pre></div>
 </div>
 
-<p>Compare with <a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a> and <a href="../advanced-lighting/point-shadows.html">Point Shadows</a>: no extra passes, no shadow textures, no bias tuning, no resolution limit, and it works for any type of light. <code>accept_any_intersection(true)</code> lets traversal stop at the first hit, which makes shadow rays cheap.</p>
-<p>The same pattern gives:</p>
+<p>Confronta con <a href="../advanced-lighting/shadow-mapping.html">Shadow mapping</a> e <a href="../advanced-lighting/point-shadows.html">Ombre da luci puntiformi</a>: nessun pass in più, nessuna texture di ombre, nessun bias da regolare, nessun limite di risoluzione, e funziona con qualsiasi tipo di luce.<br>
+<code>accept_any_intersection(true)</code> permette all'attraversamento di fermarsi al primo punto colpito, e questo rende economici i raggi d'ombra.</p>
+<p>Lo stesso schema dà:</p>
 <ul>
-<li><strong>Reflections</strong>: trace along <code>reflect(-V, N)</code> and shade the hit point.</li>
-<li><strong>Ambient occlusion</strong>: trace a few short rays in the hemisphere above the surface and count the hits. Real occlusion, replacing <a href="../advanced-lighting/ssao.html">SSAO</a>.</li>
-<li><strong>Soft shadows</strong>: aim rays at random points on an area light and average over frames.</li>
+<li><strong>Riflessi</strong>: traccia lungo <code>reflect(-V, N)</code> e calcola il colore del punto colpito.</li>
+<li><strong>Ambient occlusion</strong>: traccia alcuni raggi corti nell'emisfero sopra la superficie e conta quelli che colpiscono qualcosa.<br>
+È occlusione vera, e sostituisce l'<a href="../advanced-lighting/ssao.html">SSAO</a>.</li>
+<li><strong>Ombre morbide</strong>: punta i raggi verso punti casuali di una luce ad area e fai la media su più frame.</li>
 </ul>
 <div class="lm-demo" data-demo="ray-tracing" data-fallback="../../assets/img/beyond/ray-tracing.webp"></div>
 
-<h2 id="noise-and-denoising">Noise and denoising<a class="headerlink" href="#noise-and-denoising" title="Permanent link">#</a></h2>
-<p>One ray per pixel gives hard shadows and mirror reflections. Soft effects need many rays in random directions, and a real-time budget allows only a few per pixel. The result is noisy. The standard remedy is to <strong>accumulate</strong> results over several frames and to <strong>denoise</strong>. Metal Performance Shaders includes <code>MPSSVGFDenoiser</code>, and MetalFX offers denoised upscaling on recent systems.</p>
-<h2 id="going-further">Going further<a class="headerlink" href="#going-further" title="Permanent link">#</a></h2>
+<h2 id="rumore-e-denoising">Rumore e denoising<a class="headerlink" href="#rumore-e-denoising" title="Permanent link">#</a></h2>
+<p>Un raggio per pixel dà ombre nette e riflessi a specchio.<br>
+Gli effetti morbidi richiedono molti raggi in direzioni casuali, e un budget in tempo reale ne permette solo pochi per pixel.<br>
+Il risultato è rumoroso.<br>
+Il rimedio consueto è <strong>accumulare</strong> i risultati su più frame e fare <strong>denoising</strong>.<br>
+Metal Performance Shaders include <code>MPSSVGFDenoiser</code>, e sui sistemi recenti MetalFX offre un upscaling con denoising.</p>
+<h2 id="per-andare-oltre">Per andare oltre<a class="headerlink" href="#per-andare-oltre" title="Permanent link">#</a></h2>
 <ul>
-<li><strong>Instance acceleration structures</strong> for scenes with many moving objects (<code>MTLInstanceAccelerationStructureDescriptor</code>).</li>
-<li><strong>Intersection functions</strong> for custom primitives such as spheres and curves, and for alpha-tested geometry like foliage.</li>
-<li><strong>Path tracing</strong>: follow rays through several bounces to compute global illumination. Apple's sample code "Accelerating ray tracing using Metal" is a compact, readable path tracer and the natural next step.</li>
+<li>Le <strong>instance acceleration structure</strong> per le scene con molti oggetti in movimento (<code>MTLInstanceAccelerationStructureDescriptor</code>).</li>
+<li>Le <strong>intersection function</strong> per primitive personalizzate come sfere e curve, e per la geometria con alpha test come il fogliame.</li>
+<li>Il <strong>path tracing</strong>: seguire i raggi per più rimbalzi e calcolare l'illuminazione globale.<br>
+Il codice di esempio di Apple "Accelerating ray tracing using Metal" è un path tracer compatto e leggibile, ed è il passo successivo naturale.</li>
 </ul>
-<h2 id="the-end-and-the-beginning">The end, and the beginning<a class="headerlink" href="#the-end-and-the-beginning" title="Permanent link">#</a></h2>
-<p>This is the last chapter. You started with an empty view and now have the vocabulary to read any Metal sample, engine source or graphics paper. Pick something you want to see on screen and build it. Read Apple's sample code, watch the Metal sessions from WWDC, and keep the frame debugger open. There is always one more technique to learn, and you now have the foundation to learn it.</p></article><nav class="pager" id="pager"><a class="prev" href="../beyond/tessellation.html"><small>Precedente</small>Tassellazione</a><a class="next" href="../beyond/mesh-shaders.html"><small>Successivo</small>Mesh shader</a></nav>
+<h2 id="la-fine-e-linizio">La fine, e l'inizio<a class="headerlink" href="#la-fine-e-linizio" title="Permanent link">#</a></h2>
+<p>Questo è l'ultimo capitolo.<br>
+Sei partito da una vista vuota e ora hai il vocabolario per leggere qualsiasi esempio di Metal, il sorgente di un motore o un articolo di grafica.<br>
+Scegli qualcosa che vuoi vedere a schermo e costruiscilo.<br>
+Leggi il codice di esempio di Apple, guarda le sessioni su Metal della WWDC e tieni aperto il frame debugger.<br>
+C'è sempre un'altra tecnica da imparare, e adesso hai le basi per impararla.</p></article><nav class="pager" id="pager"><a class="prev" href="../beyond/tessellation.html"><small>Precedente</small>Tassellazione</a><a class="next" href="../beyond/mesh-shaders.html"><small>Successivo</small>Mesh shader</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#acceleration-structures">Acceleration structures</a></li><li><a href="#building-a-primitive-structure">Building a primitive structure</a></li><li><a href="#intersecting-rays-in-a-shader">Intersecting rays in a shader</a></li><li><a href="#hybrid-rendering-ray-traced-shadows">Hybrid rendering: ray traced shadows</a></li><li><a href="#noise-and-denoising">Noise and denoising</a></li><li><a href="#going-further">Going further</a></li><li><a href="#the-end-and-the-beginning">The end, and the beginning</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#acceleration-structure">Acceleration structure</a></li><li><a href="#costruire-una-struttura-primitiva">Costruire una struttura primitiva</a></li><li><a href="#intersecare-i-raggi-in-uno-shader">Intersecare i raggi in uno shader</a></li><li><a href="#rendering-ibrido-ombre-in-ray-tracing">Rendering ibrido: ombre in ray tracing</a></li><li><a href="#rumore-e-denoising">Rumore e denoising</a></li><li><a href="#per-andare-oltre">Per andare oltre</a></li><li><a href="#la-fine-e-linizio">La fine, e l&#x27;inizio</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

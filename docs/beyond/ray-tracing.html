@@ -135,15 +135,23 @@
 </nav>
 <main class="content" id="main">
 <article><p class="crumb">Beyond</p><h1 id="ray-tracing">Ray Tracing<a class="headerlink" href="#ray-tracing" title="Permanent link">#</a></h1>
-<p>Rasterization answers one question very quickly: which triangle covers this pixel? Everything else, including shadows, reflections and ambient occlusion, has been an approximation layered on top: shadow maps, environment maps, screen-space tricks. Each breaks down somewhere.</p>
-<p><strong>Ray tracing</strong> answers a more general question: what does a ray starting <em>here</em> and going <em>that way</em> hit first? With that one operation, shadows, reflections and occlusion become exact and almost trivial to express. Metal has a ray tracing API that runs on all Apple silicon, with hardware acceleration on recent chips.</p>
-<p>This chapter is an introduction. The goal is to understand the pieces and trace your first rays, then add ray traced shadows to the rasterized renderer you already have.</p>
+<p>Rasterization answers one question very quickly: which triangle covers this pixel?<br>
+Everything else, including shadows, reflections and ambient occlusion, has been an approximation layered on top: shadow maps, environment maps, screen-space tricks.<br>
+Each breaks down somewhere.</p>
+<p><strong>Ray tracing</strong> answers a more general question: what does a ray starting <em>here</em> and going <em>that way</em> hit first?<br>
+With that one operation, shadows, reflections and occlusion become exact and almost trivial to express.<br>
+Metal has a ray tracing API that runs on all Apple silicon, with hardware acceleration on recent chips.</p>
+<p>This chapter is an introduction.<br>
+The goal is to understand the pieces and trace your first rays, then add ray traced shadows to the rasterized renderer you already have.</p>
 <h2 id="acceleration-structures">Acceleration structures<a class="headerlink" href="#acceleration-structures" title="Permanent link">#</a></h2>
-<p>Testing a ray against every triangle in a scene is hopeless. An <strong>acceleration structure</strong> organizes the triangles in a tree of bounding boxes, so a ray can skip almost all of them. Metal builds and traverses this structure for you.</p>
+<p>Testing a ray against every triangle in a scene is hopeless.<br>
+An <strong>acceleration structure</strong> organizes the triangles in a tree of bounding boxes, so a ray can skip almost all of them.<br>
+Metal builds and traverses this structure for you.</p>
 <p>There are two levels:</p>
 <ul>
 <li>A <strong>primitive acceleration structure</strong> holds the triangles of one mesh.</li>
-<li>An <strong>instance acceleration structure</strong> holds many instances of primitive structures, each with its own transform. Moving an object means updating a matrix and refitting the top level, not rebuilding the mesh.</li>
+<li>An <strong>instance acceleration structure</strong> holds many instances of primitive structures, each with its own transform.<br>
+Moving an object means updating a matrix and refitting the top level, not rebuilding the mesh.</li>
 </ul>
 <p>Check for support first:</p>
 <div class="lang-swift">
@@ -218,9 +226,11 @@
 </code></pre></div>
 </div>
 
-<p>Build static geometry once at load time. The same encoder can <strong>compact</strong> a structure to save memory and <strong>refit</strong> one after vertices move.</p>
+<p>Build static geometry once at load time.<br>
+The same encoder can <strong>compact</strong> a structure to save memory and <strong>refit</strong> one after vertices move.</p>
 <h2 id="intersecting-rays-in-a-shader">Intersecting rays in a shader<a class="headerlink" href="#intersecting-rays-in-a-shader" title="Permanent link">#</a></h2>
-<p>Ray tracing in Metal is not a separate pipeline. Any shader, whether a kernel or a fragment function, can receive an acceleration structure and shoot rays into it.</p>
+<p>Ray tracing in Metal is not a separate pipeline.<br>
+Any shader, whether a kernel or a fragment function, can receive an acceleration structure and shoot rays into it.</p>
 <div class="codehilite"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;metal_stdlib&gt;</span>
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">metal</span><span class="p">;</span>
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">raytracing</span><span class="p">;</span>
@@ -264,11 +274,16 @@
 </code></pre></div>
 </div>
 
-<p>The intersection result tells you the distance to the hit, which primitive and which geometry were hit, and the barycentric coordinates of the hit point within the triangle. With the primitive index you look up the triangle's vertices in your own buffers and interpolate normals and texture coordinates. Metal can also store small per-primitive data inside the structure to make that lookup cheaper.</p>
+<p>The intersection result tells you the distance to the hit, which primitive and which geometry were hit, and the barycentric coordinates of the hit point within the triangle.<br>
+With the primitive index you look up the triangle's vertices in your own buffers and interpolate normals and texture coordinates.<br>
+Metal can also store small per-primitive data inside the structure to make that lookup cheaper.</p>
 <p>Run this kernel, show the output texture with the full-screen triangle, and you have a ray traced image of your mesh with no rasterization involved.</p>
 <h2 id="hybrid-rendering-ray-traced-shadows">Hybrid rendering: ray traced shadows<a class="headerlink" href="#hybrid-rendering-ray-traced-shadows" title="Permanent link">#</a></h2>
-<p>A full path tracer is a project of its own. The most practical use of ray tracing is <strong>hybrid</strong>: rasterize the scene as before, and use rays only for the effects that rasterization does badly.</p>
-<p>Shadows are the easiest win. In the lighting fragment function, shoot one ray from the surface toward the light. If it hits anything, the point is in shadow:</p>
+<p>A full path tracer is a project of its own.<br>
+The most practical use of ray tracing is <strong>hybrid</strong>: rasterize the scene as before, and use rays only for the effects that rasterization does badly.</p>
+<p>Shadows are the easiest win.<br>
+In the lighting fragment function, shoot one ray from the surface toward the light.<br>
+If it hits anything, the point is in shadow:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="nf">traceShadow</span><span class="p">(</span><span class="n">float3</span><span class="w"> </span><span class="n">worldPosition</span><span class="p">,</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="n">normal</span><span class="p">,</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="n">lightPosition</span><span class="p">,</span>
 <span class="w">                         </span><span class="n">primitive_acceleration_structure</span><span class="w"> </span><span class="n">scene</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">toLight</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lightPosition</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">worldPosition</span><span class="p">;</span>
@@ -303,25 +318,36 @@
 </code></pre></div>
 </div>
 
-<p>Compare with <a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a> and <a href="../advanced-lighting/point-shadows.html">Point Shadows</a>: no extra passes, no shadow textures, no bias tuning, no resolution limit, and it works for any type of light. <code>accept_any_intersection(true)</code> lets traversal stop at the first hit, which makes shadow rays cheap.</p>
+<p>Compare with <a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a> and <a href="../advanced-lighting/point-shadows.html">Point Shadows</a>: no extra passes, no shadow textures, no bias tuning, no resolution limit, and it works for any type of light.<br>
+<code>accept_any_intersection(true)</code> lets traversal stop at the first hit, which makes shadow rays cheap.</p>
 <p>The same pattern gives:</p>
 <ul>
 <li><strong>Reflections</strong>: trace along <code>reflect(-V, N)</code> and shade the hit point.</li>
-<li><strong>Ambient occlusion</strong>: trace a few short rays in the hemisphere above the surface and count the hits. Real occlusion, replacing <a href="../advanced-lighting/ssao.html">SSAO</a>.</li>
+<li><strong>Ambient occlusion</strong>: trace a few short rays in the hemisphere above the surface and count the hits.<br>
+Real occlusion, replacing <a href="../advanced-lighting/ssao.html">SSAO</a>.</li>
 <li><strong>Soft shadows</strong>: aim rays at random points on an area light and average over frames.</li>
 </ul>
 <div class="lm-demo" data-demo="ray-tracing" data-fallback="../assets/img/beyond/ray-tracing.webp"></div>
 
 <h2 id="noise-and-denoising">Noise and denoising<a class="headerlink" href="#noise-and-denoising" title="Permanent link">#</a></h2>
-<p>One ray per pixel gives hard shadows and mirror reflections. Soft effects need many rays in random directions, and a real-time budget allows only a few per pixel. The result is noisy. The standard remedy is to <strong>accumulate</strong> results over several frames and to <strong>denoise</strong>. Metal Performance Shaders includes <code>MPSSVGFDenoiser</code>, and MetalFX offers denoised upscaling on recent systems.</p>
+<p>One ray per pixel gives hard shadows and mirror reflections.<br>
+Soft effects need many rays in random directions, and a real-time budget allows only a few per pixel.<br>
+The result is noisy.<br>
+The standard remedy is to <strong>accumulate</strong> results over several frames and to <strong>denoise</strong>.<br>
+Metal Performance Shaders includes <code>MPSSVGFDenoiser</code>, and MetalFX offers denoised upscaling on recent systems.</p>
 <h2 id="going-further">Going further<a class="headerlink" href="#going-further" title="Permanent link">#</a></h2>
 <ul>
 <li><strong>Instance acceleration structures</strong> for scenes with many moving objects (<code>MTLInstanceAccelerationStructureDescriptor</code>).</li>
 <li><strong>Intersection functions</strong> for custom primitives such as spheres and curves, and for alpha-tested geometry like foliage.</li>
-<li><strong>Path tracing</strong>: follow rays through several bounces to compute global illumination. Apple's sample code "Accelerating ray tracing using Metal" is a compact, readable path tracer and the natural next step.</li>
+<li><strong>Path tracing</strong>: follow rays through several bounces to compute global illumination.<br>
+Apple's sample code "Accelerating ray tracing using Metal" is a compact, readable path tracer and the natural next step.</li>
 </ul>
 <h2 id="the-end-and-the-beginning">The end, and the beginning<a class="headerlink" href="#the-end-and-the-beginning" title="Permanent link">#</a></h2>
-<p>This is the last chapter. You started with an empty view and now have the vocabulary to read any Metal sample, engine source or graphics paper. Pick something you want to see on screen and build it. Read Apple's sample code, watch the Metal sessions from WWDC, and keep the frame debugger open. There is always one more technique to learn, and you now have the foundation to learn it.</p></article><nav class="pager" id="pager"><a class="prev" href="../beyond/tessellation.html"><small>Previous</small>Tessellation</a><a class="next" href="../beyond/mesh-shaders.html"><small>Next</small>Mesh Shaders</a></nav>
+<p>This is the last chapter.<br>
+You started with an empty view and now have the vocabulary to read any Metal sample, engine source or graphics paper.<br>
+Pick something you want to see on screen and build it.<br>
+Read Apple's sample code, watch the Metal sessions from WWDC, and keep the frame debugger open.<br>
+There is always one more technique to learn, and you now have the foundation to learn it.</p></article><nav class="pager" id="pager"><a class="prev" href="../beyond/tessellation.html"><small>Previous</small>Tessellation</a><a class="next" href="../beyond/mesh-shaders.html"><small>Next</small>Mesh Shaders</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>

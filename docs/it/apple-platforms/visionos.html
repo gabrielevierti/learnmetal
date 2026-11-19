@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,19 +134,34 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Piattaforme Apple</p><h1 id="visionos">visionOS<a class="headerlink" href="#visionos" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
-<p>On Apple Vision Pro most apps draw with RealityKit. When you want your own renderer, for a game engine or a visualization, you draw <strong>fully immersive</strong> content with Metal through a framework called <strong>Compositor Services</strong>. Your shaders and pipelines are the ones from this book. What is new is everything around the frame: there are two eyes, the camera is a person's head, and the deadline is strict.</p>
-<h2 id="what-is-different">What is different<a class="headerlink" href="#what-is-different" title="Permanent link">#</a></h2>
+<article><p class="crumb">Piattaforme Apple</p><h1 id="visionos">visionOS<a class="headerlink" href="#visionos" title="Permanent link">#</a></h1>
+<p>Su Apple Vision Pro la maggior parte delle app disegna con RealityKit.<br>
+Quando vuoi un renderer tuo, per un game engine o una visualizzazione, disegni contenuti <strong>completamente immersivi</strong> con Metal attraverso un framework chiamato <strong>Compositor Services</strong>.<br>
+I tuoi shader e le tue pipeline sono quelli di questo libro.<br>
+Di nuovo c'è tutto ciò che sta intorno al frame: gli occhi sono due, la camera è la testa di una persona e la scadenza è rigida.</p>
+<h2 id="che-cosa-cambia">Che cosa cambia<a class="headerlink" href="#che-cosa-cambia" title="Permanent link">#</a></h2>
 <ul>
-<li><strong>Two views.</strong> Each frame is rendered once per eye, with a different view and projection matrix for each.</li>
-<li><strong>You do not own the camera.</strong> The view matrix comes from the headset's tracked position, through ARKit.</li>
-<li><strong>You do not own the frame loop.</strong> There is no <code>MTKView</code> and no display link. Compositor Services gives you frames, and tells you when to start working on each.</li>
-<li><strong>The system reprojects.</strong> Just before display, the system warps your image to match the latest head position. To do that it needs your depth buffer, so depth must be correct for every pixel you draw.</li>
-<li><strong>Foveation.</strong> The headset renders the periphery at a lower resolution. You get this almost for free, but it changes how viewports and post-processing work.</li>
-<li><strong>Latency is comfort.</strong> A late frame is not a small stutter here. Aim for the display's rate, 90 frames per second or more, every frame.</li>
+<li><strong>Due viste.</strong><br>
+Ogni frame viene disegnato una volta per occhio, con una matrice view e una di proiezione diverse per ciascuno.</li>
+<li><strong>La camera non è tua.</strong><br>
+La matrice view arriva dalla posizione tracciata del visore, attraverso ARKit.</li>
+<li><strong>Il ciclo dei frame non è tuo.</strong><br>
+Non ci sono né <code>MTKView</code> né display link.<br>
+Compositor Services ti dà i frame e ti dice quando cominciare a lavorare su ciascuno.</li>
+<li><strong>Il sistema riproietta.</strong><br>
+Appena prima della visualizzazione il sistema deforma la tua immagine per farla corrispondere all'ultima posizione della testa.<br>
+Per farlo ha bisogno del tuo depth buffer, quindi la profondità deve essere corretta per ogni pixel che disegni.</li>
+<li><strong>Foveation.</strong><br>
+Il visore disegna la periferia a una risoluzione più bassa.<br>
+Lo ottieni quasi gratis, ma cambia il modo in cui funzionano i viewport e il post-processing.</li>
+<li><strong>La latenza è comfort.</strong><br>
+Qui un frame in ritardo non è un piccolo scatto.<br>
+Punta alla frequenza dello schermo, 90 frame al secondo o più, a ogni frame.</li>
 </ul>
-<h2 id="the-app-and-the-layer">The app and the layer<a class="headerlink" href="#the-app-and-the-layer" title="Permanent link">#</a></h2>
-<p>The entry point is SwiftUI. An <code>ImmersiveSpace</code> whose content is a <code>CompositorLayer</code> hands you a <code>LayerRenderer</code>, the object that replaces the view. Start a dedicated render thread from there; never render on the main thread.</p>
+<h2 id="lapp-e-il-layer">L'app e il layer<a class="headerlink" href="#lapp-e-il-layer" title="Permanent link">#</a></h2>
+<p>Il punto d'ingresso è SwiftUI.<br>
+Un <code>ImmersiveSpace</code> il cui contenuto è un <code>CompositorLayer</code> ti consegna un <code>LayerRenderer</code>, l'oggetto che sostituisce la vista.<br>
+Da lì avvia un thread di rendering dedicato; non disegnare mai sul thread principale.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">import</span><span class="w"> </span><span class="nc">SwiftUI</span>
 <span class="kd">import</span><span class="w"> </span><span class="nc">CompositorServices</span>
@@ -183,7 +198,9 @@
 </div>
 
 <div class="lang-cpp">
-<p>The entry point of a visionOS app is always SwiftUI, so a small Swift file like the one below stays in a C++ project. Everything after that can be C++: Compositor Services has a C API (<code>cp_layer_renderer_t</code>, <code>cp_frame_t</code>, <code>cp_drawable_t</code>), which is what engines use. The Swift closure passes the layer renderer to a C function that starts your render thread.</p>
+<p>Il punto d'ingresso di un'app visionOS è sempre SwiftUI, quindi in un progetto C++ resta un piccolo file Swift come quello qui sotto.<br>
+Tutto il resto può essere C++: Compositor Services ha un'API C (<code>cp_layer_renderer_t</code>, <code>cp_frame_t</code>, <code>cp_drawable_t</code>), che è quella usata dai motori.<br>
+La closure Swift passa il layer renderer a una funzione C che avvia il tuo thread di rendering.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">ImmersiveSpace</span><span class="p">(</span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="s">"Scene"</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">CompositorLayer</span><span class="p">(</span><span class="n">configuration</span><span class="p">:</span><span class="w"> </span><span class="n">LayerConfiguration</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">layerRenderer</span><span class="w"> </span><span class="k">in</span>
 <span class="w">        </span><span class="n">engine_start</span><span class="p">(</span><span class="n">layerRenderer</span><span class="p">)</span><span class="w">          </span><span class="c1">// a C function, declared in the bridging header</span>
@@ -191,12 +208,15 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>There is no GLFW on visionOS, and metal-cpp needs a bridge: the C API returns Objective-C texture objects, which you cast to <code>MTL::Texture*</code> in an Objective-C++ file, as in the <code>glfw_bridge.mm</code> of the macOS starter.</p>
+<p>Su visionOS non c'è GLFW, e a metal-cpp serve un ponte: l'API C restituisce oggetti texture di Objective-C, che converti in <code>MTL::Texture*</code> in un file Objective-C++, come nel <code>glfw_bridge.mm</code> del progetto di partenza per macOS.</p>
 </div>
 
-<p>The <strong>layout</strong> decides how the two eyes' images are stored. <code>.dedicated</code> gives one texture per eye and needs two render passes. <code>.layered</code> gives one array texture with a slice per eye, and lets you draw both eyes in one pass. Prefer layered.</p>
-<h2 id="the-frame-loop">The frame loop<a class="headerlink" href="#the-frame-loop" title="Permanent link">#</a></h2>
-<p>The loop follows the state of the layer: wait while it is paused, render while it is running, and leave when it is invalidated.</p>
+<p>Il <strong>layout</strong> decide come vengono salvate le immagini dei due occhi.<br>
+<code>.dedicated</code> dà una texture per occhio e richiede due render pass.<br>
+<code>.layered</code> dà una sola texture array con uno slice per occhio, e ti permette di disegnare entrambi gli occhi in un pass.<br>
+Preferisci layered.</p>
+<h2 id="il-ciclo-dei-frame">Il ciclo dei frame<a class="headerlink" href="#il-ciclo-dei-frame" title="Permanent link">#</a></h2>
+<p>Il ciclo segue lo stato del layer: aspetta finché è in pausa, disegna finché è in esecuzione, ed esci quando viene invalidato.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">renderLoop</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">{</span>
@@ -211,7 +231,10 @@
 </code></pre></div>
 </div>
 
-<p>A frame has two phases that you announce to the system. In the <strong>update</strong> phase you run everything that does not depend on where the head is: animation, physics, input. Then you sleep until the last sensible moment, ask for the head pose, and enter the <strong>submission</strong> phase, where you encode and commit. Waiting matters: the later you read the pose, the less the system has to correct.</p>
+<p>Un frame ha due fasi che annunci al sistema.<br>
+Nella fase di <strong>update</strong> esegui tutto ciò che non dipende da dove si trova la testa: animazione, fisica, input.<br>
+Poi dormi fino all'ultimo momento ragionevole, chiedi la posa della testa ed entri nella fase di <strong>submission</strong>, in cui codifichi e fai il commit.<br>
+Aspettare conta: più tardi leggi la posa, meno il sistema deve correggere.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">renderFrame</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">guard</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">frame</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">layerRenderer</span><span class="p">.</span><span class="n">queryNextFrame</span><span class="p">()</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="p">}</span>
@@ -242,7 +265,8 @@
 </div>
 
 <div class="lang-cpp">
-<p>With the C API the same frame reads as follows. Each call matches a Swift method one to one.</p>
+<p>Con l'API C lo stesso frame si legge così.<br>
+Ogni chiamata corrisponde uno a uno a un metodo Swift.</p>
 <div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">Engine::renderFrame</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">cp_frame_t</span><span class="w"> </span><span class="n">frame</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cp_layer_renderer_query_next_frame</span><span class="p">(</span><span class="n">layerRenderer</span><span class="p">);</span>
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">frame</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">nullptr</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
@@ -275,9 +299,12 @@
 </code></pre></div>
 </div>
 
-<p><code>worldTracking</code> is an ARKit <code>WorldTrackingProvider</code> that you start once with <code>ARKitSession().run([worldTracking])</code>. Setting <code>deviceAnchor</code> on the drawable tells the system which pose you rendered for, so it can correct the difference.</p>
-<h2 id="two-eyes-two-matrices">Two eyes, two matrices<a class="headerlink" href="#two-eyes-two-matrices" title="Permanent link">#</a></h2>
-<p>Each drawable has a list of views, normally two. A view gives the eye's transform relative to the device, and the drawable computes the eye's projection. Both are different for each eye, and the projection is not symmetric, so do not build it from a field of view.</p>
+<p><code>worldTracking</code> è un <code>WorldTrackingProvider</code> di ARKit che avvii una volta con <code>ARKitSession().run([worldTracking])</code>.<br>
+Impostare <code>deviceAnchor</code> sul drawable dice al sistema per quale posa hai disegnato, così può correggere la differenza.</p>
+<h2 id="due-occhi-due-matrici">Due occhi, due matrici<a class="headerlink" href="#due-occhi-due-matrici" title="Permanent link">#</a></h2>
+<p>Ogni drawable ha un elenco di viste, di norma due.<br>
+Una vista dà la trasformazione dell'occhio rispetto al dispositivo, e il drawable calcola la proiezione dell'occhio.<br>
+Entrambe sono diverse per ciascun occhio, e la proiezione non è simmetrica, quindi non costruirla da un campo visivo.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">deviceTransform</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">anchor</span><span class="p">?.</span><span class="n">originFromAnchorTransform</span><span class="w"> </span><span class="p">??</span><span class="w"> </span><span class="n">matrix_identity_float4x4</span>
 
@@ -292,12 +319,16 @@
 </div>
 
 <div class="lang-cpp">
-<p>In C++ read the same values with <code>cp_drawable_get_view</code>, <code>cp_view_get_transform</code> and <code>cp_drawable_compute_projection</code>, and the device transform with <code>ar_anchor_get_origin_from_anchor_transform</code>. The view matrix is <code>simd_inverse(simd_mul(deviceTransform, eyeTransform))</code>.</p>
+<p>In C++ leggi gli stessi valori con <code>cp_drawable_get_view</code>, <code>cp_view_get_transform</code> e <code>cp_drawable_compute_projection</code>, e la trasformazione del dispositivo con <code>ar_anchor_get_origin_from_anchor_transform</code>.<br>
+La matrice view è <code>simd_inverse(simd_mul(deviceTransform, eyeTransform))</code>.</p>
 </div>
 
-<p>visionOS uses <strong>reverse-Z</strong>: the projection maps the near plane to depth 1 and the far plane to 0. Clear depth to 0 and compare with <code>.greater</code>. Units are meters, and the origin is on the floor where the space was opened.</p>
-<h2 id="both-eyes-in-one-pass">Both eyes in one pass<a class="headerlink" href="#both-eyes-in-one-pass" title="Permanent link">#</a></h2>
-<p>With the layered layout the render pass targets an array texture. <strong>Vertex amplification</strong> runs the vertex function once per eye for each draw call and routes each result to its slice, so the scene is encoded once.</p>
+<p>visionOS usa il <strong>reverse-Z</strong>: la proiezione manda il near plane alla profondità 1 e il far plane a 0.<br>
+Pulisci la profondità a 0 e confronta con <code>.greater</code>.<br>
+Le unità sono metri, e l'origine sta sul pavimento nel punto in cui lo spazio è stato aperto.</p>
+<h2 id="entrambi-gli-occhi-in-un-pass">Entrambi gli occhi in un pass<a class="headerlink" href="#entrambi-gli-occhi-in-un-pass" title="Permanent link">#</a></h2>
+<p>Con il layout layered il render pass disegna su una texture array.<br>
+La <strong>vertex amplification</strong> esegue la vertex function una volta per occhio per ogni draw call e instrada ogni risultato verso il suo slice, così la scena viene codificata una volta sola.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">pass</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLRenderPassDescriptor</span><span class="p">()</span>
 <span class="n">pass</span><span class="p">.</span><span class="n">colorAttachments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">texture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">drawable</span><span class="p">.</span><span class="n">colorTextures</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -323,10 +354,11 @@
 </div>
 
 <div class="lang-cpp">
-<p>The render pass is built the same way with metal-cpp, from <code>cp_drawable_get_color_texture(drawable, 0)</code>, <code>cp_drawable_get_depth_texture(drawable, 0)</code>, <code>cp_drawable_get_view_count(drawable)</code> and <code>cp_drawable_get_rasterization_rate_map(drawable, 0)</code>. Then call <code>encoder-&gt;setViewports</code>, <code>encoder-&gt;setVertexAmplificationCount(count, mappings)</code> and bind the array of per-eye uniforms.</p>
+<p>Con metal-cpp il render pass si costruisce allo stesso modo, a partire da <code>cp_drawable_get_color_texture(drawable, 0)</code>, <code>cp_drawable_get_depth_texture(drawable, 0)</code>, <code>cp_drawable_get_view_count(drawable)</code> e <code>cp_drawable_get_rasterization_rate_map(drawable, 0)</code>.<br>
+Poi chiama <code>encoder-&gt;setViewports</code>, <code>encoder-&gt;setVertexAmplificationCount(count, mappings)</code> e collega l'array di uniform per occhio.</p>
 </div>
 
-<p>The pipeline descriptor needs <code>maxVertexAmplificationCount = 2</code>, and the vertex function picks its matrices with the amplification index.</p>
+<p>Al pipeline descriptor serve <code>maxVertexAmplificationCount = 2</code>, e la vertex function sceglie le sue matrici con l'indice di amplificazione.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">ViewUniforms</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float4x4</span><span class="w"> </span><span class="n">view</span><span class="p">;</span>
 <span class="w">    </span><span class="n">float4x4</span><span class="w"> </span><span class="n">projection</span><span class="p">;</span>
@@ -344,27 +376,43 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>Note what is stored: unlike on the Mac, the depth attachment uses <code>.store</code>, because the compositor reads it. This is the one place where the advice of the <a href="tile-based-gpus.html">tile-based GPU</a> chapter is overruled.</p>
-<h2 id="practical-notes">Practical notes<a class="headerlink" href="#practical-notes" title="Permanent link">#</a></h2>
+<p>Nota che cosa viene salvato: a differenza del Mac, l'attachment di profondità usa <code>.store</code>, perché il compositor lo legge.<br>
+È l'unico punto in cui il consiglio del capitolo sulle <a href="tile-based-gpus.html">GPU tile-based</a> non vale.</p>
+<h2 id="note-pratiche">Note pratiche<a class="headerlink" href="#note-pratiche" title="Permanent link">#</a></h2>
 <ul>
-<li><strong>Foveation and post-processing.</strong> With a rasterization rate map the texture is not uniform, so a full-screen pass that samples it must convert coordinates through the map. Start without post-processing.</li>
-<li><strong>Passthrough.</strong> For mixed immersion, where your content appears in the person's room, clear to transparent black and write premultiplied alpha; the system composites the camera image behind you.</li>
-<li><strong>Input.</strong> There are no keys or mouse. Pinches and gazes arrive as spatial events on the layer renderer, and hands through ARKit hand tracking.</li>
-<li><strong>The Simulator</strong> does not support every layout or foveation. Check the capabilities instead of assuming, as the configuration above does.</li>
-<li><strong>Budget.</strong> Two views at high resolution and 90 Hz leave a few milliseconds of GPU time. Forward rendering with MSAA, few passes and half-precision shaders is the usual choice.</li>
+<li><strong>Foveation e post-processing.</strong><br>
+Con una rasterization rate map la texture non è uniforme, quindi un pass a tutto schermo che la legge deve convertire le coordinate attraverso la mappa.<br>
+Comincia senza post-processing.</li>
+<li><strong>Passthrough.</strong><br>
+Per l'immersione mista, in cui i tuoi contenuti compaiono nella stanza della persona, pulisci a nero trasparente e scrivi alpha premoltiplicato; il sistema compone dietro di te l'immagine delle videocamere.</li>
+<li><strong>Input.</strong><br>
+Non ci sono né tasti né mouse.<br>
+Pizzichi e sguardi arrivano come eventi spaziali sul layer renderer, e le mani attraverso l'hand tracking di ARKit.</li>
+<li><strong>Il Simulatore</strong> non supporta tutti i layout né la foveation.<br>
+Controlla le capacità invece di darle per scontate, come fa la configurazione qui sopra.</li>
+<li><strong>Budget.</strong><br>
+Due viste ad alta risoluzione e a 90 Hz lasciano pochi millisecondi di tempo di GPU.<br>
+La scelta consueta è il forward rendering con MSAA, pochi pass e shader a mezza precisione.</li>
 </ul>
-<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<h2 id="esercizi">Esercizi<a class="headerlink" href="#esercizi" title="Permanent link">#</a></h2>
 <ul>
-<li>Draw the ten-cube scene of Getting Started two meters in front of the starting position.<details class="solution"><summary>Mostra la soluzione</summary><p>Units are meters and the origin is on the floor, with -z ahead of the starting direction. Scale the cube positions down, since the original scene spans several units, and move them to eye height: a model matrix of translation (0, 1.4, -2) times a scale of 0.25 applied before each cube's own transform. Use the per-eye view and projection matrices in place of the camera's.</p></details></li>
-<li>Give each eye a different clear color and check that the layers are routed correctly.<details class="solution"><summary>Mostra la soluzione</summary><p>With one pass and a layered texture you cannot clear slices to different colors, so tint in the fragment function: pass the amplification index from the vertex function as a flat value and multiply the color by red for 0 and blue for 1. If both eyes show the same tint, the view mappings are wrong, usually a <code>renderTargetArrayIndexOffset</code> left at 0.</p></details></li>
-<li>Switch to the dedicated layout and render with two passes. Compare the CPU time of encoding.<details class="solution"><summary>Mostra la soluzione</summary><p>Set <code>configuration.layout = .dedicated</code>. Each eye then has its own texture: <code>drawable.colorTextures[i]</code> and <code>drawable.depthTextures[i]</code>. Create two render pass descriptors without <code>renderTargetArrayLength</code>, and encode the whole scene twice, with one eye's matrices each and no vertex amplification. The image is identical, and the encoding time on the CPU roughly doubles, which is what the layered layout saves.</p></details></li>
+<li>Disegna la scena dei dieci cubi di Per iniziare due metri davanti alla posizione di partenza.<details class="solution"><summary>Mostra la soluzione</summary><p>Le unità sono metri e l'origine sta sul pavimento, con -z davanti alla direzione di partenza.<br>
+Riduci la scala delle posizioni dei cubi, perché la scena originale si estende per diverse unità, e portali all'altezza degli occhi: una matrice model fatta di una traslazione (0, 1.4, -2) per una scala di 0.25, applicata prima della trasformazione propria di ogni cubo.<br>
+Usa le matrici view e projection per occhio al posto di quelle della camera.</p></details></li>
+<li>Dai a ogni occhio un colore di sfondo diverso e verifica che gli strati siano instradati correttamente.<details class="solution"><summary>Mostra la soluzione</summary><p>Con un solo pass e una texture a strati non puoi pulire gli slice con colori diversi, quindi colora nella fragment function: passa l'indice di amplificazione dalla vertex function come valore flat e moltiplica il colore per rosso se vale 0 e per blu se vale 1.<br>
+Se entrambi gli occhi mostrano la stessa tinta, le view mapping sono sbagliate, di solito per un <code>renderTargetArrayIndexOffset</code> rimasto a 0.</p></details></li>
+<li>Passa al layout dedicated e disegna con due pass.<br>
+Confronta il tempo di CPU della codifica.<details class="solution"><summary>Mostra la soluzione</summary><p>Imposta <code>configuration.layout = .dedicated</code>.<br>
+Ogni occhio ha allora la sua texture: <code>drawable.colorTextures[i]</code> e <code>drawable.depthTextures[i]</code>.<br>
+Crea due render pass descriptor senza <code>renderTargetArrayLength</code> e codifica l'intera scena due volte, ciascuna con le matrici di un occhio e senza vertex amplification.<br>
+L'immagine è identica, e il tempo di codifica sulla CPU circa raddoppia: è ciò che il layout layered fa risparmiare.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../apple-platforms/metal-4.html"><small>Precedente</small>Metal 4</a><a class="next" href="../resources/examples.html"><small>Successivo</small>Codice di esempio</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#what-is-different">What is different</a></li><li><a href="#the-app-and-the-layer">The app and the layer</a></li><li><a href="#the-frame-loop">The frame loop</a></li><li><a href="#two-eyes-two-matrices">Two eyes, two matrices</a></li><li><a href="#both-eyes-in-one-pass">Both eyes in one pass</a></li><li><a href="#practical-notes">Practical notes</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#che-cosa-cambia">Che cosa cambia</a></li><li><a href="#lapp-e-il-layer">L&#x27;app e il layer</a></li><li><a href="#il-ciclo-dei-frame">Il ciclo dei frame</a></li><li><a href="#due-occhi-due-matrici">Due occhi, due matrici</a></li><li><a href="#entrambi-gli-occhi-in-un-pass">Entrambi gli occhi in un pass</a></li><li><a href="#note-pratiche">Note pratiche</a></li><li><a href="#esercizi">Esercizi</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

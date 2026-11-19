@@ -135,10 +135,12 @@
 </nav>
 <main class="content" id="main">
 <article><p class="crumb">Lighting</p><h1 id="review">Review<a class="headerlink" href="#review" title="Permanent link">#</a></h1>
-<p>You can now light a scene. The model is simple, and it is the foundation that every later technique refines.</p>
+<p>You can now light a scene.<br>
+The model is simple, and it is the foundation that every later technique refines.</p>
 <h2 id="glossary">Glossary<a class="headerlink" href="#glossary" title="Permanent link">#</a></h2>
 <ul>
-<li><strong>Color vector</strong>: red, green and blue intensities. Reflection is a component-wise multiplication of light color and surface color.</li>
+<li><strong>Color vector</strong>: red, green and blue intensities.<br>
+Reflection is a component-wise multiplication of light color and surface color.</li>
 <li><strong>Phong lighting model</strong>: ambient + diffuse + specular.</li>
 <li><strong>Ambient</strong>: a constant term that fakes indirect light.</li>
 <li><strong>Diffuse</strong>: brightness from the angle between the normal and the direction to the light: <code>max(dot(N, L), 0)</code>.</li>
@@ -163,15 +165,22 @@
 <li>Two pipeline states share one vertex function: a lit one for objects and an unlit one for lamps.</li>
 </ul>
 <h2 id="where-the-model-falls-short">Where the model falls short<a class="headerlink" href="#where-the-model-falls-short" title="Permanent link">#</a></h2>
-<p>Phong lighting is an artistic approximation. Its weaknesses point straight at later chapters:</p>
+<p>Phong lighting is an artistic approximation.<br>
+Its weaknesses point straight at later chapters:</p>
 <ul>
-<li>Highlights break down at grazing angles. See <a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a>.</li>
-<li>The colors are computed in the wrong color space. See <a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a>.</li>
-<li>Nothing casts a shadow. See <a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a>.</li>
-<li>Flat surfaces look flat. See <a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a>.</li>
-<li>Materials do not conserve energy and need hand tuning per scene. See <a href="../pbr/theory.html">PBR</a>.</li>
+<li>Highlights break down at grazing angles.<br>
+See <a href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a>.</li>
+<li>The colors are computed in the wrong color space.<br>
+See <a href="../advanced-lighting/gamma-correction.html">Gamma Correction</a>.</li>
+<li>Nothing casts a shadow.<br>
+See <a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a>.</li>
+<li>Flat surfaces look flat.<br>
+See <a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a>.</li>
+<li>Materials do not conserve energy and need hand tuning per scene.<br>
+See <a href="../pbr/theory.html">PBR</a>.</li>
 </ul>
-<p>Before any of that, cubes are getting boring. The next section loads real models.</p></article><nav class="pager" id="pager"><a class="prev" href="../lighting/multiple-lights.html"><small>Previous</small>Multiple Lights</a><a class="next" href="../model-loading/model-io.html"><small>Next</small>Model I/O</a></nav>
+<p>Before any of that, cubes are getting boring.<br>
+The next section loads real models.</p></article><nav class="pager" id="pager"><a class="prev" href="../lighting/multiple-lights.html"><small>Previous</small>Multiple Lights</a><a class="next" href="../model-loading/model-io.html"><small>Next</small>Model I/O</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>

@@ -40,7 +40,7 @@ La **command queue** si crea una volta e si tiene per tutta la vita dell'app. Ga
 
 Il descriptor della vista usa `.clear` con il tuo `clearColor`, e `.store`. Ecco perché otteniamo una finestra colorata senza disegnare niente: la pulizia fa parte dell'inizio del pass.
 
-!!! note "Coming from OpenGL"
+!!! note "Se vieni da OpenGL"
     Non esiste una chiamata `glClear`. La pulizia è una proprietà del render pass, e scegliere bene le load e store action conta per le prestazioni sulle GPU tile-based, perché ognuna può far risparmiare o costare una copia intera della texture.
 
 **2. Creare un command buffer e un encoder.** Il command buffer conserva i comandi codificati per questo frame. Il render command encoder traduce le tue chiamate (imposta la pipeline, imposta il buffer, disegna) in comandi GPU per questo singolo pass.

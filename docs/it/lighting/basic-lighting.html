@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,14 +134,15 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Illuminazione</p><h1 id="basic-lighting">Basic Lighting<a class="headerlink" href="#basic-lighting" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
+<article><p class="crumb">Illuminazione</p><h1 id="illuminazione-di-base">Illuminazione di base<a class="headerlink" href="#illuminazione-di-base" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Progetto di esempio</strong> <code>examples/Sources/08-BasicLighting</code>, si esegue con <code>swift run BasicLighting</code>. <a href="../../downloads/learnmetal-examples.zip">Scarica tutti gli esempi</a> oppure guarda <a href="../resources/examples.html">come eseguirli</a>.</div>
 
-<p>Real light is hopelessly complicated, so real-time graphics uses approximations. The classic one is the <strong>Phong lighting model</strong>, which builds the final color from three simple parts:</p>
+<p>La luce vera è complicata senza speranza, quindi la grafica in tempo reale usa delle approssimazioni.<br>
+Quella classica è il <strong>modello di illuminazione di Phong</strong>, che costruisce il colore finale da tre parti semplici:</p>
 <ul>
-<li><strong>Ambient</strong>: a small constant amount of light everywhere, standing in for light that has bounced around the room.</li>
-<li><strong>Diffuse</strong>: the surface is brighter the more directly it faces the light.</li>
-<li><strong>Specular</strong>: the shiny highlight where the light reflects toward the viewer.</li>
+<li><strong>Ambient</strong>: una piccola quantità costante di luce ovunque, al posto della luce che ha rimbalzato per la stanza.</li>
+<li><strong>Diffuse</strong>: la superficie è tanto più luminosa quanto più è rivolta verso la luce.</li>
+<li><strong>Specular</strong>: il riflesso lucido nel punto in cui la luce rimbalza verso chi guarda.</li>
 </ul>
 <h2 id="ambient">Ambient<a class="headerlink" href="#ambient" title="Permanent link">#</a></h2>
 <div class="codehilite"><pre><span></span><code><span class="kt">float</span><span class="w"> </span><span class="n">ambientStrength</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.1</span><span class="p">;</span>
@@ -149,10 +150,12 @@
 <span class="n">float3</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ambient</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">objectColor</span><span class="p">;</span>
 </code></pre></div>
 
-<p>On its own this just makes the cube dark, but it prevents unlit sides from being pure black.</p>
+<p>Da sola rende soltanto scuro il cubo, ma evita che i lati non illuminati siano nero puro.</p>
 <h2 id="diffuse">Diffuse<a class="headerlink" href="#diffuse" title="Permanent link">#</a></h2>
-<p>Diffuse lighting needs two directions at each fragment: the surface <strong>normal</strong>, and the direction from the fragment to the light. The cosine of the angle between them, given by the dot product of the two unit vectors, is the brightness: 1 when the light hits head on, 0 when it grazes the surface.</p>
-<p>Our cube already carries normals. The fragment function needs the normal and the fragment's position in <strong>world space</strong>, so the vertex function passes both:</p>
+<p>La luce diffusa ha bisogno, per ogni fragment, di due direzioni: la <strong>normale</strong> della superficie e la direzione dal fragment alla luce.<br>
+Il coseno dell'angolo tra le due, dato dal prodotto scalare dei due vettori unitari, è la luminosità: 1 quando la luce arriva di fronte, 0 quando sfiora la superficie.</p>
+<p>Il nostro cubo ha già le normali.<br>
+Alla fragment function servono la normale e la posizione del fragment in <strong>spazio mondo</strong>, quindi la vertex function passa entrambe:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">Uniforms</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float4x4</span><span class="w"> </span><span class="n">model</span><span class="p">;</span>
 <span class="w">    </span><span class="n">float4x4</span><span class="w"> </span><span class="n">view</span><span class="p">;</span>
@@ -179,8 +182,10 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<h3 id="the-normal-matrix">The normal matrix<a class="headerlink" href="#the-normal-matrix" title="Permanent link">#</a></h3>
-<p>Normals are directions, so translation must not affect them, and non-uniform scaling distorts them if you use the model matrix directly. The correct matrix for normals is the <strong>inverse transpose of the upper-left 3×3</strong> of the model matrix. Compute it on the CPU:</p>
+<h3 id="la-matrice-delle-normali">La matrice delle normali<a class="headerlink" href="#la-matrice-delle-normali" title="Permanent link">#</a></h3>
+<p>Le normali sono direzioni, quindi la traslazione non deve toccarle, e una scala non uniforme le deforma se usi direttamente la matrice model.<br>
+La matrice corretta per le normali è la <strong>trasposta dell'inversa del blocco 3×3 in alto a sinistra</strong> della matrice model.<br>
+Calcolala sulla CPU:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">Uniforms</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">model</span><span class="p">:</span><span class="w"> </span><span class="n">float4x4</span>
@@ -204,8 +209,8 @@
 </code></pre></div>
 </div>
 
-<p>If the model matrix only rotates and scales uniformly, the upper-left 3×3 itself works, but the inverse transpose is always right.</p>
-<h3 id="the-diffuse-term">The diffuse term<a class="headerlink" href="#the-diffuse-term" title="Permanent link">#</a></h3>
+<p>Se la matrice model contiene solo rotazioni e scale uniformi va bene anche il blocco 3×3 così com'è, ma la trasposta dell'inversa è sempre giusta.</p>
+<h3 id="il-termine-diffuse">Il termine diffuse<a class="headerlink" href="#il-termine-diffuse" title="Permanent link">#</a></h3>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">FragmentUniforms</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">objectColor</span><span class="p">;</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">lightColor</span><span class="p">;</span>
@@ -227,9 +232,12 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>Two details matter. Interpolated normals are no longer unit length, so normalize again in the fragment function. And <code>max(..., 0.0)</code> stops surfaces facing away from the light from getting negative light.</p>
+<p>Contano due dettagli.<br>
+Le normali interpolate non hanno più lunghezza 1, quindi normalizzale di nuovo nella fragment function.<br>
+E <code>max(..., 0.0)</code> impedisce che le superfici rivolte dalla parte opposta ricevano luce negativa.</p>
 <h2 id="specular">Specular<a class="headerlink" href="#specular" title="Permanent link">#</a></h2>
-<p>A highlight appears where the light bounces off the surface straight into the eye. Reflect the light direction around the normal and compare the result with the direction to the viewer:</p>
+<p>Un riflesso compare dove la luce rimbalza sulla superficie dritta nell'occhio.<br>
+Rifletti la direzione della luce intorno alla normale e confronta il risultato con la direzione verso chi guarda:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">viewDir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">uniforms</span><span class="p">.</span><span class="n">viewPosition</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">worldPosition</span><span class="p">);</span>
 <span class="n">float3</span><span class="w"> </span><span class="n">reflectDir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">reflect</span><span class="p">(</span><span class="o">-</span><span class="n">lightDir</span><span class="p">,</span><span class="w"> </span><span class="n">normal</span><span class="p">);</span>
 
@@ -240,8 +248,9 @@
 <span class="k">return</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
 </code></pre></div>
 
-<p><code>reflect</code> expects a vector pointing <em>toward</em> the surface, hence the minus sign. The exponent, 32 here, is the <strong>shininess</strong>: higher values give a smaller, sharper highlight.</p>
-<p>On the Swift side, fill in the new fields each frame:</p>
+<p><code>reflect</code> si aspetta un vettore che punta <em>verso</em> la superficie, da qui il segno meno.<br>
+L'esponente, qui 32, è la <strong>shininess</strong>: valori più alti danno un riflesso più piccolo e più netto.</p>
+<p>Dal lato Swift compila i nuovi campi a ogni frame:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">FragmentUniforms</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">objectColor</span><span class="p">:</span><span class="w"> </span><span class="n">Float3</span>
@@ -267,25 +276,35 @@
 </code></pre></div>
 </div>
 
-<p>The cube now has clearly distinct faces and a highlight that slides across them as you move.</p>
+<p>Ora il cubo ha facce ben distinte e un riflesso che scivola su di esse mentre ti muovi.</p>
 <div class="admonition note">
-<p class="admonition-title">World space or view space?</p>
-<p>We light in world space because it is the easiest to reason about. Lighting in view space works equally well, and there the viewer is always at the origin. Whichever you choose, every vector in a calculation must be in the same space.</p>
+<p class="admonition-title">Spazio mondo o spazio vista?</p>
+<p>Calcoliamo la luce in spazio mondo perché è il più facile su cui ragionare.<br>
+Farlo in spazio vista funziona altrettanto bene, e lì chi guarda è sempre nell'origine.<br>
+Qualunque cosa tu scelga, tutti i vettori di un calcolo devono stare nello stesso spazio.</p>
 </div>
 <div class="lm-demo" data-demo="basic-lighting" data-fallback="../../assets/img/lighting/basic-lighting.webp"></div>
 
-<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<h2 id="esercizi">Esercizi<a class="headerlink" href="#esercizi" title="Permanent link">#</a></h2>
 <ul>
-<li>Move the light in a circle around the cube over time.<details class="solution"><summary>Mostra la soluzione</summary><p>Compute the position from the time each frame and use it both for the uniform and for the lamp's model matrix: <code>(cos(time) * 2, 1, sin(time) * 2)</code>. The live demo above does exactly this.</p></details></li>
-<li>Try shininess values of 2, 8, 64 and 256.<details class="solution"><summary>Mostra la soluzione</summary><p>At 2 the highlight covers most of the face and looks like extra diffuse light. At 8 it is a wide soft glow, at 64 a small spot, and at 256 a tiny pinpoint, like polished metal or wet plastic. The exponent only narrows the lobe; it does not change its peak brightness.</p></details></li>
-<li>Do the whole lighting calculation in the vertex function and pass the resulting color to the fragment function. This is <strong>Gouraud shading</strong>. Why does the highlight look worse?<details class="solution"><summary>Mostra la soluzione</summary><p>The vertex function computes one color per vertex and the rasterizer interpolates it linearly. A highlight that falls in the middle of a face is missed entirely, because no vertex sees it, and one near a corner is smeared across the triangle. On a cube with 2 triangles per face the effect is extreme. Per-fragment lighting evaluates the formula at every pixel, so the highlight keeps its shape.</p></details></li>
+<li>Fai muovere la luce in cerchio intorno al cubo nel tempo.<details class="solution"><summary>Mostra la soluzione</summary><p>Calcola la posizione dal tempo a ogni frame e usala sia per l'uniform sia per la matrice model della lampada: <code>(cos(time) * 2, 1, sin(time) * 2)</code>.<br>
+La demo interattiva qui sopra fa esattamente questo.</p></details></li>
+<li>Prova valori di shininess di 2, 8, 64 e 256.<details class="solution"><summary>Mostra la soluzione</summary><p>A 2 il riflesso copre quasi tutta la faccia e sembra altra luce diffusa.<br>
+A 8 è un alone largo e morbido, a 64 una piccola macchia, e a 256 un puntino, come nel metallo lucidato o nella plastica bagnata.<br>
+L'esponente restringe soltanto il lobo; non ne cambia la luminosità massima.</p></details></li>
+<li>Fai l'intero calcolo della luce nella vertex function e passa il colore risultante alla fragment function.<br>
+È il <strong>Gouraud shading</strong>.<br>
+Perché il riflesso viene peggio?<details class="solution"><summary>Mostra la soluzione</summary><p>La vertex function calcola un colore per vertice e il rasterizer lo interpola in modo lineare.<br>
+Un riflesso che cade in mezzo a una faccia va perso del tutto, perché nessun vertice lo vede, e uno vicino a un angolo viene spalmato su tutto il triangolo.<br>
+Su un cubo con 2 triangoli per faccia l'effetto è estremo.<br>
+L'illuminazione per fragment valuta la formula in ogni pixel, e il riflesso mantiene la sua forma.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../lighting/colors.html"><small>Precedente</small>Colori</a><a class="next" href="../lighting/materials.html"><small>Successivo</small>Materiali</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#ambient">Ambient</a></li><li><a href="#diffuse">Diffuse</a></li><li><a href="#specular">Specular</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#ambient">Ambient</a></li><li><a href="#diffuse">Diffuse</a></li><li><a href="#specular">Specular</a></li><li><a href="#esercizi">Esercizi</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

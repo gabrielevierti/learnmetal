@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,14 +134,22 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Illuminazione avanzata</p><h1 id="ssao">SSAO<a class="headerlink" href="#ssao" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
-<p>Our ambient term is a constant, so corners, creases and the gaps between objects are as bright as open surfaces. In reality these places receive less indirect light, because nearby geometry blocks part of it. The effect is called <strong>ambient occlusion</strong>, and adding it gives a scene depth and contact that flat ambient light lacks.</p>
-<p>Computing true occlusion requires tracing rays against the scene. <strong>Screen-space ambient occlusion</strong> (SSAO) approximates it using only what is already on screen: the depth buffer.</p>
-<h2 id="how-it-works">How it works<a class="headerlink" href="#how-it-works" title="Permanent link">#</a></h2>
-<p>For each pixel, take a number of sample points in a small <strong>hemisphere</strong> above the surface, oriented along the normal. For each sample, check the G-buffer: is there geometry in front of the sample point? The fraction of samples that are blocked is the pixel's occlusion.</p>
-<p>SSAO fits naturally after a G-buffer pass. It needs positions and normals in <strong>view space</strong>, so either store them that way or transform them on read. Working in view space makes depth comparisons a matter of comparing z.</p>
-<h2 id="the-sample-kernel">The sample kernel<a class="headerlink" href="#the-sample-kernel" title="Permanent link">#</a></h2>
-<p>Generate 64 random points inside a unit hemisphere pointing along +z, in tangent space. Scale them so that more samples fall close to the origin, since nearby occluders matter most:</p>
+<article><p class="crumb">Illuminazione avanzata</p><h1 id="ssao">SSAO<a class="headerlink" href="#ssao" title="Permanent link">#</a></h1>
+<p>Il nostro termine ambient è una costante, quindi angoli, pieghe e spazi tra gli oggetti sono luminosi quanto le superfici aperte.<br>
+Nella realtà questi punti ricevono meno luce indiretta, perché la geometria vicina ne blocca una parte.<br>
+L'effetto si chiama <strong>ambient occlusion</strong>, e aggiungerlo dà alla scena la profondità e il contatto che la luce ambient piatta non ha.</p>
+<p>Calcolare la vera occlusione richiede di tracciare raggi contro la scena.<br>
+La <strong>screen-space ambient occlusion</strong> (SSAO) la approssima usando solo ciò che è già a schermo: il depth buffer.</p>
+<h2 id="come-funziona">Come funziona<a class="headerlink" href="#come-funziona" title="Permanent link">#</a></h2>
+<p>Per ogni pixel prendi un certo numero di punti in un piccolo <strong>emisfero</strong> sopra la superficie, orientato lungo la normale.<br>
+Per ogni punto controlla il G-buffer: c'è geometria davanti a quel punto?<br>
+La frazione di punti bloccati è l'occlusione del pixel.</p>
+<p>L'SSAO si inserisce in modo naturale dopo un pass di G-buffer.<br>
+Ha bisogno di posizioni e normali in <strong>spazio vista</strong>, quindi o le salvi così o le trasformi in lettura.<br>
+Lavorare in spazio vista riduce i confronti di profondità a un confronto tra z.</p>
+<h2 id="il-kernel-di-campioni">Il kernel di campioni<a class="headerlink" href="#il-kernel-di-campioni" title="Permanent link">#</a></h2>
+<p>Genera 64 punti casuali dentro un emisfero unitario rivolto lungo +z, in spazio tangente.<br>
+Scalali in modo che ne cadano di più vicino all'origine, perché ciò che occlude da vicino conta di più:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="nv">kernel</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">(</span><span class="mf">0.</span><span class="p">.&lt;</span><span class="mi">64</span><span class="p">).</span><span class="bp">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span>
 <span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">sample</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Float3</span><span class="p">(.</span><span class="n">random</span><span class="p">(</span><span class="k">in</span><span class="p">:</span><span class="w"> </span><span class="o">-</span><span class="mf">1.</span><span class="p">..</span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">random</span><span class="p">(</span><span class="k">in</span><span class="p">:</span><span class="w"> </span><span class="o">-</span><span class="mf">1.</span><span class="p">..</span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">random</span><span class="p">(</span><span class="k">in</span><span class="p">:</span><span class="w"> </span><span class="mf">0.</span><span class="p">..</span><span class="mi">1</span><span class="p">))</span>
@@ -169,9 +177,11 @@
 </code></pre></div>
 </div>
 
-<p>Store the kernel in a buffer for the shader.</p>
-<h2 id="random-rotation">Random rotation<a class="headerlink" href="#random-rotation" title="Permanent link">#</a></h2>
-<p>64 samples per pixel is already a lot, and still not enough to avoid visible banding. Rotating the kernel differently at each pixel turns the banding into fine noise, which a blur then removes. A tiny 4 × 4 texture of random vectors, tiled across the screen, supplies the rotations:</p>
+<p>Salva il kernel in un buffer per lo shader.</p>
+<h2 id="rotazione-casuale">Rotazione casuale<a class="headerlink" href="#rotazione-casuale" title="Permanent link">#</a></h2>
+<p>64 campioni per pixel sono già tanti, e non bastano ancora a evitare bande visibili.<br>
+Ruotare il kernel in modo diverso in ogni pixel trasforma le bande in un rumore fine, che una sfocatura poi elimina.<br>
+Una minuscola texture 4 × 4 di vettori casuali, ripetuta su tutto lo schermo, fornisce le rotazioni:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">noise</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">(</span><span class="mf">0.</span><span class="p">.&lt;</span><span class="mi">16</span><span class="p">).</span><span class="bp">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kc">_</span><span class="w"> </span><span class="k">in</span>
 <span class="w">    </span><span class="n">SIMD4</span><span class="p">&lt;</span><span class="nb">Float</span><span class="p">&gt;(.</span><span class="n">random</span><span class="p">(</span><span class="k">in</span><span class="p">:</span><span class="w"> </span><span class="o">-</span><span class="mf">1.</span><span class="p">..</span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">random</span><span class="p">(</span><span class="k">in</span><span class="p">:</span><span class="w"> </span><span class="o">-</span><span class="mf">1.</span><span class="p">..</span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
@@ -198,8 +208,8 @@
 </code></pre></div>
 </div>
 
-<h2 id="the-ssao-shader">The SSAO shader<a class="headerlink" href="#the-ssao-shader" title="Permanent link">#</a></h2>
-<p>The output is a single-channel texture (<code>.r8Unorm</code>) holding the occlusion factor.</p>
+<h2 id="lo-shader-dellssao">Lo shader dell'SSAO<a class="headerlink" href="#lo-shader-dellssao" title="Permanent link">#</a></h2>
+<p>L'uscita è una texture a un solo canale (<code>.r8Unorm</code>) che contiene il fattore di occlusione.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">SSAOUniforms</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float4x4</span><span class="w"> </span><span class="n">projection</span><span class="p">;</span>
 <span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">radius</span><span class="p">;</span>
@@ -242,17 +252,19 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>Points worth noting:</p>
+<p>Punti da notare:</p>
 <ul>
-<li>In our right-handed view space the camera looks down -z, so a <strong>larger</strong> z is closer to the camera. A sample is occluded when the scene's surface at that pixel is closer than the sample.</li>
-<li>The <code>bias</code>, around 0.025, prevents a flat surface from occluding itself.</li>
-<li>The <strong>range check</strong> stops a distant background object from darkening the edge of something in front of it.</li>
-<li>Reading <code>pixel % 4</code> tiles the noise texture across the screen without a sampler.</li>
-<li>The projection to texture coordinates flips y, as it did for shadow maps.</li>
+<li>Nel nostro spazio vista destrorso la camera guarda lungo -z, quindi una z <strong>più grande</strong> è più vicina alla camera.<br>
+Un campione è occluso quando la superficie della scena in quel pixel è più vicina del campione.</li>
+<li>Il <code>bias</code>, intorno a 0.025, impedisce a una superficie piatta di occludere sé stessa.</li>
+<li>Il <strong>controllo sul raggio</strong> impedisce a un oggetto lontano sullo sfondo di scurire il bordo di qualcosa che gli sta davanti.</li>
+<li>Leggere <code>pixel % 4</code> ripete la texture di rumore su tutto lo schermo senza un sampler.</li>
+<li>La proiezione verso le coordinate di texture ribalta y, come per le shadow map.</li>
 </ul>
-<p>A radius of about 0.5 world units is a good starting point.</p>
-<h2 id="blur">Blur<a class="headerlink" href="#blur" title="Permanent link">#</a></h2>
-<p>The raw result has a visible 4 × 4 noise pattern. A box blur of the same size removes it exactly:</p>
+<p>Un raggio di circa 0.5 unità di mondo è un buon punto di partenza.</p>
+<h2 id="sfocatura">Sfocatura<a class="headerlink" href="#sfocatura" title="Permanent link">#</a></h2>
+<p>Il risultato grezzo ha un motivo di rumore 4 × 4 ben visibile.<br>
+Una sfocatura a scatola della stessa dimensione lo elimina esattamente:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">fragment_ssaoBlur</span><span class="p">(</span><span class="n">ScreenOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
 <span class="w">                                 </span><span class="n">texture2d</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">ssao</span><span class="w"> </span><span class="p">[[</span><span class="na">texture</span><span class="p">(</span><span class="mi">0</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">int2</span><span class="w"> </span><span class="n">pixel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">int2</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">xy</span><span class="p">);</span>
@@ -268,33 +280,40 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<h2 id="applying-it">Applying it<a class="headerlink" href="#applying-it" title="Permanent link">#</a></h2>
-<p>Ambient occlusion affects <strong>ambient light only</strong>. In the deferred lighting pass:</p>
+<h2 id="applicarla">Applicarla<a class="headerlink" href="#applicarla" title="Permanent link">#</a></h2>
+<p>L'ambient occlusion riguarda <strong>solo la luce ambient</strong>.<br>
+Nel lighting pass del deferred:</p>
 <div class="codehilite"><pre><span></span><code><span class="kt">float</span><span class="w"> </span><span class="n">ao</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ssaoTexture</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="n">pixel</span><span class="p">).</span><span class="n">r</span><span class="p">;</span>
 <span class="n">float3</span><span class="w"> </span><span class="n">ambient</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">albedo</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.3</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">ao</span><span class="p">;</span>
 </code></pre></div>
 
-<p>Multiplying the whole lit result by the occlusion is a common mistake. It darkens directly lit surfaces, which looks dirty.</p>
+<p>Moltiplicare per l'occlusione l'intero risultato illuminato è un errore comune.<br>
+Scurisce le superfici illuminate direttamente, e l'effetto è sporco.</p>
 <div class="lm-demo" data-demo="ssao" data-fallback="../../assets/img/advanced-lighting/ssao.webp"></div>
 
-<h2 id="tuning-and-cost">Tuning and cost<a class="headerlink" href="#tuning-and-cost" title="Permanent link">#</a></h2>
+<h2 id="regolazione-e-costo">Regolazione e costo<a class="headerlink" href="#regolazione-e-costo" title="Permanent link">#</a></h2>
 <ul>
-<li>Render SSAO at <strong>half resolution</strong>. It is low-frequency information, and the blur hides the difference.</li>
-<li>16 to 32 samples are often enough with a good blur.</li>
-<li>Raising the result to a power (<code>pow(ao, 2.0)</code>) increases contrast.</li>
+<li>Calcola l'SSAO a <strong>metà risoluzione</strong>.<br>
+È informazione a bassa frequenza, e la sfocatura nasconde la differenza.</li>
+<li>Con una buona sfocatura bastano spesso da 16 a 32 campioni.</li>
+<li>Elevare il risultato a potenza (<code>pow(ao, 2.0)</code>) aumenta il contrasto.</li>
 </ul>
-<p>SSAO only knows about visible surfaces, so occlusion can appear or vanish as objects enter and leave the screen. Refinements such as HBAO and GTAO improve accuracy, and <a href="../beyond/ray-tracing.html">ray tracing</a> computes real ambient occlusion on hardware that supports it.</p>
-<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<p>L'SSAO conosce solo le superfici visibili, quindi l'occlusione può comparire o sparire quando gli oggetti entrano ed escono dallo schermo.<br>
+Varianti come HBAO e GTAO migliorano l'accuratezza, e il <a href="../beyond/ray-tracing.html">ray tracing</a> calcola la vera ambient occlusion sull'hardware che lo supporta.</p>
+<h2 id="esercizi">Esercizi<a class="headerlink" href="#esercizi" title="Permanent link">#</a></h2>
 <ul>
-<li>Output the raw and blurred occlusion to the screen.<details class="solution"><summary>Mostra la soluzione</summary><p>Return the occlusion as a gray color from the composite pass, once from the raw texture and once from the blurred one. The live demo has both: choose "Occlusion buffer" and toggle the blur.</p></details></li>
-<li>Vary the radius and the sample count and find the cheapest setting that still looks good.<details class="solution"><summary>Mostra la soluzione</summary><p>A radius near 0.5 world units darkens corners without haloing open surfaces; larger radii look dirty. Sixteen samples with the blur look close to sixty-four without it, at a quarter of the cost. Rendering the occlusion at half resolution halves the cost again.</p></details></li>
+<li>Manda a schermo l'occlusione grezza e quella sfocata.<details class="solution"><summary>Mostra la soluzione</summary><p>Dal pass di composizione restituisci l'occlusione come colore grigio, una volta dalla texture grezza e una da quella sfocata.<br>
+La demo interattiva le ha entrambe: scegli "Occlusion buffer" e accendi o spegni la sfocatura.</p></details></li>
+<li>Varia il raggio e il numero di campioni e trova l'impostazione più economica che renda ancora bene.<details class="solution"><summary>Mostra la soluzione</summary><p>Un raggio vicino a 0.5 unità di mondo scurisce gli angoli senza creare aloni sulle superfici aperte; raggi più grandi danno un aspetto sporco.<br>
+Sedici campioni con la sfocatura rendono quasi come sessantaquattro senza, a un quarto del costo.<br>
+Calcolare l'occlusione a metà risoluzione dimezza ancora il costo.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../advanced-lighting/deferred-shading.html"><small>Precedente</small>Deferred shading</a><a class="next" href="../pbr/theory.html"><small>Successivo</small>Teoria</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#how-it-works">How it works</a></li><li><a href="#the-sample-kernel">The sample kernel</a></li><li><a href="#random-rotation">Random rotation</a></li><li><a href="#the-ssao-shader">The SSAO shader</a></li><li><a href="#blur">Blur</a></li><li><a href="#applying-it">Applying it</a></li><li><a href="#tuning-and-cost">Tuning and cost</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#come-funziona">Come funziona</a></li><li><a href="#il-kernel-di-campioni">Il kernel di campioni</a></li><li><a href="#rotazione-casuale">Rotazione casuale</a></li><li><a href="#lo-shader-dellssao">Lo shader dell&#x27;SSAO</a></li><li><a href="#sfocatura">Sfocatura</a></li><li><a href="#applicarla">Applicarla</a></li><li><a href="#regolazione-e-costo">Regolazione e costo</a></li><li><a href="#esercizi">Esercizi</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

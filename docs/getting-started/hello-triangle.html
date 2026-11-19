@@ -137,7 +137,10 @@
 <article><p class="crumb">Getting Started</p><h1 id="hello-triangle">Hello Triangle<a class="headerlink" href="#hello-triangle" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Example project</strong> <code>examples/Sources/02-HelloTriangle</code>, run with <code>swift run HelloTriangle</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
 
-<p>In Metal, as in every GPU API, everything you see is made of triangles. Drawing the first one requires three new pieces: vertex data in a buffer, a pair of shaders, and a render pipeline state that ties them together. It is the steepest step in the whole series. Once it works, the rest is variation.</p>
+<p>In Metal, as in every GPU API, everything you see is made of triangles.<br>
+Drawing the first one requires three new pieces: vertex data in a buffer, a pair of shaders, and a render pipeline state that ties them together.<br>
+It is the steepest step in the whole series.<br>
+Once it works, the rest is variation.</p>
 <h2 id="the-graphics-pipeline">The graphics pipeline<a class="headerlink" href="#the-graphics-pipeline" title="Permanent link">#</a></h2>
 <p>The pipeline is the sequence of steps that turns 3D coordinates into colored pixels.</p>
 <figure>
@@ -170,7 +173,9 @@
 <li>Depth and stencil tests and blending decide how that color ends up in the texture.</li>
 </ul>
 <h2 id="vertex-data">Vertex data<a class="headerlink" href="#vertex-data" title="Permanent link">#</a></h2>
-<p>Metal expects final positions in <strong>normalized device coordinates</strong> (NDC): x and y run from -1 to 1 across the view, with x to the right and y up, and z runs from 0 to 1 into the screen. Anything outside is clipped away. A triangle in the middle of the view:</p>
+<p>Metal expects final positions in <strong>normalized device coordinates</strong> (NDC): x and y run from -1 to 1 across the view, with x to the right and y up, and z runs from 0 to 1 into the screen.<br>
+Anything outside is clipped away.<br>
+A triangle in the middle of the view:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">vertices</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="nb">Float</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w">   </span><span class="c1">// bottom left</span>
@@ -188,7 +193,9 @@
 </code></pre></div>
 </div>
 
-<p>The GPU cannot read a Swift array. The data has to be in an <code>MTLBuffer</code>. Add a property and create the buffer in <code>init</code>:</p>
+<p>The GPU cannot read a Swift array.<br>
+The data has to be in an <code>MTLBuffer</code>.<br>
+Add a property and create the buffer in <code>init</code>:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">vertexBuffer</span><span class="p">:</span><span class="w"> </span><span class="bp">MTLBuffer</span>
 
@@ -206,7 +213,8 @@
 </code></pre></div>
 </div>
 
-<p>The buffer is just bytes. Metal does not know yet that they are groups of three floats.</p>
+<p>The buffer is just bytes.<br>
+Metal does not know yet that they are groups of three floats.</p>
 <h2 id="the-shaders">The shaders<a class="headerlink" href="#the-shaders" title="Permanent link">#</a></h2>
 <p>Open <code>Shaders.metal</code> and write the two functions:</p>
 <div class="codehilite"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;metal_stdlib&gt;</span>
@@ -236,7 +244,8 @@
 <li><code>vertex</code> and <code>fragment</code> mark the functions as pipeline entry points.</li>
 <li><code>[[stage_in]]</code> means "the per-vertex (or per-fragment) input assembled for this stage".</li>
 <li><code>[[attribute(0)]]</code> says this member comes from vertex attribute 0, which we describe below.</li>
-<li><code>[[position]]</code> marks the output that holds the clip-space position. It is a <code>float4</code>; the fourth component <code>w</code> is 1 for now and becomes important with perspective.</li>
+<li><code>[[position]]</code> marks the output that holds the clip-space position.<br>
+It is a <code>float4</code>; the fourth component <code>w</code> is 1 for now and becomes important with perspective.</li>
 </ul>
 <p>The fragment function returns an orange color as RGBA floats.</p>
 <h2 id="the-vertex-descriptor">The vertex descriptor<a class="headerlink" href="#the-vertex-descriptor" title="Permanent link">#</a></h2>
@@ -258,7 +267,8 @@
 </code></pre></div>
 </div>
 
-<p>Attribute 0 is three floats, starting at byte 0 of each vertex, read from the buffer bound at index 0. Each vertex is 12 bytes apart.</p>
+<p>Attribute 0 is three floats, starting at byte 0 of each vertex, read from the buffer bound at index 0.<br>
+Each vertex is 12 bytes apart.</p>
 <h2 id="the-render-pipeline-state">The render pipeline state<a class="headerlink" href="#the-render-pipeline-state" title="Permanent link">#</a></h2>
 <p>The pipeline state combines the shader functions, the vertex layout, and the pixel format of the texture being drawn into:</p>
 <div class="lang-swift">
@@ -305,10 +315,13 @@
 </code></pre></div>
 </div>
 
-<p><code>makeDefaultLibrary()</code> loads the compiled shaders from the app bundle. Creating a pipeline state compiles the shaders for the GPU and is slow, so always do it at load time and never per frame. The pixel format must match the view's <code>colorPixelFormat</code>; a mismatch is the most common first validation error.</p>
+<p><code>makeDefaultLibrary()</code> loads the compiled shaders from the app bundle.<br>
+Creating a pipeline state compiles the shaders for the GPU and is slow, so always do it at load time and never per frame.<br>
+The pixel format must match the view's <code>colorPixelFormat</code>; a mismatch is the most common first validation error.</p>
 <div class="admonition note">
 <p class="admonition-title">Coming from OpenGL</p>
-<p>A pipeline state is roughly a linked shader program, plus the VAO's attribute layout, plus blend state, all frozen into one object. There is no VAO or VBO binding dance.</p>
+<p>A pipeline state is roughly a linked shader program, plus the VAO's attribute layout, plus blend state, all frozen into one object.<br>
+There is no VAO or VBO binding dance.</p>
 </div>
 <h2 id="draw">Draw<a class="headerlink" href="#draw" title="Permanent link">#</a></h2>
 <p>In <code>draw(in:)</code>, between creating the encoder and ending it:</p>
@@ -325,11 +338,13 @@
 </code></pre></div>
 </div>
 
-<p><code>index: 0</code> is the buffer slot that the vertex descriptor's <code>bufferIndex</code> refers to. Run the app and you should see an orange triangle.</p>
+<p><code>index: 0</code> is the buffer slot that the vertex descriptor's <code>bufferIndex</code> refers to.<br>
+Run the app and you should see an orange triangle.</p>
 <div class="lm-demo" data-demo="hello-triangle" data-fallback="../assets/img/getting-started/hello-triangle.webp"></div>
 
 <h2 id="indexed-drawing">Indexed drawing<a class="headerlink" href="#indexed-drawing" title="Permanent link">#</a></h2>
-<p>A rectangle is two triangles that share two vertices. Instead of duplicating them, store each vertex once and describe the triangles with indices:</p>
+<p>A rectangle is two triangles that share two vertices.<br>
+Instead of duplicating them, store each vertex once and describe the triangles with indices:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">vertices</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="nb">Float</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span>
 <span class="w">     </span><span class="mf">0.5</span><span class="p">,</span><span class="w">  </span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w">   </span><span class="c1">// top right</span>
@@ -383,17 +398,22 @@
 <p>To see the triangles themselves, call <code>encoder.setTriangleFillMode(.lines)</code> before drawing.</p>
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
-<li>Draw two triangles next to each other by adding three more vertices and changing <code>vertexCount</code>.<details class="solution"><summary>Show solution</summary><p>Append three more vertices to the array, for example the first triangle shifted by 0.6 on x and scaled down, and draw with a vertex count of 6. The buffer length follows the array automatically.</p>
+<li>Draw two triangles next to each other by adding three more vertices and changing <code>vertexCount</code>.<details class="solution"><summary>Show solution</summary><p>Append three more vertices to the array, for example the first triangle shifted by 0.6 on x and scaled down, and draw with a vertex count of 6.<br>
+The buffer length follows the array automatically.</p>
 <div class="codehilite"><pre><span></span><code><span class="c1">// x      y     z</span>
 <span class="mf">-0.9</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.4</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w">    </span><span class="mf">-0.1</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.4</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w">    </span><span class="mf">-0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.4</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w">     </span><span class="c1">// first triangle</span>
 <span class="w"> </span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.4</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w">     </span><span class="mf">0.9</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.4</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w">     </span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.4</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w">     </span><span class="c1">// second triangle</span>
 </code></pre></div></details></li>
-<li>Create a second pipeline state with a fragment function that returns yellow, and draw the second triangle with it.<details class="solution"><summary>Show solution</summary><p>Add a second fragment function, change only <code>fragmentFunction</code> on the descriptor, and create a second pipeline state from it. Then draw each triangle after setting its pipeline: vertex start 0, count 3 with the first state; vertex start 3, count 3 with the second.</p>
+<li>Create a second pipeline state with a fragment function that returns yellow, and draw the second triangle with it.<details class="solution"><summary>Show solution</summary><p>Add a second fragment function, change only <code>fragmentFunction</code> on the descriptor, and create a second pipeline state from it.<br>
+Then draw each triangle after setting its pipeline: vertex start 0, count 3 with the first state; vertex start 3, count 3 with the second.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_yellow</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]])</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
 <span class="p">}</span>
 </code></pre></div></details></li>
-<li>Move a vertex outside the -1 to 1 range and watch it get clipped.<details class="solution"><summary>Show solution</summary><p>Set a vertex to x = 1.5. The triangle is cut by the edge of the view: the GPU clips it against the -1 to 1 volume and rasterizes only the part inside. Nothing wraps around and nothing crashes. Clipping on z works the same way, which is why geometry in front of the near plane disappears.</p></details></li>
+<li>Move a vertex outside the -1 to 1 range and watch it get clipped.<details class="solution"><summary>Show solution</summary><p>Set a vertex to x = 1.5.<br>
+The triangle is cut by the edge of the view: the GPU clips it against the -1 to 1 volume and rasterizes only the part inside.<br>
+Nothing wraps around and nothing crashes.<br>
+Clipping on z works the same way, which is why geometry in front of the near plane disappears.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../getting-started/hello-view.html"><small>Previous</small>Hello View</a><a class="next" href="../getting-started/shaders.html"><small>Next</small>Shaders</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>

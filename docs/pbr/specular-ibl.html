@@ -135,20 +135,28 @@
 </nav>
 <main class="content" id="main">
 <article><p class="crumb">PBR</p><h1 id="specular-ibl">Specular IBL<a class="headerlink" href="#specular-ibl" title="Permanent link">#</a></h1>
-<p>The diffuse half of image-based lighting depended only on the normal, so one small cubemap solved it. The specular half is harder:</p>
+<p>The diffuse half of image-based lighting depended only on the normal, so one small cubemap solved it.<br>
+The specular half is harder:</p>
 <div class="codehilite"><pre><span></span><code>Lo = ∫Ω  (D·F·G / (4 (wo·n)(wi·n))) · Li(wi) · (n · wi) dwi
 </code></pre></div>
 
-<p>It depends on the normal, the view direction, the roughness and F0. Precomputing every combination is impossible. Epic Games' <strong>split-sum approximation</strong> breaks the integral into two parts that <em>can</em> be precomputed:</p>
+<p>It depends on the normal, the view direction, the roughness and F0.<br>
+Precomputing every combination is impossible.<br>
+Epic Games' <strong>split-sum approximation</strong> breaks the integral into two parts that <em>can</em> be precomputed:</p>
 <ol>
 <li>A <strong>prefiltered environment map</strong>: the environment blurred by the right amount for each roughness level.</li>
 <li>A <strong>BRDF lookup table</strong>: a 2D texture that holds the rest of the BRDF's response.</li>
 </ol>
 <h2 id="part-1-the-prefiltered-environment-map">Part 1: the prefiltered environment map<a class="headerlink" href="#part-1-the-prefiltered-environment-map" title="Permanent link">#</a></h2>
-<p>A rough surface reflects a wide cone of the environment, a smooth one a narrow cone. We store increasingly blurred versions of the environment in the <strong>mip levels</strong> of a cubemap: level 0 for roughness 0, the last level for roughness 1. At render time, the reflection vector and the roughness select the direction and the mip level.</p>
-<p>The approximation assumes the view direction equals the reflection direction equals the normal, since the view direction is unknown at precompute time. This costs some stretching of reflections at grazing angles and is otherwise hard to notice.</p>
+<p>A rough surface reflects a wide cone of the environment, a smooth one a narrow cone.<br>
+We store increasingly blurred versions of the environment in the <strong>mip levels</strong> of a cubemap: level 0 for roughness 0, the last level for roughness 1.<br>
+At render time, the reflection vector and the roughness select the direction and the mip level.</p>
+<p>The approximation assumes the view direction equals the reflection direction equals the normal, since the view direction is unknown at precompute time.<br>
+This costs some stretching of reflections at grazing angles and is otherwise hard to notice.</p>
 <h3 id="importance-sampling">Importance sampling<a class="headerlink" href="#importance-sampling" title="Permanent link">#</a></h3>
-<p>Averaging the environment uniformly would need thousands of samples. <strong>Importance sampling</strong> generates sample directions concentrated where the GGX distribution is large, so a few dozen suffice. It needs well-distributed quasi-random numbers, for which the <strong>Hammersley sequence</strong> is the usual choice:</p>
+<p>Averaging the environment uniformly would need thousands of samples.<br>
+<strong>Importance sampling</strong> generates sample directions concentrated where the GGX distribution is large, so a few dozen suffice.<br>
+It needs well-distributed quasi-random numbers, for which the <strong>Hammersley sequence</strong> is the usual choice:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="nf">radicalInverse</span><span class="p">(</span><span class="n">uint</span><span class="w"> </span><span class="n">bits</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">bits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">bits</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mi">16u</span><span class="p">)</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="p">(</span><span class="n">bits</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="mi">16u</span><span class="p">);</span>
 <span class="w">    </span><span class="n">bits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">((</span><span class="n">bits</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="mh">0x55555555u</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mi">1u</span><span class="p">)</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="p">((</span><span class="n">bits</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="mh">0xAAAAAAAAu</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="mi">1u</span><span class="p">);</span>
@@ -260,10 +268,13 @@
 </code></pre></div>
 </div>
 
-<p>Each mip level is half the size of the one before, and the viewport follows the attachment size automatically. Use a sampler with linear mip filtering, or the per-sample mip selection in the shader has no effect.</p>
+<p>Each mip level is half the size of the one before, and the viewport follows the attachment size automatically.<br>
+Use a sampler with linear mip filtering, or the per-sample mip selection in the shader has no effect.</p>
 <p>Cubemap filtering in Metal is seamless across faces, so there are no visible seams at face edges in the blurred levels.</p>
 <h2 id="part-2-the-brdf-lookup-table">Part 2: the BRDF lookup table<a class="headerlink" href="#part-2-the-brdf-lookup-table" title="Permanent link">#</a></h2>
-<p>The second half of the split sum depends on only two numbers: <code>n · v</code> and the roughness. Its result, a <strong>scale</strong> and a <strong>bias</strong> to apply to F0, fits in the red and green channels of a 2D texture. The table is the same for every environment, so compute it once, or even ship it as an image.</p>
+<p>The second half of the split sum depends on only two numbers: <code>n · v</code> and the roughness.<br>
+Its result, a <strong>scale</strong> and a <strong>bias</strong> to apply to F0, fits in the red and green channels of a 2D texture.<br>
+The table is the same for every environment, so compute it once, or even ship it as an image.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="nf">geometrySchlickGGX_IBL</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">NdotV</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">roughness</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">roughness</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">roughness</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">2.0</span><span class="p">;</span><span class="w">      </span><span class="c1">// note: a different k for IBL</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">NdotV</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">NdotV</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mf">1.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">k</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">k</span><span class="p">);</span>
@@ -303,7 +314,8 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>Render it with the full-screen triangle into a 512 × 512 <code>.rg16Float</code> texture. The result is a smooth red-to-yellow gradient.</p>
+<p>Render it with the full-screen triangle into a 512 × 512 <code>.rg16Float</code> texture.<br>
+The result is a smooth red-to-yellow gradient.</p>
 <figure><img src="../assets/img/pbr/prefilter.webp" alt="The two precomputed halves of the split-sum approximation." width="880" height="365" loading="lazy"><figcaption>The two precomputed halves of the split-sum approximation.</figcaption></figure>
 
 <h2 id="putting-it-together">Putting it together<a class="headerlink" href="#putting-it-together" title="Permanent link">#</a></h2>
@@ -323,12 +335,18 @@
 <span class="n">float3</span><span class="w"> </span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ambient</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">Lo</span><span class="p">;</span>
 </code></pre></div>
 
-<p>Sample the lookup table with a clamping sampler. The texture coordinate for roughness must match how you rendered the table: here row 0, the top, is roughness 0.</p>
-<p>Now the metal spheres come alive. Smooth ones mirror the environment, rough ones show a soft, blurred version of it, and everything is tinted correctly by F0. Together with the direct lighting from point lights, this is a complete PBR pipeline.</p>
+<p>Sample the lookup table with a clamping sampler.<br>
+The texture coordinate for roughness must match how you rendered the table: here row 0, the top, is roughness 0.</p>
+<p>Now the metal spheres come alive.<br>
+Smooth ones mirror the environment, rough ones show a soft, blurred version of it, and everything is tinted correctly by F0.<br>
+Together with the direct lighting from point lights, this is a complete PBR pipeline.</p>
 <figure><img src="../assets/img/pbr/specular-ibl.webp" alt="Full image-based lighting: smooth metals mirror the environment, rough ones show a blurred version of it." width="880" height="495" loading="lazy"><figcaption>Full image-based lighting: smooth metals mirror the environment, rough ones show a blurred version of it.</figcaption></figure>
 
 <h2 id="beyond-a-single-probe">Beyond a single probe<a class="headerlink" href="#beyond-a-single-probe" title="Permanent link">#</a></h2>
-<p>One environment map describes the light at one point. Inside a building, a sphere would reflect the sky through the walls. Engines place many <strong>reflection probes</strong> around a level, each with its own prefiltered map, and blend between the nearest ones. <strong>Screen-space reflections</strong> and, on capable hardware, <a href="../beyond/ray-tracing.html">ray traced</a> reflections add what probes cannot capture: nearby, moving objects.</p>
+<p>One environment map describes the light at one point.<br>
+Inside a building, a sphere would reflect the sky through the walls.<br>
+Engines place many <strong>reflection probes</strong> around a level, each with its own prefiltered map, and blend between the nearest ones.<br>
+<strong>Screen-space reflections</strong> and, on capable hardware, <a href="../beyond/ray-tracing.html">ray traced</a> reflections add what probes cannot capture: nearby, moving objects.</p>
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
 <li>Display each mip level of the prefiltered map as a skybox.<details class="solution"><summary>Show solution</summary><p>Sample the prefiltered cubemap in the skybox shader at a fixed level.</p>
@@ -336,8 +354,12 @@
 </code></pre></div>
 
 <p>Level 0 is the sharp environment and each higher level is blurrier.</p></details></li>
-<li>Precompute the three IBL textures once and cache them on disk.<details class="solution"><summary>Show solution</summary><p>The irradiance map, the prefiltered map and the lookup table depend only on the environment, and the table not even on that. After generating them, read each mip level and face back with a blit into a buffer and write the bytes to a file; at the next launch fill the textures with <code>replace</code>. A common container for this is KTX.</p></details></li>
-<li>Load a full PBR model and place it in three different environments without changing its material.<details class="solution"><summary>Show solution</summary><p>Nothing about the material changes. Regenerate the irradiance and prefiltered maps for each environment and bind them. The same object looks blue-tinted under an open sky and warm in a sunset, which is the practical benefit of physically based materials.</p></details></li>
+<li>Precompute the three IBL textures once and cache them on disk.<details class="solution"><summary>Show solution</summary><p>The irradiance map, the prefiltered map and the lookup table depend only on the environment, and the table not even on that.<br>
+After generating them, read each mip level and face back with a blit into a buffer and write the bytes to a file; at the next launch fill the textures with <code>replace</code>.<br>
+A common container for this is KTX.</p></details></li>
+<li>Load a full PBR model and place it in three different environments without changing its material.<details class="solution"><summary>Show solution</summary><p>Nothing about the material changes.<br>
+Regenerate the irradiance and prefiltered maps for each environment and bind them.<br>
+The same object looks blue-tinted under an open sky and warm in a sunset, which is the practical benefit of physically based materials.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../pbr/diffuse-irradiance.html"><small>Previous</small>Diffuse Irradiance</a><a class="next" href="../in-practice/debugging.html"><small>Next</small>Debugging</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>

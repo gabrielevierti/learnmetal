@@ -135,17 +135,27 @@
 </nav>
 <main class="content" id="main">
 <article><p class="crumb">Beyond</p><h1 id="tessellation">Tessellation<a class="headerlink" href="#tessellation" title="Permanent link">#</a></h1>
-<p>Detailed surfaces need many triangles, but only where the viewer can see the detail. A mountain a kilometer away does not need the triangle density of the ground under your feet. <strong>Tessellation</strong> lets the GPU subdivide coarse geometry on the fly, as finely as you ask, so a mesh can be stored and animated at low resolution and rendered at high resolution.</p>
+<p>Detailed surfaces need many triangles, but only where the viewer can see the detail.<br>
+A mountain a kilometer away does not need the triangle density of the ground under your feet.<br>
+<strong>Tessellation</strong> lets the GPU subdivide coarse geometry on the fly, as finely as you ask, so a mesh can be stored and animated at low resolution and rendered at high resolution.</p>
 <h2 id="patches">Patches<a class="headerlink" href="#patches" title="Permanent link">#</a></h2>
-<p>With tessellation, you no longer submit triangles. You submit <strong>patches</strong>: triangles or quads defined by <strong>control points</strong>. For each patch you provide <strong>tessellation factors</strong> that say how finely to subdivide it. The GPU's tessellator generates the new vertices, and a special vertex function computes the final position of each.</p>
-<p>Metal's design differs from other APIs. There are no separate hull and domain shader stages. Instead:</p>
+<p>With tessellation, you no longer submit triangles.<br>
+You submit <strong>patches</strong>: triangles or quads defined by <strong>control points</strong>.<br>
+For each patch you provide <strong>tessellation factors</strong> that say how finely to subdivide it.<br>
+The GPU's tessellator generates the new vertices, and a special vertex function computes the final position of each.</p>
+<p>Metal's design differs from other APIs.<br>
+There are no separate hull and domain shader stages.<br>
+Instead:</p>
 <ol>
 <li>A <strong>compute kernel</strong>, or the CPU, writes tessellation factors into a buffer.</li>
 <li>The tessellator subdivides each patch according to its factors.</li>
 <li>A <strong>post-tessellation vertex function</strong> runs once for every generated vertex.</li>
 </ol>
 <h2 id="tessellation-factors">Tessellation factors<a class="headerlink" href="#tessellation-factors" title="Permanent link">#</a></h2>
-<p>A quad patch has four <strong>edge factors</strong> and two <strong>inside factors</strong>. A triangle patch has three and one. A factor of 1 means no subdivision; 16 means the edge is split into 16 segments. Edge factors are separate from inside factors so that two neighboring patches can agree on their shared edge and leave no cracks, even when their interiors are subdivided differently.</p>
+<p>A quad patch has four <strong>edge factors</strong> and two <strong>inside factors</strong>.<br>
+A triangle patch has three and one.<br>
+A factor of 1 means no subdivision; 16 means the edge is split into 16 segments.<br>
+Edge factors are separate from inside factors so that two neighboring patches can agree on their shared edge and leave no cracks, even when their interiors are subdivided differently.</p>
 <p>A kernel that sets the same factor for every patch:</p>
 <div class="codehilite"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;metal_stdlib&gt;</span>
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">metal</span><span class="p">;</span>
@@ -172,9 +182,12 @@
 </code></pre></div>
 </div>
 
-<p>In a real renderer, the kernel computes each edge's factor from its distance to the camera or its length on screen. That is <strong>adaptive tessellation</strong>. Compute a factor per <em>edge</em> from that edge's own midpoint, so both patches sharing the edge get the same value.</p>
+<p>In a real renderer, the kernel computes each edge's factor from its distance to the camera or its length on screen.<br>
+That is <strong>adaptive tessellation</strong>.<br>
+Compute a factor per <em>edge</em> from that edge's own midpoint, so both patches sharing the edge get the same value.</p>
 <h2 id="the-pipeline">The pipeline<a class="headerlink" href="#the-pipeline" title="Permanent link">#</a></h2>
-<p>Control points go in an ordinary vertex buffer. The vertex descriptor says that the data advances per control point:</p>
+<p>Control points go in an ordinary vertex buffer.<br>
+The vertex descriptor says that the data advances per control point:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">vertexDescriptor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MTLVertexDescriptor</span><span class="p">()</span>
 <span class="n">vertexDescriptor</span><span class="p">.</span><span class="n">attributes</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">format</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">float3</span>
@@ -220,7 +233,10 @@
 </code></pre></div>
 </div>
 
-<p>The <strong>partition mode</strong> controls how edges are split. <code>.integer</code> and <code>.pow2</code> snap to whole numbers, which causes visible popping as factors change. The fractional modes add new vertices gradually, so detail grows smoothly as the camera approaches. The maximum factor is 16 on older iOS devices and 64 on Macs and recent Apple GPUs.</p>
+<p>The <strong>partition mode</strong> controls how edges are split.<br>
+<code>.integer</code> and <code>.pow2</code> snap to whole numbers, which causes visible popping as factors change.<br>
+The fractional modes add new vertices gradually, so detail grows smoothly as the camera approaches.<br>
+The maximum factor is 16 on older iOS devices and 64 on Macs and recent Apple GPUs.</p>
 <h2 id="the-post-tessellation-vertex-function">The post-tessellation vertex function<a class="headerlink" href="#the-post-tessellation-vertex-function" title="Permanent link">#</a></h2>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">ControlPoint</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">position</span><span class="w"> </span><span class="p">[[</span><span class="na">attribute</span><span class="p">(</span><span class="mi">0</span><span class="p">)]];</span>
@@ -265,7 +281,9 @@
 <li><code>[[position_in_patch]]</code> is where the generated vertex lies within the patch: a <code>float2</code> from 0 to 1 for quads, and a <code>float3</code> of barycentric weights for triangles.</li>
 <li>Vertex functions cannot compute mip levels automatically, so texture samples name the level.</li>
 </ul>
-<p>The function decides what the patch <em>means</em>. Here it is a flat quad displaced by a height map. Interpret sixteen control points as a bicubic Bézier patch and you get smooth curved surfaces from a coarse cage.</p>
+<p>The function decides what the patch <em>means</em>.<br>
+Here it is a flat quad displaced by a height map.<br>
+Interpret sixteen control points as a bicubic Bézier patch and you get smooth curved surfaces from a coarse cage.</p>
 <h2 id="drawing">Drawing<a class="headerlink" href="#drawing" title="Permanent link">#</a></h2>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="c1">// 1. Compute pass: fill the factor buffer.</span>
@@ -325,7 +343,8 @@
 <div class="lm-demo" data-demo="tessellation" data-fallback="../assets/img/beyond/tessellation.webp"></div>
 
 <h2 id="normals-for-displaced-surfaces">Normals for displaced surfaces<a class="headerlink" href="#normals-for-displaced-surfaces" title="Permanent link">#</a></h2>
-<p>Displacement changes the surface, so the original normals are wrong. For a height map, compute the normal from neighboring heights, in the vertex function or per fragment:</p>
+<p>Displacement changes the surface, so the original normals are wrong.<br>
+For a height map, compute the normal from neighboring heights, in the vertex function or per fragment:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float2</span><span class="w"> </span><span class="n">texel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">float2</span><span class="p">(</span><span class="n">heightMap</span><span class="p">.</span><span class="n">get_width</span><span class="p">(),</span><span class="w"> </span><span class="n">heightMap</span><span class="p">.</span><span class="n">get_height</span><span class="p">());</span>
 <span class="kt">float</span><span class="w"> </span><span class="n">left</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">heightMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">uv</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">float2</span><span class="p">(</span><span class="n">texel</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)).</span><span class="n">r</span><span class="p">;</span>
 <span class="kt">float</span><span class="w"> </span><span class="n">right</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">heightMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">uv</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">float2</span><span class="p">(</span><span class="n">texel</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)).</span><span class="n">r</span><span class="p">;</span>
@@ -340,11 +359,16 @@
 <li><strong>Displacement mapping</strong>: real geometric detail with correct silhouettes and shadows, where <a href="../advanced-lighting/parallax-mapping.html">parallax mapping</a> only fakes it.</li>
 <li><strong>Smooth surfaces</strong>: subdivision surfaces and Bézier patches for characters and vehicles.</li>
 </ul>
-<p>On recent hardware, mesh shaders offer another route to the same goals with more control. Tessellation remains the simplest way to get adaptive detail and is supported on every Apple GPU.</p>
+<p>On recent hardware, mesh shaders offer another route to the same goals with more control.<br>
+Tessellation remains the simplest way to get adaptive detail and is supported on every Apple GPU.</p>
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
-<li>Animate the tessellation level and watch the wireframe refine.<details class="solution"><summary>Show solution</summary><p>Pass <code>level = 1.0 + 7.5 * (sin(time) * 0.5 + 0.5)</code> to the factor kernel each frame. With a fractional partition mode the new vertices slide out of existing edges smoothly. The live demo has a slider for the factor.</p></details></li>
-<li>Compute per-edge factors from the camera distance in the kernel.<details class="solution"><summary>Show solution</summary><p>Give the kernel the control points and the camera position. For each edge take its midpoint, compute the distance to the camera, and map it to a factor. Use the average of the edge factors for the inside.</p>
+<li>Animate the tessellation level and watch the wireframe refine.<details class="solution"><summary>Show solution</summary><p>Pass <code>level = 1.0 + 7.5 * (sin(time) * 0.5 + 0.5)</code> to the factor kernel each frame.<br>
+With a fractional partition mode the new vertices slide out of existing edges smoothly.<br>
+The live demo has a slider for the factor.</p></details></li>
+<li>Compute per-edge factors from the camera distance in the kernel.<details class="solution"><summary>Show solution</summary><p>Give the kernel the control points and the camera position.<br>
+For each edge take its midpoint, compute the distance to the camera, and map it to a factor.<br>
+Use the average of the edge factors for the inside.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="nf">edgeFactor</span><span class="p">(</span><span class="n">float3</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="n">eye</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">distance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">length</span><span class="p">((</span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.5</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">eye</span><span class="p">);</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">clamp</span><span class="p">(</span><span class="mf">48.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">distance</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">16.0</span><span class="p">);</span>
@@ -352,7 +376,9 @@
 </code></pre></div>
 
 <p>Because the factor depends only on the edge's own endpoints, both patches that share an edge compute the same value and no cracks appear.</p></details></li>
-<li>Compare <code>.integer</code> and <code>.fractionalEven</code> while moving the camera.<details class="solution"><summary>Show solution</summary><p>With <code>.integer</code> the factor snaps to whole numbers, so the mesh changes in visible jumps as you move. With <code>.fractionalEven</code> new vertices grow out of existing ones, and the transition is continuous. Fractional modes cost nothing extra and are the right default for anything that moves.</p></details></li>
+<li>Compare <code>.integer</code> and <code>.fractionalEven</code> while moving the camera.<details class="solution"><summary>Show solution</summary><p>With <code>.integer</code> the factor snaps to whole numbers, so the mesh changes in visible jumps as you move.<br>
+With <code>.fractionalEven</code> new vertices grow out of existing ones, and the transition is continuous.<br>
+Fractional modes cost nothing extra and are the right default for anything that moves.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../beyond/compute-shaders.html"><small>Previous</small>Compute Shaders</a><a class="next" href="../beyond/ray-tracing.html"><small>Next</small>Ray Tracing</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>

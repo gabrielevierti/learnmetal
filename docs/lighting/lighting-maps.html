@@ -137,9 +137,13 @@
 <article><p class="crumb">Lighting</p><h1 id="lighting-maps">Lighting Maps<a class="headerlink" href="#lighting-maps" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Example project</strong> <code>examples/Sources/09-LightingMaps</code>, run with <code>swift run LightingMaps</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
 
-<p>A material with one color per object is still too coarse. A wooden crate with a steel frame is two materials on one surface: the wood is dull, the steel is shiny. The answer is to store material properties in textures, so they can vary per pixel. Such textures are called <strong>lighting maps</strong>.</p>
+<p>A material with one color per object is still too coarse.<br>
+A wooden crate with a steel frame is two materials on one surface: the wood is dull, the steel is shiny.<br>
+The answer is to store material properties in textures, so they can vary per pixel.<br>
+Such textures are called <strong>lighting maps</strong>.</p>
 <h2 id="diffuse-maps">Diffuse maps<a class="headerlink" href="#diffuse-maps" title="Permanent link">#</a></h2>
-<p>A <strong>diffuse map</strong> is what earlier chapters simply called a texture: an image holding the surface's color at every point. Replace the material's diffuse color with a texture lookup, and use the same value for ambient:</p>
+<p>A <strong>diffuse map</strong> is what earlier chapters simply called a texture: an image holding the surface's color at every point.<br>
+Replace the material's diffuse color with a texture lookup, and use the same value for ambient:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">Material</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">shininess</span><span class="p">;</span>
 <span class="p">};</span>
@@ -172,7 +176,9 @@
 
 <p>Remember to shrink the Swift <code>Material</code> struct to match.</p>
 <h2 id="specular-maps">Specular maps<a class="headerlink" href="#specular-maps" title="Permanent link">#</a></h2>
-<p>The <strong>specular map</strong> is a second image, usually grayscale, that says how strongly each point reflects highlights. For the crate it is black over the wood and bright over the steel frame, with scratches and wear painted in. Black means no highlight; white means full.</p>
+<p>The <strong>specular map</strong> is a second image, usually grayscale, that says how strongly each point reflects highlights.<br>
+For the crate it is black over the wood and bright over the steel frame, with scratches and wear painted in.<br>
+Black means no highlight; white means full.</p>
 <p>Load both images and bind them to the two texture slots:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">diffuseMap</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="p">!</span><span class="w"> </span><span class="n">loader</span><span class="p">.</span><span class="n">newTexture</span><span class="p">(</span><span class="n">URL</span><span class="p">:</span><span class="w"> </span><span class="n">url</span><span class="p">(</span><span class="k">for</span><span class="p">:</span><span class="w"> </span><span class="s">"container2"</span><span class="p">,</span><span class="w"> </span><span class="s">"png"</span><span class="p">),</span><span class="w"> </span><span class="n">options</span><span class="p">:</span><span class="w"> </span><span class="n">options</span><span class="p">)</span>
@@ -202,19 +208,25 @@
 <div class="lm-demo" data-demo="lighting-maps" data-fallback="../assets/img/lighting/lighting-maps.webp"></div>
 
 <h2 id="one-sampler-many-textures">One sampler, many textures<a class="headerlink" href="#one-sampler-many-textures" title="Permanent link">#</a></h2>
-<p>Both maps are read through the same sampler. A sampler describes <em>how</em> to read, and that is nearly always the same for all maps of a material, so a single sampler state is typical.</p>
+<p>Both maps are read through the same sampler.<br>
+A sampler describes <em>how</em> to read, and that is nearly always the same for all maps of a material, so a single sampler state is typical.</p>
 <h2 id="single-channel-textures">Single-channel textures<a class="headerlink" href="#single-channel-textures" title="Permanent link">#</a></h2>
-<p>A grayscale specular map wastes three channels when loaded as RGBA. Metal has one-channel formats such as <code>.r8Unorm</code>, and a PNG saved as grayscale is loaded that way by <code>MTKTextureLoader</code>. In the shader you then read only <code>.r</code>:</p>
+<p>A grayscale specular map wastes three channels when loaded as RGBA.<br>
+Metal has one-channel formats such as <code>.r8Unorm</code>, and a PNG saved as grayscale is loaded that way by <code>MTKTextureLoader</code>.<br>
+In the shader you then read only <code>.r</code>:</p>
 <div class="codehilite"><pre><span></span><code><span class="kt">float</span><span class="w"> </span><span class="n">specularStrength</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">specularMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">mapSampler</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">r</span><span class="p">;</span>
 </code></pre></div>
 
-<p>Real asset pipelines go further and pack several grayscale maps into the channels of one texture, for example roughness in green and metalness in blue. You will see that in the PBR section.</p>
+<p>Real asset pipelines go further and pack several grayscale maps into the channels of one texture, for example roughness in green and metalness in blue.<br>
+You will see that in the PBR section.</p>
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
 <li>Invert the specular map in the shader so the wood shines and the steel does not.<details class="solution"><summary>Show solution</summary><p>Subtract the sampled value from one.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">specularColor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">specularMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">mapSampler</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">rgb</span><span class="p">;</span>
 </code></pre></div></details></li>
-<li>Use a colored specular map and see how it tints the highlights.<details class="solution"><summary>Show solution</summary><p>Nothing in the shader changes: the specular term is already multiplied by the map's rgb. A map painted blue over the steel gives blue highlights there. This is how colored metals are done in the Phong model.</p></details></li>
+<li>Use a colored specular map and see how it tints the highlights.<details class="solution"><summary>Show solution</summary><p>Nothing in the shader changes: the specular term is already multiplied by the map's rgb.<br>
+A map painted blue over the steel gives blue highlights there.<br>
+This is how colored metals are done in the Phong model.</p></details></li>
 <li>Add an <strong>emission map</strong>: a third texture whose color is added to the result regardless of lighting, making parts of the object appear to glow.<details class="solution"><summary>Show solution</summary><p>Bind a third texture and add its color after the lighting, without multiplying by any light term.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">emission</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">emissionMap</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">mapSampler</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">rgb</span><span class="p">;</span>
 <span class="k">return</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">ambient</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">diffuse</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">specular</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">emission</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>

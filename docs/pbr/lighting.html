@@ -137,7 +137,8 @@
 <article><p class="crumb">PBR</p><h1 id="lighting">Lighting<a class="headerlink" href="#lighting" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Example project</strong> <code>examples/Sources/16-PBR</code>, run with <code>swift run PBR</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
 
-<p>With the theory in hand, the PBR fragment shader is short. This chapter implements the Cook-Torrance BRDF for point lights, first with constant material values and then with textures.</p>
+<p>With the theory in hand, the PBR fragment shader is short.<br>
+This chapter implements the Cook-Torrance BRDF for point lights, first with constant material values and then with textures.</p>
 <h2 id="the-brdf-functions">The BRDF functions<a class="headerlink" href="#the-brdf-functions" title="Permanent link">#</a></h2>
 <p>Each formula from the previous chapter becomes a small function:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">constant</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">PI</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">3.14159265359</span><span class="p">;</span>
@@ -167,7 +168,8 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>Squaring the roughness before use (<code>a = roughness²</code>) makes the parameter feel linear to artists. It is a convention adopted by nearly all engines.</p>
+<p>Squaring the roughness before use (<code>a = roughness²</code>) makes the parameter feel linear to artists.<br>
+It is a convention adopted by nearly all engines.</p>
 <h2 id="the-fragment-function">The fragment function<a class="headerlink" href="#the-fragment-function" title="Permanent link">#</a></h2>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">PBRUniforms</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">viewPosition</span><span class="p">;</span>
@@ -223,18 +225,24 @@
 
 <p>Walking through the loop:</p>
 <ul>
-<li><strong>Radiance</strong> is the light's color attenuated by the inverse square of the distance. A point light delivers all its energy from one direction, so the integral of the reflectance equation reduces to one evaluation per light.</li>
+<li><strong>Radiance</strong> is the light's color attenuated by the inverse square of the distance.<br>
+A point light delivers all its energy from one direction, so the integral of the reflectance equation reduces to one evaluation per light.</li>
 <li><strong>F0</strong> blends from the dielectric value 0.04 to the albedo as the material becomes metallic.</li>
-<li>The <strong>specular</strong> term is <code>D·G·F</code> over the normalization factor. The small constant avoids a division by zero.</li>
+<li>The <strong>specular</strong> term is <code>D·G·F</code> over the normalization factor.<br>
+The small constant avoids a division by zero.</li>
 <li><code>kD</code> removes the reflected fraction and removes diffuse entirely for metals.</li>
 <li>The result is multiplied by <code>NdotL</code>, the cosine factor.</li>
 </ul>
-<p>The output is linear HDR. It goes through the tone mapping pass from the <a href="../advanced-lighting/hdr.html">HDR</a> chapter and the sRGB drawable. Do not gamma correct in this shader.</p>
-<p>The fixed ambient term is a placeholder. Replacing it with real light from the environment is the job of the next two chapters.</p>
+<p>The output is linear HDR.<br>
+It goes through the tone mapping pass from the <a href="../advanced-lighting/hdr.html">HDR</a> chapter and the sRGB drawable.<br>
+Do not gamma correct in this shader.</p>
+<p>The fixed ambient term is a placeholder.<br>
+Replacing it with real light from the environment is the job of the next two chapters.</p>
 <div class="lm-demo" data-demo="pbr"></div>
 
 <h2 id="a-grid-of-spheres">A grid of spheres<a class="headerlink" href="#a-grid-of-spheres" title="Permanent link">#</a></h2>
-<p>The standard test: a grid of spheres where metalness increases from bottom to top and roughness from left to right. Model I/O generates the sphere:</p>
+<p>The standard test: a grid of spheres where metalness increases from bottom to top and roughness from left to right.<br>
+Model I/O generates the sphere:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">sphere</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">MDLMesh</span><span class="p">(</span><span class="n">sphereWithExtent</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">segments</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">64</span><span class="p">,</span><span class="w"> </span><span class="mi">64</span><span class="p">],</span>
 <span class="w">                     </span><span class="n">inwardNormals</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="n">geometryType</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">triangles</span><span class="p">,</span><span class="w"> </span><span class="n">allocator</span><span class="p">:</span><span class="w"> </span><span class="n">allocator</span><span class="p">)</span>
@@ -280,7 +288,8 @@
 </code></pre></div>
 </div>
 
-<p>Four lights with a color of (300, 300, 300) placed about 10 units in front of the grid light it well. Such large values are normal with inverse-square falloff.</p>
+<p>Four lights with a color of (300, 300, 300) placed about 10 units in front of the grid light it well.<br>
+Such large values are normal with inverse-square falloff.</p>
 <p>Even with a flat ambient term the result is striking: rough dielectrics look like chalk or rubber, smooth ones like plastic, and the metals have colored, tight highlights.</p>
 <figure><img src="../assets/img/pbr/lighting.webp" alt="Metalness increases from bottom to top, roughness from left to right. Direct lighting only." width="880" height="495" loading="lazy"><figcaption>Metalness increases from bottom to top, roughness from left to right. Direct lighting only.</figcaption></figure>
 
@@ -304,12 +313,16 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>Load the albedo map as sRGB and all the others as linear data. Many asset packs combine occlusion, roughness and metalness into the red, green and blue channels of a single "ORM" texture, which saves two texture reads.</p>
+<p>Load the albedo map as sRGB and all the others as linear data.<br>
+Many asset packs combine occlusion, roughness and metalness into the red, green and blue channels of a single "ORM" texture, which saves two texture reads.</p>
 <p>With Model I/O, extend the material loader from the <a href="../model-loading/mesh.html">Mesh</a> chapter to read the <code>.metallic</code>, <code>.roughness</code>, <code>.tangentSpaceNormal</code> and <code>.ambientOcclusion</code> semantics, falling back to 1 × 1 textures holding the scalar values when a property has no texture.</p>
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
-<li>Give every sphere the same roughness and vary only the albedo to see how metals tint their highlights.<details class="solution"><summary>Show solution</summary><p>Set the roughness to a constant such as 0.3 and derive the albedo from the column. Dielectrics keep a white highlight whatever their color. As metalness rises the highlight takes the color of the albedo, because F0 becomes the albedo itself.</p></details></li>
-<li>Find a free PBR material set, such as rusted iron or worn plastic, and apply it to a sphere.<details class="solution"><summary>Show solution</summary><p>Sites such as Poly Haven and ambientCG publish free sets. Load the albedo as sRGB and the normal, roughness, metalness and occlusion maps as linear, add tangents to the mesh, and use the textured fragment function from this chapter.</p></details></li>
+<li>Give every sphere the same roughness and vary only the albedo to see how metals tint their highlights.<details class="solution"><summary>Show solution</summary><p>Set the roughness to a constant such as 0.3 and derive the albedo from the column.<br>
+Dielectrics keep a white highlight whatever their color.<br>
+As metalness rises the highlight takes the color of the albedo, because F0 becomes the albedo itself.</p></details></li>
+<li>Find a free PBR material set, such as rusted iron or worn plastic, and apply it to a sphere.<details class="solution"><summary>Show solution</summary><p>Sites such as Poly Haven and ambientCG publish free sets.<br>
+Load the albedo as sRGB and the normal, roughness, metalness and occlusion maps as linear, add tangents to the mesh, and use the textured fragment function from this chapter.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../pbr/theory.html"><small>Previous</small>Theory</a><a class="next" href="../pbr/diffuse-irradiance.html"><small>Next</small>Diffuse Irradiance</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>

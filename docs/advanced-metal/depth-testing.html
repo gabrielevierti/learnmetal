@@ -135,10 +135,16 @@
 </nav>
 <main class="content" id="main">
 <article><p class="crumb">Advanced Metal</p><h1 id="depth-testing">Depth Testing<a class="headerlink" href="#depth-testing" title="Permanent link">#</a></h1>
-<p>We turned on the depth buffer in <a href="../getting-started/coordinate-systems.html">Coordinate Systems</a> and moved on. It deserves a closer look, because several later techniques, shadows above all, depend on understanding exactly what it stores.</p>
+<p>We turned on the depth buffer in <a href="../getting-started/coordinate-systems.html">Coordinate Systems</a> and moved on.<br>
+It deserves a closer look, because several later techniques, shadows above all, depend on understanding exactly what it stores.</p>
 <h2 id="how-the-test-works">How the test works<a class="headerlink" href="#how-the-test-works" title="Permanent link">#</a></h2>
-<p>The depth attachment stores one value per pixel. For every fragment the GPU compares the fragment's depth with the stored value using the <strong>compare function</strong> of the current depth-stencil state. If the test passes, the fragment is kept, and if depth writing is enabled, its depth replaces the stored one. If it fails, the fragment is discarded.</p>
-<p>The test conceptually runs after the fragment function. In practice GPUs run it <em>before</em> whenever they can (<strong>early depth testing</strong>), skipping the fragment function for hidden pixels. Apple GPUs go further with hidden surface removal: for opaque geometry they work out the visible fragment for each pixel first and shade only that one.</p>
+<p>The depth attachment stores one value per pixel.<br>
+For every fragment the GPU compares the fragment's depth with the stored value using the <strong>compare function</strong> of the current depth-stencil state.<br>
+If the test passes, the fragment is kept, and if depth writing is enabled, its depth replaces the stored one.<br>
+If it fails, the fragment is discarded.</p>
+<p>The test conceptually runs after the fragment function.<br>
+In practice GPUs run it <em>before</em> whenever they can (<strong>early depth testing</strong>), skipping the fragment function for hidden pixels.<br>
+Apple GPUs go further with hidden surface removal: for opaque geometry they work out the visible fragment for each pixel first and shade only that one.</p>
 <h2 id="compare-functions">Compare functions<a class="headerlink" href="#compare-functions" title="Permanent link">#</a></h2>
 <table>
 <thead>
@@ -194,14 +200,20 @@
 </code></pre></div>
 </div>
 
-<p>A state with testing on and <strong>writing off</strong> is common: <code>isDepthWriteEnabled = false</code> lets fragments be hidden by existing geometry without affecting the buffer. Transparent objects and particle effects use it.</p>
-<p>Depth-stencil states are cheap, immutable objects. Create the handful you need at startup and switch between them with <code>encoder.setDepthStencilState</code>.</p>
+<p>A state with testing on and <strong>writing off</strong> is common: <code>isDepthWriteEnabled = false</code> lets fragments be hidden by existing geometry without affecting the buffer.<br>
+Transparent objects and particle effects use it.</p>
+<p>Depth-stencil states are cheap, immutable objects.<br>
+Create the handful you need at startup and switch between them with <code>encoder.setDepthStencilState</code>.</p>
 <h2 id="the-values-are-not-linear">The values are not linear<a class="headerlink" href="#the-values-are-not-linear" title="Permanent link">#</a></h2>
-<p>The depth buffer does not store distance. After the projection matrix and the perspective divide, depth in Metal is</p>
+<p>The depth buffer does not store distance.<br>
+After the projection matrix and the perspective divide, depth in Metal is</p>
 <div class="codehilite"><pre><span></span><code>depth = far * (z - near) / (z * (far - near))
 </code></pre></div>
 
-<p>for a point at distance <code>z</code> in front of the camera. It is 0 at the near plane and 1 at the far plane, but in between it is strongly non-linear. With near 0.1 and far 100, a point just 1 unit away already has depth 0.9, and at 10 units it is 0.99. Most of the precision is spent close to the camera, which is where the eye notices errors most.</p>
+<p>for a point at distance <code>z</code> in front of the camera.<br>
+It is 0 at the near plane and 1 at the far plane, but in between it is strongly non-linear.<br>
+With near 0.1 and far 100, a point just 1 unit away already has depth 0.9, and at 10 units it is 0.99.<br>
+Most of the precision is spent close to the camera, which is where the eye notices errors most.</p>
 <h2 id="visualizing-depth">Visualizing depth<a class="headerlink" href="#visualizing-depth" title="Permanent link">#</a></h2>
 <p>The built-in <code>[[position]]</code> input of a fragment function contains the pixel coordinates in x and y and the depth in z:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_depth</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]])</span><span class="w"> </span><span class="p">{</span>
@@ -209,7 +221,8 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>Almost everything is white unless you are very close. To see something useful, convert back to linear distance:</p>
+<p>Almost everything is white unless you are very close.<br>
+To see something useful, convert back to linear distance:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="nf">linearizeDepth</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">depth</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">near</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">far</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">near</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">far</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">far</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">depth</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">far</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">near</span><span class="p">));</span>
 <span class="p">}</span>
@@ -220,19 +233,26 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>Keep this function. Screen-space effects such as SSAO need it.</p>
+<p>Keep this function.<br>
+Screen-space effects such as SSAO need it.</p>
 <div class="lm-demo" data-demo="depth-testing" data-fallback="../assets/img/advanced-metal/depth-testing.webp"></div>
 
 <h2 id="z-fighting">Z-fighting<a class="headerlink" href="#z-fighting" title="Permanent link">#</a></h2>
-<p>When two surfaces are nearly coplanar, their depth values round to the same number and the winner flips from pixel to pixel, producing a flickering stripe pattern called <strong>z-fighting</strong>. Remedies:</p>
+<p>When two surfaces are nearly coplanar, their depth values round to the same number and the winner flips from pixel to pixel, producing a flickering stripe pattern called <strong>z-fighting</strong>.<br>
+Remedies:</p>
 <ul>
-<li><strong>Do not place surfaces that close.</strong> A small offset that nobody notices is the simplest cure.</li>
-<li><strong>Push the near plane out.</strong> Going from 0.01 to 0.1 gains a lot of precision.</li>
-<li><strong>Use a 32-bit float depth buffer.</strong> <code>.depth32Float</code> is supported everywhere in Metal and is what we use. <code>.depth16Unorm</code> saves memory at the cost of precision.</li>
+<li><strong>Do not place surfaces that close.</strong><br>
+A small offset that nobody notices is the simplest cure.</li>
+<li><strong>Push the near plane out.</strong><br>
+Going from 0.01 to 0.1 gains a lot of precision.</li>
+<li><strong>Use a 32-bit float depth buffer.</strong><br>
+<code>.depth32Float</code> is supported everywhere in Metal and is what we use.<br>
+<code>.depth16Unorm</code> saves memory at the cost of precision.</li>
 <li><strong>Use a depth bias</strong> for decals and similar: <code>encoder.setDepthBias(_:slopeScale:clamp:)</code> nudges the depth of what you draw next.</li>
 </ul>
 <h2 id="reverse-z">Reverse-Z<a class="headerlink" href="#reverse-z" title="Permanent link">#</a></h2>
-<p>Floating-point numbers have the most precision near 0, and the perspective mapping needs the most precision near 1. The two can be made to cancel by flipping the range: map the near plane to 1 and the far plane to 0, clear depth to 0, and test with <code>.greater</code>.</p>
+<p>Floating-point numbers have the most precision near 0, and the perspective mapping needs the most precision near 1.<br>
+The two can be made to cancel by flipping the range: map the near plane to 1 and the far plane to 0, clear depth to 0, and test with <code>.greater</code>.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">view</span><span class="p">.</span><span class="n">clearDepth</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mf">0.0</span>
 <span class="n">descriptor</span><span class="p">.</span><span class="n">depthCompareFunction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">greater</span>
@@ -246,11 +266,17 @@
 </code></pre></div>
 </div>
 
-<p>This <strong>reverse-Z</strong> setup gives almost uniform precision over huge view distances and is standard in modern engines. It works in Metal precisely because NDC depth runs from 0 to 1. We keep the conventional direction in this series so that the code stays easy to compare with other material.</p>
+<p>This <strong>reverse-Z</strong> setup gives almost uniform precision over huge view distances and is standard in modern engines.<br>
+It works in Metal precisely because NDC depth runs from 0 to 1.<br>
+We keep the conventional direction in this series so that the code stays easy to compare with other material.</p>
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
-<li>Draw the scene with <code>.always</code> and explain the result in terms of draw order.<details class="solution"><summary>Show solution</summary><p>With <code>.always</code> nothing is ever rejected, so each pixel shows whatever was drawn last. Objects drawn later appear in front of objects drawn earlier even when they are behind them, and within one cube the faces at the end of the vertex buffer cover the others.</p></details></li>
-<li>Put two quads 0.0001 apart and move the camera away until they fight. Then try each remedy.<details class="solution"><summary>Show solution</summary><p>At close range the two quads have distinct depth values. As the camera moves away, both depths approach 1 and round to the same number, and the flickering stripes appear. Each remedy works: a larger gap, a farther near plane (try 1.0 instead of 0.1), a depth bias on the second quad with <code>setDepthBias</code>, or reverse-Z.</p></details></li>
+<li>Draw the scene with <code>.always</code> and explain the result in terms of draw order.<details class="solution"><summary>Show solution</summary><p>With <code>.always</code> nothing is ever rejected, so each pixel shows whatever was drawn last.<br>
+Objects drawn later appear in front of objects drawn earlier even when they are behind them, and within one cube the faces at the end of the vertex buffer cover the others.</p></details></li>
+<li>Put two quads 0.0001 apart and move the camera away until they fight.<br>
+Then try each remedy.<details class="solution"><summary>Show solution</summary><p>At close range the two quads have distinct depth values.<br>
+As the camera moves away, both depths approach 1 and round to the same number, and the flickering stripes appear.<br>
+Each remedy works: a larger gap, a farther near plane (try 1.0 instead of 0.1), a depth bias on the second quad with <code>setDepthBias</code>, or reverse-Z.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../model-loading/model.html"><small>Previous</small>Model</a><a class="next" href="../advanced-metal/stencil-testing.html"><small>Next</small>Stencil Testing</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>

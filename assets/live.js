@@ -809,11 +809,11 @@ fragment float4 fragment_depth(Plain in [[stage_in]]) {
         program = next;
         autoPending = next.fields;
         errorBox.hidden = true;
-        if (status) { status.textContent = "Compiled"; status.className = "lm-status ok"; }
+        if (status) { status.textContent = (window.LM_T && window.LM_T.compiled) || "Compiled"; status.className = "lm-status ok"; }
       } catch (err) {
         errorBox.textContent = readableError(err, HEAD_LINES + 1, preludeLines);
         errorBox.hidden = false;
-        if (status) { status.textContent = "Error"; status.className = "lm-status bad"; }
+        if (status) { status.textContent = (window.LM_T && window.LM_T.error) || "Error"; status.className = "lm-status bad"; }
       }
       touch();
     }
@@ -828,9 +828,9 @@ fragment float4 fragment_depth(Plain in [[stage_in]]) {
       title.textContent = "Shaders.metal";
       status = document.createElement("span");
       const reset = document.createElement("button");
-      reset.type = "button"; reset.textContent = "Reset";
+      reset.type = "button"; reset.textContent = (window.LM_T && window.LM_T.resetshader) || "Reset";
       const share = document.createElement("button");
-      share.type = "button"; share.textContent = "Copy link";
+      share.type = "button"; share.textContent = (window.LM_T && window.LM_T.copylink) || "Copy link";
       share.title = "Copy a link to this page that opens with your version of the shader";
       bar.append(title, status, share, reset);
       panel.appendChild(bar);
@@ -844,9 +844,9 @@ fragment float4 fragment_depth(Plain in [[stage_in]]) {
       share.addEventListener("click", async () => {
         const url = location.href.split("#")[0] + "#shader=" + demoId + ":" + (await packText(editor.get()));
         try { history.replaceState(null, "", url); } catch (e) { /* file:// pages may refuse */ }
-        try { await navigator.clipboard.writeText(url); share.textContent = "Link copied"; }
+        try { await navigator.clipboard.writeText(url); share.textContent = (window.LM_T && window.LM_T.linkcopied) || "Link copied"; }
         catch (e) { window.prompt("Copy this link", url); }
-        setTimeout(() => { share.textContent = "Copy link"; }, 1600);
+        setTimeout(() => { share.textContent = (window.LM_T && window.LM_T.copylink) || "Copy link"; }, 1600);
       });
       const shared = new RegExp("^#shader=" + demoId + ":(.+)$").exec(location.hash);
       if (shared) {
@@ -869,7 +869,7 @@ fragment float4 fragment_depth(Plain in [[stage_in]]) {
         const d = document.createElement("details");
         d.className = "lm-details";
         const sum = document.createElement("summary");
-        sum.textContent = "Edit the shader";
+        sum.textContent = (window.LM_T && window.LM_T.editshader) || "Edit the shader";
         d.append(sum, panel);
         el.appendChild(d);
       } else {

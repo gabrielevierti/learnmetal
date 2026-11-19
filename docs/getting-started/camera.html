@@ -137,9 +137,12 @@
 <article><p class="crumb">Getting Started</p><h1 id="camera">Camera<a class="headerlink" href="#camera" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Example project</strong> <code>examples/Sources/07-Camera</code>, run with <code>swift run Camera</code>. <a href="../downloads/learnmetal-examples.zip">Download all examples</a> or see <a href="../resources/examples.html">how to run them</a>.</div>
 
-<p>A fixed view matrix shows a scene from one spot. A camera you can fly through the scene is a view matrix that is rebuilt every frame from a position and a direction, both driven by input.</p>
+<p>A fixed view matrix shows a scene from one spot.<br>
+A camera you can fly through the scene is a view matrix that is rebuilt every frame from a position and a direction, both driven by input.</p>
 <h2 id="the-look-at-matrix">The look-at matrix<a class="headerlink" href="#the-look-at-matrix" title="Permanent link">#</a></h2>
-<p>A camera is defined by where it is, what it looks at, and which way is up. From those three we derive three perpendicular axes and build a matrix that moves the world into the camera's frame. Add to <code>Math.swift</code>:</p>
+<p>A camera is defined by where it is, what it looks at, and which way is up.<br>
+From those three we derive three perpendicular axes and build a matrix that moves the world into the camera's frame.<br>
+Add to <code>Math.swift</code>:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">extension</span><span class="w"> </span><span class="nc">float4x4</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="c1">/// Right-handed view matrix.</span>
@@ -170,7 +173,8 @@
 </code></pre></div>
 </div>
 
-<p>The rotation part lines the world up with the camera's axes, and the last column moves the camera to the origin. Try it by orbiting the scene:</p>
+<p>The rotation part lines the world up with the camera's axes, and the last column moves the camera to the origin.<br>
+Try it by orbiting the scene:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">radius</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">10</span>
 <span class="kd">let</span><span class="w"> </span><span class="nv">eye</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Float3</span><span class="p">(</span><span class="n">sin</span><span class="p">(</span><span class="n">time</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">radius</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">cos</span><span class="p">(</span><span class="n">time</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">radius</span><span class="p">)</span>
@@ -185,7 +189,8 @@
 </div>
 
 <h2 id="a-fly-camera">A fly camera<a class="headerlink" href="#a-fly-camera" title="Permanent link">#</a></h2>
-<p>For free movement, store a position and two angles. <strong>Yaw</strong> turns left and right, <strong>pitch</strong> looks up and down.</p>
+<p>For free movement, store a position and two angles.<br>
+<strong>Yaw</strong> turns left and right, <strong>pitch</strong> looks up and down.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">import</span><span class="w"> </span><span class="nc">simd</span>
 
@@ -266,9 +271,11 @@
 </code></pre></div>
 </div>
 
-<p><code>front</code> turns the two angles into a direction with basic trigonometry. Pitch is clamped just short of 90 degrees because looking straight up makes <code>front</code> parallel to the up vector, and the cross product in <code>lookAt</code> collapses.</p>
+<p><code>front</code> turns the two angles into a direction with basic trigonometry.<br>
+Pitch is clamped just short of 90 degrees because looking straight up makes <code>front</code> parallel to the up vector, and the cross product in <code>lookAt</code> collapses.</p>
 <h2 id="delta-time">Delta time<a class="headerlink" href="#delta-time" title="Permanent link">#</a></h2>
-<p>Frames do not take equal time. Movement must be scaled by the time since the last frame, the <strong>delta time</strong>, or the camera speed would depend on the frame rate:</p>
+<p>Frames do not take equal time.<br>
+Movement must be scaled by the time since the last frame, the <strong>delta time</strong>, or the camera speed would depend on the frame rate:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="nv">lastFrameTime</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">CACurrentMediaTime</span><span class="p">()</span>
 
@@ -289,7 +296,8 @@
 </div>
 
 <h2 id="input">Input<a class="headerlink" href="#input" title="Permanent link">#</a></h2>
-<p>AppKit and UIKit deliver input as events, which is awkward for a game loop that wants to ask "is W down right now?". The <strong>GameController</strong> framework lets you poll the keyboard and mouse on both macOS and iPadOS:</p>
+<p>AppKit and UIKit deliver input as events, which is awkward for a game loop that wants to ask "is W down right now?".<br>
+The <strong>GameController</strong> framework lets you poll the keyboard and mouse on both macOS and iPadOS:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">import</span><span class="w"> </span><span class="nc">GameController</span>
 
@@ -319,7 +327,8 @@
 </code></pre></div>
 </div>
 
-<p>Mouse movement arrives through a handler that reports deltas. Register it once, for example in the renderer's <code>init</code>:</p>
+<p>Mouse movement arrives through a handler that reports deltas.<br>
+Register it once, for example in the renderer's <code>init</code>:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">NotificationCenter</span><span class="p">.</span><span class="k">default</span><span class="p">.</span><span class="n">addObserver</span><span class="p">(</span><span class="n">forName</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">GCMouseDidConnect</span><span class="p">,</span><span class="w"> </span><span class="n">object</span><span class="p">:</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="n">queue</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">main</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">[</span><span class="kr">weak</span><span class="w"> </span><span class="kc">self</span><span class="p">]</span><span class="w"> </span><span class="n">note</span><span class="w"> </span><span class="k">in</span>
 <span class="w">    </span><span class="k">guard</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">mouse</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">note</span><span class="p">.</span><span class="n">object</span><span class="w"> </span><span class="k">as</span><span class="p">?</span><span class="w"> </span><span class="bp">GCMouse</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="p">}</span>
@@ -350,11 +359,15 @@
 </code></pre></div>
 </div>
 
-<p><code>deltaY</code> is positive when the mouse moves up, so pitch increases and the camera looks up. On macOS the window must be key for keyboard polling to work; click it once after launch. The same framework reads game controllers through <code>GCController</code>, which is the natural choice on iPhone.</p>
+<p><code>deltaY</code> is positive when the mouse moves up, so pitch increases and the camera looks up.<br>
+On macOS the window must be key for keyboard polling to work; click it once after launch.<br>
+The same framework reads game controllers through <code>GCController</code>, which is the natural choice on iPhone.</p>
 <div class="lang-cpp">
 <div class="admonition note">
 <p class="admonition-title">Input in C++</p>
-<p>The C++ version uses GLFW, which the window already comes from, in place of the GameController framework. <code>glfwGetKey</code> polls the keyboard, and cursor and scroll callbacks deliver mouse movement. GLFW reports the cursor position with y growing downward, so the callback subtracts in the other order to make pitch increase when the mouse moves up.</p>
+<p>The C++ version uses GLFW, which the window already comes from, in place of the GameController framework.<br>
+<code>glfwGetKey</code> polls the keyboard, and cursor and scroll callbacks deliver mouse movement.<br>
+GLFW reports the cursor position with y growing downward, so the callback subtracts in the other order to make pitch increase when the mouse moves up.</p>
 </div>
 </div>
 
@@ -379,14 +392,19 @@
 </code></pre></div>
 </div>
 
-<p>Zoom is nothing more than narrowing the field of view. You can now fly around the ten cubes from the previous chapter.</p>
+<p>Zoom is nothing more than narrowing the field of view.<br>
+You can now fly around the ten cubes from the previous chapter.</p>
 <div class="lm-demo" data-demo="camera" data-fallback="../assets/img/getting-started/camera.webp"></div>
 
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
-<li>Turn the fly camera into a first-person camera that cannot leave the ground plane (keep <code>position.y</code> fixed).<details class="solution"><summary>Show solution</summary><p>Move along a flattened front vector, so looking up or down does not change your height: normalize <code>(front.x, 0, front.z)</code> and use that in <code>move</code>. Leave <code>viewMatrix</code> unchanged so you can still look around freely.</p></details></li>
-<li>Add Q and E to move straight up and down.<details class="solution"><summary>Show solution</summary><p>Add a vertical input to <code>move</code> and apply it along the world up axis: <code>position.y += vertical * speed * deltaTime</code>. Read the two keys the same way as W and S (<code>.keyQ</code> and <code>.keyE</code> with GameController, <code>GLFW_KEY_Q</code> and <code>GLFW_KEY_E</code> with GLFW).</p></details></li>
-<li>Hold Shift to triple the movement speed.<details class="solution"><summary>Show solution</summary><p>Multiply the speed while Shift is down. With GameController check <code>keyboard.button(forKeyCode: .leftShift)?.isPressed</code>; with GLFW check <code>glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS</code>. Then pass <code>deltaTime * 3</code> to <code>move</code>, or scale <code>speed</code> for that frame.</p></details></li>
+<li>Turn the fly camera into a first-person camera that cannot leave the ground plane (keep <code>position.y</code> fixed).<details class="solution"><summary>Show solution</summary><p>Move along a flattened front vector, so looking up or down does not change your height: normalize <code>(front.x, 0, front.z)</code> and use that in <code>move</code>.<br>
+Leave <code>viewMatrix</code> unchanged so you can still look around freely.</p></details></li>
+<li>Add Q and E to move straight up and down.<details class="solution"><summary>Show solution</summary><p>Add a vertical input to <code>move</code> and apply it along the world up axis: <code>position.y += vertical * speed * deltaTime</code>.<br>
+Read the two keys the same way as W and S (<code>.keyQ</code> and <code>.keyE</code> with GameController, <code>GLFW_KEY_Q</code> and <code>GLFW_KEY_E</code> with GLFW).</p></details></li>
+<li>Hold Shift to triple the movement speed.<details class="solution"><summary>Show solution</summary><p>Multiply the speed while Shift is down.<br>
+With GameController check <code>keyboard.button(forKeyCode: .leftShift)?.isPressed</code>; with GLFW check <code>glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS</code>.<br>
+Then pass <code>deltaTime * 3</code> to <code>move</code>, or scale <code>speed</code> for that frame.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../getting-started/coordinate-systems.html"><small>Previous</small>Coordinate Systems</a><a class="next" href="../getting-started/review.html"><small>Next</small>Review</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>

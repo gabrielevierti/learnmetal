@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,47 +134,53 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Metal avanzato</p><h1 id="depth-testing">Depth Testing<a class="headerlink" href="#depth-testing" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
-<p>We turned on the depth buffer in <a href="../getting-started/coordinate-systems.html">Coordinate Systems</a> and moved on. It deserves a closer look, because several later techniques, shadows above all, depend on understanding exactly what it stores.</p>
-<h2 id="how-the-test-works">How the test works<a class="headerlink" href="#how-the-test-works" title="Permanent link">#</a></h2>
-<p>The depth attachment stores one value per pixel. For every fragment the GPU compares the fragment's depth with the stored value using the <strong>compare function</strong> of the current depth-stencil state. If the test passes, the fragment is kept, and if depth writing is enabled, its depth replaces the stored one. If it fails, the fragment is discarded.</p>
-<p>The test conceptually runs after the fragment function. In practice GPUs run it <em>before</em> whenever they can (<strong>early depth testing</strong>), skipping the fragment function for hidden pixels. Apple GPUs go further with hidden surface removal: for opaque geometry they work out the visible fragment for each pixel first and shade only that one.</p>
-<h2 id="compare-functions">Compare functions<a class="headerlink" href="#compare-functions" title="Permanent link">#</a></h2>
+<article><p class="crumb">Metal avanzato</p><h1 id="test-di-profondita">Test di profondità<a class="headerlink" href="#test-di-profondita" title="Permanent link">#</a></h1>
+<p>Abbiamo acceso il depth buffer in <a href="../getting-started/coordinate-systems.html">Sistemi di coordinate</a> e siamo andati avanti.<br>
+Merita uno sguardo più attento, perché diverse tecniche successive, le ombre prima di tutte, dipendono dal capire con esattezza che cosa contiene.</p>
+<h2 id="come-funziona-il-test">Come funziona il test<a class="headerlink" href="#come-funziona-il-test" title="Permanent link">#</a></h2>
+<p>L'attachment di profondità conserva un valore per pixel.<br>
+Per ogni fragment la GPU confronta la profondità del fragment con il valore salvato, usando la <strong>compare function</strong> del depth-stencil state corrente.<br>
+Se il test passa, il fragment viene tenuto e, se la scrittura della profondità è attiva, la sua profondità sostituisce quella salvata.<br>
+Se fallisce, il fragment viene scartato.</p>
+<p>Concettualmente il test avviene dopo la fragment function.<br>
+In pratica le GPU lo eseguono <em>prima</em> ogni volta che possono (<strong>early depth testing</strong>), saltando la fragment function per i pixel nascosti.<br>
+Le GPU Apple vanno oltre con la hidden surface removal: per la geometria opaca stabiliscono prima quale fragment è visibile in ogni pixel e calcolano solo quello.</p>
+<h2 id="compare-function">Compare function<a class="headerlink" href="#compare-function" title="Permanent link">#</a></h2>
 <table>
 <thead>
 <tr>
 <th><code>MTLCompareFunction</code></th>
-<th>Fragment passes when</th>
+<th>Il fragment passa quando</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>.less</code></td>
-<td>its depth is less than the stored depth</td>
+<td>la sua profondità è minore di quella salvata</td>
 </tr>
 <tr>
 <td><code>.lessEqual</code></td>
-<td>less than or equal</td>
+<td>minore o uguale</td>
 </tr>
 <tr>
 <td><code>.equal</code></td>
-<td>equal</td>
+<td>uguale</td>
 </tr>
 <tr>
 <td><code>.greater</code>, <code>.greaterEqual</code></td>
-<td>greater (or equal)</td>
+<td>maggiore (o uguale)</td>
 </tr>
 <tr>
 <td><code>.notEqual</code></td>
-<td>different</td>
+<td>diversa</td>
 </tr>
 <tr>
 <td><code>.always</code></td>
-<td>always. This is the default, meaning no depth test</td>
+<td>sempre. È il valore predefinito, cioè nessun test di profondità</td>
 </tr>
 <tr>
 <td><code>.never</code></td>
-<td>never</td>
+<td>mai</td>
 </tr>
 </tbody>
 </table>
@@ -194,22 +200,29 @@
 </code></pre></div>
 </div>
 
-<p>A state with testing on and <strong>writing off</strong> is common: <code>isDepthWriteEnabled = false</code> lets fragments be hidden by existing geometry without affecting the buffer. Transparent objects and particle effects use it.</p>
-<p>Depth-stencil states are cheap, immutable objects. Create the handful you need at startup and switch between them with <code>encoder.setDepthStencilState</code>.</p>
-<h2 id="the-values-are-not-linear">The values are not linear<a class="headerlink" href="#the-values-are-not-linear" title="Permanent link">#</a></h2>
-<p>The depth buffer does not store distance. After the projection matrix and the perspective divide, depth in Metal is</p>
+<p>È comune uno state con il test acceso e la <strong>scrittura spenta</strong>: <code>isDepthWriteEnabled = false</code> permette ai fragment di essere nascosti dalla geometria esistente senza modificare il buffer.<br>
+Lo usano gli oggetti trasparenti e gli effetti particellari.</p>
+<p>I depth-stencil state sono oggetti economici e immutabili.<br>
+Crea all'avvio i pochi che ti servono e passa dall'uno all'altro con <code>encoder.setDepthStencilState</code>.</p>
+<h2 id="i-valori-non-sono-lineari">I valori non sono lineari<a class="headerlink" href="#i-valori-non-sono-lineari" title="Permanent link">#</a></h2>
+<p>Il depth buffer non contiene la distanza.<br>
+Dopo la matrice di proiezione e la divisione prospettica, la profondità in Metal è</p>
 <div class="codehilite"><pre><span></span><code>depth = far * (z - near) / (z * (far - near))
 </code></pre></div>
 
-<p>for a point at distance <code>z</code> in front of the camera. It is 0 at the near plane and 1 at the far plane, but in between it is strongly non-linear. With near 0.1 and far 100, a point just 1 unit away already has depth 0.9, and at 10 units it is 0.99. Most of the precision is spent close to the camera, which is where the eye notices errors most.</p>
-<h2 id="visualizing-depth">Visualizing depth<a class="headerlink" href="#visualizing-depth" title="Permanent link">#</a></h2>
-<p>The built-in <code>[[position]]</code> input of a fragment function contains the pixel coordinates in x and y and the depth in z:</p>
+<p>per un punto a distanza <code>z</code> davanti alla camera.<br>
+Vale 0 sul near plane e 1 sul far plane, ma in mezzo è fortemente non lineare.<br>
+Con near a 0.1 e far a 100, un punto a una sola unità di distanza ha già profondità 0.9, e a 10 unità ha 0.99.<br>
+La maggior parte della precisione viene spesa vicino alla camera, che è dove l'occhio nota di più gli errori.</p>
+<h2 id="visualizzare-la-profondita">Visualizzare la profondità<a class="headerlink" href="#visualizzare-la-profondita" title="Permanent link">#</a></h2>
+<p>L'input predefinito <code>[[position]]</code> di una fragment function contiene in x e y le coordinate del pixel e in z la profondità:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_depth</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]])</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">float3</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">position</span><span class="p">.</span><span class="n">z</span><span class="p">),</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
 <span class="p">}</span>
 </code></pre></div>
 
-<p>Almost everything is white unless you are very close. To see something useful, convert back to linear distance:</p>
+<p>Quasi tutto è bianco, a meno di stare molto vicino.<br>
+Per vedere qualcosa di utile riconverti in distanza lineare:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="nf">linearizeDepth</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">depth</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">near</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">far</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">near</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">far</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">far</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">depth</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">far</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">near</span><span class="p">));</span>
 <span class="p">}</span>
@@ -220,19 +233,26 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>Keep this function. Screen-space effects such as SSAO need it.</p>
+<p>Tieni da parte questa funzione.<br>
+Serve agli effetti in screen space come l'SSAO.</p>
 <div class="lm-demo" data-demo="depth-testing" data-fallback="../../assets/img/advanced-metal/depth-testing.webp"></div>
 
 <h2 id="z-fighting">Z-fighting<a class="headerlink" href="#z-fighting" title="Permanent link">#</a></h2>
-<p>When two surfaces are nearly coplanar, their depth values round to the same number and the winner flips from pixel to pixel, producing a flickering stripe pattern called <strong>z-fighting</strong>. Remedies:</p>
+<p>Quando due superfici sono quasi complanari, le loro profondità si arrotondano allo stesso numero e la vincitrice cambia da pixel a pixel, producendo un motivo a strisce tremolanti chiamato <strong>z-fighting</strong>.<br>
+I rimedi:</p>
 <ul>
-<li><strong>Do not place surfaces that close.</strong> A small offset that nobody notices is the simplest cure.</li>
-<li><strong>Push the near plane out.</strong> Going from 0.01 to 0.1 gains a lot of precision.</li>
-<li><strong>Use a 32-bit float depth buffer.</strong> <code>.depth32Float</code> is supported everywhere in Metal and is what we use. <code>.depth16Unorm</code> saves memory at the cost of precision.</li>
-<li><strong>Use a depth bias</strong> for decals and similar: <code>encoder.setDepthBias(_:slopeScale:clamp:)</code> nudges the depth of what you draw next.</li>
+<li><strong>Non mettere le superfici così vicine.</strong><br>
+Un piccolo scarto che nessuno nota è la cura più semplice.</li>
+<li><strong>Allontana il near plane.</strong><br>
+Passare da 0.01 a 0.1 fa guadagnare molta precisione.</li>
+<li><strong>Usa un depth buffer float a 32 bit.</strong><br>
+<code>.depth32Float</code> è supportato ovunque in Metal ed è quello che usiamo.<br>
+<code>.depth16Unorm</code> risparmia memoria a scapito della precisione.</li>
+<li><strong>Usa un depth bias</strong> per le decal e simili: <code>encoder.setDepthBias(_:slopeScale:clamp:)</code> sposta leggermente la profondità di ciò che disegni dopo.</li>
 </ul>
 <h2 id="reverse-z">Reverse-Z<a class="headerlink" href="#reverse-z" title="Permanent link">#</a></h2>
-<p>Floating-point numbers have the most precision near 0, and the perspective mapping needs the most precision near 1. The two can be made to cancel by flipping the range: map the near plane to 1 and the far plane to 0, clear depth to 0, and test with <code>.greater</code>.</p>
+<p>I numeri in virgola mobile hanno la massima precisione vicino a 0, e la mappatura prospettica ha bisogno della massima precisione vicino a 1.<br>
+Si può fare in modo che le due cose si compensino invertendo l'intervallo: manda il near plane a 1 e il far plane a 0, pulisci la profondità a 0 e fai il test con <code>.greater</code>.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">view</span><span class="p">.</span><span class="n">clearDepth</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mf">0.0</span>
 <span class="n">descriptor</span><span class="p">.</span><span class="n">depthCompareFunction</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">.</span><span class="n">greater</span>
@@ -246,18 +266,24 @@
 </code></pre></div>
 </div>
 
-<p>This <strong>reverse-Z</strong> setup gives almost uniform precision over huge view distances and is standard in modern engines. It works in Metal precisely because NDC depth runs from 0 to 1. We keep the conventional direction in this series so that the code stays easy to compare with other material.</p>
-<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<p>Questa impostazione <strong>reverse-Z</strong> dà una precisione quasi uniforme su distanze di vista enormi, ed è la norma nei motori moderni.<br>
+In Metal funziona proprio perché la profondità delle NDC va da 0 a 1.<br>
+In questa serie teniamo la direzione convenzionale, così il codice resta facile da confrontare con altro materiale.</p>
+<h2 id="esercizi">Esercizi<a class="headerlink" href="#esercizi" title="Permanent link">#</a></h2>
 <ul>
-<li>Draw the scene with <code>.always</code> and explain the result in terms of draw order.<details class="solution"><summary>Mostra la soluzione</summary><p>With <code>.always</code> nothing is ever rejected, so each pixel shows whatever was drawn last. Objects drawn later appear in front of objects drawn earlier even when they are behind them, and within one cube the faces at the end of the vertex buffer cover the others.</p></details></li>
-<li>Put two quads 0.0001 apart and move the camera away until they fight. Then try each remedy.<details class="solution"><summary>Mostra la soluzione</summary><p>At close range the two quads have distinct depth values. As the camera moves away, both depths approach 1 and round to the same number, and the flickering stripes appear. Each remedy works: a larger gap, a farther near plane (try 1.0 instead of 0.1), a depth bias on the second quad with <code>setDepthBias</code>, or reverse-Z.</p></details></li>
+<li>Disegna la scena con <code>.always</code> e spiega il risultato in termini di ordine di disegno.<details class="solution"><summary>Mostra la soluzione</summary><p>Con <code>.always</code> non viene mai scartato niente, quindi ogni pixel mostra ciò che è stato disegnato per ultimo.<br>
+Gli oggetti disegnati dopo appaiono davanti a quelli disegnati prima anche quando stanno dietro, e in un singolo cubo le facce in fondo al vertex buffer coprono le altre.</p></details></li>
+<li>Metti due rettangoli a 0.0001 di distanza e allontana la camera finché non iniziano a contendersi i pixel.<br>
+Poi prova ciascun rimedio.<details class="solution"><summary>Mostra la soluzione</summary><p>Da vicino i due rettangoli hanno profondità distinte.<br>
+Man mano che la camera si allontana entrambe le profondità si avvicinano a 1 e si arrotondano allo stesso numero, e compaiono le strisce tremolanti.<br>
+Ogni rimedio funziona: uno scarto maggiore, un near plane più lontano (prova 1.0 invece di 0.1), un depth bias sul secondo rettangolo con <code>setDepthBias</code>, oppure il reverse-Z.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../model-loading/model.html"><small>Precedente</small>Modello</a><a class="next" href="../advanced-metal/stencil-testing.html"><small>Successivo</small>Test di stencil</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#how-the-test-works">How the test works</a></li><li><a href="#compare-functions">Compare functions</a></li><li><a href="#the-values-are-not-linear">The values are not linear</a></li><li><a href="#visualizing-depth">Visualizing depth</a></li><li><a href="#z-fighting">Z-fighting</a></li><li><a href="#reverse-z">Reverse-Z</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#come-funziona-il-test">Come funziona il test</a></li><li><a href="#compare-function">Compare function</a></li><li><a href="#i-valori-non-sono-lineari">I valori non sono lineari</a></li><li><a href="#visualizzare-la-profondita">Visualizzare la profondità</a></li><li><a href="#z-fighting">Z-fighting</a></li><li><a href="#reverse-z">Reverse-Z</a></li><li><a href="#esercizi">Esercizi</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

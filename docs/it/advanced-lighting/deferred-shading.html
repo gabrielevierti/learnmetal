@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,47 +134,51 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Illuminazione avanzata</p><h1 id="deferred-shading">Deferred Shading<a class="headerlink" href="#deferred-shading" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
-<p>Until now we have used <strong>forward rendering</strong>: every object is drawn and lit in one go, and every fragment loops over every light. Two things make that wasteful. Fragments that are later covered by something closer were lit for nothing, and the cost grows as objects × lights.</p>
-<p><strong>Deferred shading</strong> splits rendering into two phases:</p>
+<article><p class="crumb">Illuminazione avanzata</p><h1 id="deferred-shading">Deferred shading<a class="headerlink" href="#deferred-shading" title="Permanent link">#</a></h1>
+<p>Finora abbiamo usato il <strong>forward rendering</strong>: ogni oggetto viene disegnato e illuminato in un colpo solo, e ogni fragment scorre tutte le luci.<br>
+Due cose lo rendono uno spreco.<br>
+I fragment che poi vengono coperti da qualcosa di più vicino sono stati illuminati per niente, e il costo cresce come oggetti × luci.</p>
+<p>Il <strong>deferred shading</strong> divide il rendering in due fasi:</p>
 <ol>
-<li><strong>Geometry pass</strong>: draw the scene once and store the <em>inputs</em> of lighting, such as position, normal and albedo, in a set of textures called the <strong>G-buffer</strong>.</li>
-<li><strong>Lighting pass</strong>: for each pixel on screen, read the G-buffer and compute lighting once.</li>
+<li><strong>Geometry pass</strong>: disegna la scena una volta e salva gli <em>ingressi</em> dell'illuminazione, come posizione, normale e albedo, in un gruppo di texture chiamato <strong>G-buffer</strong>.</li>
+<li><strong>Lighting pass</strong>: per ogni pixel dello schermo leggi il G-buffer e calcola la luce una volta sola.</li>
 </ol>
-<p>Lighting cost becomes pixels × lights and no longer depends on scene complexity. Hundreds of lights become practical.</p>
-<h2 id="the-g-buffer">The G-buffer<a class="headerlink" href="#the-g-buffer" title="Permanent link">#</a></h2>
+<p>Il costo dell'illuminazione diventa pixel × luci e non dipende più dalla complessità della scena.<br>
+Centinaia di luci diventano praticabili.</p>
+<h2 id="il-g-buffer">Il G-buffer<a class="headerlink" href="#il-g-buffer" title="Permanent link">#</a></h2>
 <table>
 <thead>
 <tr>
 <th>Attachment</th>
-<th>Format</th>
-<th>Contents</th>
+<th>Formato</th>
+<th>Contenuto</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>0</td>
 <td><code>.rgba8Unorm_srgb</code></td>
-<td>Albedo in rgb, specular strength in a</td>
+<td>Albedo in rgb, intensità speculare in a</td>
 </tr>
 <tr>
 <td>1</td>
 <td><code>.rgba16Float</code></td>
-<td>World-space normal</td>
+<td>Normale in spazio mondo</td>
 </tr>
 <tr>
 <td>2</td>
 <td><code>.rgba16Float</code></td>
-<td>World-space position</td>
+<td>Posizione in spazio mondo</td>
 </tr>
 <tr>
 <td>depth</td>
 <td><code>.depth32Float</code></td>
-<td>Depth</td>
+<td>Profondità</td>
 </tr>
 </tbody>
 </table>
-<p>Create each as a texture with <code>[.renderTarget, .shaderRead]</code> usage and attach all three to one render pass. The geometry pass fragment function fills them:</p>
+<p>Crea ciascuno come texture con uso <code>[.renderTarget, .shaderRead]</code> e collega tutti e tre a un solo render pass.<br>
+La fragment function del geometry pass li riempie:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">GBufferOut</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">albedoSpecular</span><span class="w"> </span><span class="p">[[</span><span class="na">color</span><span class="p">(</span><span class="mi">0</span><span class="p">)]];</span>
 <span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">normal</span><span class="w">         </span><span class="p">[[</span><span class="na">color</span><span class="p">(</span><span class="mi">1</span><span class="p">)]];</span>
@@ -194,10 +198,13 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>No lighting happens here. The pass is cheap, and the depth test guarantees that only the nearest surface ends up in each pixel.</p>
-<p>Storing position costs a lot of memory. Production renderers reconstruct it from the depth buffer and the inverse view-projection matrix, and pack normals into two channels. Start with the simple layout and optimize later.</p>
-<h2 id="the-lighting-pass">The lighting pass<a class="headerlink" href="#the-lighting-pass" title="Permanent link">#</a></h2>
-<p>A full-screen triangle reads the G-buffer and lights every pixel:</p>
+<p>Qui non avviene alcun calcolo di luce.<br>
+Il pass costa poco, e il test di profondità garantisce che in ogni pixel finisca solo la superficie più vicina.</p>
+<p>Salvare la posizione costa molta memoria.<br>
+I renderer da produzione la ricostruiscono dal depth buffer e dall'inversa della matrice view-projection, e comprimono le normali in due canali.<br>
+Comincia dal layout semplice e ottimizza dopo.</p>
+<h2 id="il-lighting-pass">Il lighting pass<a class="headerlink" href="#il-lighting-pass" title="Permanent link">#</a></h2>
+<p>Un triangolo a tutto schermo legge il G-buffer e illumina ogni pixel:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_lighting</span><span class="p">(</span><span class="n">ScreenOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
 <span class="w">                                  </span><span class="n">constant</span><span class="w"> </span><span class="n">LightingUniforms</span><span class="w"> </span><span class="o">&amp;</span><span class="n">uniforms</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">1</span><span class="p">)]],</span>
 <span class="w">                                  </span><span class="n">constant</span><span class="w"> </span><span class="n">PointLight</span><span class="w"> </span><span class="o">*</span><span class="n">lights</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">2</span><span class="p">)]],</span>
@@ -228,27 +235,38 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p><code>read</code> fetches the exact texel for this pixel with no sampler. The <code>radius</code> check skips lights too far away to matter.</p>
+<p><code>read</code> prende il texel esatto di questo pixel, senza sampler.<br>
+Il controllo su <code>radius</code> salta le luci troppo lontane per contare.</p>
 <div class="lm-demo" data-demo="deferred-shading" data-fallback="../../assets/img/advanced-lighting/deferred-shading.webp"></div>
 
-<h2 id="light-volumes">Light volumes<a class="headerlink" href="#light-volumes" title="Permanent link">#</a></h2>
-<p>Looping over all lights for every pixel still wastes work, since most lights reach only a small part of the screen. The refinement is to draw a <strong>sphere</strong> for each light, sized to its radius, using instancing. Each sphere's fragment function lights only the pixels it covers and adds its result with additive blending (<code>.one</code>, <code>.one</code>). Cull front faces and disable depth writes, so the light still works when the camera is inside the sphere. With volumes, a thousand small lights cost little more than their combined screen area.</p>
-<p>Compute the radius from the attenuation: the distance at which the light's contribution falls below a small threshold such as 5/256.</p>
-<h2 id="mixing-in-forward-rendering">Mixing in forward rendering<a class="headerlink" href="#mixing-in-forward-rendering" title="Permanent link">#</a></h2>
-<p>Deferred shading cannot handle transparency, since each pixel stores one surface. The usual structure is:</p>
+<h2 id="i-volumi-di-luce">I volumi di luce<a class="headerlink" href="#i-volumi-di-luce" title="Permanent link">#</a></h2>
+<p>Scorrere tutte le luci per ogni pixel spreca ancora lavoro, perché la maggior parte delle luci raggiunge solo una piccola parte dello schermo.<br>
+Il perfezionamento consiste nel disegnare per ogni luce una <strong>sfera</strong> grande quanto il suo raggio, usando l'instancing.<br>
+La fragment function di ogni sfera illumina solo i pixel che copre e somma il suo risultato con il blending additivo (<code>.one</code>, <code>.one</code>).<br>
+Scarta le facce frontali e disattiva la scrittura della profondità, così la luce funziona anche quando la camera è dentro la sfera.<br>
+Con i volumi, mille piccole luci costano poco più della loro area complessiva sullo schermo.</p>
+<p>Calcola il raggio dall'attenuazione: la distanza a cui il contributo della luce scende sotto una piccola soglia, per esempio 5/256.</p>
+<h2 id="aggiungere-il-forward-rendering">Aggiungere il forward rendering<a class="headerlink" href="#aggiungere-il-forward-rendering" title="Permanent link">#</a></h2>
+<p>Il deferred shading non può gestire la trasparenza, perché ogni pixel conserva una sola superficie.<br>
+La struttura consueta è:</p>
 <ol>
-<li>Geometry pass, then the lighting pass.</li>
-<li>A forward pass on top for transparent objects, lamps and the skybox.</li>
+<li>Geometry pass, poi lighting pass.</li>
+<li>Sopra, un pass forward per gli oggetti trasparenti, le lampade e lo skybox.</li>
 </ol>
-<p>The forward pass must use the <strong>same depth buffer</strong> as the geometry pass, so that forward-rendered objects are hidden correctly behind deferred ones. Attach the G-buffer's depth texture to the forward pass with <code>loadAction = .load</code>.</p>
-<h2 id="single-pass-deferred-on-apple-gpus">Single-pass deferred on Apple GPUs<a class="headerlink" href="#single-pass-deferred-on-apple-gpus" title="Permanent link">#</a></h2>
-<p>The classic approach stores the whole G-buffer in memory and reads it back in a second pass. On a tile-based GPU that is expensive: every tile has to be written out and loaded again. Apple GPUs offer something better.</p>
-<p>A fragment function on Apple silicon can <strong>read the current contents of the color attachments</strong> it is drawing to. This is called <strong>programmable blending</strong> or framebuffer fetch. The entire deferred pipeline then fits in <strong>one render pass</strong>:</p>
+<p>Il pass forward deve usare lo <strong>stesso depth buffer</strong> del geometry pass, così gli oggetti disegnati in forward vengono nascosti correttamente dietro quelli deferred.<br>
+Collega la texture di profondità del G-buffer al pass forward con <code>loadAction = .load</code>.</p>
+<h2 id="deferred-in-un-solo-pass-sulle-gpu-apple">Deferred in un solo pass sulle GPU Apple<a class="headerlink" href="#deferred-in-un-solo-pass-sulle-gpu-apple" title="Permanent link">#</a></h2>
+<p>L'approccio classico salva in memoria l'intero G-buffer e lo rilegge in un secondo pass.<br>
+Su una GPU tile-based questo costa caro: ogni tile va scritto fuori e ricaricato.<br>
+Le GPU Apple offrono di meglio.</p>
+<p>Su Apple silicon una fragment function può <strong>leggere il contenuto attuale degli attachment di colore</strong> su cui sta disegnando.<br>
+Si chiama <strong>programmable blending</strong>, o framebuffer fetch.<br>
+L'intera pipeline deferred sta allora in <strong>un solo render pass</strong>:</p>
 <ul>
-<li>Attachment 0 is the final lit color (the drawable or an HDR texture).</li>
-<li>Attachments 1 to 3 are the G-buffer, created with <code>storageMode = .memoryless</code>, <code>loadAction = .clear</code> and <code>storeAction = .dontCare</code>.</li>
-<li>First draw the geometry, writing attachments 1 to 3.</li>
-<li>Then, <strong>in the same encoder</strong>, draw the light volumes with a fragment function that takes the G-buffer as input:</li>
+<li>L'attachment 0 è il colore finale illuminato (il drawable o una texture HDR).</li>
+<li>Gli attachment da 1 a 3 sono il G-buffer, creati con <code>storageMode = .memoryless</code>, <code>loadAction = .clear</code> e <code>storeAction = .dontCare</code>.</li>
+<li>Prima disegni la geometria, scrivendo gli attachment da 1 a 3.</li>
+<li>Poi, <strong>nello stesso encoder</strong>, disegni i volumi di luce con una fragment function che riceve il G-buffer in ingresso:</li>
 </ul>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">LightingIn</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">albedoSpecular</span><span class="w"> </span><span class="p">[[</span><span class="na">color</span><span class="p">(</span><span class="mi">1</span><span class="p">)]];</span>
@@ -272,9 +290,13 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<p>The G-buffer never leaves the GPU's tile memory. It consumes no system memory and no bandwidth, which makes deferred shading practical even on phones. On Intel Macs the feature is unavailable, so portable renderers keep the two-pass path as a fallback; check <code>device.supportsFamily(.apple1)</code>. Apple's "Rendering a Scene with Deferred Lighting" sample code shows both paths side by side.</p>
-<p>Apple GPUs also support <strong>tile shaders</strong>, compute-like functions that run once per tile in the middle of a render pass. They are used to build per-tile light lists for <strong>tiled forward</strong> rendering, an alternative that keeps the benefits of forward shading, including MSAA and transparency, with many lights.</p>
-<h2 id="trade-offs">Trade-offs<a class="headerlink" href="#trade-offs" title="Permanent link">#</a></h2>
+<p>Il G-buffer non lascia mai la memoria dei tile della GPU.<br>
+Non consuma memoria di sistema né banda, e questo rende il deferred shading praticabile perfino sui telefoni.<br>
+Sui Mac Intel la funzione non è disponibile, quindi i renderer portabili tengono come riserva il percorso a due pass; controlla <code>device.supportsFamily(.apple1)</code>.<br>
+Il codice di esempio di Apple "Rendering a Scene with Deferred Lighting" mostra i due percorsi fianco a fianco.</p>
+<p>Le GPU Apple supportano anche i <strong>tile shader</strong>, funzioni simili a quelle di compute che girano una volta per tile nel mezzo di un render pass.<br>
+Si usano per costruire liste di luci per tile nel rendering <strong>tiled forward</strong>, un'alternativa che con molte luci conserva i vantaggi del forward shading, MSAA e trasparenza compresi.</p>
+<h2 id="compromessi">Compromessi<a class="headerlink" href="#compromessi" title="Permanent link">#</a></h2>
 <table>
 <thead>
 <tr>
@@ -285,37 +307,41 @@
 </thead>
 <tbody>
 <tr>
-<td>Many lights</td>
-<td>Costly</td>
-<td>Cheap</td>
+<td>Molte luci</td>
+<td>Costoso</td>
+<td>Economico</td>
 </tr>
 <tr>
-<td>Transparency</td>
-<td>Works</td>
-<td>Needs a forward pass</td>
+<td>Trasparenza</td>
+<td>Funziona</td>
+<td>Serve un pass forward</td>
 </tr>
 <tr>
 <td>MSAA</td>
-<td>Works</td>
-<td>Difficult</td>
+<td>Funziona</td>
+<td>Difficile</td>
 </tr>
 <tr>
-<td>Material variety</td>
-<td>Any shader per object</td>
-<td>Limited by the G-buffer layout</td>
+<td>Varietà di materiali</td>
+<td>Qualsiasi shader per oggetto</td>
+<td>Limitata dal layout del G-buffer</td>
 </tr>
 <tr>
-<td>Memory</td>
-<td>Low</td>
-<td>High, unless memoryless</td>
+<td>Memoria</td>
+<td>Poca</td>
+<td>Molta, a meno di usare memoryless</td>
 </tr>
 </tbody>
 </table>
-<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<h2 id="esercizi">Esercizi<a class="headerlink" href="#esercizi" title="Permanent link">#</a></h2>
 <ul>
-<li>Display each G-buffer texture on screen to verify its contents.<details class="solution"><summary>Mostra la soluzione</summary><p>In the lighting pass return one of the textures directly, remapping it into the visible range: normals as <code>n * 0.5 + 0.5</code>, positions scaled down. The live demo has a selector for this.</p></details></li>
-<li>Scatter 200 small colored lights and compare the frame time with the forward renderer.<details class="solution"><summary>Mostra la soluzione</summary><p>With forward rendering every fragment of every object loops over all 200 lights, including fragments that are later hidden. Deferred shading runs the loop once per screen pixel. With light volumes, or the distance test in the demo's shader, most pixels evaluate only the few lights that reach them.</p></details></li>
-<li>Reconstruct position from depth and remove the position attachment.<details class="solution"><summary>Mostra la soluzione</summary><p>Pass the inverse of the view-projection matrix. Rebuild the clip-space position from the texture coordinate and the stored depth, transform it, and divide by w.</p>
+<li>Mostra a schermo ogni texture del G-buffer per verificarne il contenuto.<details class="solution"><summary>Mostra la soluzione</summary><p>Nel lighting pass restituisci direttamente una delle texture, riportandola nell'intervallo visibile: le normali come <code>n * 0.5 + 0.5</code>, le posizioni ridotte di scala.<br>
+La demo interattiva ha un selettore per questo.</p></details></li>
+<li>Spargi 200 piccole luci colorate e confronta il tempo di frame con il renderer forward.<details class="solution"><summary>Mostra la soluzione</summary><p>Con il forward rendering ogni fragment di ogni oggetto scorre tutte e 200 le luci, compresi i fragment che poi vengono nascosti.<br>
+Il deferred shading esegue il ciclo una volta per pixel dello schermo.<br>
+Con i volumi di luce, o con il controllo sulla distanza nello shader della demo, la maggior parte dei pixel valuta solo le poche luci che li raggiungono.</p></details></li>
+<li>Ricostruisci la posizione dalla profondità ed elimina l'attachment della posizione.<details class="solution"><summary>Mostra la soluzione</summary><p>Passa l'inversa della matrice view-projection.<br>
+Ricostruisci la posizione in clip space dalla coordinata di texture e dalla profondità salvata, trasformala e dividi per w.</p>
 <div class="codehilite"><pre><span></span><code><span class="kt">float</span><span class="w"> </span><span class="n">depth</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">depthTexture</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">);</span>
 <span class="n">float4</span><span class="w"> </span><span class="n">clip</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="n">depth</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
 <span class="n">float4</span><span class="w"> </span><span class="n">world</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">inverseViewProjection</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">clip</span><span class="p">;</span>
@@ -327,7 +353,7 @@
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#the-g-buffer">The G-buffer</a></li><li><a href="#the-lighting-pass">The lighting pass</a></li><li><a href="#light-volumes">Light volumes</a></li><li><a href="#mixing-in-forward-rendering">Mixing in forward rendering</a></li><li><a href="#single-pass-deferred-on-apple-gpus">Single-pass deferred on Apple GPUs</a></li><li><a href="#trade-offs">Trade-offs</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#il-g-buffer">Il G-buffer</a></li><li><a href="#il-lighting-pass">Il lighting pass</a></li><li><a href="#i-volumi-di-luce">I volumi di luce</a></li><li><a href="#aggiungere-il-forward-rendering">Aggiungere il forward rendering</a></li><li><a href="#deferred-in-un-solo-pass-sulle-gpu-apple">Deferred in un solo pass sulle GPU Apple</a></li><li><a href="#compromessi">Compromessi</a></li><li><a href="#esercizi">Esercizi</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

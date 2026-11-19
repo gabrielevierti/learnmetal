@@ -18,7 +18,7 @@
   d.dataset.lang = l === "cpp" ? "cpp" : "swift";
 })();
 </script>
-<script>window.LM_T = {"copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
+<script>window.LM_T = {"compiled": "Compilato", "error": "Errore", "resetshader": "Ripristina", "copylink": "Copia link", "linkcopied": "Link copiato", "editshader": "Modifica lo shader", "copy": "Copia", "copied": "Copiato", "none": "Nessun risultato per", "loading": "Carico l'indice", "progress": "{n} capitoli letti su {total}", "reset": "Azzera il progresso", "read": "letto"};</script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../assets/code.css">
 </head>
@@ -134,12 +134,13 @@
 </ul></div>
 </nav>
 <main class="content" id="main">
-<article><p class="crumb">Illuminazione</p><h1 id="materials">Materials<a class="headerlink" href="#materials" title="Permanent link">#</a></h1><div class="lang-note"><strong>Capitolo non ancora tradotto.</strong> Per ora il testo di questo capitolo è in inglese. Il codice è lo stesso in entrambe le lingue.</div>
+<article><p class="crumb">Illuminazione</p><h1 id="materiali">Materiali<a class="headerlink" href="#materiali" title="Permanent link">#</a></h1>
 <div class="example-box lang-swift"><strong>Progetto di esempio</strong> <code>examples/Sources/08-BasicLighting</code>, si esegue con <code>swift run BasicLighting</code>. <a href="../../downloads/learnmetal-examples.zip">Scarica tutti gli esempi</a> oppure guarda <a href="../resources/examples.html">come eseguirli</a>.</div>
 
-<p>Steel, wood and plastic react to the same light in different ways. To describe that, we stop using a single object color and give each surface a <strong>material</strong>: separate colors for the three Phong terms, plus a shininess.</p>
-<h2 id="material-and-light-structs">Material and light structs<a class="headerlink" href="#material-and-light-structs" title="Permanent link">#</a></h2>
-<p>MSL structs can nest, which keeps the uniforms readable:</p>
+<p>Acciaio, legno e plastica reagiscono in modo diverso alla stessa luce.<br>
+Per descriverlo smettiamo di usare un unico colore dell'oggetto e diamo a ogni superficie un <strong>materiale</strong>: colori separati per i tre termini di Phong, più una shininess.</p>
+<h2 id="le-struct-del-materiale-e-della-luce">Le struct del materiale e della luce<a class="headerlink" href="#le-struct-del-materiale-e-della-luce" title="Permanent link">#</a></h2>
+<p>Le struct di MSL si possono annidare, e questo tiene leggibili gli uniform:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">Material</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">ambient</span><span class="p">;</span>
 <span class="w">    </span><span class="n">float3</span><span class="w"> </span><span class="n">diffuse</span><span class="p">;</span>
@@ -162,13 +163,14 @@
 </code></pre></div>
 
 <ul>
-<li><code>ambient</code> is the color the surface shows under ambient light, usually the same as its diffuse color.</li>
-<li><code>diffuse</code> is the surface's main color.</li>
-<li><code>specular</code> is the color of its highlight.</li>
-<li><code>shininess</code> controls how tight the highlight is.</li>
+<li><code>ambient</code> è il colore che la superficie mostra sotto la luce ambient, di solito uguale al suo colore diffuse.</li>
+<li><code>diffuse</code> è il colore principale della superficie.</li>
+<li><code>specular</code> è il colore del suo riflesso.</li>
+<li><code>shininess</code> controlla quanto è stretto il riflesso.</li>
 </ul>
-<p>The light gets its own intensities per term as well. Ambient light should be weak, diffuse light is the light's actual color, and specular is usually full white.</p>
-<h2 id="the-shader">The shader<a class="headerlink" href="#the-shader" title="Permanent link">#</a></h2>
+<p>Anche la luce ha le proprie intensità per ogni termine.<br>
+La luce ambient deve essere debole, quella diffuse è il vero colore della luce, e quella specular di solito è bianco pieno.</p>
+<h2 id="lo-shader">Lo shader<a class="headerlink" href="#lo-shader" title="Permanent link">#</a></h2>
 <div class="codehilite"><pre><span></span><code><span class="n">fragment</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">fragment_main</span><span class="p">(</span><span class="n">VertexOut</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">[[</span><span class="na">stage_in</span><span class="p">]],</span>
 <span class="w">                              </span><span class="n">constant</span><span class="w"> </span><span class="n">FragmentUniforms</span><span class="w"> </span><span class="o">&amp;</span><span class="n">uniforms</span><span class="w"> </span><span class="p">[[</span><span class="na">buffer</span><span class="p">(</span><span class="mi">1</span><span class="p">)]])</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">Material</span><span class="w"> </span><span class="n">material</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uniforms</span><span class="p">.</span><span class="n">material</span><span class="p">;</span>
@@ -191,8 +193,8 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<h2 id="the-swift-side">The Swift side<a class="headerlink" href="#the-swift-side" title="Permanent link">#</a></h2>
-<p>Mirror the structs exactly, in the same member order:</p>
+<h2 id="il-lato-swift">Il lato Swift<a class="headerlink" href="#il-lato-swift" title="Permanent link">#</a></h2>
+<p>Rispecchia le struct con esattezza, con i membri nello stesso ordine:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">Material</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">ambient</span><span class="p">:</span><span class="w"> </span><span class="n">Float3</span>
@@ -267,11 +269,15 @@
 </div>
 
 <div class="admonition warning">
-<p class="admonition-title">Check the layout</p>
-<p><code>Material</code> ends with a lone <code>Float</code> after three 16-byte vectors, so its size is 52 bytes and its stride is 64. Here the next member, <code>light</code>, is 16-byte aligned and starts at offset 64 in both languages. There is one trap with nested structs: Swift is allowed to place a small following member, such as a <code>Float</code>, inside the unused tail of the previous struct (at offset 52), while MSL never does. To stay safe, follow a nested struct with a 16-byte-aligned member, or end every nested struct on a 16-byte boundary. When values look wrong, print <code>MemoryLayout&lt;FragmentUniforms&gt;.offset(of: \.viewPosition)</code> and compare offsets by hand.</p>
+<p class="admonition-title">Controlla il layout</p>
+<p><code>Material</code> finisce con un <code>Float</code> isolato dopo tre vettori da 16 byte, quindi la sua size è 52 byte e il suo stride è 64.<br>
+Qui il membro successivo, <code>light</code>, è allineato a 16 byte e comincia all'offset 64 in entrambi i linguaggi.<br>
+Con le struct annidate c'è una trappola: Swift può mettere un piccolo membro successivo, per esempio un <code>Float</code>, nella coda inutilizzata della struct precedente (all'offset 52), mentre MSL non lo fa mai.<br>
+Per stare tranquillo, fai seguire a una struct annidata un membro allineato a 16 byte, oppure fai finire ogni struct annidata su un multiplo di 16 byte.<br>
+Quando i valori sembrano sbagliati, stampa <code>MemoryLayout&lt;FragmentUniforms&gt;.offset(of: \.viewPosition)</code> e confronta gli offset a mano.</p>
 </div>
-<h2 id="playing-with-light-colors">Playing with light colors<a class="headerlink" href="#playing-with-light-colors" title="Permanent link">#</a></h2>
-<p>Because the light has separate terms, changing the light changes the whole mood:</p>
+<h2 id="giocare-con-i-colori-della-luce">Giocare con i colori della luce<a class="headerlink" href="#giocare-con-i-colori-della-luce" title="Permanent link">#</a></h2>
+<p>Poiché la luce ha termini separati, cambiare la luce cambia tutta l'atmosfera:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">lightColor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Float3</span><span class="p">(</span><span class="n">sin</span><span class="p">(</span><span class="n">time</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">2.0</span><span class="p">),</span><span class="w"> </span><span class="n">sin</span><span class="p">(</span><span class="n">time</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.7</span><span class="p">),</span><span class="w"> </span><span class="n">sin</span><span class="p">(</span><span class="n">time</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">1.3</span><span class="p">))</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.5</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.5</span>
 <span class="n">fragmentUniforms</span><span class="p">.</span><span class="n">light</span><span class="p">.</span><span class="n">diffuse</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">lightColor</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.5</span>
@@ -287,12 +293,13 @@
 
 <div class="lm-demo" data-demo="materials" data-fallback="../../assets/img/lighting/materials.webp"></div>
 
-<h2 id="real-materials">Real materials<a class="headerlink" href="#real-materials" title="Permanent link">#</a></h2>
-<p>Tables of measured Phong values for real substances have circulated for decades. A few to try, with all light terms set to white:</p>
+<h2 id="materiali-reali">Materiali reali<a class="headerlink" href="#materiali-reali" title="Permanent link">#</a></h2>
+<p>Da decenni circolano tabelle di valori di Phong misurati su sostanze reali.<br>
+Eccone alcuni da provare, con tutti i termini della luce impostati a bianco:</p>
 <table>
 <thead>
 <tr>
-<th>Material</th>
+<th>Materiale</th>
 <th>Ambient</th>
 <th>Diffuse</th>
 <th>Specular</th>
@@ -301,28 +308,28 @@
 </thead>
 <tbody>
 <tr>
-<td>Emerald</td>
+<td>Smeraldo</td>
 <td>0.02, 0.17, 0.02</td>
 <td>0.08, 0.61, 0.08</td>
 <td>0.63, 0.73, 0.63</td>
 <td>77</td>
 </tr>
 <tr>
-<td>Gold</td>
+<td>Oro</td>
 <td>0.25, 0.20, 0.07</td>
 <td>0.75, 0.61, 0.23</td>
 <td>0.63, 0.56, 0.37</td>
 <td>51</td>
 </tr>
 <tr>
-<td>Cyan plastic</td>
+<td>Plastica ciano</td>
 <td>0.0, 0.1, 0.06</td>
 <td>0.0, 0.51, 0.51</td>
 <td>0.50, 0.50, 0.50</td>
 <td>32</td>
 </tr>
 <tr>
-<td>Red rubber</td>
+<td>Gomma rossa</td>
 <td>0.05, 0.0, 0.0</td>
 <td>0.5, 0.4, 0.4</td>
 <td>0.7, 0.04, 0.04</td>
@@ -330,18 +337,24 @@
 </tr>
 </tbody>
 </table>
-<p>Phong materials are a rough approximation. The <a href="../pbr/theory.html">PBR</a> section replaces them with a model based on physics.</p>
-<h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
+<p>I materiali di Phong sono un'approssimazione grossolana.<br>
+La sezione <a href="../pbr/theory.html">PBR</a> li sostituisce con un modello basato sulla fisica.</p>
+<h2 id="esercizi">Esercizi<a class="headerlink" href="#esercizi" title="Permanent link">#</a></h2>
 <ul>
-<li>Reproduce each material in the table.<details class="solution"><summary>Mostra la soluzione</summary><p>Copy the four values of a row into the material uniform and set the light's ambient, diffuse and specular to white. The live demo above has the presets; switch between them and compare how wide and how colored the highlight is.</p></details></li>
-<li>Why does a metal look more convincing when its specular color matches its diffuse color?<details class="solution"><summary>Mostra la soluzione</summary><p>A metal has no diffuse reflection of its own. All the light it returns is reflected at the surface, and that reflection is tinted by the metal: gold reflects yellow light. So its highlight has the metal's color. A plastic's highlight comes from its clear outer layer and stays white, whatever the color underneath. This is the idea the PBR section later makes precise with the metalness parameter.</p></details></li>
+<li>Riproduci ogni materiale della tabella.<details class="solution"><summary>Mostra la soluzione</summary><p>Copia i quattro valori di una riga nell'uniform del materiale e imposta a bianco ambient, diffuse e specular della luce.<br>
+La demo interattiva qui sopra ha i preset; passa dall'uno all'altro e confronta quanto è largo e quanto è colorato il riflesso.</p></details></li>
+<li>Perché un metallo risulta più convincente quando il suo colore specular coincide con il suo colore diffuse?<details class="solution"><summary>Mostra la soluzione</summary><p>Un metallo non ha una riflessione diffusa propria.<br>
+Tutta la luce che restituisce viene riflessa in superficie, e quel riflesso prende la tinta del metallo: l'oro riflette luce gialla.<br>
+Quindi il suo riflesso ha il colore del metallo.<br>
+Il riflesso di una plastica viene dal suo strato esterno trasparente e resta bianco, qualunque sia il colore sotto.<br>
+È l'idea che più avanti la sezione PBR rende precisa con il parametro metalness.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../lighting/basic-lighting.html"><small>Precedente</small>Illuminazione di base</a><a class="next" href="../lighting/lighting-maps.html"><small>Successivo</small>Mappe di illuminazione</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#material-and-light-structs">Material and light structs</a></li><li><a href="#the-shader">The shader</a></li><li><a href="#the-swift-side">The Swift side</a></li><li><a href="#playing-with-light-colors">Playing with light colors</a></li><li><a href="#real-materials">Real materials</a></li><li><a href="#exercises">Exercises</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#le-struct-del-materiale-e-della-luce">Le struct del materiale e della luce</a></li><li><a href="#lo-shader">Lo shader</a></li><li><a href="#il-lato-swift">Il lato Swift</a></li><li><a href="#giocare-con-i-colori-della-luce">Giocare con i colori della luce</a></li><li><a href="#materiali-reali">Materiali reali</a></li><li><a href="#esercizi">Esercizi</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

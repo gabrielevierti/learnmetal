@@ -135,7 +135,9 @@
 </nav>
 <main class="content" id="main">
 <article><p class="crumb">Apple Platforms</p><h1 id="metalfx-upscaling">MetalFX Upscaling<a class="headerlink" href="#metalfx-upscaling" title="Permanent link">#</a></h1>
-<p>The cost of a frame grows with the number of pixels. <strong>MetalFX</strong> lets you render the scene at a lower resolution and produces a full-resolution image that looks close to one rendered natively. A game that renders 1280 × 720 and upscales to 2560 × 1440 shades a quarter of the pixels.</p>
+<p>The cost of a frame grows with the number of pixels.<br>
+<strong>MetalFX</strong> lets you render the scene at a lower resolution and produces a full-resolution image that looks close to one rendered natively.<br>
+A game that renders 1280 × 720 and upscales to 2560 × 1440 shades a quarter of the pixels.</p>
 <p>MetalFX offers two upscalers, and since 2025 a denoising upscaler for ray tracing and a frame interpolator.</p>
 <table>
 <thead>
@@ -168,9 +170,11 @@
 </tr>
 </tbody>
 </table>
-<p>The scalers are available from macOS 13 and iOS 16 on devices with Apple silicon. The denoised scaler and the frame interpolator need the 2025 systems (macOS 26, iOS 26).</p>
+<p>The scalers are available from macOS 13 and iOS 16 on devices with Apple silicon.<br>
+The denoised scaler and the frame interpolator need the 2025 systems (macOS 26, iOS 26).</p>
 <h2 id="where-it-goes-in-the-frame">Where it goes in the frame<a class="headerlink" href="#where-it-goes-in-the-frame" title="Permanent link">#</a></h2>
-<p>Upscaling replaces nothing in your renderer. It is one more step, and its place matters.</p>
+<p>Upscaling replaces nothing in your renderer.<br>
+It is one more step, and its place matters.</p>
 <ol>
 <li>Render the scene at low resolution into an HDR texture.</li>
 <li><strong>Upscale</strong> to the output resolution.</li>
@@ -179,7 +183,8 @@
 </ol>
 <p>Text and interface elements must never go through the upscaler: draw them afterwards, at native resolution.</p>
 <h2 id="the-spatial-scaler">The spatial scaler<a class="headerlink" href="#the-spatial-scaler" title="Permanent link">#</a></h2>
-<p>It works on a single image, with no history. Create it once, and again whenever a size changes.</p>
+<p>It works on a single image, with no history.<br>
+Create it once, and again whenever a size changes.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">import</span><span class="w"> </span><span class="nc">MetalFX</span>
 
@@ -217,7 +222,8 @@
 </code></pre></div>
 </div>
 
-<p>Each frame, hand it the textures and encode it into the command buffer, between your passes. It is not part of a render pass.</p>
+<p>Each frame, hand it the textures and encode it into the command buffer, between your passes.<br>
+It is not part of a render pass.</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="n">scaler</span><span class="p">.</span><span class="n">colorTexture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">sceneTexture</span>
 <span class="n">scaler</span><span class="p">.</span><span class="n">outputTexture</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">upscaledTexture</span>
@@ -233,11 +239,15 @@
 
 <p>The output texture must be created with the usage the scaler asks for in <code>outputTextureUsage</code>, and with <code>storageMode = .private</code>.</p>
 <h2 id="the-temporal-scaler">The temporal scaler<a class="headerlink" href="#the-temporal-scaler" title="Permanent link">#</a></h2>
-<p>The temporal scaler gathers detail from previous frames. Each frame you shift the whole image by a fraction of a pixel, the <strong>jitter</strong>, so that over several frames every pixel is sampled at many positions. The scaler lines up the old frames with the new one using <strong>motion vectors</strong>, and blends them. The result has more real detail than any single frame, and it is anti-aliased, so MSAA becomes unnecessary.</p>
+<p>The temporal scaler gathers detail from previous frames.<br>
+Each frame you shift the whole image by a fraction of a pixel, the <strong>jitter</strong>, so that over several frames every pixel is sampled at many positions.<br>
+The scaler lines up the old frames with the new one using <strong>motion vectors</strong>, and blends them.<br>
+The result has more real detail than any single frame, and it is anti-aliased, so MSAA becomes unnecessary.</p>
 <p>It needs three inputs beyond the color.</p>
 <ul>
 <li><strong>Depth</strong>, from the same low-resolution pass.</li>
-<li><strong>Motion vectors</strong>: for each pixel, how far the surface moved on screen since the last frame. Render them as an extra color attachment (<code>rg16Float</code>).</li>
+<li><strong>Motion vectors</strong>: for each pixel, how far the surface moved on screen since the last frame.<br>
+Render them as an extra color attachment (<code>rg16Float</code>).</li>
 <li><strong>The jitter offset</strong> you applied to the projection this frame.</li>
 </ul>
 <div class="lang-swift">
@@ -322,9 +332,11 @@
 </code></pre></div>
 </div>
 
-<p>Whether the sign of each term is right depends on your projection convention. If the image shimmers or blurs when the camera is still, flip one sign at a time: with the correct signs a static scene converges to a sharp image in a few frames.</p>
+<p>Whether the sign of each term is right depends on your projection convention.<br>
+If the image shimmers or blurs when the camera is still, flip one sign at a time: with the correct signs a static scene converges to a sharp image in a few frames.</p>
 <h3 id="motion-vectors">Motion vectors<a class="headerlink" href="#motion-vectors" title="Permanent link">#</a></h3>
-<p>In the vertex function compute the clip-space position of the vertex in this frame and in the previous one, both <strong>without</strong> jitter, and pass them on. The fragment function turns them into a uv-space difference.</p>
+<p>In the vertex function compute the clip-space position of the vertex in this frame and in the previous one, both <strong>without</strong> jitter, and pass them on.<br>
+The fragment function turns them into a uv-space difference.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">SceneOut</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">float4</span><span class="w"> </span><span class="n">color</span><span class="w">  </span><span class="p">[[</span><span class="na">color</span><span class="p">(</span><span class="mi">0</span><span class="p">)]];</span>
 <span class="w">    </span><span class="n">float2</span><span class="w"> </span><span class="n">motion</span><span class="w"> </span><span class="p">[[</span><span class="na">color</span><span class="p">(</span><span class="mi">1</span><span class="p">)]];</span>
@@ -367,25 +379,38 @@
 </code></pre></div>
 </div>
 
-<p>Set <code>isDepthReversed</code> if you use reverse-Z. Set <code>reset</code> whenever the history is useless, or ghosts of the old scene will linger.</p>
+<p>Set <code>isDepthReversed</code> if you use reverse-Z.<br>
+Set <code>reset</code> whenever the history is useless, or ghosts of the old scene will linger.</p>
 <h2 id="getting-the-quality-right">Getting the quality right<a class="headerlink" href="#getting-the-quality-right" title="Permanent link">#</a></h2>
 <ul>
-<li><strong>Texture detail.</strong> A low-resolution render picks blurrier mip levels. Give your samplers a negative LOD bias of <code>log2(renderWidth / outputWidth)</code>, for example -1 when upscaling 2×, so textures keep their full-resolution sharpness.</li>
-<li><strong>Ghosting</strong> behind moving objects means wrong or missing motion vectors. Check animated, skinned and instanced objects first.</li>
-<li><strong>Transparent and particle effects</strong> have no motion vectors of their own. Mark them in the scaler's <strong>reactive mask</strong> so it trusts the new frame more there.</li>
-<li><strong>Exposure.</strong> The scaler works in linear HDR and needs to know roughly how bright the image will be shown. Either enable <code>isAutoExposureEnabled</code> on the descriptor, or supply your own exposure texture.</li>
-<li><strong>Dynamic resolution.</strong> Create the scaler for the largest input size and set <code>inputContentWidth</code> and <code>inputContentHeight</code> each frame to the region actually rendered.</li>
+<li><strong>Texture detail.</strong><br>
+A low-resolution render picks blurrier mip levels.<br>
+Give your samplers a negative LOD bias of <code>log2(renderWidth / outputWidth)</code>, for example -1 when upscaling 2×, so textures keep their full-resolution sharpness.</li>
+<li><strong>Ghosting</strong> behind moving objects means wrong or missing motion vectors.<br>
+Check animated, skinned and instanced objects first.</li>
+<li><strong>Transparent and particle effects</strong> have no motion vectors of their own.<br>
+Mark them in the scaler's <strong>reactive mask</strong> so it trusts the new frame more there.</li>
+<li><strong>Exposure.</strong><br>
+The scaler works in linear HDR and needs to know roughly how bright the image will be shown.<br>
+Either enable <code>isAutoExposureEnabled</code> on the descriptor, or supply your own exposure texture.</li>
+<li><strong>Dynamic resolution.</strong><br>
+Create the scaler for the largest input size and set <code>inputContentWidth</code> and <code>inputContentHeight</code> each frame to the region actually rendered.</li>
 </ul>
 <h2 id="exercises">Exercises<a class="headerlink" href="#exercises" title="Permanent link">#</a></h2>
 <ul>
-<li>Add the spatial scaler to the render-target example: render at half size and compare with the <code>.linear</code> stretch.<details class="solution"><summary>Show solution</summary><p>Create the scaler with the half-size input and the drawable-size output, encode it after the scene pass, and let the final pass sample the upscaled texture. Edges and texture detail are visibly crisper than with the linear filter, which only blurs. Thin lines still flicker, because a spatial scaler cannot invent samples it never had; that is what the temporal scaler fixes.</p></details></li>
+<li>Add the spatial scaler to the render-target example: render at half size and compare with the <code>.linear</code> stretch.<details class="solution"><summary>Show solution</summary><p>Create the scaler with the half-size input and the drawable-size output, encode it after the scene pass, and let the final pass sample the upscaled texture.<br>
+Edges and texture detail are visibly crisper than with the linear filter, which only blurs.<br>
+Thin lines still flicker, because a spatial scaler cannot invent samples it never had; that is what the temporal scaler fixes.</p></details></li>
 <li>Visualize the motion texture while moving the camera.<details class="solution"><summary>Show solution</summary><p>Return the motion from a debug pass, scaled up so it is visible.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float2</span><span class="w"> </span><span class="n">motion</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">motionTexture</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">rg</span><span class="p">;</span>
 <span class="k">return</span><span class="w"> </span><span class="n">float4</span><span class="p">(</span><span class="n">abs</span><span class="p">(</span><span class="n">motion</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">20.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
 </code></pre></div>
 
-<p>With a still camera the image is black except for moving objects. Panning right tints everything red, tilting tints it green, and nearer surfaces are brighter than far ones, because they move farther on screen.</p></details></li>
-<li>With the temporal scaler running, stop sending the jitter offset and describe what happens.<details class="solution"><summary>Show solution</summary><p>The scaler assumes the samples sit at pixel centers while they are in fact shifted every frame. It lines the history up wrongly, and the image shakes by a fraction of a pixel or turns soft. The opposite mistake, sending offsets without jittering the projection, gives a stable image with no extra detail and no anti-aliasing.</p></details></li>
+<p>With a still camera the image is black except for moving objects.<br>
+Panning right tints everything red, tilting tints it green, and nearer surfaces are brighter than far ones, because they move farther on screen.</p></details></li>
+<li>With the temporal scaler running, stop sending the jitter offset and describe what happens.<details class="solution"><summary>Show solution</summary><p>The scaler assumes the samples sit at pixel centers while they are in fact shifted every frame.<br>
+It lines the history up wrongly, and the image shakes by a fraction of a pixel or turns soft.<br>
+The opposite mistake, sending offsets without jittering the projection, gives a stable image with no extra detail and no anti-aliasing.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../apple-platforms/tile-based-gpus.html"><small>Previous</small>Tile-Based GPUs</a><a class="next" href="../apple-platforms/metal-4.html"><small>Next</small>Metal 4</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>

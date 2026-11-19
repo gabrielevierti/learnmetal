@@ -135,9 +135,14 @@
 </nav>
 <main class="content" id="main">
 <article><p class="crumb">Advanced Lighting</p><h1 id="gamma-correction">Gamma Correction<a class="headerlink" href="#gamma-correction" title="Permanent link">#</a></h1>
-<p>There is a mistake in every image we have rendered so far. Lighting math assumes that a value of 0.5 is half as bright as 1.0. On a display, it is not.</p>
+<p>There is a mistake in every image we have rendered so far.<br>
+Lighting math assumes that a value of 0.5 is half as bright as 1.0.<br>
+On a display, it is not.</p>
 <h2 id="displays-are-not-linear">Displays are not linear<a class="headerlink" href="#displays-are-not-linear" title="Permanent link">#</a></h2>
-<p>Displays follow the <strong>sRGB</strong> standard, which is close to a power curve with an exponent of 2.2, called <strong>gamma</strong>. A pixel value of 0.5 is shown at about 0.5^2.2 ≈ 0.22 of full brightness. This is not a defect. Human vision is more sensitive to differences between dark tones than between bright ones, and the curve spends more of the 256 available steps on the dark end, where we notice them.</p>
+<p>Displays follow the <strong>sRGB</strong> standard, which is close to a power curve with an exponent of 2.2, called <strong>gamma</strong>.<br>
+A pixel value of 0.5 is shown at about 0.5^2.2 ≈ 0.22 of full brightness.<br>
+This is not a defect.<br>
+Human vision is more sensitive to differences between dark tones than between bright ones, and the curve spends more of the 256 available steps on the dark end, where we notice them.</p>
 <p>The consequence: image files are stored already <strong>encoded</strong> for this curve, and whatever we write to the screen is treated as encoded too.</p>
 <h2 id="what-goes-wrong">What goes wrong<a class="headerlink" href="#what-goes-wrong" title="Permanent link">#</a></h2>
 <p>If we do lighting directly on encoded values:</p>
@@ -150,8 +155,10 @@
 <h2 id="metal-does-both-conversions-for-you">Metal does both conversions for you<a class="headerlink" href="#metal-does-both-conversions-for-you" title="Permanent link">#</a></h2>
 <p>Pixel formats ending in <code>_srgb</code> tell Metal that a texture holds sRGB-encoded data:</p>
 <ul>
-<li><strong>Sampling</strong> an sRGB texture returns <strong>linear</strong> values. The conversion happens before filtering, which is the correct order.</li>
-<li><strong>Writing</strong> to an sRGB render target converts <strong>linear</strong> shader output to sRGB. Blending is also performed in linear space.</li>
+<li><strong>Sampling</strong> an sRGB texture returns <strong>linear</strong> values.<br>
+The conversion happens before filtering, which is the correct order.</li>
+<li><strong>Writing</strong> to an sRGB render target converts <strong>linear</strong> shader output to sRGB.<br>
+Blending is also performed in linear space.</li>
 </ul>
 <p>So gamma correction is two configuration changes and zero shader code.</p>
 <p><strong>1. Make the view's drawable sRGB:</strong></p>
@@ -186,17 +193,23 @@
 
 <div class="admonition warning">
 <p class="admonition-title">Only colors are sRGB</p>
-<p>Textures that hold <strong>colors</strong> made by an artist looking at a screen are sRGB: diffuse, albedo, emissive. Textures that hold <strong>data</strong> are linear: normal maps, specular, roughness, metalness, height, ambient occlusion. Decoding a normal map as sRGB bends every normal and produces subtly wrong lighting that is hard to diagnose.</p>
+<p>Textures that hold <strong>colors</strong> made by an artist looking at a screen are sRGB: diffuse, albedo, emissive.<br>
+Textures that hold <strong>data</strong> are linear: normal maps, specular, roughness, metalness, height, ambient occlusion.<br>
+Decoding a normal map as sRGB bends every normal and produces subtly wrong lighting that is hard to diagnose.</p>
 </div>
-<p>If you leave out the <code>.SRGB</code> option, the loader decides from the image file's metadata, which may or may not be what you want. Being explicit avoids surprises.</p>
+<p>If you leave out the <code>.SRGB</code> option, the loader decides from the image file's metadata, which may or may not be what you want.<br>
+Being explicit avoids surprises.</p>
 <h2 id="doing-it-by-hand">Doing it by hand<a class="headerlink" href="#doing-it-by-hand" title="Permanent link">#</a></h2>
 <p>If you cannot use an sRGB target, apply the curve at the end of the fragment function:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">float3</span><span class="w"> </span><span class="n">encoded</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pow</span><span class="p">(</span><span class="n">color</span><span class="p">,</span><span class="w"> </span><span class="n">float3</span><span class="p">(</span><span class="mf">1.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">2.2</span><span class="p">));</span>
 </code></pre></div>
 
-<p>and decode textures on read with <code>pow(texel, float3(2.2))</code>. The automatic route is more accurate, since the true sRGB curve is not a pure power function, and it filters and blends correctly. Do one or the other, never both, or the image comes out washed out.</p>
+<p>and decode textures on read with <code>pow(texel, float3(2.2))</code>.<br>
+The automatic route is more accurate, since the true sRGB curve is not a pure power function, and it filters and blends correctly.<br>
+Do one or the other, never both, or the image comes out washed out.</p>
 <h2 id="constant-colors">Constant colors<a class="headerlink" href="#constant-colors" title="Permanent link">#</a></h2>
-<p>Colors typed into code or picked in a color picker are sRGB values. In a linear workflow they should be converted before use:</p>
+<p>Colors typed into code or picked in a color picker are sRGB values.<br>
+In a linear workflow they should be converted before use:</p>
 <div class="lang-swift">
 <div class="codehilite"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">linear</span><span class="p">(</span><span class="kc">_</span><span class="w"> </span><span class="n">srgb</span><span class="p">:</span><span class="w"> </span><span class="n">Float3</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="n">Float3</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">Float3</span><span class="p">(</span><span class="n">pow</span><span class="p">(</span><span class="n">srgb</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mf">2.2</span><span class="p">),</span><span class="w"> </span><span class="n">pow</span><span class="p">(</span><span class="n">srgb</span><span class="p">.</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="mf">2.2</span><span class="p">),</span><span class="w"> </span><span class="n">pow</span><span class="p">(</span><span class="n">srgb</span><span class="p">.</span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="mf">2.2</span><span class="p">))</span>
@@ -216,13 +229,19 @@
 <div class="codehilite"><pre><span></span><code><span class="kt">float</span><span class="w"> </span><span class="n">attenuation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">distance</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">distance</span><span class="p">);</span>
 </code></pre></div>
 
-<p>Without gamma correction this looks far too harsh, because the display's curve squares the falloff once more. That is why older tutorials use linear falloff or the three-term formula from <a href="../lighting/light-casters.html">Light Casters</a>, which were tuned by eye on uncorrected output. With a linear workflow, inverse-square falloff looks right, and from here on we use it.</p>
+<p>Without gamma correction this looks far too harsh, because the display's curve squares the falloff once more.<br>
+That is why older tutorials use linear falloff or the three-term formula from <a href="../lighting/light-casters.html">Light Casters</a>, which were tuned by eye on uncorrected output.<br>
+With a linear workflow, inverse-square falloff looks right, and from here on we use it.</p>
 <h2 id="what-to-expect">What to expect<a class="headerlink" href="#what-to-expect" title="Permanent link">#</a></h2>
-<p>After the switch, the scene looks brighter and flatter in the mid-tones, and light and material values tuned earlier will need adjusting. This is normal. What you gain is lighting that adds up correctly, which every chapter from here to the end of the PBR section depends on.</p>
+<p>After the switch, the scene looks brighter and flatter in the mid-tones, and light and material values tuned earlier will need adjusting.<br>
+This is normal.<br>
+What you gain is lighting that adds up correctly, which every chapter from here to the end of the PBR section depends on.</p>
 <figure><img src="../assets/img/advanced-lighting/gamma-correction.webp" alt="The same lights with inverse-square falloff. Without gamma correction the falloff is far too harsh." width="880" height="246" loading="lazy"><figcaption>The same lights with inverse-square falloff. Without gamma correction the falloff is far too harsh.</figcaption></figure>
 
 <h2 id="wide-color">Wide color<a class="headerlink" href="#wide-color" title="Permanent link">#</a></h2>
-<p>Apple displays cover the Display P3 gamut, which is larger than sRGB. <code>MTKView</code> has a <code>colorspace</code> property (through its layer on iOS) and extended-range pixel formats such as <code>.bgra10_xr_srgb</code> for rendering colors outside sRGB. It is an advanced topic and unnecessary for learning, but good to know it exists when a designer asks why a red looks duller in your renderer than in Photos.</p></article><nav class="pager" id="pager"><a class="prev" href="../advanced-lighting/blinn-phong.html"><small>Previous</small>Blinn-Phong</a><a class="next" href="../advanced-lighting/shadow-mapping.html"><small>Next</small>Shadow Mapping</a></nav>
+<p>Apple displays cover the Display P3 gamut, which is larger than sRGB.<br>
+<code>MTKView</code> has a <code>colorspace</code> property (through its layer on iOS) and extended-range pixel formats such as <code>.bgra10_xr_srgb</code> for rendering colors outside sRGB.<br>
+It is an advanced topic and unnecessary for learning, but good to know it exists when a designer asks why a red looks duller in your renderer than in Photos.</p></article><nav class="pager" id="pager"><a class="prev" href="../advanced-lighting/blinn-phong.html"><small>Previous</small>Blinn-Phong</a><a class="next" href="../advanced-lighting/shadow-mapping.html"><small>Next</small>Shadow Mapping</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>

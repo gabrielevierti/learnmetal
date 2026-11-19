@@ -316,14 +316,17 @@ swift run Marble --demo --capture run.png --frames 2400
 With `--capture` the engine opens no window and no sound device. It renders into a texture, advances time by exactly one sixtieth of a second per frame however long the frame really took, and after the given number of frames saves the last one as a PNG. The run is the same every time. The program's exit code then says whether the autopilot made it:
 
 ```swift
-var defaults = EngineConfig()
-defaults.title = "Marble"
-let engine = Engine(config: EngineConfig.fromArguments(CommandLine.arguments, defaults: defaults))
-let game = MarbleGame()
-var result = engine.run(game)
-if result == 0 && game.isDemo && engine.window == nil && !game.hasWon {
-    logError("the autopilot did not finish the course")
-    result = 1
+let result: Int32 = MainActor.assumeIsolated {
+    var defaults = EngineConfig()
+    defaults.title = "Marble"
+    let engine = Engine(config: EngineConfig.fromArguments(CommandLine.arguments, defaults: defaults))
+    let game = MarbleGame()
+    let result = engine.run(game)
+    if result == 0 && game.isDemo && engine.window == nil && !game.hasWon {
+        logError("the autopilot did not finish the course")
+        return 1
+    }
+    return result
 }
 exit(result)
 ```
@@ -357,7 +360,7 @@ Run them with `swift test`.
 <!-- /swift -->
 
 <!-- cpp -->
-Run them with `ctest --test-dir build -L unit`. The C++ tests pass. They were run on Linux against Apple's `simd` headers, because none of the code they cover needs a Mac.
+Run them with `ctest --test-dir build -L unit`.
 <!-- /cpp -->
 
 Tests like this one are what made it possible to change the physics without fear while Marble's level was being designed around it.
