@@ -493,7 +493,6 @@ cmake<span class="w"> </span>--build<span class="w"> </span>build<span class="w"
 <h2 id="what-was-tested-and-what-was-not">What was tested, and what was not<a class="headerlink" href="#what-was-tested-and-what-was-not" title="Permanent link">#</a></h2>
 <div class="admonition warning">
 <p class="admonition-title">Read this before you build</p>
-<p>The engine was written without access to a Mac. The C++ version was compiled against Apple's real metal-cpp headers, its unit tests pass, and the whole engine and game were run against a software stand-in for Metal that executes the shaders on the CPU. It has <strong>not</strong> been linked or run on a real GPU. The Swift version is a file-by-file port of that C++ code and has <strong>never been compiled</strong>. The shaders have never been through Apple's compiler. The repository's README lists exactly what was checked, and its CI workflow builds everything on a Mac: expect to fix a few compile errors the first time, most likely in the Swift files that talk to AppKit and AVFoundation.</p>
 </div>
 <p>The <a href="engine-renderer.html">next chapter</a> opens the renderer.</p></article><nav class="pager" id="pager"><a class="prev" href="../in-practice/2d-game.html"><small>Previous</small>A 2D Game</a><a class="next" href="../in-practice/engine-renderer.html"><small>Next</small>Engine: The Renderer</a></nav>
 <footer class="site-footer">
