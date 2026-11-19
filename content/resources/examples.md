@@ -54,9 +54,13 @@ Chapters that are not in this list have their code inline only.
 
 The starter is the Hello Triangle chapter in C++: a GLFW window, a `CAMetalLayer`, and a renderer written with Apple's metal-cpp. It needs `brew install glfw cmake` and a copy of [metal-cpp](https://developer.apple.com/metal/cpp/) unzipped into the folder. Build it with CMake as described in [Project Setup](../getting-started/project-setup.html). It is the base that the C++ code in the chapters builds on.
 
+## The engine
+
+The largest example has a repository of its own. The [LearnMetal Engine]({{engine-repo}}) is a small game engine with a playable game, written in Swift and in C++, that puts the techniques of this site to work together. [A Game Engine](../in-practice/game-engine.html) introduces it, and the chapters after it walk through the renderer, the game and the editor.
+
 ## About the live demos and the figures
 
 The live demos run in your browser with WebGL. The shader you edit is Metal Shading Language, translated to GLSL on the fly by a small script (`assets/live.js`). The translator covers the subset of the language the chapters use; it is a teaching aid and not a full Metal implementation, so a few things differ from a real Mac, such as stricter rules about mixing `int` and `float`.
 
 
-The remaining static images are illustrations. They are drawn by a small software renderer in the repository's `tools/` folder, which implements the same math as each chapter's shaders with numpy. They are not screenshots of the Metal examples, so expect small differences in textures and framing when you run the code.
+The remaining static images are illustrations. They are drawn by a small software renderer in the repository's `tools/` folder, which implements the same math as each chapter's shaders with numpy. They are not screenshots of the Metal examples, so expect small differences in textures and framing when you run the code. The pictures in the engine chapters are a different case: they were produced by the engine's own shaders, run on the CPU by a test program.

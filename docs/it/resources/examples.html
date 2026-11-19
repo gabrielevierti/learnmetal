@@ -112,6 +112,10 @@
 <li><a data-key="in-practice/debugging" href="../in-practice/debugging.html">Debug</a></li>
 <li><a data-key="in-practice/text-rendering" href="../in-practice/text-rendering.html">Rendering del testo</a></li>
 <li><a data-key="in-practice/2d-game" href="../in-practice/2d-game.html">Un gioco 2D</a></li>
+<li><a data-key="in-practice/game-engine" href="../in-practice/game-engine.html">Un game engine</a></li>
+<li><a data-key="in-practice/engine-renderer" href="../in-practice/engine-renderer.html">Engine: il renderer</a></li>
+<li><a data-key="in-practice/engine-gameplay" href="../in-practice/engine-gameplay.html">Engine: il gioco</a></li>
+<li><a data-key="in-practice/engine-editor" href="../in-practice/engine-editor.html">Engine: l&#x27;editor</a></li>
 </ul></div>
 <div class="nav-section"><h4>Oltre</h4><ul>
 <li><a data-key="beyond/compute-shaders" href="../beyond/compute-shaders.html">Compute shader</a></li>
@@ -233,15 +237,17 @@ swift<span class="w"> </span>run<span class="w"> </span>-c<span class="w"> </spa
 <p><a class="cta" href="../../downloads/learnmetal-cpp-starter.zip">Download the C++ starter (.zip)</a></p>
 
 <p>The starter is the Hello Triangle chapter in C++: a GLFW window, a <code>CAMetalLayer</code>, and a renderer written with Apple's metal-cpp. It needs <code>brew install glfw cmake</code> and a copy of <a href="https://developer.apple.com/metal/cpp/">metal-cpp</a> unzipped into the folder. Build it with CMake as described in <a href="../getting-started/project-setup.html">Project Setup</a>. It is the base that the C++ code in the chapters builds on.</p>
+<h2 id="the-engine">The engine<a class="headerlink" href="#the-engine" title="Permanent link">#</a></h2>
+<p>The largest example has a repository of its own. The <a href="https://github.com/gabrielevierti/learnmetal-engine">LearnMetal Engine</a> is a small game engine with a playable game, written in Swift and in C++, that puts the techniques of this site to work together. <a href="../in-practice/game-engine.html">A Game Engine</a> introduces it, and the chapters after it walk through the renderer, the game and the editor.</p>
 <h2 id="about-the-live-demos-and-the-figures">About the live demos and the figures<a class="headerlink" href="#about-the-live-demos-and-the-figures" title="Permanent link">#</a></h2>
 <p>The live demos run in your browser with WebGL. The shader you edit is Metal Shading Language, translated to GLSL on the fly by a small script (<code>assets/live.js</code>). The translator covers the subset of the language the chapters use; it is a teaching aid and not a full Metal implementation, so a few things differ from a real Mac, such as stricter rules about mixing <code>int</code> and <code>float</code>.</p>
-<p>The remaining static images are illustrations. They are drawn by a small software renderer in the repository's <code>tools/</code> folder, which implements the same math as each chapter's shaders with numpy. They are not screenshots of the Metal examples, so expect small differences in textures and framing when you run the code.</p></article><nav class="pager" id="pager"><a class="prev" href="../apple-platforms/visionos.html"><small>Precedente</small>visionOS</a></nav>
+<p>The remaining static images are illustrations. They are drawn by a small software renderer in the repository's <code>tools/</code> folder, which implements the same math as each chapter's shaders with numpy. They are not screenshots of the Metal examples, so expect small differences in textures and framing when you run the code. The pictures in the engine chapters are a different case: they were produced by the engine's own shaders, run on the CPU by a test program.</p></article><nav class="pager" id="pager"><a class="prev" href="../apple-platforms/visionos.html"><small>Precedente</small>visionOS</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. Tutti i diritti riservati.</p>
   <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
 </footer>
 </main>
-<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#running-an-example">Running an example</a></li><li><a href="#the-examples">The examples</a></li><li><a href="#how-they-differ-from-the-chapters">How they differ from the chapters</a></li><li><a href="#c-starter">C++ starter</a></li><li><a href="#about-the-live-demos-and-the-figures">About the live demos and the figures</a></li></ul></aside>
+<aside class="toc" aria-label="In questa pagina"><h4>In questa pagina</h4><ul><li><a href="#running-an-example">Running an example</a></li><li><a href="#the-examples">The examples</a></li><li><a href="#how-they-differ-from-the-chapters">How they differ from the chapters</a></li><li><a href="#c-starter">C++ starter</a></li><li><a href="#the-engine">The engine</a></li><li><a href="#about-the-live-demos-and-the-figures">About the live demos and the figures</a></li></ul></aside>
 </div>
 <script defer src="../../assets/textures.js"></script>
 <script defer src="../../assets/live.js"></script>

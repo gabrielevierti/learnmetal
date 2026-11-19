@@ -23,6 +23,8 @@ ASSETS = ROOT / "assets"
 EXAMPLES_DIR = ROOT / "examples"
 CPP_DIR = ROOT / "examples-cpp"
 GITHUB = "https://github.com/gabrielevierti"
+# The LearnMetal Engine lives in a repository of its own. Chapters refer to it as {{engine-repo}}.
+ENGINE_REPO = GITHUB + "/learnmetal-engine"
 AUTHOR = "Gabriele Vierti"
 YEAR = "2026"
 OUT = ROOT / "docs"
@@ -93,6 +95,10 @@ SECTIONS = [
         ("debugging", "Debugging"),
         ("text-rendering", "Text Rendering"),
         ("2d-game", "A 2D Game"),
+        ("game-engine", "A Game Engine"),
+        ("engine-renderer", "Engine: The Renderer"),
+        ("engine-gameplay", "Engine: The Game"),
+        ("engine-editor", "Engine: The Editor"),
     ]),
     ("beyond", "Beyond", [
         ("compute-shaders", "Compute Shaders"),
@@ -198,6 +204,15 @@ FIGURES = {
     "in-practice/debugging": [("in-practice/debugging", "Debugging by color: intermediate values written out as the fragment color.", "Command buffer errors")],
     "in-practice/text-rendering": [("in-practice/text-rendering", "The glyph atlas, and text composed from one textured quad per character.", "Limits of this approach")],
     "in-practice/2d-game": [("in-practice/2d-game", "The whole game is one instanced draw call of colored rectangles.", "Making it feel good")],
+    "in-practice/game-engine": [("in-practice/game-engine", "Marble, the game that comes with the engine: physically based materials, light from the sky, cascaded shadows, bloom and an interface drawn on top.", "What an engine adds")],
+    "in-practice/engine-renderer": [("in-practice/engine-renderer", "One frame of Marble, pass by pass. Each picture is the texture that the pass draws into.", "Shadows in cascades")],
+    "in-practice/engine-gameplay": [
+        ("in-practice/engine-gameplay", "The whole course. The marble starts in the foreground, crosses the gap on the orange platform and finishes on the far right.", "Entities and components"),
+        ("in-practice/engine-complete", "The end of an unattended run: the autopilot has collected all eight gems and reached the goal.", "Tests that do not need a GPU")],
+    "in-practice/engine-editor": [
+        ("in-practice/engine-editor", "The editor with its sample scene. The golden ball is selected: its handles are in the view, its components in the inspector.", "An interface in immediate mode"),
+        ("in-practice/engine-editor-materials", "The Materials tab: the surface of the selected material and its texture slots.", "Scenes as text"),
+        ("in-practice/engine-editor-play", "After pressing Play: seen through the scene's own camera, the ball has rolled onto the ramp and the fountain is running.", "What it does not do")],
     "beyond/compute-shaders": [("beyond/compute-shaders", "A kernel reads one texture and writes another, one thread per pixel.", "Threads and threadgroups")],
     "beyond/tessellation": [("beyond/tessellation", "The same 4 x 4 grid of quad patches at increasing tessellation factors, displaced by a height function.", "Normals for displaced surfaces")],
     "beyond/ray-tracing": [("beyond/ray-tracing", "Left: what an intersection returns. Right: shadows from one ray per pixel toward the light.", "Noise and denoising")],
@@ -248,7 +263,7 @@ BLURBS = {
     "advanced-metal": "Depth and stencil, blending, render targets, cubemaps, instancing and anti-aliasing.",
     "advanced-lighting": "Shadows, normal and parallax mapping, HDR, bloom, deferred shading and SSAO.",
     "pbr": "Physically based materials and image-based lighting.",
-    "in-practice": "Debugging tools, text rendering and a small playable game.",
+    "in-practice": "Debugging tools, text rendering, a small playable game, and a complete game engine with its editor.",
     "beyond": "Compute shaders, tessellation, ray tracing and mesh shaders.",
     "apple-platforms": "What is specific to Apple hardware: tile-based GPUs, MetalFX, Metal 4 and visionOS.",
     "resources": "Runnable example projects for Swift and C++.",
@@ -305,6 +320,8 @@ IT_TITLES = {
     "pbr/theory": "Teoria", "pbr/lighting": "Illuminazione", "pbr/diffuse-irradiance": "Irradianza diffusa",
     "pbr/specular-ibl": "IBL speculare",
     "in-practice/debugging": "Debug", "in-practice/text-rendering": "Rendering del testo", "in-practice/2d-game": "Un gioco 2D",
+    "in-practice/game-engine": "Un game engine", "in-practice/engine-renderer": "Engine: il renderer",
+    "in-practice/engine-gameplay": "Engine: il gioco", "in-practice/engine-editor": "Engine: l'editor",
     "beyond/compute-shaders": "Compute shader", "beyond/tessellation": "Tassellazione", "beyond/ray-tracing": "Ray tracing",
     "beyond/mesh-shaders": "Mesh shader",
     "apple-platforms/tile-based-gpus": "GPU tile-based", "apple-platforms/metalfx": "Upscaling con MetalFX",
@@ -319,7 +336,7 @@ BLURBS_IT = {
     "advanced-metal": "Profondità e stencil, blending, render target, cubemap, instancing e anti-aliasing.",
     "advanced-lighting": "Ombre, normal e parallax mapping, HDR, bloom, deferred shading e SSAO.",
     "pbr": "Materiali fisicamente corretti e illuminazione basata su immagini.",
-    "in-practice": "Strumenti di debug, rendering del testo e un piccolo gioco giocabile.",
+    "in-practice": "Strumenti di debug, rendering del testo, un piccolo gioco giocabile e un game engine completo con il suo editor.",
     "beyond": "Compute shader, tassellazione, ray tracing e mesh shader.",
     "apple-platforms": "Ciò che è specifico dell'hardware Apple: GPU tile-based, MetalFX, Metal 4 e visionOS.",
     "resources": "Progetti di esempio eseguibili per Swift e C++.",
@@ -658,6 +675,7 @@ def build_site(lang):
             continue
         key = f"{folder}/{slug}"
         text, english, is_translated = localized(folder, slug, lang)
+        text, english = (x.replace("{{engine-repo}}", ENGINE_REPO) for x in (text, english))
         translated += is_translated
         m = md()
         body = m.convert(preprocess(text, key, folder, slug, english, lang))

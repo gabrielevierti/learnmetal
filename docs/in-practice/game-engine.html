@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en" data-root="../" data-site="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Game Engine | learnmetal</title>
+<meta name="description" content="In Practice: A Game Engine. Learn 3D graphics programming with Apple&#x27;s Metal, from the first triangle to physically based rendering, in Swift or C++.">
+<meta name="author" content="Gabriele Vierti">
+<link rel="icon" href="../assets/favicon.png">
+<script>
+(function () {
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem("theme"); l = localStorage.getItem("lang"); } catch (e) {}
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  d.dataset.theme = t;
+  var q = /[?&]lang=(swift|cpp)/.exec(location.search);      // links can pick a language: page.html?lang=cpp
+  if (q) l = q[1];
+  d.dataset.lang = l === "cpp" ? "cpp" : "swift";
+})();
+</script>
+<script>window.LM_T = {"copy": "Copy", "copied": "Copied", "none": "No results for", "loading": "Loading the index", "progress": "{n} of {total} chapters read", "reset": "Reset progress", "read": "read"};</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+</head>
+<body class="" data-key="in-practice/game-engine">
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <button id="menu-toggle" class="icon-btn" aria-label="Open the chapter list">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a class="brand" href="../index.html"><img src="../assets/logo.png" alt="LearnMetal" width="136" height="32"></a>
+  <div class="search" role="search">
+    <input id="search" type="search" placeholder="Search" aria-label="Search" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results" hidden></div>
+  </div>
+  <button id="search-toggle" class="icon-btn" aria-label="Search">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <div class="lang-switch site-lang" role="group" aria-label="Language of the text">
+    <a href="../in-practice/game-engine.html" aria-current="true">EN</a>
+    <a href="../it/in-practice/game-engine.html">IT</a>
+  </div>
+  <div class="lang-switch" role="group" aria-label="Language of the host code">
+    <button type="button" data-set-lang="swift">Swift</button>
+    <button type="button" data-set-lang="cpp">C++</button>
+  </div>
+  <a class="icon-btn" href="https://github.com/gabrielevierti" aria-label="Gabriele Vierti on GitHub"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg></a>
+  <button id="theme-toggle" class="icon-btn" aria-label="Switch between light and dark">
+    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"/></svg>
+  </button>
+</header>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Chapters">
+<div class="nav-section"><h4>Getting Started</h4><ul>
+<li><a data-key="getting-started/introduction" href="../getting-started/introduction.html">Introduction</a></li>
+<li><a data-key="getting-started/project-setup" href="../getting-started/project-setup.html">Project Setup</a></li>
+<li><a data-key="getting-started/hello-view" href="../getting-started/hello-view.html">Hello View</a></li>
+<li><a data-key="getting-started/hello-triangle" href="../getting-started/hello-triangle.html">Hello Triangle</a></li>
+<li><a data-key="getting-started/shaders" href="../getting-started/shaders.html">Shaders</a></li>
+<li><a data-key="getting-started/textures" href="../getting-started/textures.html">Textures</a></li>
+<li><a data-key="getting-started/transformations" href="../getting-started/transformations.html">Transformations</a></li>
+<li><a data-key="getting-started/coordinate-systems" href="../getting-started/coordinate-systems.html">Coordinate Systems</a></li>
+<li><a data-key="getting-started/camera" href="../getting-started/camera.html">Camera</a></li>
+<li><a data-key="getting-started/review" href="../getting-started/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Lighting</h4><ul>
+<li><a data-key="lighting/colors" href="../lighting/colors.html">Colors</a></li>
+<li><a data-key="lighting/basic-lighting" href="../lighting/basic-lighting.html">Basic Lighting</a></li>
+<li><a data-key="lighting/materials" href="../lighting/materials.html">Materials</a></li>
+<li><a data-key="lighting/lighting-maps" href="../lighting/lighting-maps.html">Lighting Maps</a></li>
+<li><a data-key="lighting/light-casters" href="../lighting/light-casters.html">Light Casters</a></li>
+<li><a data-key="lighting/multiple-lights" href="../lighting/multiple-lights.html">Multiple Lights</a></li>
+<li><a data-key="lighting/review" href="../lighting/review.html">Review</a></li>
+</ul></div>
+<div class="nav-section"><h4>Model Loading</h4><ul>
+<li><a data-key="model-loading/model-io" href="../model-loading/model-io.html">Model I/O</a></li>
+<li><a data-key="model-loading/mesh" href="../model-loading/mesh.html">Mesh</a></li>
+<li><a data-key="model-loading/model" href="../model-loading/model.html">Model</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Metal</h4><ul>
+<li><a data-key="advanced-metal/depth-testing" href="../advanced-metal/depth-testing.html">Depth Testing</a></li>
+<li><a data-key="advanced-metal/stencil-testing" href="../advanced-metal/stencil-testing.html">Stencil Testing</a></li>
+<li><a data-key="advanced-metal/blending" href="../advanced-metal/blending.html">Blending</a></li>
+<li><a data-key="advanced-metal/face-culling" href="../advanced-metal/face-culling.html">Face Culling</a></li>
+<li><a data-key="advanced-metal/render-targets" href="../advanced-metal/render-targets.html">Render Targets</a></li>
+<li><a data-key="advanced-metal/cubemaps" href="../advanced-metal/cubemaps.html">Cubemaps</a></li>
+<li><a data-key="advanced-metal/advanced-data" href="../advanced-metal/advanced-data.html">Advanced Data</a></li>
+<li><a data-key="advanced-metal/advanced-msl" href="../advanced-metal/advanced-msl.html">Advanced MSL</a></li>
+<li><a data-key="advanced-metal/no-geometry-shaders" href="../advanced-metal/no-geometry-shaders.html">Life Without Geometry Shaders</a></li>
+<li><a data-key="advanced-metal/instancing" href="../advanced-metal/instancing.html">Instancing</a></li>
+<li><a data-key="advanced-metal/anti-aliasing" href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></li>
+</ul></div>
+<div class="nav-section"><h4>Advanced Lighting</h4><ul>
+<li><a data-key="advanced-lighting/blinn-phong" href="../advanced-lighting/blinn-phong.html">Blinn-Phong</a></li>
+<li><a data-key="advanced-lighting/gamma-correction" href="../advanced-lighting/gamma-correction.html">Gamma Correction</a></li>
+<li><a data-key="advanced-lighting/shadow-mapping" href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></li>
+<li><a data-key="advanced-lighting/point-shadows" href="../advanced-lighting/point-shadows.html">Point Shadows</a></li>
+<li><a data-key="advanced-lighting/normal-mapping" href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></li>
+<li><a data-key="advanced-lighting/parallax-mapping" href="../advanced-lighting/parallax-mapping.html">Parallax Mapping</a></li>
+<li><a data-key="advanced-lighting/hdr" href="../advanced-lighting/hdr.html">HDR</a></li>
+<li><a data-key="advanced-lighting/bloom" href="../advanced-lighting/bloom.html">Bloom</a></li>
+<li><a data-key="advanced-lighting/deferred-shading" href="../advanced-lighting/deferred-shading.html">Deferred Shading</a></li>
+<li><a data-key="advanced-lighting/ssao" href="../advanced-lighting/ssao.html">SSAO</a></li>
+</ul></div>
+<div class="nav-section"><h4>PBR</h4><ul>
+<li><a data-key="pbr/theory" href="../pbr/theory.html">Theory</a></li>
+<li><a data-key="pbr/lighting" href="../pbr/lighting.html">Lighting</a></li>
+<li><a data-key="pbr/diffuse-irradiance" href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a></li>
+<li><a data-key="pbr/specular-ibl" href="../pbr/specular-ibl.html">Specular IBL</a></li>
+</ul></div>
+<div class="nav-section"><h4>In Practice</h4><ul>
+<li><a data-key="in-practice/debugging" href="../in-practice/debugging.html">Debugging</a></li>
+<li><a data-key="in-practice/text-rendering" href="../in-practice/text-rendering.html">Text Rendering</a></li>
+<li><a data-key="in-practice/2d-game" href="../in-practice/2d-game.html">A 2D Game</a></li>
+<li><a class="active" aria-current="page" data-key="in-practice/game-engine" href="../in-practice/game-engine.html">A Game Engine</a></li>
+<li><a data-key="in-practice/engine-renderer" href="../in-practice/engine-renderer.html">Engine: The Renderer</a></li>
+<li><a data-key="in-practice/engine-gameplay" href="../in-practice/engine-gameplay.html">Engine: The Game</a></li>
+<li><a data-key="in-practice/engine-editor" href="../in-practice/engine-editor.html">Engine: The Editor</a></li>
+</ul></div>
+<div class="nav-section"><h4>Beyond</h4><ul>
+<li><a data-key="beyond/compute-shaders" href="../beyond/compute-shaders.html">Compute Shaders</a></li>
+<li><a data-key="beyond/tessellation" href="../beyond/tessellation.html">Tessellation</a></li>
+<li><a data-key="beyond/ray-tracing" href="../beyond/ray-tracing.html">Ray Tracing</a></li>
+<li><a data-key="beyond/mesh-shaders" href="../beyond/mesh-shaders.html">Mesh Shaders</a></li>
+</ul></div>
+<div class="nav-section"><h4>Apple Platforms</h4><ul>
+<li><a data-key="apple-platforms/tile-based-gpus" href="../apple-platforms/tile-based-gpus.html">Tile-Based GPUs</a></li>
+<li><a data-key="apple-platforms/metalfx" href="../apple-platforms/metalfx.html">MetalFX Upscaling</a></li>
+<li><a data-key="apple-platforms/metal-4" href="../apple-platforms/metal-4.html">Metal 4</a></li>
+<li><a data-key="apple-platforms/visionos" href="../apple-platforms/visionos.html">visionOS</a></li>
+</ul></div>
+<div class="nav-section"><h4>Resources</h4><ul>
+<li><a data-key="resources/examples" href="../resources/examples.html">Example Code</a></li>
+</ul></div>
+</nav>
+<main class="content" id="main">
+<article><p class="crumb">In Practice</p><h1 id="a-game-engine">A Game Engine<a class="headerlink" href="#a-game-engine" title="Permanent link">#</a></h1>
+<p>Every chapter so far built one technique in isolation: a shadow map here, a bloom chain there, each in its own small program. This chapter and the next three put them together. The result is the <strong>LearnMetal Engine</strong>: a small game engine made entirely with Metal, written twice, once in Swift and once in C++, with a complete little game on top and an editor to build scenes with.</p>
+<p>It is deliberately small. The engine is between five and six thousand lines in either language, comments included, and it is meant to be read. Nothing in it is a technique you have not met in these pages; what is new is how the pieces are arranged so that they work together.</p>
+<p><a class="cta" href="https://github.com/gabrielevierti/learnmetal-engine">Get the engine on GitHub</a> <a class="cta ghost" href="https://github.com/gabrielevierti/learnmetal-engine/archive/refs/heads/main.zip">Download it as a .zip</a></p>
+
+<h2 id="get-it-and-run-it">Get it and run it<a class="headerlink" href="#get-it-and-run-it" title="Permanent link">#</a></h2>
+<p>The engine lives in a repository of its own. You need macOS 13 or later and Xcode 15 or later.</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/gabrielevierti/learnmetal-engine.git
+<span class="nb">cd</span><span class="w"> </span>learnmetal-engine
+swift<span class="w"> </span>run<span class="w"> </span>Marble
+</code></pre></div>
+
+<p>Open <code>Package.swift</code> in Xcode instead if you want the debugger and the GPU tools.</p>
+</div>
+
+<div class="lang-cpp">
+<p>The C++ version also needs CMake 3.24 or later. The first configuration downloads the four libraries it uses: GLFW, metal-cpp, stb and miniaudio.</p>
+<div class="codehilite"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/gabrielevierti/learnmetal-engine.git
+<span class="nb">cd</span><span class="w"> </span>learnmetal-engine
+cmake<span class="w"> </span>-B<span class="w"> </span>build<span class="w"> </span>-DCMAKE_BUILD_TYPE<span class="o">=</span>Release
+cmake<span class="w"> </span>--build<span class="w"> </span>build<span class="w"> </span>-j
+./build/marble
+</code></pre></div>
+</div>
+
+<p>That starts <strong>Marble</strong>, the sample game. Roll with W A S D, jump with Space, look around with the arrow keys or by dragging the mouse. Collect the eight gems and reach the glowing disc. A gamepad works too.</p>
+<p>Press <strong>F1</strong> for statistics and <strong>F2</strong> to see the physics shapes.</p>
+<div class="admonition note">
+<p class="admonition-title">Where the pictures come from</p>
+<p>The images in these chapters were not taken on a Mac. They were produced by a test program that runs the engine's real shaders on the CPU, which is how the engine was tested while it was being written. On a GPU you should see the same picture, with edges smoothed by multisampling.</p>
+</div>
+<figure><img src="../assets/img/in-practice/game-engine.webp" alt="Marble, the game that comes with the engine: physically based materials, light from the sky, cascaded shadows, bloom and an interface drawn on top." width="880" height="495" loading="lazy"><figcaption>Marble, the game that comes with the engine: physically based materials, light from the sky, cascaded shadows, bloom and an interface drawn on top.</figcaption></figure>
+
+<h2 id="what-an-engine-adds">What an engine adds<a class="headerlink" href="#what-an-engine-adds" title="Permanent link">#</a></h2>
+<p>The example programs of this site each have a renderer class that knows exactly what it draws: "a cube and a floor", "nine spheres". That stops working the moment the list of things to draw is decided while the program runs. An engine is what you get when you separate <strong>what exists</strong> from <strong>how it is drawn</strong>:</p>
+<ul>
+<li>A <strong>scene</strong> holds the things that exist: entities with a position, a mesh, a light, a physics body.</li>
+<li>A <strong>renderer</strong> draws whatever is in the scene, without knowing what game it is.</li>
+<li><strong>Systems</strong> change the scene over time: physics, particles, the game's own logic.</li>
+<li>A <strong>loop</strong> runs all of them in a fixed order, every frame.</li>
+</ul>
+<p>Around those sit the services a game takes for granted: loading files, input, sound, a way to draw an interface.</p>
+<h2 id="the-shape-of-a-game">The shape of a game<a class="headerlink" href="#the-shape-of-a-game" title="Permanent link">#</a></h2>
+<p>A game is an object with a few functions that the engine calls at the right moments. Here is a complete one: a cube that turns, lit by a sun, with a shadow.</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="kd">import</span><span class="w"> </span><span class="nc">Foundation</span>
+<span class="kd">import</span><span class="w"> </span><span class="nc">LMEngine</span>
+<span class="kd">import</span><span class="w"> </span><span class="nc">simd</span>
+
+<span class="kr">final</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nc">Spin</span><span class="p">:</span><span class="w"> </span><span class="n">Game</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">cube</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Entity</span><span class="p">.</span><span class="n">invalid</span>
+
+<span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nf">start</span><span class="p">(</span><span class="kc">_</span><span class="w"> </span><span class="n">engine</span><span class="p">:</span><span class="w"> </span><span class="n">Engine</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">scene</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">engine</span><span class="p">.</span><span class="n">scene</span>
+
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">camera</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">scene</span><span class="p">.</span><span class="n">create</span><span class="p">(</span><span class="s">"Camera"</span><span class="p">)</span>
+<span class="w">        </span><span class="n">scene</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">camera</span><span class="p">,</span><span class="w"> </span><span class="n">Transform</span><span class="p">(</span><span class="n">position</span><span class="p">:</span><span class="w"> </span><span class="n">Vec3</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.5</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">),</span><span class="w"> </span><span class="n">rotation</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">lookRotation</span><span class="p">(</span><span class="n">forward</span><span class="p">:</span><span class="w"> </span><span class="n">Vec3</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">0.35</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">))))</span>
+<span class="w">        </span><span class="n">scene</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">camera</span><span class="p">,</span><span class="w"> </span><span class="n">Camera</span><span class="p">())</span>
+
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">sun</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">scene</span><span class="p">.</span><span class="n">create</span><span class="p">(</span><span class="s">"Sun"</span><span class="p">)</span>
+<span class="w">        </span><span class="n">scene</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">sun</span><span class="p">,</span><span class="w"> </span><span class="n">Transform</span><span class="p">(</span><span class="n">rotation</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">lookRotation</span><span class="p">(</span><span class="n">forward</span><span class="p">:</span><span class="w"> </span><span class="n">Vec3</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">0.3</span><span class="p">))))</span>
+<span class="w">        </span><span class="n">scene</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">sun</span><span class="p">,</span><span class="w"> </span><span class="n">Light</span><span class="p">(</span><span class="n">type</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">directional</span><span class="p">,</span><span class="w"> </span><span class="n">intensity</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="n">castsShadows</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">))</span>
+
+<span class="w">        </span><span class="n">cube</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">scene</span><span class="p">.</span><span class="n">create</span><span class="p">(</span><span class="s">"Cube"</span><span class="p">)</span>
+<span class="w">        </span><span class="n">scene</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">cube</span><span class="p">,</span><span class="w"> </span><span class="n">Transform</span><span class="p">())</span>
+<span class="w">        </span><span class="n">scene</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">cube</span><span class="p">,</span><span class="w"> </span><span class="n">MeshRenderer</span><span class="p">(</span><span class="n">mesh</span><span class="p">:</span><span class="w"> </span><span class="n">engine</span><span class="p">.</span><span class="n">assets</span><span class="p">.</span><span class="n">cube</span><span class="p">,</span><span class="w"> </span><span class="n">material</span><span class="p">:</span><span class="w"> </span><span class="n">engine</span><span class="p">.</span><span class="n">assets</span><span class="p">.</span><span class="n">makeMaterial</span><span class="p">(</span><span class="n">baseColor</span><span class="p">:</span><span class="w"> </span><span class="n">Vec4</span><span class="p">(</span><span class="mf">0.9</span><span class="p">,</span><span class="w"> </span><span class="mf">0.4</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">))))</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="kc">_</span><span class="w"> </span><span class="n">engine</span><span class="p">:</span><span class="w"> </span><span class="n">Engine</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">engine</span><span class="p">.</span><span class="n">scene</span><span class="p">[</span><span class="n">cube</span><span class="p">,</span><span class="w"> </span><span class="n">Transform</span><span class="p">.</span><span class="kc">self</span><span class="p">]?.</span><span class="n">rotation</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Quat</span><span class="p">(</span><span class="n">angle</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span><span class="p">(</span><span class="n">engine</span><span class="p">.</span><span class="n">time</span><span class="p">.</span><span class="n">elapsed</span><span class="p">),</span><span class="w"> </span><span class="n">axis</span><span class="p">:</span><span class="w"> </span><span class="n">Vec3</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">))</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nv">engine</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Engine</span><span class="p">(</span><span class="n">config</span><span class="p">:</span><span class="w"> </span><span class="n">EngineConfig</span><span class="p">.</span><span class="n">fromArguments</span><span class="p">(</span><span class="n">CommandLine</span><span class="p">.</span><span class="n">arguments</span><span class="p">))</span>
+<span class="n">exit</span><span class="p">(</span><span class="n">engine</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="n">Spin</span><span class="p">()))</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">"LMEngine.hpp"</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">lm</span><span class="p">;</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">Spin</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">Game</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Entity</span><span class="w"> </span><span class="n">cube</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">start</span><span class="p">(</span><span class="n">Engine</span><span class="o">&amp;</span><span class="w"> </span><span class="n">engine</span><span class="p">)</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">Scene</span><span class="o">&amp;</span><span class="w"> </span><span class="n">scene</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">engine</span><span class="p">.</span><span class="n">scene</span><span class="p">;</span>
+
+<span class="w">        </span><span class="n">Entity</span><span class="w"> </span><span class="n">camera</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">scene</span><span class="p">.</span><span class="n">create</span><span class="p">(</span><span class="s">"Camera"</span><span class="p">);</span>
+<span class="w">        </span><span class="n">Transform</span><span class="w"> </span><span class="n">view</span><span class="p">;</span>
+<span class="w">        </span><span class="n">view</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Vec3</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.5f</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">};</span>
+<span class="w">        </span><span class="n">view</span><span class="p">.</span><span class="n">rotation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lookRotation</span><span class="p">(</span><span class="n">Vec3</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.35f</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">});</span>
+<span class="w">        </span><span class="n">scene</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">camera</span><span class="p">,</span><span class="w"> </span><span class="n">view</span><span class="p">);</span>
+<span class="w">        </span><span class="n">scene</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">camera</span><span class="p">,</span><span class="w"> </span><span class="n">Camera</span><span class="p">{});</span>
+
+<span class="w">        </span><span class="n">Entity</span><span class="w"> </span><span class="n">sun</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">scene</span><span class="p">.</span><span class="n">create</span><span class="p">(</span><span class="s">"Sun"</span><span class="p">);</span>
+<span class="w">        </span><span class="n">Transform</span><span class="w"> </span><span class="n">sunDirection</span><span class="p">;</span>
+<span class="w">        </span><span class="n">sunDirection</span><span class="p">.</span><span class="n">rotation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lookRotation</span><span class="p">(</span><span class="n">Vec3</span><span class="p">{</span><span class="mf">0.4f</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.3f</span><span class="p">});</span>
+<span class="w">        </span><span class="n">scene</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">sun</span><span class="p">,</span><span class="w"> </span><span class="n">sunDirection</span><span class="p">);</span>
+<span class="w">        </span><span class="n">Light</span><span class="w"> </span><span class="n">light</span><span class="p">;</span>
+<span class="w">        </span><span class="n">light</span><span class="p">.</span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LightType</span><span class="o">::</span><span class="n">Directional</span><span class="p">;</span>
+<span class="w">        </span><span class="n">light</span><span class="p">.</span><span class="n">intensity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
+<span class="w">        </span><span class="n">light</span><span class="p">.</span><span class="n">castsShadows</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">        </span><span class="n">scene</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">sun</span><span class="p">,</span><span class="w"> </span><span class="n">light</span><span class="p">);</span>
+
+<span class="w">        </span><span class="n">cube</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">scene</span><span class="p">.</span><span class="n">create</span><span class="p">(</span><span class="s">"Cube"</span><span class="p">);</span>
+<span class="w">        </span><span class="n">scene</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">cube</span><span class="p">,</span><span class="w"> </span><span class="n">Transform</span><span class="p">{});</span>
+<span class="w">        </span><span class="n">scene</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">cube</span><span class="p">,</span><span class="w"> </span><span class="n">MeshRenderer</span><span class="p">{</span><span class="n">engine</span><span class="p">.</span><span class="n">assets</span><span class="p">().</span><span class="n">cube</span><span class="p">(),</span><span class="w"> </span><span class="n">engine</span><span class="p">.</span><span class="n">assets</span><span class="p">().</span><span class="n">makeMaterial</span><span class="p">(</span><span class="n">Vec4</span><span class="p">{</span><span class="mf">0.9f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.4f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1f</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">})});</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="n">Engine</span><span class="o">&amp;</span><span class="w"> </span><span class="n">engine</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="p">)</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">engine</span><span class="p">.</span><span class="n">scene</span><span class="p">.</span><span class="n">get</span><span class="o">&lt;</span><span class="n">Transform</span><span class="o">&gt;</span><span class="p">(</span><span class="n">cube</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">rotation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">axisAngle</span><span class="p">(</span><span class="n">Vec3</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">},</span><span class="w"> </span><span class="kt">float</span><span class="p">(</span><span class="n">engine</span><span class="p">.</span><span class="n">time</span><span class="p">.</span><span class="n">elapsed</span><span class="p">));</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">};</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="o">**</span><span class="w"> </span><span class="n">argv</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Engine</span><span class="w"> </span><span class="n">engine</span><span class="p">(</span><span class="n">EngineConfig</span><span class="o">::</span><span class="n">fromArguments</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="n">argv</span><span class="p">));</span>
+<span class="w">    </span><span class="n">Spin</span><span class="w"> </span><span class="n">game</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">engine</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="n">game</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+
+<p>There is no render pass in it, no pipeline state, no buffer. The game says what exists; everything from the earlier chapters happens inside <code>engine.run</code>.</p>
+<p>Notice how the camera and the sun are aimed. Both look down their own negative z axis, like the camera of the <a href="../getting-started/camera.html">Camera</a> chapter, so giving them a rotation is giving them a direction.</p>
+<h2 id="the-frame">The frame<a class="headerlink" href="#the-frame" title="Permanent link">#</a></h2>
+<p><code>Engine</code> owns the loop. Every frame it does the same things in the same order:</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">func</span><span class="w"> </span><span class="nf">simulate</span><span class="p">(</span><span class="kc">_</span><span class="w"> </span><span class="n">game</span><span class="p">:</span><span class="w"> </span><span class="n">Game</span><span class="p">,</span><span class="w"> </span><span class="n">realDelta</span><span class="p">:</span><span class="w"> </span><span class="nb">Double</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Physics and the game's fixedUpdate advance in steps of constant length.</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">steps</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">time</span><span class="p">.</span><span class="n">beginFrame</span><span class="p">(</span><span class="n">realDelta</span><span class="p">)</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="kc">_</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mf">0.</span><span class="p">.&lt;</span><span class="n">steps</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">game</span><span class="p">.</span><span class="n">fixedUpdate</span><span class="p">(</span><span class="kc">self</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">:</span><span class="w"> </span><span class="n">time</span><span class="p">.</span><span class="n">fixedDelta</span><span class="p">)</span>
+<span class="w">        </span><span class="n">runBehaviors</span><span class="p">(</span><span class="n">isFixedStep</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">:</span><span class="w"> </span><span class="n">time</span><span class="p">.</span><span class="n">fixedDelta</span><span class="p">)</span>
+<span class="w">        </span><span class="n">physics</span><span class="p">.</span><span class="n">step</span><span class="p">(</span><span class="n">scene</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">:</span><span class="w"> </span><span class="n">time</span><span class="p">.</span><span class="n">fixedDelta</span><span class="p">)</span>
+<span class="w">        </span><span class="n">scene</span><span class="p">.</span><span class="n">flushDestroyed</span><span class="p">()</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="c1">// Show bodies where they are between the last two steps, for smooth motion at any frame rate.</span>
+<span class="w">    </span><span class="n">physics</span><span class="p">.</span><span class="n">writeTransforms</span><span class="p">(</span><span class="n">scene</span><span class="p">,</span><span class="w"> </span><span class="n">alpha</span><span class="p">:</span><span class="w"> </span><span class="n">time</span><span class="p">.</span><span class="n">alpha</span><span class="p">)</span>
+
+<span class="w">    </span><span class="n">game</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="kc">self</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">:</span><span class="w"> </span><span class="n">time</span><span class="p">.</span><span class="n">delta</span><span class="p">)</span>
+<span class="w">    </span><span class="n">runBehaviors</span><span class="p">(</span><span class="n">isFixedStep</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">:</span><span class="w"> </span><span class="n">time</span><span class="p">.</span><span class="n">delta</span><span class="p">)</span>
+<span class="w">    </span><span class="n">scene</span><span class="p">.</span><span class="n">flushDestroyed</span><span class="p">()</span>
+<span class="w">    </span><span class="n">scene</span><span class="p">.</span><span class="n">updateTransforms</span><span class="p">()</span>
+<span class="w">    </span><span class="n">updateParticles</span><span class="p">(</span><span class="n">scene</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">:</span><span class="w"> </span><span class="n">time</span><span class="p">.</span><span class="n">delta</span><span class="p">)</span>
+
+<span class="w">    </span><span class="n">canvas</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="n">size</span><span class="p">:</span><span class="w"> </span><span class="n">screenSize</span><span class="p">)</span>
+<span class="w">    </span><span class="n">game</span><span class="p">.</span><span class="n">draw</span><span class="p">(</span><span class="kc">self</span><span class="p">,</span><span class="w"> </span><span class="n">canvas</span><span class="p">:</span><span class="w"> </span><span class="n">canvas</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">showsColliders</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">drawColliders</span><span class="p">()</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">showsStatistics</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">drawStatistics</span><span class="p">()</span><span class="w"> </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">Engine::simulate</span><span class="p">(</span><span class="n">Game</span><span class="o">&amp;</span><span class="w"> </span><span class="n">game</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">realDelta</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Physics and the game's fixedUpdate advance in steps of constant length.</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">steps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">time</span><span class="p">.</span><span class="n">beginFrame</span><span class="p">(</span><span class="n">realDelta</span><span class="p">);</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">steps</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">game</span><span class="p">.</span><span class="n">fixedUpdate</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="n">time</span><span class="p">.</span><span class="n">fixedDelta</span><span class="p">);</span>
+<span class="w">        </span><span class="n">runBehaviors</span><span class="p">(</span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="n">time</span><span class="p">.</span><span class="n">fixedDelta</span><span class="p">);</span>
+<span class="w">        </span><span class="n">physics</span><span class="p">.</span><span class="n">step</span><span class="p">(</span><span class="n">scene</span><span class="p">,</span><span class="w"> </span><span class="n">time</span><span class="p">.</span><span class="n">fixedDelta</span><span class="p">);</span>
+<span class="w">        </span><span class="n">scene</span><span class="p">.</span><span class="n">flushDestroyed</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="c1">// Show bodies where they are between the last two steps, for smooth motion at any frame rate.</span>
+<span class="w">    </span><span class="n">physics</span><span class="p">.</span><span class="n">writeTransforms</span><span class="p">(</span><span class="n">scene</span><span class="p">,</span><span class="w"> </span><span class="n">time</span><span class="p">.</span><span class="n">alpha</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">game</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="n">time</span><span class="p">.</span><span class="n">delta</span><span class="p">);</span>
+<span class="w">    </span><span class="n">runBehaviors</span><span class="p">(</span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="n">time</span><span class="p">.</span><span class="n">delta</span><span class="p">);</span>
+<span class="w">    </span><span class="n">scene</span><span class="p">.</span><span class="n">flushDestroyed</span><span class="p">();</span>
+<span class="w">    </span><span class="n">scene</span><span class="p">.</span><span class="n">updateTransforms</span><span class="p">();</span>
+<span class="w">    </span><span class="n">updateParticles</span><span class="p">(</span><span class="n">scene</span><span class="p">,</span><span class="w"> </span><span class="n">time</span><span class="p">.</span><span class="n">delta</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">canvas_</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="n">screenSize</span><span class="p">());</span>
+<span class="w">    </span><span class="n">game</span><span class="p">.</span><span class="n">draw</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="n">canvas_</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">showsColliders</span><span class="p">)</span><span class="w"> </span><span class="n">drawColliders</span><span class="p">();</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">showsStatistics</span><span class="p">)</span><span class="w"> </span><span class="n">drawStatistics</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+
+<p>After this the renderer draws the scene, and then the 2D canvas on top of it.</p>
+<p>The order is not arbitrary. Physics runs before the game's <code>update</code>, so game logic sees where things ended up. World matrices are computed after everything that can move an entity, and before the two systems that need them: particles and the renderer. Entities that were destroyed during the frame are only removed at fixed points, so that no system ever holds a reference to something that vanished halfway through.</p>
+<h2 id="a-fixed-step-for-physics">A fixed step for physics<a class="headerlink" href="#a-fixed-step-for-physics" title="Permanent link">#</a></h2>
+<p>Rendering takes a different amount of time every frame. If physics advanced by that same varying amount, a ball would bounce a little differently on every machine, and a slow frame could push it through a floor. So physics always advances by exactly one sixtieth of a second, and the engine decides how many such steps fit in the time that has passed:</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="n">accumulator</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="nb">Double</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span>
+<span class="kd">var</span><span class="w"> </span><span class="nv">steps</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="k">while</span><span class="w"> </span><span class="n">accumulator</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="nb">Double</span><span class="p">(</span><span class="n">fixedDelta</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">steps</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">maxStepsPerFrame</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">accumulator</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="nb">Double</span><span class="p">(</span><span class="n">fixedDelta</span><span class="p">)</span>
+<span class="w">    </span><span class="n">steps</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span>
+<span class="p">}</span>
+<span class="k">if</span><span class="w"> </span><span class="n">steps</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="n">maxStepsPerFrame</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">accumulator</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">min</span><span class="p">(</span><span class="n">accumulator</span><span class="p">,</span><span class="w"> </span><span class="nb">Double</span><span class="p">(</span><span class="n">fixedDelta</span><span class="p">))</span><span class="w"> </span><span class="p">}</span>
+<span class="n">alpha</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">Float</span><span class="p">(</span><span class="n">accumulator</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">Double</span><span class="p">(</span><span class="n">fixedDelta</span><span class="p">))</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="n">accumulator_</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">delta</span><span class="p">;</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">steps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">accumulator_</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">fixedDelta</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">steps</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">maxStepsPerFrame</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">accumulator_</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">fixedDelta</span><span class="p">;</span>
+<span class="w">    </span><span class="n">steps</span><span class="o">++</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">steps</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">maxStepsPerFrame</span><span class="p">)</span><span class="w"> </span><span class="n">accumulator_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">min</span><span class="p">(</span><span class="n">accumulator_</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="p">(</span><span class="n">fixedDelta</span><span class="p">));</span>
+<span class="n">alpha</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">float</span><span class="p">(</span><span class="n">accumulator_</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">fixedDelta</span><span class="p">);</span>
+</code></pre></div>
+</div>
+
+<p>Real time is poured into the accumulator and taken out in fixed portions. On a 120 Hz display, every other frame runs no step at all; after a hiccup, one frame runs several, up to a limit.</p>
+<p>What is left in the accumulator is a fraction of a step, <code>alpha</code>. The renderer does not show bodies at their latest physics position, but at a blend between the previous one and the latest one, <code>alpha</code> of the way along. That is what makes motion smooth even though physics only knows sixty moments per second.</p>
+<p>One consequence is worth remembering: a function that runs "zero, one or several times per frame" is the wrong place to ask whether a key was just pressed. Read input in <code>update</code> and remember it; apply forces in <code>fixedUpdate</code>.</p>
+<h2 id="one-source-of-truth-for-the-gpu">One source of truth for the GPU<a class="headerlink" href="#one-source-of-truth-for-the-gpu" title="Permanent link">#</a></h2>
+<p>Every chapter with a uniform buffer had the same warning: the struct in the shader and the struct in the host code must match byte for byte, and nothing checks it. In an engine with a dozen such structs and two host languages, hoping is not enough.</p>
+<p>The engine declares each struct once, in a C header that all three compilers read. Inside a shader the <code>simd</code> names are made to mean the shader's own types. Shortened to one struct, the header looks like this:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1">// Shaders/Shared/ShaderTypes.h</span>
+<span class="cp">#ifdef __METAL_VERSION__</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">float2</span><span class="w"> </span><span class="n">simd_float2</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">float3</span><span class="w"> </span><span class="n">simd_float3</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">float4</span><span class="w"> </span><span class="n">simd_float4</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">float3x3</span><span class="w"> </span><span class="n">simd_float3x3</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">float4x4</span><span class="w"> </span><span class="n">simd_float4x4</span><span class="p">;</span>
+<span class="cp">#else</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;simd/simd.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdint.h&gt;</span>
+<span class="cp">#endif</span>
+
+<span class="k">enum</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">LMBufferVertices</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">   </span><span class="c1">// mesh vertices, described by the vertex descriptor</span>
+<span class="w">    </span><span class="n">LMBufferPass</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">   </span><span class="c1">// PassUniforms: the camera of the current pass</span>
+<span class="w">    </span><span class="n">LMBufferInstances</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">   </span><span class="c1">// InstanceData[], indexed by instance_id</span>
+<span class="w">    </span><span class="n">LMBufferMaterial</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w">   </span><span class="c1">// MaterialUniforms</span>
+<span class="w">    </span><span class="n">LMBufferFrame</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w">   </span><span class="c1">// FrameUniforms: sun, shadows, environment, fog</span>
+<span class="w">    </span><span class="n">LMBufferLights</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">   </span><span class="c1">// LightData[]</span>
+<span class="p">};</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">simd_float4x4</span><span class="w"> </span><span class="n">model</span><span class="p">;</span>
+<span class="w">    </span><span class="n">simd_float4x4</span><span class="w"> </span><span class="n">normalMatrix</span><span class="p">;</span><span class="w">      </span><span class="c1">// inverse transpose of model</span>
+<span class="w">    </span><span class="n">simd_float4</span><span class="w"> </span><span class="n">tint</span><span class="p">;</span><span class="w">                </span><span class="c1">// multiplies the material's base color</span>
+<span class="p">}</span><span class="w"> </span><span class="n">InstanceData</span><span class="p">;</span>
+</code></pre></div>
+
+<p>The shaders include it with <code>#include</code>. The host code brings it in like this:</p>
+<div class="lang-swift">
+<div class="codehilite"><pre><span></span><code><span class="c1">// Package.swift: a C target whose only header is ShaderTypes.h</span>
+<span class="p">.</span><span class="n">target</span><span class="p">(</span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="s">"ShaderTypes"</span><span class="p">,</span><span class="w"> </span><span class="n">path</span><span class="p">:</span><span class="w"> </span><span class="s">"Shaders/Shared"</span><span class="p">,</span><span class="w"> </span><span class="n">publicHeadersPath</span><span class="p">:</span><span class="w"> </span><span class="s">"."</span><span class="p">),</span>
+<span class="p">.</span><span class="n">target</span><span class="p">(</span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="s">"LMEngine"</span><span class="p">,</span><span class="w"> </span><span class="n">dependencies</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">"ShaderTypes"</span><span class="p">],</span><span class="w"> </span><span class="n">path</span><span class="p">:</span><span class="w"> </span><span class="s">"Swift/LMEngine"</span><span class="p">),</span>
+
+<span class="c1">// Rendering/GPUTypes.swift: Swift-style names for the C constants</span>
+<span class="kd">import</span><span class="w"> </span><span class="nc">ShaderTypes</span>
+
+<span class="kd">enum</span><span class="w"> </span><span class="nc">BufferIndex</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">static</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">vertices</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">Int</span><span class="p">(</span><span class="n">LMBufferVertices</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">static</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">pass</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">Int</span><span class="p">(</span><span class="n">LMBufferPass</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">static</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">instances</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">Int</span><span class="p">(</span><span class="n">LMBufferInstances</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">static</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">material</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">Int</span><span class="p">(</span><span class="n">LMBufferMaterial</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">static</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">frame</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">Int</span><span class="p">(</span><span class="n">LMBufferFrame</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">static</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">lights</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">Int</span><span class="p">(</span><span class="n">LMBufferLights</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1">// Rendering/RenderPasses.swift</span>
+<span class="n">encoder</span><span class="p">.</span><span class="n">setVertexBuffer</span><span class="p">(</span><span class="n">batch</span><span class="p">.</span><span class="n">instances</span><span class="p">.</span><span class="n">buffer</span><span class="p">,</span><span class="w"> </span><span class="n">offset</span><span class="p">:</span><span class="w"> </span><span class="n">batch</span><span class="p">.</span><span class="n">instances</span><span class="p">.</span><span class="n">offset</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="n">BufferIndex</span><span class="p">.</span><span class="n">instances</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="lang-cpp">
+<div class="codehilite"><pre><span></span><code><span class="c1">// Rendering/GPUTypes.hpp: the same header, inside a namespace</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;simd/simd.h&gt;</span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;cstdint&gt;</span>
+
+<span class="k">namespace</span><span class="w"> </span><span class="nn">lm</span><span class="o">::</span><span class="nn">gpu</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">"ShaderTypes.h"</span>
+<span class="p">}</span>
+
+<span class="c1">// Rendering/RenderPasses.cpp</span>
+<span class="n">encoder</span><span class="o">-&gt;</span><span class="n">setVertexBuffer</span><span class="p">(</span><span class="n">batch</span><span class="p">.</span><span class="n">instances</span><span class="p">.</span><span class="n">buffer</span><span class="p">,</span><span class="w"> </span><span class="n">batch</span><span class="p">.</span><span class="n">instances</span><span class="p">.</span><span class="n">offset</span><span class="p">,</span><span class="w"> </span><span class="n">gpu</span><span class="o">::</span><span class="n">LMBufferInstances</span><span class="p">);</span>
+</code></pre></div>
+</div>
+
+<p>The binding slots live in the same header, so <code>[[buffer(LMBufferInstances)]]</code> in a shader and the index passed to the encoder are the same constant, not two numbers that happen to agree.</p>
+<p>Two rules keep the header safe. No <code>bool</code>, whose size differs between languages. And remember that a <code>float3</code> occupies sixteen bytes in all three languages: the unit tests check the size of every struct, so a mistake fails a test and not a frame.</p>
+<h2 id="where-each-chapter-went">Where each chapter went<a class="headerlink" href="#where-each-chapter-went" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Chapter</th>
+<th>In the engine</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../getting-started/shaders.html">Shaders</a></td>
+<td><code>Rendering/ShaderLibrary</code>, which compiles the <code>.metal</code> files at startup and reloads them when they change</td>
+</tr>
+<tr>
+<td><a href="../getting-started/textures.html">Textures</a></td>
+<td><code>Rendering/Texture</code>, <code>Assets/Assets</code></td>
+</tr>
+<tr>
+<td><a href="../getting-started/transformations.html">Transformations</a>, <a href="../getting-started/camera.html">Camera</a></td>
+<td><code>Math/Math</code>, <code>Scene/Scene</code></td>
+</tr>
+<tr>
+<td><a href="../lighting/multiple-lights.html">Multiple Lights</a></td>
+<td><code>Shaders/Lighting.metal</code></td>
+</tr>
+<tr>
+<td><a href="../model-loading/model.html">Model</a></td>
+<td><code>Assets/MeshData</code>, with its own reader for OBJ files</td>
+</tr>
+<tr>
+<td><a href="../advanced-metal/blending.html">Blending</a>, <a href="../advanced-metal/face-culling.html">Face Culling</a></td>
+<td>transparent and cut-out materials in <code>Rendering/RenderPasses</code></td>
+</tr>
+<tr>
+<td><a href="../advanced-metal/render-targets.html">Render Targets</a>, <a href="../advanced-metal/anti-aliasing.html">Anti-Aliasing</a></td>
+<td>the HDR, multisampled main pass</td>
+</tr>
+<tr>
+<td><a href="../advanced-metal/cubemaps.html">Cubemaps</a></td>
+<td><code>Rendering/Environment</code>, <code>Shaders/Sky.metal</code></td>
+</tr>
+<tr>
+<td><a href="../advanced-metal/instancing.html">Instancing</a></td>
+<td>automatic, in <code>Renderer.makeBatches</code></td>
+</tr>
+<tr>
+<td><a href="../advanced-lighting/shadow-mapping.html">Shadow Mapping</a></td>
+<td><code>Rendering/Cascades</code>: four shadow maps instead of one</td>
+</tr>
+<tr>
+<td><a href="../advanced-lighting/normal-mapping.html">Normal Mapping</a></td>
+<td>tangents in <code>Assets/MeshData</code>, <code>Shaders/Forward.metal</code></td>
+</tr>
+<tr>
+<td><a href="../advanced-lighting/hdr.html">HDR</a>, <a href="../advanced-lighting/bloom.html">Bloom</a>, <a href="../advanced-lighting/ssao.html">SSAO</a></td>
+<td><code>Shaders/Post.metal</code></td>
+</tr>
+<tr>
+<td><a href="../pbr/lighting.html">PBR</a>, <a href="../pbr/diffuse-irradiance.html">Diffuse Irradiance</a>, <a href="../pbr/specular-ibl.html">Specular IBL</a></td>
+<td><code>Shaders/Lighting.metal</code>, <code>Shaders/IBL.metal</code></td>
+</tr>
+<tr>
+<td><a href="debugging.html">Debugging</a></td>
+<td>labels on every pass, <code>Rendering/DebugDraw</code></td>
+</tr>
+<tr>
+<td><a href="text-rendering.html">Text Rendering</a>, <a href="2d-game.html">A 2D Game</a></td>
+<td><code>Rendering/Canvas</code>, with distance-field fonts</td>
+</tr>
+<tr>
+<td><a href="../apple-platforms/tile-based-gpus.html">Tile-Based GPUs</a></td>
+<td>memoryless targets, load and store actions chosen per pass</td>
+</tr>
+</tbody>
+</table>
+<p>Not everything made it. There are no <a href="../advanced-metal/stencil-testing.html">stencil outlines</a>, no <a href="../advanced-lighting/deferred-shading.html">deferred path</a>, no <a href="../advanced-lighting/point-shadows.html">shadows from point lights</a>, no <a href="../advanced-lighting/parallax-mapping.html">parallax mapping</a>, and nothing from the Beyond section. A small engine that does a few things well is a better place to add those than a large one that does everything halfway.</p>
+<h2 id="what-was-tested-and-what-was-not">What was tested, and what was not<a class="headerlink" href="#what-was-tested-and-what-was-not" title="Permanent link">#</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Read this before you build</p>
+<p>The engine was written without access to a Mac. The C++ version was compiled against Apple's real metal-cpp headers, its unit tests pass, and the whole engine and game were run against a software stand-in for Metal that executes the shaders on the CPU. It has <strong>not</strong> been linked or run on a real GPU. The Swift version is a file-by-file port of that C++ code and has <strong>never been compiled</strong>. The shaders have never been through Apple's compiler. The repository's README lists exactly what was checked, and its CI workflow builds everything on a Mac: expect to fix a few compile errors the first time, most likely in the Swift files that talk to AppKit and AVFoundation.</p>
+</div>
+<p>The <a href="engine-renderer.html">next chapter</a> opens the renderer.</p></article><nav class="pager" id="pager"><a class="prev" href="../in-practice/2d-game.html"><small>Previous</small>A 2D Game</a><a class="next" href="../in-practice/engine-renderer.html"><small>Next</small>Engine: The Renderer</a></nav>
+<footer class="site-footer">
+  <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>
+  <p><a href="https://github.com/gabrielevierti"><svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg> github.com/gabrielevierti</a></p>
+</footer>
+</main>
+<aside class="toc" aria-label="On this page"><h4>On this page</h4><ul><li><a href="#get-it-and-run-it">Get it and run it</a></li><li><a href="#what-an-engine-adds">What an engine adds</a></li><li><a href="#the-shape-of-a-game">The shape of a game</a></li><li><a href="#the-frame">The frame</a></li><li><a href="#a-fixed-step-for-physics">A fixed step for physics</a></li><li><a href="#one-source-of-truth-for-the-gpu">One source of truth for the GPU</a></li><li><a href="#where-each-chapter-went">Where each chapter went</a></li><li><a href="#what-was-tested-and-what-was-not">What was tested, and what was not</a></li></ul></aside>
+</div>
+<script defer src="../assets/textures.js"></script>
+<script defer src="../assets/live.js"></script>
+<script defer src="../assets/demos.js"></script>
+<script defer src="../assets/site.js"></script>
+</body>
+</html>
