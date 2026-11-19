@@ -307,7 +307,7 @@ The blur then costs a quarter as much and covers twice the screen distance per p
 Because the glow is smooth, the lower resolution is not visible after the final upsample.</p></details></li>
 <li>Implement the downsample and upsample chain.<details class="solution"><summary>Show solution</summary><p>Create a chain of textures, each half the size of the previous.<br>
 Downsample the bright texture into each level with a small filter, then go back up: upsample level n, add it to level n - 1, and repeat to the top.<br>
-The live demo above uses the texture's own mipmaps as the downsample chain and sums five levels in one pass.</p></details></li>
+The live demo above uses the texture's own mipmaps as the downsample chain and sums six levels in one pass.</p></details></li>
 </ul></article><nav class="pager" id="pager"><a class="prev" href="../advanced-lighting/hdr.html"><small>Previous</small>HDR</a><a class="next" href="../advanced-lighting/deferred-shading.html"><small>Next</small>Deferred Shading</a></nav>
 <footer class="site-footer">
   <p>&copy; 2026 Gabriele Vierti. All rights reserved.</p>

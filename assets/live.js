@@ -13,6 +13,8 @@
   "use strict";
 
   const LM = (window.LM = window.LM || {});
+  // Text of the demos in the language of the page, when the page brings a translation.
+  const tr = (text) => (window.LM_T && window.LM_T.demo && window.LM_T.demo[text]) || text;
   LM.demos = LM.demos || {};
   LM.define = function (id, cfg) { LM.demos[id] = cfg; };
 
@@ -791,6 +793,9 @@ fragment float4 fragment_depth(Plain in [[stage_in]]) {
     const sceneProgram = cfg.sceneSource ? buildProgram(gl, cfg.sceneSource) : null;
     const finalProgram = cfg.finalSource ? buildProgram(gl, cfg.finalSource) : null;
     let passTarget = null;
+    // An optional hidden full-screen pass between the scene and the editable pass, into a texture with mipmaps.
+    const preProgram = cfg.preSource ? buildProgram(gl, cfg.preSource) : null;
+    let preTarget = null;
     const backProgram = cfg.backgroundSource ? buildProgram(gl, cfg.backgroundSource) : null;
     const shadowTarget = cfg.shadow ? target(1024, 1024, true) : null;
     let sceneTarget = null;
@@ -861,7 +866,7 @@ fragment float4 fragment_depth(Plain in [[stage_in]]) {
       if (prelude) {
         const d = document.createElement("details");
         d.className = "lm-prelude";
-        d.innerHTML = "<summary>Show the structs and the vertex function</summary><pre><code></code></pre>";
+        d.innerHTML = "<summary>" + tr("Show the structs and the vertex function") + "</summary><pre><code></code></pre>";
         d.querySelector("code").innerHTML = highlight(prelude);
         panel.appendChild(d);
       }
@@ -1008,7 +1013,7 @@ fragment float4 fragment_depth(Plain in [[stage_in]]) {
 
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const w = Math.max(1, Math.round(canvas.clientWidth * dpr)), h = Math.max(1, Math.round(canvas.clientHeight * dpr));
-      if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; dirty = true; sceneTarget = null; passTarget = null; }
+      if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; dirty = true; sceneTarget = null; passTarget = null; preTarget = null; }
       if (!dirty || !program) return;
       dirty = false;
 
@@ -1075,6 +1080,17 @@ fragment float4 fragment_depth(Plain in [[stage_in]]) {
         if (cfg.sceneMips) { gl.bindTexture(gl.TEXTURE_2D, sceneTarget.color); gl.generateMipmap(gl.TEXTURE_2D); }
       }
 
+      if (preProgram) {
+        if (!preTarget) preTarget = target(w, h, false, { hdr: true, mips: true });
+        gl.bindFramebuffer(gl.FRAMEBUFFER, preTarget.fb);
+        gl.viewport(0, 0, w, h);
+        setState({ depth: false });
+        fullscreen(preProgram, base, -1);
+        textures[cfg.preTarget || "pre"] = preTarget.color;
+        gl.bindTexture(gl.TEXTURE_2D, preTarget.color);
+        gl.generateMipmap(gl.TEXTURE_2D);
+      }
+
       if (finalProgram) {                                 // the editable pass into a texture, then a hidden final pass
         if (!passTarget) passTarget = target(w, h, false);
         gl.bindFramebuffer(gl.FRAMEBUFFER, passTarget.fb);
@@ -1114,7 +1130,7 @@ fragment float4 fragment_depth(Plain in [[stage_in]]) {
     if (!cfg.caption) return;
     const p = document.createElement("p");
     p.className = "lm-caption";
-    p.textContent = cfg.caption;
+    p.textContent = tr(cfg.caption);
     el.appendChild(p);
   }
 

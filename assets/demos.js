@@ -1466,35 +1466,64 @@ fragment float4 fragment_scene(VertexOut in [[stage_in]],
     }
     return float4(hdr, 1.0);
 }`,
+    // A hidden pass first keeps what is brighter than the threshold, in a texture with mipmaps.
+    preTarget: "bright",
+    preSource: SCREEN + `
+struct BloomUniforms { float threshold; float intensity; float exposure; int enabled; };
+fragment float4 fragment_bright(ScreenOut in [[stage_in]], constant BloomUniforms &uniforms [[buffer(0)]],
+                                texture2d<float> scene [[texture(0)]], sampler s [[sampler(0)]]) {
+    float3 color = scene.sample(s, in.uv, level(0.0)).rgb;
+    float brightness = dot(color, float3(0.2126, 0.7152, 0.0722));
+    return float4(color * saturate(brightness - uniforms.threshold) / max(brightness, 0.0001), 1.0);
+}`,
     prelude: SCREEN,
     code: `
 struct BloomUniforms {
-    float threshold;
+    float threshold;      // used by the pass before this one, which fills "bright"
     float intensity;
     float exposure;
     int enabled;
 };
 
-// Keep only what is brighter than the threshold.
-static float3 brightPart(float3 color, float threshold) {
-    float brightness = dot(color, float3(0.2126, 0.7152, 0.0722));
-    return color * saturate(brightness - threshold) / max(brightness, 0.0001);
-}
-
+// "scene" is the HDR image. "bright" holds only its pixels brighter than the
+// threshold, and each of its mip levels is a smaller, blurrier copy of them.
 fragment float4 fragment_composite(ScreenOut in [[stage_in]],
                                    constant BloomUniforms &uniforms [[buffer(0)]],
                                    texture2d<float> scene [[texture(0)]],
+                                   texture2d<float> bright [[texture(1)]],
                                    sampler s [[sampler(0)]]) {
     float3 hdr = scene.sample(s, in.uv, level(0.0)).rgb;
 
     if (uniforms.enabled != 0) {
-        // Each mip level is a blurrier copy of the scene. Summing the bright
-        // part of several levels gives a wide, smooth glow.
+        // Summing several mip levels gives a wide glow. Read with the sampler's
+        // linear filter, though, a small level shows its pixels as squares. So each
+        // level is read with a smoother filter: a cubic curve over 4 x 4 pixels,
+        // which four well-placed linear reads add up to exactly.
+        float2 size = float2(bright.get_width(), bright.get_height());
         float3 glow = float3(0.0);
-        for (int mip = 2; mip <= 6; mip++) {
-            glow += brightPart(scene.sample(s, in.uv, level(float(mip))).rgb, uniforms.threshold);
+        for (int mip = 1; mip <= 6; mip++) {
+            float lod = float(mip);
+            float2 levelSize = max(floor(size / exp2(lod)), float2(1.0));
+            float2 pixel = in.uv * levelSize - 0.5;
+            float2 f = fract(pixel);                     // where we are inside the pixel
+            float2 corner = pixel - f;
+
+            // The weights of the four pixels along each axis, grouped two by two.
+            float2 w0 = (1.0 - f) * (1.0 - f) * (1.0 - f) / 6.0;
+            float2 w1 = (3.0 * f * f * f - 6.0 * f * f + 4.0) / 6.0;
+            float2 w3 = f * f * f / 6.0;
+            float2 w2 = 1.0 - w0 - w1 - w3;
+            float2 near = w0 + w1;
+            float2 far = w2 + w3;
+            float2 a = (corner - 0.5 + w1 / near) / levelSize;
+            float2 b = (corner + 1.5 + w3 / far) / levelSize;
+
+            glow += near.x * near.y * bright.sample(s, float2(a.x, a.y), level(lod)).rgb
+                  + far.x  * near.y * bright.sample(s, float2(b.x, a.y), level(lod)).rgb
+                  + near.x * far.y  * bright.sample(s, float2(a.x, b.y), level(lod)).rgb
+                  + far.x  * far.y  * bright.sample(s, float2(b.x, b.y), level(lod)).rgb;
         }
-        hdr += glow * uniforms.intensity / 5.0;          // add the glow before tone mapping
+        hdr += glow * uniforms.intensity;                // add the glow before tone mapping
     }
 
     float3 mapped = 1.0 - exp(-hdr * uniforms.exposure);
