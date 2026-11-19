@@ -9,6 +9,7 @@
   <a href="https://gabrielevierti.github.io/learnmetal/"><b>Read the tutorials</b></a> ·
   <a href="https://gabrielevierti.github.io/learnmetal/it/index.html"><b>Versione italiana</b></a> ·
   <a href="#run-the-examples"><b>Examples</b></a> ·
+  <a href="#the-learnmetal-engine"><b>Engine</b></a> ·
   <a href="#build-the-site"><b>Build the site</b></a>
 </p>
 
@@ -20,7 +21,7 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/readme/features-dark.svg">
-  <img src="assets/readme/features-light.svg" width="100%" alt="Features: from a triangle to PBR in over 50 chapters; Swift or C++; live demos in the browser; runnable examples; exercises with solutions; notes for readers coming from OpenGL, Vulkan or Direct3D.">
+  <img src="assets/readme/features-light.svg" width="100%" alt="Features: from a triangle to PBR in 60 chapters; Swift or C++; live demos in the browser; runnable examples and a complete game engine; exercises with solutions; notes for readers coming from OpenGL, Vulkan or Direct3D.">
 </picture>
 
 ## What you'll learn
@@ -33,7 +34,7 @@
 | **Advanced Metal** | Depth Testing · Stencil Testing · Blending · Face Culling · Render Targets · Cubemaps · Advanced Data · Advanced MSL · Life Without Geometry Shaders · Instancing · Anti-Aliasing |
 | **Advanced Lighting** | Blinn-Phong · Gamma Correction · Shadow Mapping · Point Shadows · Normal Mapping · Parallax Mapping · HDR · Bloom · Deferred Shading · SSAO |
 | **PBR** | Theory · Lighting · Diffuse Irradiance · Specular IBL |
-| **In Practice** | Debugging · Text Rendering · A 2D Game |
+| **In Practice** | Debugging · Text Rendering · A 2D Game · A Game Engine · Engine: The Renderer · Engine: The Game · Engine: The Editor |
 | **Beyond** | Compute Shaders · Tessellation · Ray Tracing · Mesh Shaders |
 | **Apple Platforms** | Tile-Based GPUs · MetalFX Upscaling · Metal 4 · visionOS |
 
@@ -101,6 +102,14 @@ Run it from the `build` folder: `Shaders.metal` is loaded from the current direc
 
 Both sets of examples can also be downloaded as zips from the [Example Code](https://gabrielevierti.github.io/learnmetal/resources/examples.html) page.
 
+## The LearnMetal Engine
+
+The tutorials end with a complete game engine written with Metal, twice: in Swift and in C++. It puts the chapters together into something you can make a game with, and it comes with **Marble**, a platform game, **FPV**, a simulated racing drone for Mac, iPhone and iPad, and a scene **editor** made with the engine itself. The four engine chapters in *In Practice* walk through its code.
+
+<a href="https://github.com/gabrielevierti/learnmetal-engine"><img src="https://raw.githubusercontent.com/gabrielevierti/learnmetal-engine/main/Docs/marble.jpg" width="100%" alt="Marble, the game that comes with the LearnMetal Engine: the marble on a stone bridge, gems ahead"></a>
+
+**→ [gabrielevierti/learnmetal-engine](https://github.com/gabrielevierti/learnmetal-engine)**
+
 ## Build the site
 
 The site is generated from Markdown by a small Python script. It reads `content/`, and writes the finished site to `docs/`, which is what GitHub Pages serves.
@@ -124,7 +133,7 @@ Corrections are welcome, from a typo to a wrong explanation. Open an issue or a 
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+No license has been chosen yet: until one is added, all rights are reserved. The tutorials are free to read on the site.
 
 ---
 
