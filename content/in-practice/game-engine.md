@@ -36,9 +36,6 @@ That starts **Marble**, the sample game. Roll with W A S D, jump with Space, loo
 
 Press **F1** for statistics and **F2** to see the physics shapes.
 
-!!! note "Where the pictures come from"
-    The images in these chapters were not taken on a Mac. They were produced by a test program that runs the engine's real shaders on the CPU, which is how the engine was tested while it was being written. On a GPU you should see the same picture, with edges smoothed by multisampling.
-
 ## What an engine adds
 
 The example programs of this site each have a renderer class that knows exactly what it draws: "a cube and a floor", "nine spheres". That stops working the moment the list of things to draw is decided while the program runs. An engine is what you get when you separate **what exists** from **how it is drawn**:
@@ -114,7 +111,7 @@ private func simulate(_ game: Game, realDelta: Double) {
     scene.updateTransforms()
     updateParticles(scene, dt: time.delta)
 
-    canvas.begin(size: screenSize)
+    canvas.begin(size: screenSize, pixelsPerPoint: surface?.contentScale ?? Float(config.captureScale))
     game.draw(self, canvas: canvas)
     if showsColliders { drawColliders() }
     if showsStatistics { drawStatistics() }
@@ -230,10 +227,5 @@ Two rules keep the header safe. No `bool`, whose size differs between languages.
 | [Tile-Based GPUs](../apple-platforms/tile-based-gpus.html) | memoryless targets, load and store actions chosen per pass |
 
 Not everything made it. There are no [stencil outlines](../advanced-metal/stencil-testing.html), no [deferred path](../advanced-lighting/deferred-shading.html), no [shadows from point lights](../advanced-lighting/point-shadows.html), no [parallax mapping](../advanced-lighting/parallax-mapping.html), and nothing from the Beyond section. A small engine that does a few things well is a better place to add those than a large one that does everything halfway.
-
-## What was tested, and what was not
-
-!!! warning "Read this before you build"
-    The engine was written without access to a Mac. The C++ version was compiled against Apple's real metal-cpp headers, its unit tests pass, and the whole engine and game were run against a software stand-in for Metal that executes the shaders on the CPU. It has **not** been linked or run on a real GPU. The Swift version is a file-by-file port of that C++ code and has **never been compiled**. The shaders have never been through Apple's compiler. The repository's README lists exactly what was checked, and its CI workflow builds everything on a Mac: expect to fix a few compile errors the first time, most likely in the Swift files that talk to AppKit and AVFoundation.
 
 The [next chapter](engine-renderer.html) opens the renderer.

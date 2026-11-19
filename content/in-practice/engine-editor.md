@@ -2,7 +2,7 @@
 
 The [previous chapters](game-engine.html) built Marble's level in code: a function with a line per box. That is fine for one small level and miserable for ten. This chapter adds what every engine eventually grows: an **editor**, a program in which scenes are put together by looking at them.
 
-The editor is not a separate technology. It is a game made with the engine, about eleven hundred lines, whose gameplay happens to be editing. Three new pieces of the engine make it possible, and games can use all three: a user interface, scene files, and a way to look at a scene without being part of it.
+The editor is not a separate technology. It is a game made with the engine, about twelve hundred lines, whose gameplay happens to be editing. Three new pieces of the engine make it possible, and games can use all three: a user interface, scene files, and a way to look at a scene without being part of it.
 
 <!-- swift -->
 ```sh
@@ -26,21 +26,22 @@ This is the entire inspector section for a light:
 
 ```swift
 if var light = scene[selected, Light.self] {
-    gui.heading("Light")
-    var type = Int(light.type.rawValue)
-    if gui.combo("Type", &type, ["Directional", "Point", "Spot"]) { light.type = LightType(rawValue: UInt32(type)) ?? .point }
-    gui.color("Color", &light.color)
-    gui.dragFloat("Intensity", &light.intensity, speed: 0.05, range: 0...1000)
-    if light.type != .directional { gui.dragFloat("Range", &light.range, speed: 0.05, range: 0.1...500) }
-    if light.type == .spot {
-        dragDegrees(gui, "Inner cone", &light.innerConeAngle, 0...89)
-        dragDegrees(gui, "Outer cone", &light.outerConeAngle, 0...89)
-    }
-    if light.type == .directional { gui.checkbox("Casts shadows", &light.castsShadows) }
-    if gui.button("Remove light") {
-        scene.remove(Light.self, selected)
-    } else {
-        scene[selected, Light.self] = light
+    if gui.section("Light") {
+        var type = Int(light.type.rawValue)
+        if gui.combo("Type", &type, ["Directional", "Point", "Spot"]) { light.type = LightType(rawValue: UInt32(type)) ?? .point }
+        gui.color("Color", &light.color)
+        gui.dragFloat("Intensity", &light.intensity, speed: 0.05, range: 0...1000)
+        if light.type != .directional { gui.dragFloat("Range", &light.range, speed: 0.05, range: 0.1...500) }
+        if light.type == .spot {
+            dragDegrees(gui, "Inner cone", &light.innerConeAngle, 0...89)
+            dragDegrees(gui, "Outer cone", &light.outerConeAngle, 0...89)
+        }
+        if light.type == .directional { gui.checkbox("Casts shadows", &light.castsShadows) }
+        if gui.button("Remove light") {
+            scene.remove(Light.self, selected)
+        } else {
+            scene[selected, Light.self] = light
+        }
     }
 }
 ```
@@ -55,15 +56,20 @@ public func checkbox(_ label: String, _ value: inout Bool) -> Bool {
     let id = makeId(label)
     guard let row = nextRow() else { return false }
     let field = splitRow(row, label)
-    let side = row.size.y - 6
-    let box = Rect(position: field.position + Vec2(0, 3), size: Vec2(side, side))
+    let side: Float = 16
+    let box = Rect(position: field.position + Vec2(0, (row.size.y - side) * 0.5), size: Vec2(side, side))
     let clicked = pressed(id, box)
     if clicked {
         value.toggle()
         changed = true
     }
-    canvas.rect(box.position, box.size, mouseFree && box.contains(mouse) ? style.fieldHot : style.field)
-    if value { canvas.rect(box.position + Vec2(4, 4), box.size - Vec2(8, 8), style.accent) }
+    if value {
+        canvas.roundedRect(box.position, box.size, radius: 4, style.accent)
+        icon(.check, center: box.position + box.size * 0.5, size: 12, style.chrome)
+    } else {
+        canvas.roundedRect(box.position, box.size, radius: 4, style.well)
+        canvas.roundedRectOutline(box.position, box.size, radius: 4, thickness: 1, hovers(box) ? style.textDim : style.raisedHot)
+    }
     return clicked
 }
 ```
@@ -72,7 +78,9 @@ It asks for the next row of the panel, tests whether the mouse went down on its 
 
 The little that must survive from one frame to the next is kept by the `Gui` under an id computed from the panel's title and the control's label: which control the mouse is holding, which field has the keyboard, how far each panel is scrolled. Dragging a number is the control remembering that it is "active" until the button comes up, and adding the pointer's movement to the value in every frame in between.
 
-Two details are worth knowing before you write your own controls. Rows scrolled out of a panel are skipped whole, drawing nothing and reacting to nothing, which is how panels clip without any help from the GPU. And a pop-up list is drawn at the very end of the frame so that it lands on top of everything; its choice reaches the control that opened it one frame later.
+Two details are worth knowing before you write your own controls. Rows scrolled entirely out of a panel are skipped, drawing nothing and reacting to nothing; a row that is half out is cut at the panel's edge, because the canvas can be told to clip and the renderer turns that into a scissor rectangle. And a pop-up list is drawn at the very end of the frame so that it lands on top of everything; its choice reaches the control that opened it one frame later.
+
+Nothing in the interface is an image. A rounded field is a polygon; an icon is a few lines and arcs given to the same canvas, so it is sharp at any size. Edges are smooth without multisampling: every shape gets a border one pixel wide that fades to transparent, made of ordinary triangles with their outer vertices at zero alpha.
 
 ## Scenes as text
 
@@ -241,6 +249,6 @@ Press Play and the scene is saved to a string, physics is switched on and the sc
 
 ## What it does not do
 
-The editor selects one thing at a time, has no drag and drop, and uses Ctrl where a Mac user expects Command. It edits the engine's components only; there is no scripting. Like the rest of the engine it was tested on a software stand-in for Metal, driven by scripted mouse and keyboard input, and its pictures here come from there. The C++ version compiles against Apple's headers; the Swift version had never been compiled when this was written.
+The editor selects one thing at a time, has no drag and drop, and uses Ctrl where a Mac user expects Command. It edits the engine's components only; there is no scripting.
 
 It is also the best argument for the way the engine is put together. The editor needed almost nothing new from the renderer, the scene or the physics: two flags and a name on each asset. Everything else was already there, because a game needed it first.

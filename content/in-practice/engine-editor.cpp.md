@@ -1,17 +1,18 @@
 ```cpp
 if (Light* light = scene.get<Light>(selected_)) {
-    gui_.heading("Light");
-    int type = int(light->type);
-    if (gui_.combo("Type", type, {"Directional", "Point", "Spot"})) light->type = LightType(type);
-    gui_.color("Color", light->color);
-    gui_.dragFloat("Intensity", light->intensity, 0.05f, 0.0f, 1000.0f);
-    if (light->type != LightType::Directional) gui_.dragFloat("Range", light->range, 0.05f, 0.1f, 500.0f);
-    if (light->type == LightType::Spot) {
-        dragDegrees(gui_, "Inner cone", light->innerConeAngle, 0.0f, 89.0f);
-        dragDegrees(gui_, "Outer cone", light->outerConeAngle, 0.0f, 89.0f);
+    if (gui_.section("Light")) {
+        int type = int(light->type);
+        if (gui_.combo("Type", type, {"Directional", "Point", "Spot"})) light->type = LightType(type);
+        gui_.color("Color", light->color);
+        gui_.dragFloat("Intensity", light->intensity, 0.05f, 0.0f, 1000.0f);
+        if (light->type != LightType::Directional) gui_.dragFloat("Range", light->range, 0.05f, 0.1f, 500.0f);
+        if (light->type == LightType::Spot) {
+            dragDegrees(gui_, "Inner cone", light->innerConeAngle, 0.0f, 89.0f);
+            dragDegrees(gui_, "Outer cone", light->outerConeAngle, 0.0f, 89.0f);
+        }
+        if (light->type == LightType::Directional) gui_.checkbox("Casts shadows", light->castsShadows);
+        if (gui_.button("Remove light")) scene.remove<Light>(selected_);
     }
-    if (light->type == LightType::Directional) gui_.checkbox("Casts shadows", light->castsShadows);
-    if (gui_.button("Remove light")) scene.remove<Light>(selected_);
 }
 ```
 
@@ -21,15 +22,20 @@ bool Gui::checkbox(const std::string& label, bool& value) {
     Rect row, field;
     if (!nextRow(row)) return false;
     splitRow(row, label, field);
-    float side = row.size.y - 6;
-    Rect box{field.position + Vec2{0, 3}, Vec2{side, side}};
+    float side = 16;
+    Rect box{field.position + Vec2{0, (row.size.y - side) * 0.5f}, Vec2{side, side}};
     bool clicked = pressed(id, box);
     if (clicked) {
         value = !value;
         changed_ = true;
     }
-    canvas_->rect(box.position, box.size, mouseFree_ && box.contains(mouse_) ? style.fieldHot : style.field);
-    if (value) canvas_->rect(box.position + Vec2{4, 4}, box.size - Vec2{8, 8}, style.accent);
+    if (value) {
+        canvas_->roundedRect(box.position, box.size, 4, style.accent);
+        icon(Icon::Check, box.position + box.size * 0.5f, 12, style.chrome);
+    } else {
+        canvas_->roundedRect(box.position, box.size, 4, style.well);
+        canvas_->roundedRectOutline(box.position, box.size, 4, 1, hovers(box) ? style.textDim : style.raisedHot);
+    }
     return clicked;
 }
 ```

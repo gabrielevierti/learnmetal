@@ -5,7 +5,7 @@ Metal 4, introduced in 2025, is the first large revision of Metal's core API. No
 It runs on Apple silicon: Macs with M1 or later and iPhones and iPads with A14 or later, on the 2025 systems (macOS 26, iOS 26) and newer. Check at runtime, and keep the classic path as a fallback.
 
 !!! warning "Read this as a map"
-    This chapter explains the model and shows the shape of the code. The names follow Apple's documentation at the time of writing, but this part of Metal is young and the code here has not been compiled. Start real work from Apple's sample *Drawing a triangle with Metal 4*.
+    This chapter explains the model and shows the shape of the code. The names follow Apple's documentation at the time of writing, and this part of Metal is young. Start real work from Apple's sample *Drawing a triangle with Metal 4*.
 
 ## Side by side with the Metal you know
 

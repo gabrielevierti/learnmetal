@@ -353,7 +353,7 @@ func testABallFallsBouncesAndComesToRestOnTheFloor() {
 ```
 
 <!-- swift -->
-Run them with `swift test`. As the first chapter said, the Swift version had never been compiled when this was written, and that includes its tests; their C++ twins pass.
+Run them with `swift test`.
 <!-- /swift -->
 
 <!-- cpp -->
